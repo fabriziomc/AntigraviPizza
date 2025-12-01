@@ -1,0 +1,20 @@
+
+> antigravipizza@0.0.0 build
+> vite build
+
+[36mvite v7.2.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 20 modules transformed.
+rendering chunks...
+[33m[plugin vite:reporter] 
+(!) C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/modules/database.js is dynamically imported by C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/components/Planner.js, C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/components/Planner.js, C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/modules/recipeGenerator.js but also statically imported by C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/components/Combinations.js, C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/components/Dashboard.js, C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/components/Planner.js, C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/components/Shopping.js, C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/main.js, C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/modules/recipeSearch.js, C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/modules/shopping.js, dynamic import will not move module into another chunk.
+[39m
+[33m[plugin vite:reporter] 
+(!) C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/main.js is dynamically imported by C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/components/Planner.js but also statically imported by C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/index.html, dynamic import will not move module into another chunk.
+[39m
+computing gzip size...
+[2mdist/[22m[32mindex.html                          [39m[1m[2m 8.03 kB[22m[1m[22m[2m │ gzip:  2.00 kB[22m
+[2mdist/[22m[35massets/index-Dui_OIKY.css           [39m[1m[2m21.28 kB[22m[1m[22m[2m │ gzip:  4.49 kB[22m
+[2mdist/[22m[36massets/recipeGenerator-DdnC8Ako.js  [39m[1m[2m10.39 kB[22m[1m[22m[2m │ gzip:  3.04 kB[22m
+[2mdist/[22m[36massets/index-rHkC53Me.js            [39m[1m[2m51.57 kB[22m[1m[22m[2m │ gzip: 13.30 kB[22m
+[32m✓ built in 507ms[39m

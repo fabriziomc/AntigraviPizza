@@ -1,0 +1,369 @@
+// ============================================
+// LIBRARY COMPONENT
+// ============================================
+
+import { getAllRecipes, getRecipeById, toggleFavorite, deleteRecipe } from '../modules/database.js';
+import { RECIPE_TAGS } from '../utils/constants.js';
+import { debounce, showToast } from '../utils/helpers.js';
+import { state } from '../store.js';
+import { openModal, closeModal } from '../modules/ui.js';
+
+export async function renderLibrary(appState) {
+  await renderFilters();
+  await renderRecipes(appState);
+  setupLibraryListeners();
+}
+
+async function renderFilters() {
+  const filtersContainer = document.getElementById('recipeFilters');
+
+  filtersContainer.innerHTML = `
+    <div class="filters-scroll">
+      <button class="filter-chip active" data-tag="all">Tutte</button>
+      <button class="filter-chip" data-tag="favorites">⭐ Preferite</button>
+      ${RECIPE_TAGS.map(tag => `
+        <button class="filter-chip" data-tag="${tag}">${tag}</button>
+      `).join('')}
+    </div>
+    
+    <div class="filters-sort">
+      <select id="recipeSort" class="sort-select">
+        <option value="newest">📅 Più recenti</option>
+        <option value="oldest">📅 Meno recenti</option>
+        <option value="az">🔤 A-Z</option>
+        <option value="za">🔤 Z-A</option>
+      </select>
+    </div>
+  `;
+
+  // Restore sort state
+  if (state.sortBy) {
+    const sortSelect = document.getElementById('recipeSort');
+    if (sortSelect) sortSelect.value = state.sortBy;
+  }
+}
+
+async function renderRecipes(state) {
+  const grid = document.getElementById('recipesGrid');
+  let recipes = await getAllRecipes();
+
+  // Apply search filter
+  if (state.searchTerm) {
+    const term = state.searchTerm.toLowerCase();
+    recipes = recipes.filter(recipe =>
+      recipe.name.toLowerCase().includes(term) ||
+      recipe.pizzaiolo.toLowerCase().includes(term) ||
+      recipe.description.toLowerCase().includes(term)
+    );
+  }
+
+  // Apply tag filter
+  if (state.selectedTag && state.selectedTag !== 'all') {
+    if (state.selectedTag === 'favorites') {
+      recipes = recipes.filter(recipe => recipe.isFavorite);
+    } else {
+      recipes = recipes.filter(recipe => recipe.tags.includes(state.selectedTag));
+    }
+  }
+
+  // Apply sorting
+  const sortBy = state.sortBy || 'newest';
+  recipes.sort((a, b) => {
+    switch (sortBy) {
+      case 'newest':
+        return (b.dateAdded || 0) - (a.dateAdded || 0);
+      case 'oldest':
+        return (a.dateAdded || 0) - (b.dateAdded || 0);
+      case 'az':
+        return a.name.localeCompare(b.name);
+      case 'za':
+        return b.name.localeCompare(a.name);
+      default:
+        return 0;
+    }
+  });
+
+  if (recipes.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1;">
+        <div class="empty-icon">🍕</div>
+        <h3 class="empty-title">Nessuna ricetta trovata</h3>
+        <p class="empty-description">Prova a modificare i filtri o aggiungi nuove ricette</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = recipes.map(recipe => createRecipeCard(recipe)).join('');
+}
+
+function createRecipeCard(recipe) {
+  return `
+    <div class="recipe-card" data-recipe-id="${recipe.id}">
+      <img 
+        src="${recipe.imageUrl || 'https://via.placeholder.com/400x200/667eea/ffffff?text=🍕'}" 
+        alt="${recipe.name}"
+        class="recipe-card-image"
+        onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%232a2f4a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2250%22>🍕</text></svg>'"
+      />
+      <button class="recipe-card-favorite ${recipe.isFavorite ? 'active' : ''}" data-recipe-id="${recipe.id}">
+        ${recipe.isFavorite ? '⭐' : '☆'}
+      </button>
+      <div class="recipe-card-body">
+        <h3 class="recipe-card-title">${recipe.name}</h3>
+        <div class="recipe-card-pizzaiolo">
+          <span>👨‍🍳</span>
+          <span>${recipe.pizzaiolo}</span>
+        </div>
+        <div class="recipe-card-tags">
+          ${recipe.tags.slice(0, 3).map(tag => `
+            <span class="tag">${tag}</span>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function setupLibraryListeners() {
+  // Search
+  const searchInput = document.getElementById('recipeSearch');
+  searchInput.removeEventListener('input', handleSearch);
+  searchInput.addEventListener('input', debounce(handleSearch, 300));
+
+  // Filter chips
+  document.getElementById('recipeFilters').addEventListener('click', (e) => {
+    const chip = e.target.closest('.filter-chip');
+    if (chip) {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      handleFilterChange(chip.dataset.tag);
+    }
+  });
+
+  // Sort select
+  const sortSelect = document.getElementById('recipeSort');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      handleSortChange(e.target.value);
+    });
+  }
+
+  // Recipe cards
+  document.getElementById('recipesGrid').addEventListener('click', async (e) => {
+    const card = e.target.closest('.recipe-card');
+    const favoriteBtn = e.target.closest('.recipe-card-favorite');
+
+    if (favoriteBtn) {
+      e.stopPropagation();
+      await handleToggleFavorite(favoriteBtn.dataset.recipeId);
+    } else if (card) {
+      await showRecipeModal(card.dataset.recipeId);
+    }
+  });
+}
+
+async function handleSearch(e) {
+  state.searchTerm = e.target.value;
+  await renderRecipes(state);
+}
+
+async function handleFilterChange(tag) {
+  state.selectedTag = tag;
+  await renderRecipes(state);
+}
+
+async function handleSortChange(sortBy) {
+  state.sortBy = sortBy;
+  await renderRecipes(state);
+}
+
+async function handleToggleFavorite(recipeId) {
+  try {
+    await toggleFavorite(recipeId);
+    await renderRecipes(state);
+  } catch (error) {
+    console.error('Failed to toggle favorite:', error);
+  }
+}
+
+async function showRecipeModal(recipeId) {
+  const recipe = await getRecipeById(recipeId);
+  if (!recipe) return;
+
+  // Helper to split ingredients
+  const doughIngredients = recipe.ingredients.filter(i => i.phase === 'dough' || i.category === 'Impasto');
+  const toppingIngredients = recipe.ingredients.filter(i => i.phase === 'topping' || (i.phase !== 'dough' && i.category !== 'Impasto'));
+
+  // Helper to format instruction list
+  const renderInstructions = (list) => list.map(instruction => `
+    <li class="instruction-item">${instruction}</li>
+  `).join('');
+
+  // Handle instructions (array vs object)
+  let doughInstructions = [];
+  let toppingInstructions = [];
+
+  if (Array.isArray(recipe.instructions)) {
+    // Legacy format or simple array
+    toppingInstructions = recipe.instructions;
+  } else {
+    // New format
+    doughInstructions = recipe.instructions.dough || [];
+    toppingInstructions = recipe.instructions.topping || [];
+  }
+
+  const modalContent = `
+    <div class="modal-header">
+      <h2 class="modal-title">${recipe.name}</h2>
+      <button class="modal-close" onclick="window.closeRecipeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <img 
+        src="${recipe.imageUrl || 'https://via.placeholder.com/800x300/667eea/ffffff?text=🍕'}" 
+        alt="${recipe.name}"
+        class="recipe-modal-image"
+        onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%232a2f4a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2250%22>🍕</text></svg>'"
+      />
+      
+      <div class="recipe-modal-meta">
+        <div class="recipe-modal-pizzaiolo">
+          <span>👨‍🍳</span>
+          <span>${recipe.pizzaiolo}</span>
+        </div>
+        ${recipe.source ? `<a href="${recipe.source}" target="_blank" class="recipe-modal-source">🔗 Fonte</a>` : ''}
+      </div>
+      
+      ${recipe.description ? `<p>${recipe.description}</p>` : ''}
+      
+      <div class="recipe-modal-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+        <!-- IMPASTO SECTION -->
+        <div class="recipe-section-group">
+            <h3 class="recipe-modal-section-title" style="border-bottom: 1px solid var(--color-primary); padding-bottom: 0.5rem;">🥣 Impasto</h3>
+            
+            <div class="recipe-modal-section">
+                <h4 style="color: var(--color-gray-400); font-size: 0.9rem; margin-bottom: 0.5rem;">Ingredienti</h4>
+                <ul class="ingredients-list">
+                ${doughIngredients.map(ing => `
+                    <li class="ingredient-item">
+                    <span class="ingredient-name">${ing.name}</span>
+                    <span class="ingredient-quantity">${ing.quantity} ${ing.unit}</span>
+                    </li>
+                `).join('')}
+                </ul>
+            </div>
+
+            ${doughInstructions.length > 0 ? `
+            <div class="recipe-modal-section">
+                <h4 style="color: var(--color-gray-400); font-size: 0.9rem; margin-bottom: 0.5rem;">Procedimento</h4>
+                <ol class="instructions-list">
+                    ${renderInstructions(doughInstructions)}
+                </ol>
+            </div>
+            ` : ''}
+        </div>
+
+        <!-- CONDIMENTO SECTION -->
+        <div class="recipe-section-group">
+            <h3 class="recipe-modal-section-title" style="border-bottom: 1px solid var(--color-accent); padding-bottom: 0.5rem;">🍅 Condimento</h3>
+            
+            <div class="recipe-modal-section">
+                <h4 style="color: var(--color-gray-400); font-size: 0.9rem; margin-bottom: 0.5rem;">Ingredienti</h4>
+                <ul class="ingredients-list">
+                ${toppingIngredients.map(ing => `
+                    <li class="ingredient-item" style="${ing.postBake ? 'border-left: 3px solid var(--color-accent);' : ''}">
+                    <div style="display: flex; flex-direction: column; width: 100%;">
+                        <div style="display: flex; justify-content: space-between; width: 100%;">
+                            <span class="ingredient-name">${ing.name}</span>
+                            <span class="ingredient-quantity">${ing.quantity} ${ing.unit}</span>
+                        </div>
+                        ${ing.postBake ? '<span style="font-size: 0.75rem; color: var(--color-accent); margin-top: 2px;">📤 In uscita</span>' : ''}
+                    </div>
+                    </li>
+                `).join('')}
+                </ul>
+            </div>
+
+            <div class="recipe-modal-section">
+                <h4 style="color: var(--color-gray-400); font-size: 0.9rem; margin-bottom: 0.5rem;">Cottura e Farcitura</h4>
+                <ol class="instructions-list">
+                    ${renderInstructions(toppingInstructions)}
+                </ol>
+            </div>
+        </div>
+      </div>
+      
+      ${recipe.tags.length > 0 ? `
+        <div class="recipe-card-tags">
+          ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+        </div>
+      ` : ''}
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="window.closeRecipeModal()">Chiudi</button>
+      <button class="btn btn-accent" id="btnDeleteRecipe">
+        <span>🗑️</span>
+        Elimina
+      </button>
+    </div>
+  `;
+
+  openModal(modalContent);
+
+  // Attach delete listener dynamically
+  const deleteBtn = document.getElementById('btnDeleteRecipe');
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', () => {
+      // Replace modal content with confirmation
+      const modalBody = document.querySelector('.modal-body');
+      const modalFooter = document.querySelector('.modal-footer');
+
+      // Save original content in case user cancels (optional, but for now we just close on cancel)
+
+      modalBody.innerHTML = `
+            <div class="confirmation-view" style="text-align: center; padding: 2rem 0;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                <h3>Sei sicuro?</h3>
+                <p>Vuoi davvero eliminare la ricetta <strong>${recipe.name}</strong>?</p>
+                <p class="text-sm text-gray-400">Questa azione non può essere annullata.</p>
+            </div>
+          `;
+
+      modalFooter.innerHTML = `
+            <button class="btn btn-secondary" id="btnCancelDelete">Annulla</button>
+            <button class="btn btn-primary" id="btnConfirmDelete" style="background-color: var(--color-accent); border-color: var(--color-accent);">
+                Sì, elimina
+            </button>
+          `;
+
+      // Attach confirmation listeners
+      document.getElementById('btnCancelDelete').addEventListener('click', () => {
+        // Re-render the original modal
+        showRecipeModal(recipe.id);
+      });
+
+      document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
+        try {
+          const btn = document.getElementById('btnConfirmDelete');
+          btn.textContent = 'Eliminazione...';
+          btn.disabled = true;
+
+          await deleteRecipe(recipe.id);
+          closeModal();
+
+          // Refresh data
+          await renderRecipes(state);
+          showToast('Ricetta eliminata con successo', 'success');
+        } catch (error) {
+          console.error('Failed to delete recipe:', error);
+          showToast('Errore durante l\'eliminazione', 'error');
+          // Restore modal
+          showRecipeModal(recipe.id);
+        }
+      });
+    });
+  }
+}
+
+// Global functions for modal
+window.closeRecipeModal = closeModal;

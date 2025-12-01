@@ -1,0 +1,29 @@
+
+> antigravipizza@0.0.0 build
+> vite build
+
+[36mvite v7.2.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 20 modules transformed.
+[31m✗[39m Build failed in 118ms
+[31merror during build:
+[31msrc/main.js (18:9): "renderLibrary" is not exported by "src/components/Library.js", imported by "src/main.js".[31m
+file: [36mC:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/src/main.js:18:9[31m
+[33m
+16: import { renderDashboard } from './components/Dashboard.js';
+17: import { renderDiscovery } from './components/Discovery.js';
+18: import { renderLibrary } from './components/Library.js';
+             ^
+19: import { renderPlanner } from './components/Planner.js';
+20: import { renderShopping } from './components/Shopping.js';
+[31m
+    at getRollupError (file:///C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+    at error (file:///C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+    at Module.error (file:///C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/node_modules/rollup/dist/es/shared/node-entry.js:16956:16)
+    at Module.traceVariable (file:///C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/node_modules/rollup/dist/es/shared/node-entry.js:17412:29)
+    at ModuleScope.findVariable (file:///C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/node_modules/rollup/dist/es/shared/node-entry.js:15076:39)
+    at FunctionScope.findVariable (file:///C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/node_modules/rollup/dist/es/shared/node-entry.js:5649:38)
+    at FunctionBodyScope.findVariable (file:///C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/node_modules/rollup/dist/es/shared/node-entry.js:5649:38)
+    at BlockScope.findVariable (file:///C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/node_modules/rollup/dist/es/shared/node-entry.js:5649:38)
+    at BlockScope.findVariable (file:///C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/node_modules/rollup/dist/es/shared/node-entry.js:5649:38)
+    at Identifier.bind (file:///C:/Users/FABRIZIO/.gemini/antigravity/ManagerAgente/AntigraviPizza/node_modules/rollup/dist/es/shared/node-entry.js:5423:40)[39m
