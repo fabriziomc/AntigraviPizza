@@ -7,7 +7,7 @@ console.log('🚀 main.js is loading...');
 import './styles/index.css';
 import './styles/components.css';
 
-import { initDB, getAllRecipes, getAllPizzaNights, initCombinations } from './modules/database.js';
+import { initDB, getAllRecipes, getAllPizzaNights, initCombinations, initSeedData } from './modules/database.js';
 import { NAV_ITEMS, VIEWS, FLAVOR_COMBINATIONS } from './utils/constants.js';
 import { showToast } from './utils/helpers.js';
 import { state } from './store.js';
@@ -42,6 +42,15 @@ async function initApp() {
     } catch (combError) {
       console.warn('⚠️ Could not initialize combinations:', combError.message);
       // Continue anyway - combinations are optional
+    }
+
+    // Initialize seed data if database is empty
+    try {
+      await initSeedData();
+      console.log('✅ Seed data checked/loaded');
+    } catch (seedError) {
+      console.warn('⚠️ Could not load seed data:', seedError.message);
+      // Continue anyway - seed data is optional
     }
 
     // Load initial data

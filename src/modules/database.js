@@ -55,6 +55,51 @@ export async function initDB() {
 }
 
 /**
+ * Initialize seed data if database is empty
+ */
+export async function initSeedData() {
+    try {
+        // Check if seed data has already been loaded
+        const seedLoaded = localStorage.getItem('seedDataLoaded');
+        if (seedLoaded === 'true') {
+            console.log('Seed data already loaded, skipping...');
+            return;
+        }
+
+        // Check if database already has recipes
+        const existingRecipes = await getAllRecipes();
+        if (existingRecipes.length > 0) {
+            console.log('Database already has recipes, skipping seed data...');
+            localStorage.setItem('seedDataLoaded', 'true');
+            return;
+        }
+
+        console.log('Loading seed data...');
+
+        // Fetch seed data from public folder
+        const response = await fetch('/seed-data.json');
+        if (!response.ok) {
+            throw new Error('Failed to load seed data');
+        }
+
+        const seedData = await response.json();
+
+        // Import the data
+        const results = await importData(seedData);
+
+        console.log(`Seed data loaded: ${results.recipesImported} recipes imported`);
+
+        // Mark seed data as loaded
+        localStorage.setItem('seedDataLoaded', 'true');
+
+        return results;
+    } catch (error) {
+        console.error('Error loading seed data:', error);
+        // Don't throw - app should still work even if seed data fails
+    }
+}
+
+/**
  * Get database instance
  */
 export function getDB() {

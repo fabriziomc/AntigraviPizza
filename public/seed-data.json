@@ -1,0 +1,397 @@
+{
+    "version": 1,
+    "exportDate": 1764609949750,
+    "recipes": [
+        {
+            "id": "0f1fd3e5-34a7-4d71-8a2a-c4600fab871a",
+            "name": "Pizza Speck Alto Adige e Taleggio",
+            "pizzaiolo": "Franco Pepe",
+            "source": "",
+            "description": "Una pizza gourmet che unisce la sapidità dello Speck Alto Adige IGP con la cremosità del Taleggio DOP, bilanciata da un tocco di miele di castagno e noci.",
+            "ingredients": [
+                {
+                    "name": "Farina tipo 0",
+                    "quantity": 500,
+                    "unit": "g",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Acqua",
+                    "quantity": 325,
+                    "unit": "ml",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Sale marino",
+                    "quantity": 10,
+                    "unit": "g",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Lievito di birra",
+                    "quantity": 2,
+                    "unit": "g",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Fior di latte",
+                    "quantity": 145,
+                    "unit": "g",
+                    "category": "Formaggi",
+                    "phase": "topping",
+                    "postBake": false
+                },
+                {
+                    "name": "Taleggio",
+                    "quantity": 78,
+                    "unit": "g",
+                    "category": "Formaggi",
+                    "phase": "topping",
+                    "postBake": false
+                },
+                {
+                    "name": "Speck Alto Adige",
+                    "quantity": 78,
+                    "unit": "g",
+                    "category": "Salumi",
+                    "phase": "topping",
+                    "postBake": true
+                },
+                {
+                    "name": "Noci",
+                    "quantity": 38,
+                    "unit": "g",
+                    "category": "Erbe e Spezie",
+                    "phase": "topping",
+                    "postBake": true
+                },
+                {
+                    "name": "Miele di castagno",
+                    "quantity": 18,
+                    "unit": "g",
+                    "category": "Altro",
+                    "phase": "topping",
+                    "postBake": true
+                }
+            ],
+            "instructions": {
+                "dough": [
+                    "Preparare l'impasto napoletana classica con farina tipo 0, acqua, sale e lievito di birra",
+                    "Impastare fino ad ottenere un composto liscio ed elastico",
+                    "Lasciare lievitare: 24 ore a temperatura ambiente",
+                    "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
+                ],
+                "topping": [
+                    "Aggiungere fior di latte e taleggio a pezzetti",
+                    "All'uscita dal forno, aggiungere: speck alto adige, noci, miele di castagno",
+                    "Infornare a 471°C per 158 secondi",
+                    "Servire immediatamente ben calda"
+                ]
+            },
+            "imageUrl": "",
+            "tags": [
+                "Gourmet",
+                "Bianca",
+                "Premium"
+            ],
+            "dateAdded": 1764338207543,
+            "isFavorite": false
+        },
+        {
+            "id": "3edbb5bd-cf06-4317-aa4a-f7f419b92134",
+            "name": "Pizza Tartufo nero e Funghi porcini",
+            "pizzaiolo": "Simone Padoan",
+            "source": "",
+            "description": "Un'esplosione di sapori autunnali con la base di fior di latte, l'intensità del tartufo nero e la ricchezza dei funghi porcini freschi.",
+            "ingredients": [
+                {
+                    "name": "Farina tipo 1",
+                    "quantity": 500,
+                    "unit": "g",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Acqua",
+                    "quantity": 350,
+                    "unit": "ml",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Sale marino",
+                    "quantity": 10,
+                    "unit": "g",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Lievito madre",
+                    "quantity": 100,
+                    "unit": "g",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Fior di latte",
+                    "quantity": 145,
+                    "unit": "g",
+                    "category": "Formaggi",
+                    "phase": "topping",
+                    "postBake": false
+                },
+                {
+                    "name": "Funghi porcini",
+                    "quantity": 98,
+                    "unit": "g",
+                    "category": "Verdure",
+                    "phase": "topping",
+                    "postBake": false
+                },
+                {
+                    "name": "Tartufo nero",
+                    "quantity": 18,
+                    "unit": "g",
+                    "category": "Altro",
+                    "phase": "topping",
+                    "postBake": true
+                },
+                {
+                    "name": "Prezzemolo",
+                    "quantity": 9,
+                    "unit": "g",
+                    "category": "Erbe e Spezie",
+                    "phase": "topping",
+                    "postBake": true
+                }
+            ],
+            "instructions": {
+                "dough": [
+                    "Preparare l'impasto contemporanea con farina tipo 1, acqua, sale e lievito madre",
+                    "Impastare fino ad ottenere un composto liscio ed elastico",
+                    "Lasciare lievitare: 48 ore in frigorifero + 6 ore a T.A.",
+                    "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
+                ],
+                "topping": [
+                    "Aggiungere fior di latte e funghi porcini a fette",
+                    "All'uscita dal forno, aggiungere: tartufo nero, prezzemolo",
+                    "Infornare a 471°C per 158 secondi",
+                    "Servire immediatamente ben calda"
+                ]
+            },
+            "imageUrl": "",
+            "tags": [
+                "Gourmet",
+                "Bianca",
+                "Premium",
+                "Vegetariana"
+            ],
+            "dateAdded": 1764338207543,
+            "isFavorite": false
+        },
+        {
+            "id": "45f1c169-abeb-4cb9-baf2-53e94746dfad",
+            "name": "Gorgonzola DOP Gourmet",
+            "pizzaiolo": "Tony Gemignani",
+            "source": "",
+            "description": "Una pizza dai sapori decisi ma equilibrati, con la dolcezza del Gorgonzola DOP, la croccantezza delle noci e un tocco agrodolce di pere caramellate.",
+            "ingredients": [
+                {
+                    "name": "Farina tipo 0",
+                    "quantity": 500,
+                    "unit": "g",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Acqua",
+                    "quantity": 325,
+                    "unit": "ml",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Sale marino",
+                    "quantity": 10,
+                    "unit": "g",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Lievito di birra",
+                    "quantity": 2,
+                    "unit": "g",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Fior di latte",
+                    "quantity": 145,
+                    "unit": "g",
+                    "category": "Formaggi",
+                    "phase": "topping",
+                    "postBake": false
+                },
+                {
+                    "name": "Gorgonzola DOP",
+                    "quantity": 78,
+                    "unit": "g",
+                    "category": "Formaggi",
+                    "phase": "topping",
+                    "postBake": false
+                },
+                {
+                    "name": "Noci",
+                    "quantity": 38,
+                    "unit": "g",
+                    "category": "Erbe e Spezie",
+                    "phase": "topping",
+                    "postBake": true
+                },
+                {
+                    "name": "Pere caramellate",
+                    "quantity": 48,
+                    "unit": "g",
+                    "category": "Altro",
+                    "phase": "topping",
+                    "postBake": true
+                }
+            ],
+            "instructions": {
+                "dough": [
+                    "Preparare l'impasto napoletana classica con farina tipo 0, acqua, sale e lievito di birra",
+                    "Impastare fino ad ottenere un composto liscio ed elastico",
+                    "Lasciare lievitare: 24 ore a temperatura ambiente",
+                    "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
+                ],
+                "topping": [
+                    "Aggiungere fior di latte e gorgonzola dop a pezzetti",
+                    "All'uscita dal forno, aggiungere: noci, pere caramellate",
+                    "Infornare a 471°C per 158 secondi",
+                    "Servire immediatamente ben calda"
+                ]
+            },
+            "imageUrl": "",
+            "tags": [
+                "Gourmet",
+                "Bianca",
+                "Vegetariana"
+            ],
+            "dateAdded": 1764338207543,
+            "isFavorite": false
+        },
+        {
+            "id": "6b0865bb-465e-4cb6-99b1-9569f98c410a",
+            "name": "Tartufo nero Gourmet",
+            "pizzaiolo": "Enzo Coccia",
+            "source": "",
+            "description": "Una pizza bianca raffinata con la cremosità della scamorza, l'aroma intenso del tartufo nero e un tocco piccante dato dal peperoncino fresco e dalle noci croccanti.",
+            "ingredients": [
+                {
+                    "name": "Farina manitoba",
+                    "quantity": 500,
+                    "unit": "g",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Acqua",
+                    "quantity": 380,
+                    "unit": "ml",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Sale marino",
+                    "quantity": 10,
+                    "unit": "g",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Lievito madre",
+                    "quantity": 80,
+                    "unit": "g",
+                    "category": "Impasto",
+                    "phase": "dough",
+                    "postBake": false
+                },
+                {
+                    "name": "Scamorza",
+                    "quantity": 103,
+                    "unit": "g",
+                    "category": "Formaggi",
+                    "phase": "topping",
+                    "postBake": false
+                },
+                {
+                    "name": "Tartufo nero",
+                    "quantity": 18,
+                    "unit": "g",
+                    "category": "Altro",
+                    "phase": "topping",
+                    "postBake": true
+                },
+                {
+                    "name": "Peperoncino fresco",
+                    "quantity": 9,
+                    "unit": "g",
+                    "category": "Erbe e Spezie",
+                    "phase": "topping",
+                    "postBake": true
+                },
+                {
+                    "name": "Noci",
+                    "quantity": 48,
+                    "unit": "g",
+                    "category": "Erbe e Spezie",
+                    "phase": "topping",
+                    "postBake": true
+                }
+            ],
+            "instructions": {
+                "dough": [
+                    "Preparare l'impasto alta idratazione con farina manitoba, acqua, sale e lievito madre",
+                    "Impastare fino ad ottenere un composto liscio ed elastico",
+                    "Lasciare lievitare: 36 ore a temperatura controllata",
+                    "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
+                ],
+                "topping": [
+                    "Aggiungere scamorza a pezzetti",
+                    "All'uscita dal forno, aggiungere: tartufo nero, peperoncino fresco, noci",
+                    "Infornare a 471°C per 158 secondi",
+                    "Servire immediatamente ben calda"
+                ]
+            },
+            "imageUrl": "",
+            "tags": [
+                "Vegetariana",
+                "Premium",
+                "Gourmet",
+                "Bianca"
+            ],
+            "dateAdded": 1764338207543,
+            "isFavorite": false
+        }
+    ],
+    "pizzaNights": []
+}
