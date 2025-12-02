@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Export - AntigraviPizza</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #764ba2;
+            margin-top: 30px;
+            font-size: 20px;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            font-size: 12px;
+            background: #667eea;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            resize: vertical;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🍕 Manual Export - AntigraviPizza</h1>
+        <p>Questa pagina ti guiderà nell'esportazione manuale dei dati del database.</p>
+
+        <div class="instructions">
+            <h2>📋 Istruzioni</h2>
+            <ol>
+                <li>Clicca sul pulsante <strong>"Esporta Database"</strong> qui sotto</li>
+                <li>I dati verranno caricati e mostrati nell'area di testo</li>
+                <li>Clicca su <strong>"Salva come seed-data.json"</strong> per scaricare il file</li>
+                <li>Sostituisci il file <code>public/seed-data.json</code> con quello scaricato</li>
+                <li>Fai il deploy su Vercel</li>
+            </ol>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="exportDatabase()" id="exportBtn">📥 Esporta Database</button>
+            <button onclick="downloadFile()" id="downloadBtn" style="display: none;">💾 Salva come
+                seed-data.json</button>
+        </div>
+
+        <div id="stats" class="stats" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-label">Ricette</div>
+                <div class="stat-number" id="recipeCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pizza Nights</div>
+                <div class="stat-number" id="nightCount">0</div>
+            </div>
+        </div>
+
+        <div id="statusDiv" style="display: none;"></div>
+
+        <textarea id="jsonOutput" placeholder="I dati esportati appariranno qui..." style="display: none;"></textarea>
+    </div>
+
+    <script type="module">
+        import { initDB, exportData } from './src/modules/database.js';
+
+        let exportedDataString = '';
+
+        window.exportDatabase = async function () {
+            const statusDiv = document.getElementById('statusDiv');
+            const jsonOutput = document.getElementById('jsonOutput');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const exportBtn = document.getElementById('exportBtn');
+            const statsDiv = document.getElementById('stats');
+
+            try {
+                exportBtn.disabled = true;
+                exportBtn.textContent = '⏳ Esportazione in corso...';
+
+                // Initialize and export
+                await initDB();
+                const data = await exportData();
+
+                // Convert to JSON string
+                exportedDataString = JSON.stringify(data, null, 2);
+
+                // Update UI
+                document.getElementById('recipeCount').textContent = data.recipes.length;
+                document.getElementById('nightCount').textContent = data.pizzaNights.length;
+                statsDiv.style.display = 'grid';
+
+                jsonOutput.value = exportedDataString;
+                jsonOutput.style.display = 'block';
+                downloadBtn.style.display = 'inline-block';
+
+                statusDiv.className = 'status success';
+                statusDiv.textContent = `✅ Export completato! ${data.recipes.length} ricette, ${data.pizzaNights.length} pizza nights.`;
+                statusDiv.style.display = 'block';
+
+                exportBtn.textContent = '✅ Esportato!';
+
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Errore: ' + error.message;
+                statusDiv.style.display = 'block';
+                exportBtn.disabled = false;
+                exportBtn.textContent = '📥 Esporta Database';
+                console.error(error);
+            }
+        };
+
+        window.downloadFile = function () {
+            const blob = new Blob([exportedDataString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'seed-data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // Show confirmation
+            const downloadBtn = document.getElementById('downloadBtn');
+            const originalText = downloadBtn.textContent;
+            downloadBtn.textContent = '✅ Scaricato!';
+            setTimeout(() => {
+                downloadBtn.textContent = originalText;
+            }, 2000);
+        };
+    </script>
+</body>
+
+</html>

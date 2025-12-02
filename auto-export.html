@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Export - AntigraviPizza</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status.success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        #jsonData {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🍕 Auto Export - AntigraviPizza</h1>
+
+        <div id="status" class="status info">
+            Inizializzazione in corso...
+        </div>
+
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-label">Ricette</div>
+                <div class="stat-number" id="recipeCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pizza Nights</div>
+                <div class="stat-number" id="nightCount">0</div>
+            </div>
+        </div>
+
+        <pre id="jsonData"></pre>
+    </div>
+
+    <script type="module">
+        import { initDB, exportData as dbExportData } from './src/modules/database.js';
+
+        async function autoExport() {
+            const statusEl = document.getElementById('status');
+            const statsEl = document.getElementById('stats');
+            const jsonDataEl = document.getElementById('jsonData');
+
+            try {
+                // Initialize database
+                await initDB();
+                statusEl.className = 'status info';
+                statusEl.textContent = '⏳ Esportazione automatica in corso...';
+
+                // Export data
+                const exportedData = await dbExportData();
+
+                // Update stats
+                document.getElementById('recipeCount').textContent = exportedData.recipes.length;
+                document.getElementById('nightCount').textContent = exportedData.pizzaNights.length;
+                statsEl.style.display = 'grid';
+
+                // Display JSON
+                const jsonString = JSON.stringify(exportedData, null, 2);
+                jsonDataEl.textContent = jsonString;
+                jsonDataEl.style.display = 'block';
+
+                // Store in window for easy access
+                window.exportedData = exportedData;
+                window.exportedDataString = jsonString;
+
+                statusEl.className = 'status success';
+                statusEl.textContent = `✅ Dati esportati! ${exportedData.recipes.length} ricette, ${exportedData.pizzaNights.length} pizza nights. I dati sono disponibili in window.exportedDataString`;
+
+                console.log('=== EXPORTED DATA ===');
+                console.log(jsonString);
+                console.log('=== END EXPORTED DATA ===');
+
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Errore: ' + error.message;
+                console.error(error);
+            }
+        }
+
+        // Auto-run on load
+        autoExport();
+    </script>
+</body>
+
+</html>

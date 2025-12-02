@@ -2,7 +2,7 @@
 // LIBRARY COMPONENT
 // ============================================
 
-import { getAllRecipes, getRecipeById, toggleFavorite, deleteRecipe } from '../modules/database.js';
+import { getAllRecipes, getRecipeById, toggleFavorite, deleteRecipe, updateRecipe } from '../modules/database.js';
 import { RECIPE_TAGS } from '../utils/constants.js';
 import { debounce, showToast } from '../utils/helpers.js';
 import { state } from '../store.js';
@@ -219,12 +219,23 @@ async function showRecipeModal(recipeId) {
       <button class="modal-close" onclick="window.closeRecipeModal()">×</button>
     </div>
     <div class="modal-body">
-      <img 
-        src="${recipe.imageUrl || 'https://via.placeholder.com/800x300/667eea/ffffff?text=🍕'}" 
-        alt="${recipe.name}"
-        class="recipe-modal-image"
-        onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%232a2f4a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2250%22>🍕</text></svg>'"
-      />
+      <div style="position: relative;">
+        <img 
+          id="recipeModalImage"
+          src="${recipe.imageUrl || 'https://via.placeholder.com/800x300/667eea/ffffff?text=🍕'}" 
+          alt="${recipe.name}"
+          class="recipe-modal-image"
+          onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%232a2f4a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2250%22>🍕</text></svg>'"
+        />
+        <button 
+          id="btnRegenerateImage" 
+          class="btn btn-secondary" 
+          style="position: absolute; top: 10px; right: 10px; padding: 8px 16px; font-size: 14px; background: rgba(255, 255, 255, 0.9); color: var(--color-primary); border: 1px solid var(--color-primary);"
+          title="Rigenera immagine"
+        >
+          🔄 Rigenera Immagine
+        </button>
+      </div>
       
       <div class="recipe-modal-meta">
         <div class="recipe-modal-pizzaiolo">
@@ -310,6 +321,14 @@ async function showRecipeModal(recipeId) {
 
   openModal(modalContent);
 
+  // Attach regenerate image listener
+  const regenerateBtn = document.getElementById('btnRegenerateImage');
+  if (regenerateBtn) {
+    regenerateBtn.addEventListener('click', async () => {
+      await handleRegenerateImage(recipe);
+    });
+  }
+
   // Attach delete listener dynamically
   const deleteBtn = document.getElementById('btnDeleteRecipe');
   if (deleteBtn) {
@@ -362,6 +381,105 @@ async function showRecipeModal(recipeId) {
         }
       });
     });
+  }
+}
+
+/**
+ * Handle image regeneration
+ */
+async function handleRegenerateImage(recipe) {
+  try {
+    const btn = document.getElementById('btnRegenerateImage');
+    const img = document.getElementById('recipeModalImage');
+
+    // Update button state
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Generazione...';
+
+    // Extract main ingredients for the prompt
+    const toppingIngredients = recipe.ingredients.filter(i => i.phase === 'topping' || i.category !== 'Impasto');
+    const mainIngredients = toppingIngredients.slice(0, 3).map(i => i.name);
+
+    // Generate new image URL with timestamp to avoid caching
+    const imagePrompt = `gourmet pizza ${recipe.name}, toppings: ${mainIngredients.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
+    const timestamp = Date.now();
+    const newImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?seed=${timestamp}`;
+
+    console.log('Generating new image:', newImageUrl);
+
+    // Show loading state on image
+    img.style.opacity = '0.5';
+
+    // Remove old event listeners
+    const newImg = img.cloneNode(true);
+    img.parentNode.replaceChild(newImg, img);
+
+    // Create a new image element to preload
+    const preloadImg = new Image();
+
+    // Wait for image to load with longer timeout
+    await new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        console.error('Image load timeout after 30 seconds');
+        reject(new Error('Image load timeout'));
+      }, 30000); // 30 seconds timeout
+
+      preloadImg.onload = () => {
+        clearTimeout(timeoutId);
+        console.log('Image loaded successfully');
+        resolve();
+      };
+
+      preloadImg.onerror = (error) => {
+        clearTimeout(timeoutId);
+        console.error('Image load error:', error);
+        reject(new Error('Failed to load image'));
+      };
+
+      // Start loading
+      preloadImg.src = newImageUrl;
+    });
+
+    // Update the visible image
+    const currentImg = document.getElementById('recipeModalImage');
+    if (currentImg) {
+      currentImg.src = newImageUrl;
+      currentImg.style.opacity = '1';
+    }
+
+    // Update recipe in database BEFORE showing success
+    console.log('Updating recipe in database...');
+    await updateRecipe(recipe.id, { imageUrl: newImageUrl });
+    console.log('Recipe updated successfully');
+
+    // Update button state
+    btn.innerHTML = '✅ Rigenerata!';
+    setTimeout(() => {
+      btn.innerHTML = '🔄 Rigenera Immagine';
+      btn.disabled = false;
+    }, 2000);
+
+    // Refresh the recipe cards
+    await renderRecipes(state);
+
+    showToast('Immagine rigenerata con successo!', 'success');
+
+  } catch (error) {
+    console.error('Failed to regenerate image:', error);
+    showToast('Errore nella rigenerazione dell\'immagine: ' + error.message, 'error');
+
+    // Reset button
+    const btn = document.getElementById('btnRegenerateImage');
+    if (btn) {
+      btn.innerHTML = '🔄 Rigenera Immagine';
+      btn.disabled = false;
+    }
+
+    // Reset image opacity
+    const img = document.getElementById('recipeModalImage');
+    if (img) {
+      img.style.opacity = '1';
+    }
   }
 }
 
