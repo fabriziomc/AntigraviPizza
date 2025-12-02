@@ -171,7 +171,7 @@ function selectRandomIngredients(category, count = 1) {
 }
 
 /**
- * Genera una ricetta casuale intelligente
+ * Genera una ricetta casuale intelligente basata su archetipi
  */
 export async function generateRandomRecipe() {
     // Fetch combinations from DB
@@ -183,11 +183,15 @@ export async function generateRandomRecipe() {
         ? dbCombinations.map(c => c.ingredients)
         : FLAVOR_COMBINATIONS;
 
-    // Scegli se usare una combinazione predefinita o creare una nuova
-    const usePredefinedCombo = Math.random() > 0.5;
+    // Scegli se usare una combinazione predefinita o creare una nuova basata su archetipi
+    // 40% combinazione predefinita, 60% archetipo
+    const usePredefinedCombo = Math.random() > 0.6;
 
     let ingredients = [];
     let mainIngredientNames = [];
+    let pizzaName = '';
+    let description = '';
+    let doughType = null;
 
     if (usePredefinedCombo && combinations.length > 0) {
         // Usa una combinazione testata
@@ -199,92 +203,113 @@ export async function generateRandomRecipe() {
             const found = findIngredientByName(ingName);
             if (found) ingredients.push(found);
         });
+
+        doughType = DOUGH_TYPES[Math.floor(Math.random() * DOUGH_TYPES.length)];
+        pizzaName = generatePizzaName(mainIngredientNames);
+        description = `Una ${doughType.type.toLowerCase()} con ${mainIngredientNames.join(' e ').toLowerCase()}, creata secondo la tradizione.`;
+
     } else {
-        // Crea una combinazione nuova
-        const hasBase = Math.random() > 0.3;
-        if (hasBase) {
-            const base = selectRandomIngredients(INGREDIENTS_DB.bases, 1)[0];
-            ingredients.push({
-                name: base.name,
-                quantity: 200,
-                unit: 'g',
-                category: base.category,
-                phase: 'topping',
-                postBake: base.postBake
-            });
+        // Usa la logica degli ARCHETIPI
+        const archetypes = ['dolce_salato', 'terra_bosco', 'fresca_estiva', 'piccante_decisa'];
+        const selectedArchetype = archetypes[Math.floor(Math.random() * archetypes.length)];
+
+        switch (selectedArchetype) {
+            case 'dolce_salato':
+                // Contrasto: Formaggio forte + Frutta/Miele + Croccante
+                doughType = DOUGH_TYPES.find(d => d.type === 'Contemporanea') || DOUGH_TYPES[0];
+
+                // Base bianca
+                const cheese = selectRandomIngredients(INGREDIENTS_DB.cheeses.filter(c => ['Gorgonzola DOP', 'Taleggio', 'Pecorino Romano'].includes(c.name)), 1)[0];
+                const fruit = selectRandomIngredients(INGREDIENTS_DB.finishes.filter(f => ['Pere', 'Fichi', 'Miele di acacia'].includes(f.name)), 1)[0];
+                const crunch = selectRandomIngredients(INGREDIENTS_DB.finishes.filter(f => ['Noci', 'Pistacchi'].includes(f.name)), 1)[0];
+
+                ingredients.push({ ...cheese, quantity: 80, category: 'Formaggi', phase: 'topping' });
+                ingredients.push({ ...fruit, quantity: 60, category: 'Frutta', phase: 'topping', postBake: fruit.name !== 'Pere' });
+                ingredients.push({ ...crunch, quantity: 30, category: 'Croccante', phase: 'topping', postBake: true });
+
+                // Aggiungi mozzarella fior di latte come base
+                ingredients.unshift({ name: 'Fior di latte', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
+
+                mainIngredientNames = [cheese.name, fruit.name];
+                pizzaName = `Contrasto ${cheese.name.split(' ')[0]}`;
+                description = `Un perfetto equilibrio tra la sapidità del ${cheese.name.toLowerCase()} e la dolcezza di ${fruit.name.toLowerCase()}, completata dalla croccantezza di ${crunch.name.toLowerCase()}.`;
+                break;
+
+            case 'terra_bosco':
+                // Sapori autunnali: Funghi/Tartufo + Salume stagionato + Crema
+                doughType = DOUGH_TYPES.find(d => d.type === 'Integrale') || DOUGH_TYPES[0];
+
+                const mushroom = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => v.name.includes('Funghi')), 1)[0];
+                const meat = selectRandomIngredients(INGREDIENTS_DB.meats.filter(m => ['Speck Alto Adige', 'Salsiccia fresca', 'Guanciale croccante'].includes(m.name)), 1)[0];
+                const cream = selectRandomIngredients(INGREDIENTS_DB.bases.filter(b => b.name.includes('Crema') || b.name.includes('Tartufo')), 1)[0] ||
+                    selectRandomIngredients(INGREDIENTS_DB.premium.filter(p => p.name.includes('Tartufo')), 1)[0];
+
+                if (cream) ingredients.push({ ...cream, quantity: cream.category === 'Salsa' ? 80 : 15, category: 'Base', phase: 'topping', postBake: cream.postBake });
+                ingredients.push({ ...mushroom, quantity: 100, category: 'Verdure', phase: 'topping', postBake: false });
+                ingredients.push({ ...meat, quantity: 80, category: 'Carne', phase: 'topping', postBake: meat.postBake });
+
+                // Base mozzarella
+                ingredients.unshift({ name: 'Provola affumicata', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
+
+                mainIngredientNames = [mushroom.name, meat.name];
+                pizzaName = `Bosco ${meat.name.split(' ')[0]}`;
+                description = `I profumi del bosco con ${mushroom.name.toLowerCase()} e ${meat.name.toLowerCase()}, su una base rustica.`;
+                break;
+
+            case 'fresca_estiva':
+                // Base focaccia/rossa + Ingredienti a crudo
+                doughType = DOUGH_TYPES.find(d => d.type === 'Alta Idratazione') || DOUGH_TYPES[0];
+
+                const freshBase = Math.random() > 0.5
+                    ? { name: 'Pomodorini datterini', quantity: 150, unit: 'g', category: 'Verdure', phase: 'topping', postBake: false }
+                    : { name: 'Olio EVO aromatizzato', quantity: 20, unit: 'ml', category: 'Oli', phase: 'topping', postBake: true };
+
+                const freshCheese = selectRandomIngredients(INGREDIENTS_DB.cheeses.filter(c => ['Burrata', 'Stracciatella', 'Mozzarella di bufala'].includes(c.name)), 1)[0];
+                const freshMeat = selectRandomIngredients(INGREDIENTS_DB.meats.filter(m => ['Prosciutto crudo di Parma', 'Bresaola', 'Alici di Cetara'].includes(m.name)), 1)[0];
+                const freshVeg = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => ['Rucola', 'Pomodorini ciliegino'].includes(v.name)), 1)[0];
+
+                ingredients.push({ ...freshBase });
+                ingredients.push({ ...freshCheese, quantity: 120, category: 'Formaggi', phase: 'topping', postBake: true });
+                ingredients.push({ ...freshMeat, quantity: 70, category: 'Carne', phase: 'topping', postBake: true });
+                ingredients.push({ ...freshVeg, quantity: 50, category: 'Verdure', phase: 'topping', postBake: true });
+
+                // Aggiungi scorza di limone se c'è pesce
+                if (freshMeat.name.includes('Alici') || freshMeat.name.includes('Salmone')) {
+                    ingredients.push({ name: 'Limone grattugiato', quantity: 5, unit: 'g', category: 'Aromi', phase: 'topping', postBake: true });
+                }
+
+                mainIngredientNames = [freshCheese.name, freshMeat.name];
+                pizzaName = `Estate ${freshMeat.name.split(' ')[0]}`;
+                description = `Freschezza assoluta con ${freshCheese.name.toLowerCase()} e ${freshMeat.name.toLowerCase()} aggiunti a crudo.`;
+                break;
+
+            case 'piccante_decisa':
+                // Base rossa + Piccante + Contrasto dolce/acido
+                doughType = DOUGH_TYPES.find(d => d.type === 'Napoletana Classica') || DOUGH_TYPES[0];
+
+                ingredients.push({ name: 'Pomodoro San Marzano', quantity: 80, unit: 'g', category: 'Salsa', phase: 'topping', postBake: false });
+                ingredients.push({ name: 'Fior di latte', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
+
+                const spicy = selectRandomIngredients(INGREDIENTS_DB.meats.filter(m => ['Nduja calabrese', 'Salame piccante'].includes(m.name)), 1)[0];
+                const vegetable = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => ['Cipolla caramellata', 'Olive taggiasche', 'Peperoni'].includes(v.name)), 1)[0];
+                const finish = Math.random() > 0.5
+                    ? { name: 'Miele di acacia', quantity: 15, unit: 'g', category: 'Salsa', phase: 'topping', postBake: true }
+                    : { name: 'Ricotta fresca', quantity: 50, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: true };
+
+                ingredients.push({ ...spicy, quantity: 60, category: 'Carne', phase: 'topping', postBake: false });
+                ingredients.push({ ...vegetable, quantity: 50, category: 'Verdure', phase: 'topping', postBake: false });
+                ingredients.push({ ...finish });
+
+                mainIngredientNames = [spicy.name, vegetable.name];
+                pizzaName = `Fuoco e ${finish.name.split(' ')[0]}`;
+                description = `Il carattere deciso della ${spicy.name.toLowerCase()} bilanciato dalla dolcezza di ${finish.name.toLowerCase()}.`;
+                break;
         }
-
-        // Aggiungi formaggio principale
-        const mainCheese = selectRandomIngredients(INGREDIENTS_DB.cheeses, 1)[0];
-        ingredients.push({
-            name: mainCheese.name,
-            quantity: mainCheese.weight[0] + Math.random() * (mainCheese.weight[1] - mainCheese.weight[0]),
-            unit: 'g',
-            category: 'Formaggi',
-            phase: 'topping',
-            postBake: mainCheese.postBake
-        });
-        mainIngredientNames.push(mainCheese.name);
-
-        // Decidi il tipo di pizza (carne, vegetariana, premium)
-        const pizzaType = Math.random();
-
-        if (pizzaType < 0.4) {
-            // Pizza con carne
-            const meat = selectRandomIngredients(INGREDIENTS_DB.meats, 1)[0];
-            ingredients.push({
-                name: meat.name,
-                quantity: meat.weight[0] + Math.random() * (meat.weight[1] - meat.weight[0]),
-                unit: 'g',
-                category: 'Carne',
-                phase: 'topping',
-                postBake: meat.postBake
-            });
-            mainIngredientNames.push(meat.name);
-        } else if (pizzaType < 0.7) {
-            // Pizza vegetariana
-            const veggies = selectRandomIngredients(INGREDIENTS_DB.vegetables, 2);
-            veggies.forEach(veg => {
-                ingredients.push({
-                    name: veg.name,
-                    quantity: veg.weight[0] + Math.random() * (veg.weight[1] - veg.weight[0]),
-                    unit: 'g',
-                    category: 'Verdure',
-                    phase: 'topping',
-                    postBake: veg.postBake
-                });
-            });
-            mainIngredientNames.push(veggies[0].name);
-        } else {
-            // Pizza premium
-            const premium = selectRandomIngredients(INGREDIENTS_DB.premium, 1)[0];
-            ingredients.push({
-                name: premium.name,
-                quantity: premium.weight[0] + Math.random() * (premium.weight[1] - premium.weight[0]),
-                unit: 'g',
-                category: 'Altro',
-                phase: 'topping',
-                postBake: premium.postBake
-            });
-            mainIngredientNames.push(premium.name);
-        }
-
-        // Aggiungi finishing touches
-        const finishes = selectRandomIngredients(INGREDIENTS_DB.finishes, Math.random() > 0.5 ? 2 : 1);
-        finishes.forEach(finish => {
-            ingredients.push({
-                name: finish.name,
-                quantity: finish.weight[0] + Math.random() * (finish.weight[1] - finish.weight[0]),
-                unit: finish.name.includes('Olio') || finish.name.includes('Aceto') || finish.name.includes('Miele') ? 'ml' : 'g',
-                category: 'Erbe e Spezie',
-                phase: 'topping',
-                postBake: finish.postBake
-            });
-        });
     }
 
-    // Aggiungi sempre l'impasto
-    const doughType = DOUGH_TYPES[Math.floor(Math.random() * DOUGH_TYPES.length)];
+    // Aggiungi sempre l'impasto se non è già stato aggiunto
+    if (!doughType) doughType = DOUGH_TYPES[Math.floor(Math.random() * DOUGH_TYPES.length)];
+
     const doughIngredients = [
         { name: doughType.flour, quantity: 500, unit: 'g', category: 'Impasto', phase: 'dough', postBake: false },
         { name: 'Acqua', quantity: doughType.water, unit: 'ml', category: 'Impasto', phase: 'dough', postBake: false },
@@ -300,14 +325,11 @@ export async function generateRandomRecipe() {
         quantity: Math.round(ing.quantity)
     }));
 
-    // Genera nome
-    const name = generatePizzaName(mainIngredientNames);
+    // Genera nome se non esiste
+    if (!pizzaName) pizzaName = generatePizzaName(mainIngredientNames);
 
     // Scegli pizzaiolo casuale
     const pizzaiolo = FAMOUS_PIZZAIOLOS[Math.floor(Math.random() * FAMOUS_PIZZAIOLOS.length)];
-
-    // Genera descrizione
-    const description = `Una ${doughType.type.toLowerCase()} con ${mainIngredientNames.join(' e ').toLowerCase()}, creata secondo la tradizione ${doughType.type.includes('Napoletana') ? 'napoletana' : doughType.type.includes('Romana') ? 'romana' : 'contemporanea'}.`;
 
     // Genera istruzioni divise per fase
     const instructions = {
@@ -328,11 +350,11 @@ export async function generateRandomRecipe() {
     const tags = determineTags(ingredients, doughType);
 
     // Genera URL immagine dinamica
-    const imagePrompt = `gourmet pizza ${name}, toppings: ${mainIngredientNames.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
+    const imagePrompt = `gourmet pizza ${pizzaName}, toppings: ${mainIngredientNames.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
     const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}`;
 
     return {
-        name,
+        name: pizzaName,
         pizzaiolo,
         source: 'Generata da AntigraviPizza',
         description,

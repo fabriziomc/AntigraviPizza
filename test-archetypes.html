@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archetype Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .recipe {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .recipe h3 {
+            margin-top: 0;
+        }
+
+        .tags {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .stats {
+            background: #f0f0f0;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🍕 Pizza Archetype Test</h1>
+    <div id="stats" class="stats">Generating...</div>
+    <div id="results"></div>
+
+    <script type="module">
+        import { generateRandomRecipe } from './src/modules/recipeGenerator.js';
+        import { initDB } from './src/modules/database.js';
+
+        async function runTest() {
+            const resultsDiv = document.getElementById('results');
+            const statsDiv = document.getElementById('stats');
+
+            // Initialize DB first
+            try {
+                await initDB();
+                console.log('Database initialized');
+            } catch (e) {
+                console.error('Failed to init DB:', e);
+                statsDiv.textContent = 'Error initializing database: ' + e.message;
+                return;
+            }
+
+            const count = 20;
+            const recipes = [];
+
+            // Generate recipes
+            for (let i = 0; i < count; i++) {
+                const recipe = await generateRandomRecipe();
+                recipes.push(recipe);
+            }
+
+            // Analyze results
+            let archetypes = {
+                'Dolce/Salato': 0,
+                'Terra/Bosco': 0,
+                'Fresca/Estiva': 0,
+                'Piccante/Decisa': 0,
+                'Predefined/Random': 0
+            };
+
+            recipes.forEach(r => {
+                const name = r.name.toLowerCase();
+                const desc = r.description.toLowerCase();
+
+                if (name.includes('contrasto') || desc.includes('equilibrio')) archetypes['Dolce/Salato']++;
+                else if (name.includes('bosco') || desc.includes('bosco')) archetypes['Terra/Bosco']++;
+                else if (name.includes('estate') || desc.includes('freschezza')) archetypes['Fresca/Estiva']++;
+                else if (name.includes('fuoco') || desc.includes('carattere deciso')) archetypes['Piccante/Decisa']++;
+                else archetypes['Predefined/Random']++;
+
+                // Render card
+                const div = document.createElement('div');
+                div.className = 'recipe';
+                div.innerHTML = `
+                    <h3>${r.name}</h3>
+                    <p>${r.description}</p>
+                    <div class="tags">Tags: ${r.tags.join(', ')}</div>
+                    <div><strong>Ingredients:</strong> ${r.ingredients.map(i => i.name).join(', ')}</div>
+                `;
+                resultsDiv.appendChild(div);
+            });
+
+            // Update stats
+            statsDiv.innerHTML = `
+                <h3>Statistics (${count} runs)</h3>
+                <ul>
+                    ${Object.entries(archetypes).map(([k, v]) => `<li>${k}: ${v} (${Math.round(v / count * 100)}%)</li>`).join('')}
+                </ul>
+            `;
+
+            window.testCompleted = true;
+        }
+
+        runTest();
+    </script>
+</body>
+
+</html>
