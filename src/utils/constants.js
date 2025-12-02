@@ -98,7 +98,8 @@ export const VIEWS = {
     LIBRARY: 'library',
     PLANNER: 'planner',
     SHOPPING: 'shopping',
-    COMBINATIONS: 'combinations'
+    COMBINATIONS: 'combinations',
+    SETTINGS: 'settings'
 };
 
 // Navigation items
@@ -108,7 +109,8 @@ export const NAV_ITEMS = [
     { id: VIEWS.LIBRARY, label: 'Pizze', icon: '🍕' },
     { id: VIEWS.COMBINATIONS, label: 'Abbinamenti', icon: '🧪' },
     { id: VIEWS.PLANNER, label: 'Pianifica Serata', icon: '🎉' },
-    { id: VIEWS.SHOPPING, label: 'Lista Spesa', icon: '🛒' }
+    { id: VIEWS.SHOPPING, label: 'Lista Spesa', icon: '🛒' },
+    { id: VIEWS.SETTINGS, label: 'Impostazioni', icon: '⚙️' }
 ];
 
 // Combinazioni di ingredienti che funzionano bene insieme

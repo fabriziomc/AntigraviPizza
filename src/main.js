@@ -20,6 +20,7 @@ import { renderLibrary } from './components/Library.js';
 import { renderPlanner } from './components/Planner.js';
 import { renderShopping } from './components/Shopping.js';
 import { renderCombinations, setupCombinationsListeners } from './components/Combinations.js';
+import { renderSettings } from './components/Settings.js';
 
 console.log('✅ All imports loaded');
 
@@ -159,6 +160,9 @@ async function renderCurrentView() {
       case VIEWS.COMBINATIONS:
         await renderCombinations();
         setupCombinationsListeners();
+        break;
+      case VIEWS.SETTINGS:
+        await renderSettings();
         break;
       default:
         await renderDashboard(state);
