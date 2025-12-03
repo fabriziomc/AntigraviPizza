@@ -319,10 +319,11 @@ export async function generateRandomRecipe() {
 
     ingredients = [...doughIngredients, ...ingredients];
 
-    // Arrotonda le quantità
+    // Arrotonda le quantità e assegna unità mancanti
     ingredients = ingredients.map(ing => ({
         ...ing,
-        quantity: Math.round(ing.quantity)
+        quantity: Math.round(ing.quantity),
+        unit: ing.unit || (['Olio', 'Aceto', 'Riduzione'].some(x => ing.name.includes(x)) ? 'ml' : 'g')
     }));
 
     // Genera nome se non esiste
