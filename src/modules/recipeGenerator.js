@@ -464,10 +464,13 @@ function determineTags(ingredients, doughType) {
 /**
  * Genera multiple ricette casuali
  */
-export function generateMultipleRecipes(count = 3) {
-    const recipes = [];
+/**
+ * Genera multiple ricette casuali
+ */
+export async function generateMultipleRecipes(count = 3) {
+    const promises = [];
     for (let i = 0; i < count; i++) {
-        recipes.push(generateRandomRecipe());
+        promises.push(generateRandomRecipe());
     }
-    return recipes;
+    return await Promise.all(promises);
 }

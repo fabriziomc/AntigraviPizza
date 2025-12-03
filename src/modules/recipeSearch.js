@@ -62,7 +62,7 @@ export async function importSampleRecipes() {
     const { generateMultipleRecipes } = await import('./recipeGenerator.js');
 
     // Generate 3 new random recipes
-    const newRecipes = generateMultipleRecipes(3);
+    const newRecipes = await generateMultipleRecipes(3);
     let imported = 0;
 
     for (const recipe of newRecipes) {
