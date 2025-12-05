@@ -1,0 +1,59 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+const DB_TYPE = process.env.DB_TYPE || 'sqlite';
+
+let db = null;
+let dbType = DB_TYPE;
+
+if (DB_TYPE === 'sqlite') {
+    // SQLite implementation
+    const Database = (await import('better-sqlite3')).default;
+    const path = (await import('path')).default;
+    const { fileURLToPath } = await import('url');
+    const fs = (await import('fs')).default;
+
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+
+    const dbPath = path.join(__dirname, '..', 'antigravipizza.db');
+    db = new Database(dbPath);
+
+    // Enable foreign keys
+    db.pragma('foreign_keys = ON');
+
+    console.log(`✅ SQLite database initialized at: ${dbPath}`);
+
+    // Initialize schema
+    function initSchema() {
+        const schemaPath = path.join(__dirname, 'sql', 'schema.sqlite.sql');
+        const schema = fs.readFileSync(schemaPath, 'utf8');
+
+        // Split by semicolons and execute each statement
+        const statements = schema.split(';').filter(s => s.trim().length > 0);
+
+        for (const statement of statements) {
+            db.exec(statement);
+        }
+
+        console.log('✅ Database schema initialized');
+    }
+
+    // Initialize schema on first run
+    initSchema();
+} else if (DB_TYPE === 'mssql') {
+    // SQL Server implementation
+    console.log('✅ SQL Server mode enabled');
+    // Connection will be handled by db-mssql.js
+}
+
+export function getDb() {
+    return db;
+}
+
+export function getDbType() {
+    return dbType;
+}
+
+export { db };
+

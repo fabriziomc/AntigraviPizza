@@ -15,7 +15,16 @@ const INGREDIENTS_DB = {
         { name: 'Pesto di basilico', category: 'Salsa', phase: 'topping', postBake: true },
         { name: 'Crema di pistacchio', category: 'Salsa', phase: 'topping', postBake: true },
         { name: 'Crema di burrata', category: 'Salsa', phase: 'topping', postBake: true },
-        { name: 'Olio EVO aromatizzato', category: 'Oli', phase: 'topping', postBake: true }
+        { name: 'Olio EVO aromatizzato', category: 'Oli', phase: 'topping', postBake: true },
+        // Nuove basi e salse
+        { name: 'Crema di ceci', category: 'Salsa', phase: 'topping', postBake: false },
+        { name: 'Crema di melanzane', category: 'Salsa', phase: 'topping', postBake: false },
+        { name: 'Salsa verde', category: 'Salsa', phase: 'topping', postBake: true },
+        { name: 'Crema di noci', category: 'Salsa', phase: 'topping', postBake: true },
+        { name: 'Crema di peperoni', category: 'Salsa', phase: 'topping', postBake: false },
+        { name: 'Pesto di rucola', category: 'Salsa', phase: 'topping', postBake: true },
+        { name: 'Pesto rosso', category: 'Salsa', phase: 'topping', postBake: true },
+        { name: 'Salsa al pesto di olive', category: 'Salsa', phase: 'topping', postBake: true }
     ],
 
     // Formaggi
@@ -31,7 +40,18 @@ const INGREDIENTS_DB = {
         { name: 'Provola affumicata', weight: [100, 150], phase: 'topping', postBake: false },
         { name: 'Ricotta fresca', weight: [80, 120], phase: 'topping', postBake: true },
         { name: 'Scamorza', weight: [100, 140], phase: 'topping', postBake: false },
-        { name: 'Caciocavallo', weight: [80, 120], phase: 'topping', postBake: false }
+        { name: 'Caciocavallo', weight: [80, 120], phase: 'topping', postBake: false },
+        // Nuovi formaggi
+        { name: 'Fontina Val d\'Aosta', weight: [80, 120], phase: 'topping', postBake: false },
+        { name: 'Asiago', weight: [70, 100], phase: 'topping', postBake: false },
+        { name: 'Castelmagno', weight: [60, 90], phase: 'topping', postBake: false },
+        { name: 'Squacquerone', weight: [80, 120], phase: 'topping', postBake: true },
+        { name: 'Crescenza', weight: [80, 120], phase: 'topping', postBake: true },
+        { name: 'Robiola', weight: [70, 100], phase: 'topping', postBake: true },
+        { name: 'Brie', weight: [80, 120], phase: 'topping', postBake: false },
+        { name: 'Grana Padano', weight: [40, 60], phase: 'topping', postBake: false },
+        { name: 'Caprino fresco', weight: [70, 100], phase: 'topping', postBake: true },
+        { name: 'Stracchino', weight: [80, 120], phase: 'topping', postBake: true }
     ],
 
     // Carni e salumi
@@ -45,7 +65,20 @@ const INGREDIENTS_DB = {
         { name: 'Bresaola', weight: [40, 60], phase: 'topping', postBake: true },
         { name: 'Salame piccante', weight: [50, 80], phase: 'topping', postBake: false },
         { name: 'Mortadella', weight: [60, 90], phase: 'topping', postBake: true },
-        { name: 'Nduja calabrese', weight: [30, 50], phase: 'topping', postBake: false }
+        { name: 'Nduja calabrese', weight: [30, 50], phase: 'topping', postBake: false },
+        // Nuovi salumi
+        { name: 'Culatello di Zibello', weight: [50, 70], phase: 'topping', postBake: true },
+        { name: 'Coppa di Parma', weight: [50, 70], phase: 'topping', postBake: true },
+        { name: 'Lonza', weight: [50, 70], phase: 'topping', postBake: true },
+        { name: 'Porchetta', weight: [70, 100], phase: 'topping', postBake: true },
+        { name: 'Ventricina', weight: [50, 80], phase: 'topping', postBake: false },
+        { name: 'Finocchiona', weight: [50, 80], phase: 'topping', postBake: true },
+        { name: 'Soppressata', weight: [50, 80], phase: 'topping', postBake: false },
+        { name: 'Lardo di Colonnata', weight: [30, 50], phase: 'topping', postBake: true },
+        { name: 'Capocollo', weight: [50, 70], phase: 'topping', postBake: true },
+        { name: 'Salamino piccante', weight: [50, 80], phase: 'topping', postBake: false },
+        { name: 'Prosciutto di San Daniele', weight: [60, 80], phase: 'topping', postBake: true },
+        { name: 'Cotechino', weight: [80, 120], phase: 'topping', postBake: false }
     ],
 
     // Verdure
@@ -62,7 +95,28 @@ const INGREDIENTS_DB = {
         { name: 'Olive taggiasche', weight: [40, 60], phase: 'topping', postBake: true },
         { name: 'Cipolla caramellata', weight: [50, 80], phase: 'topping', postBake: false },
         { name: 'Friarielli', weight: [80, 120], phase: 'topping', postBake: false },
-        { name: 'Asparagi', weight: [60, 100], phase: 'topping', postBake: false }
+        { name: 'Asparagi', weight: [60, 100], phase: 'topping', postBake: false },
+        // Nuove verdure
+        { name: 'Spinaci', weight: [80, 120], phase: 'topping', postBake: false },
+        { name: 'Bietole', weight: [80, 120], phase: 'topping', postBake: false },
+        { name: 'Cavolo nero', weight: [70, 100], phase: 'topping', postBake: false },
+        { name: 'Broccoli', weight: [80, 120], phase: 'topping', postBake: false },
+        { name: 'Cavolfiore', weight: [80, 120], phase: 'topping', postBake: false },
+        { name: 'Patate', weight: [100, 150], phase: 'topping', postBake: false },
+        { name: 'Patate dolci', weight: [100, 150], phase: 'topping', postBake: false },
+        { name: 'Pomodori secchi', weight: [40, 60], phase: 'topping', postBake: true },
+        { name: 'Capperi', weight: [20, 40], phase: 'topping', postBake: true },
+        { name: 'Sedano', weight: [50, 80], phase: 'topping', postBake: false },
+        { name: 'Carote', weight: [60, 100], phase: 'topping', postBake: false },
+        { name: 'Barbabietole', weight: [70, 100], phase: 'topping', postBake: false },
+        { name: 'Piselli', weight: [60, 100], phase: 'topping', postBake: false },
+        { name: 'Fave', weight: [60, 100], phase: 'topping', postBake: false },
+        { name: 'Cicoria', weight: [60, 90], phase: 'topping', postBake: false },
+        { name: 'Catalogna', weight: [60, 90], phase: 'topping', postBake: false },
+        { name: 'Puntarelle', weight: [50, 80], phase: 'topping', postBake: true },
+        { name: 'Agretti', weight: [50, 80], phase: 'topping', postBake: false },
+        { name: 'Cipolla rossa', weight: [50, 80], phase: 'topping', postBake: false },
+        { name: 'Porri', weight: [60, 100], phase: 'topping', postBake: false }
     ],
 
     // Ingredienti premium
@@ -73,7 +127,16 @@ const INGREDIENTS_DB = {
         { name: 'Alici di Cetara', weight: [40, 60], phase: 'topping', postBake: true },
         { name: 'Bottarga', weight: [20, 30], phase: 'topping', postBake: true },
         { name: 'Caviale', weight: [10, 20], phase: 'topping', postBake: true },
-        { name: 'Foie gras', weight: [30, 50], phase: 'topping', postBake: true }
+        { name: 'Foie gras', weight: [30, 50], phase: 'topping', postBake: true },
+        // Nuovi ingredienti premium (pesce e frutti di mare)
+        { name: 'Scampi', weight: [80, 120], phase: 'topping', postBake: false },
+        { name: 'Gamberi rossi', weight: [80, 120], phase: 'topping', postBake: false },
+        { name: 'Polpo', weight: [80, 120], phase: 'topping', postBake: false },
+        { name: 'Cozze', weight: [100, 150], phase: 'topping', postBake: false },
+        { name: 'Vongole', weight: [80, 120], phase: 'topping', postBake: false },
+        { name: 'Capesante', weight: [60, 100], phase: 'topping', postBake: false },
+        { name: 'Tonno fresco', weight: [70, 100], phase: 'topping', postBake: true },
+        { name: 'Acciughe', weight: [30, 50], phase: 'topping', postBake: true }
     ],
 
     // Finishing touches
@@ -90,7 +153,23 @@ const INGREDIENTS_DB = {
         { name: 'Fichi', weight: [50, 80], phase: 'topping', postBake: true },
         { name: 'Olio al tartufo', weight: [10, 20], phase: 'topping', postBake: true },
         { name: 'Aceto balsamico', weight: [10, 20], phase: 'topping', postBake: true },
-        { name: 'Riduzione di balsamico', weight: [15, 25], phase: 'topping', postBake: true }
+        { name: 'Riduzione di balsamico', weight: [15, 25], phase: 'topping', postBake: true },
+        // Nuovi finishes
+        { name: 'Timo', weight: [5, 10], phase: 'topping', postBake: false },
+        { name: 'Salvia', weight: [5, 10], phase: 'topping', postBake: false },
+        { name: 'Maggiorana', weight: [5, 10], phase: 'topping', postBake: false },
+        { name: 'Prezzemolo', weight: [10, 20], phase: 'topping', postBake: true },
+        { name: 'Erba cipollina', weight: [5, 15], phase: 'topping', postBake: true },
+        { name: 'Aneto', weight: [5, 10], phase: 'topping', postBake: true },
+        { name: 'Menta', weight: [10, 20], phase: 'topping', postBake: true },
+        { name: 'Zenzero', weight: [5, 10], phase: 'topping', postBake: true },
+        { name: 'Paprika affumicata', weight: [5, 10], phase: 'topping', postBake: false },
+        { name: 'Semi di sesamo', weight: [10, 20], phase: 'topping', postBake: true },
+        { name: 'Granella di mandorle', weight: [20, 40], phase: 'topping', postBake: true },
+        { name: 'Nocciole', weight: [30, 50], phase: 'topping', postBake: true },
+        { name: 'Pinoli', weight: [20, 40], phase: 'topping', postBake: true },
+        { name: 'Miele di castagno', weight: [15, 30], phase: 'topping', postBake: true },
+        { name: 'Scaglie di cioccolato', weight: [20, 40], phase: 'topping', postBake: true }
     ]
 };
 
@@ -148,18 +227,91 @@ const PIZZA_STYLES = [
 ];
 
 /**
- * Genera un nome creativo per la pizza basato sugli ingredienti
+ * Genera un nome creativo e unico per la pizza basato sugli ingredienti
  */
-function generatePizzaName(mainIngredients) {
+async function generatePizzaName(mainIngredients, existingNames = []) {
+    const ing1 = mainIngredients[0] || 'Speciale';
+    const ing2 = mainIngredients[1] || '';
+    const ing3 = mainIngredients[2] || '';
+
+    // Template più variati per ridurre collisioni
     const templates = [
-        `Pizza ${mainIngredients[0]} e ${mainIngredients[1]}`,
-        `${mainIngredients[0]} ${mainIngredients[1] ? 'e ' + mainIngredients[1] : ''}`,
-        `La ${mainIngredients[0]}`,
-        `Speciale ${mainIngredients[0]}`,
-        `${mainIngredients[0]} Gourmet`
+        // Classici
+        `Pizza ${ing1} e ${ing2}`,
+        `${ing1} ${ing2 ? 'e ' + ing2 : ''}`,
+        `La ${ing1}`,
+
+        // Regionali
+        `Napoletana al ${ing1}`,
+        `Romana con ${ing1}`,
+        `Focaccia ${ing1}`,
+
+        // Descrittivi
+        `Delizia di ${ing1}`,
+        `Sapori di ${ing1} e ${ing2}`,
+        `Profumi di ${ing1}`,
+        `Tentazione ${ing1}`,
+
+        // Creativi
+        `${ing1} Gourmet`,
+        `Speciale ${ing1}`,
+        `${ing1} Premium`,
+        `Fantasia di ${ing1}`,
+
+        // Con tre ingredienti
+        ing3 ? `Trio ${ing1}, ${ing2} e ${ing3}` : null,
+        ing3 ? `${ing1}, ${ing2} e ${ing3}` : null,
+
+        // Poetici
+        `Armonia di ${ing1}`,
+        `Sinfonia ${ing1} e ${ing2}`,
+        `Contrasto ${ing1}`,
+        `Equilibrio ${ing1}`
+    ].filter(Boolean); // Rimuovi null
+
+    // Prova a generare un nome unico
+    let attempts = 0;
+    let pizzaName = '';
+
+    while (attempts < templates.length) {
+        const template = templates[Math.floor(Math.random() * templates.length)];
+        pizzaName = template.trim().replace(/\s+/g, ' '); // Normalizza spazi
+
+        // Controlla se il nome esiste già
+        if (!existingNames.includes(pizzaName)) {
+            return pizzaName;
+        }
+
+        attempts++;
+    }
+
+    // Se tutti i template sono usati, aggiungi un suffisso descrittivo
+    const suffixes = [
+        'Deluxe',
+        'Speciale',
+        'Premium',
+        'Rustica',
+        'Contemporanea',
+        'Tradizionale',
+        'Innovativa',
+        'Artigianale'
     ];
 
-    return templates[Math.floor(Math.random() * templates.length)];
+    // Prova con suffisso
+    for (const suffix of suffixes) {
+        const nameWithSuffix = `${templates[0]} ${suffix}`;
+        if (!existingNames.includes(nameWithSuffix)) {
+            return nameWithSuffix;
+        }
+    }
+
+    // Ultima risorsa: aggiungi numero
+    let counter = 1;
+    while (existingNames.includes(`${templates[0]} ${counter}`)) {
+        counter++;
+    }
+
+    return `${templates[0]} ${counter}`;
 }
 
 /**
@@ -174,9 +326,11 @@ function selectRandomIngredients(category, count = 1) {
  * Genera una ricetta casuale intelligente basata su archetipi
  */
 export async function generateRandomRecipe() {
-    // Fetch combinations from DB
-    const { getAllCombinations } = await import('./database.js');
+    // Fetch combinations and existing recipe names from DB
+    const { getAllCombinations, getAllRecipes } = await import('./database.js');
     const dbCombinations = await getAllCombinations();
+    const existingRecipes = await getAllRecipes();
+    const existingNames = existingRecipes.map(r => r.name);
 
     // Use DB combinations if available, otherwise fallback to default
     const combinations = dbCombinations.length > 0
@@ -184,8 +338,8 @@ export async function generateRandomRecipe() {
         : FLAVOR_COMBINATIONS;
 
     // Scegli se usare una combinazione predefinita o creare una nuova basata su archetipi
-    // 40% combinazione predefinita, 60% archetipo
-    const usePredefinedCombo = Math.random() > 0.6;
+    // 30% combinazione predefinita, 70% archetipo (aumentata varietà)
+    const usePredefinedCombo = Math.random() > 0.7;
 
     let ingredients = [];
     let mainIngredientNames = [];
@@ -205,12 +359,12 @@ export async function generateRandomRecipe() {
         });
 
         doughType = DOUGH_TYPES[Math.floor(Math.random() * DOUGH_TYPES.length)];
-        pizzaName = generatePizzaName(mainIngredientNames);
+        pizzaName = await generatePizzaName(mainIngredientNames, existingNames);
         description = `Una ${doughType.type.toLowerCase()} con ${mainIngredientNames.join(' e ').toLowerCase()}, creata secondo la tradizione.`;
 
     } else {
-        // Usa la logica degli ARCHETIPI
-        const archetypes = ['dolce_salato', 'terra_bosco', 'fresca_estiva', 'piccante_decisa'];
+        // Usa la logica degli ARCHETIPI (ora con 7 archetipi invece di 4)
+        const archetypes = ['dolce_salato', 'terra_bosco', 'fresca_estiva', 'piccante_decisa', 'mare', 'vegana', 'fusion'];
         const selectedArchetype = archetypes[Math.floor(Math.random() * archetypes.length)];
 
         switch (selectedArchetype) {
@@ -304,6 +458,69 @@ export async function generateRandomRecipe() {
                 pizzaName = `Fuoco e ${finish.name.split(' ')[0]}`;
                 description = `Il carattere deciso della ${spicy.name.toLowerCase()} bilanciato dalla dolcezza di ${finish.name.toLowerCase()}.`;
                 break;
+
+            case 'mare':
+                // Pesce/frutti di mare + Verdure fresche + Agrumi + Erbe
+                doughType = DOUGH_TYPES.find(d => d.type === 'Alta Idratazione') || DOUGH_TYPES[0];
+
+                const seafood = selectRandomIngredients(INGREDIENTS_DB.premium.filter(p => ['Gamberi rossi', 'Scampi', 'Polpo', 'Vongole', 'Capesante', 'Tonno fresco'].includes(p.name)), 1)[0];
+                const seaVeg = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => ['Zucchine', 'Pomodorini ciliegino', 'Rucola', 'Asparagi'].includes(v.name)), 1)[0];
+                const citrus = selectRandomIngredients(INGREDIENTS_DB.finishes.filter(f => f.name === 'Limone grattugiato'), 1)[0];
+                const herb = selectRandomIngredients(INGREDIENTS_DB.finishes.filter(f => ['Prezzemolo', 'Aneto', 'Basilico fresco'].includes(f.name)), 1)[0];
+
+                // Base bianca o pomodorini
+                if (Math.random() > 0.5) {
+                    ingredients.push({ name: 'Pomodorini datterini', quantity: 100, unit: 'g', category: 'Verdure', phase: 'topping', postBake: false });
+                }
+                ingredients.push({ name: 'Fior di latte', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
+                ingredients.push({ ...seafood, quantity: 100, category: 'Pesce', phase: 'topping', postBake: false });
+                ingredients.push({ ...seaVeg, quantity: 80, category: 'Verdure', phase: 'topping', postBake: false });
+                if (citrus) ingredients.push({ ...citrus, quantity: 5, category: 'Aromi', phase: 'topping', postBake: true });
+                if (herb) ingredients.push({ ...herb, quantity: 10, category: 'Erbe', phase: 'topping', postBake: true });
+
+                mainIngredientNames = [seafood.name, seaVeg.name];
+                pizzaName = `Mare ${seafood.name.split(' ')[0]}`;
+                description = `I sapori del mare con ${seafood.name.toLowerCase()} e ${seaVeg.name.toLowerCase()}, esaltati da agrumi e erbe fresche.`;
+                break;
+
+            case 'vegana':
+                // Verdure + Creme vegetali + Semi + Erbe
+                doughType = DOUGH_TYPES.find(d => d.type === 'Integrale') || DOUGH_TYPES[0];
+
+                const veganBase = selectRandomIngredients(INGREDIENTS_DB.bases.filter(b => ['Crema di ceci', 'Crema di melanzane', 'Crema di zucca', 'Pesto di rucola'].includes(b.name)), 1)[0];
+                const veganVeg1 = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => ['Melanzane grigliate', 'Zucchine', 'Spinaci', 'Funghi champignon', 'Broccoli'].includes(v.name)), 1)[0];
+                const veganVeg2 = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => ['Pomodorini ciliegino', 'Rucola', 'Radicchio', 'Olive taggiasche'].includes(v.name)), 1)[0];
+                const seeds = selectRandomIngredients(INGREDIENTS_DB.finishes.filter(f => ['Semi di sesamo', 'Pinoli', 'Noci'].includes(f.name)), 1)[0];
+
+                if (veganBase) ingredients.push({ ...veganBase, quantity: 80, category: 'Base', phase: 'topping', postBake: false });
+                ingredients.push({ ...veganVeg1, quantity: 100, category: 'Verdure', phase: 'topping', postBake: false });
+                ingredients.push({ ...veganVeg2, quantity: 60, category: 'Verdure', phase: 'topping', postBake: true });
+                if (seeds) ingredients.push({ ...seeds, quantity: 20, category: 'Semi', phase: 'topping', postBake: true });
+                ingredients.push({ name: 'Basilico fresco', quantity: 10, unit: 'g', category: 'Erbe', phase: 'topping', postBake: true });
+
+                mainIngredientNames = [veganVeg1.name, veganVeg2.name];
+                pizzaName = `Vegana ${veganVeg1.name.split(' ')[0]}`;
+                description = `Una pizza completamente vegetale con ${veganVeg1.name.toLowerCase()} e ${veganVeg2.name.toLowerCase()}, ricca di sapori naturali.`;
+                break;
+
+            case 'fusion':
+                // Mix creativo di ingredienti non tradizionali
+                doughType = DOUGH_TYPES.find(d => d.type === 'Contemporanea') || DOUGH_TYPES[0];
+
+                const fusionCheese = selectRandomIngredients(INGREDIENTS_DB.cheeses.filter(c => ['Brie', 'Caprino fresco', 'Squacquerone', 'Crescenza'].includes(c.name)), 1)[0];
+                const fusionMeat = selectRandomIngredients(INGREDIENTS_DB.meats.filter(m => ['Porchetta', 'Lardo di Colonnata', 'Finocchiona'].includes(m.name)), 1)[0];
+                const fusionVeg = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => ['Barbabietole', 'Patate dolci', 'Cavolo nero'].includes(v.name)), 1)[0];
+                const fusionFinish = selectRandomIngredients(INGREDIENTS_DB.finishes.filter(f => ['Miele di castagno', 'Aceto balsamico', 'Granella di mandorle'].includes(f.name)), 1)[0];
+
+                ingredients.push({ ...fusionCheese, quantity: 100, category: 'Formaggi', phase: 'topping', postBake: false });
+                ingredients.push({ ...fusionMeat, quantity: 70, category: 'Carne', phase: 'topping', postBake: true });
+                ingredients.push({ ...fusionVeg, quantity: 80, category: 'Verdure', phase: 'topping', postBake: false });
+                if (fusionFinish) ingredients.push({ ...fusionFinish, quantity: 20, category: 'Finish', phase: 'topping', postBake: true });
+
+                mainIngredientNames = [fusionCheese.name, fusionMeat.name, fusionVeg.name];
+                pizzaName = `Fusion ${fusionCheese.name.split(' ')[0]}`;
+                description = `Un'interpretazione contemporanea con ${fusionCheese.name.toLowerCase()}, ${fusionMeat.name.toLowerCase()} e ${fusionVeg.name.toLowerCase()}.`;
+                break;
         }
     }
 
@@ -327,7 +544,7 @@ export async function generateRandomRecipe() {
     }));
 
     // Genera nome se non esiste
-    if (!pizzaName) pizzaName = generatePizzaName(mainIngredientNames);
+    if (!pizzaName) pizzaName = await generatePizzaName(mainIngredientNames, existingNames);
 
     // Scegli pizzaiolo casuale
     const pizzaiolo = FAMOUS_PIZZAIOLOS[Math.floor(Math.random() * FAMOUS_PIZZAIOLOS.length)];

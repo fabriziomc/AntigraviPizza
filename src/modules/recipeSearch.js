@@ -58,11 +58,29 @@ export async function searchWebForRecipes(query) {
  * Import sample recipes using the intelligent generator
  */
 export async function importSampleRecipes() {
+    // Ask user how many recipes to generate
+    const count = prompt('Quante pizze vuoi generare?', '3');
+
+    // Validate input
+    if (count === null) {
+        // User cancelled
+        return 0;
+    }
+
+    const numRecipes = parseInt(count);
+    if (isNaN(numRecipes) || numRecipes < 1 || numRecipes > 20) {
+        showToast('Inserisci un numero valido tra 1 e 20', 'error');
+        return 0;
+    }
+
+    // Show loading message
+    showToast(`Generazione di ${numRecipes} ricette gourmet in corso...`, 'info');
+
     // Import the recipe generator dynamically
     const { generateMultipleRecipes } = await import('./recipeGenerator.js');
 
-    // Generate 3 new random recipes
-    const newRecipes = await generateMultipleRecipes(3);
+    // Generate the requested number of recipes
+    const newRecipes = await generateMultipleRecipes(numRecipes);
     let imported = 0;
 
     for (const recipe of newRecipes) {
@@ -76,6 +94,8 @@ export async function importSampleRecipes() {
 
     if (imported > 0) {
         showToast(`${imported} nuove ricette gourmet generate! 🍕`, 'success');
+    } else {
+        showToast('Nessuna ricetta generata', 'error');
     }
 
     return imported;
