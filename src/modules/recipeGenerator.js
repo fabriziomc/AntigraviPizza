@@ -234,59 +234,85 @@ async function generatePizzaName(mainIngredients, existingNames = []) {
     const ing2 = mainIngredients[1] || '';
     const ing3 = mainIngredients[2] || '';
 
-    // Template più variati per ridurre collisioni
+    // Estrai solo il nome principale (prima parola) per pattern più corti
+    const short1 = ing1.split(' ')[0];
+    const short2 = ing2 ? ing2.split(' ')[0] : '';
+    const short3 = ing3 ? ing3.split(' ')[0] : '';
+
+    // APPROCCIO C: Mix di pattern + ingredienti reali + creatività
     const templates = [
-        // Classici
-        `Pizza ${ing1} e ${ing2}`,
-        `${ing1} ${ing2 ? 'e ' + ing2 : ''}`,
-        `La ${ing1}`,
+        // === PATTERN CON INGREDIENTI REALI ===
 
-        // Regionali
-        `Napoletana al ${ing1}`,
-        `Romana con ${ing1}`,
-        `Focaccia ${ing1}`,
+        // Due ingredienti - varie combinazioni
+        ing2 ? `Pizza ${short1} e ${short2}` : null,
+        ing2 ? `${short1} e ${short2}` : null,
+        ing2 ? `${ing1} e ${ing2}` : null,
+        ing2 ? `Sapori di ${short1} e ${short2}` : null,
+        ing2 ? `Delizia ${short1} e ${short2}` : null,
+        ing2 ? `${short1} al ${short2}` : null,
+        ing2 ? `${short2} e ${short1}` : null, // Ordine invertito
 
-        // Descrittivi
+        // Tre ingredienti - combinazioni ricche
+        ing3 ? `Trio ${short1}, ${short2} e ${short3}` : null,
+        ing3 ? `${short1}, ${short2} e ${short3}` : null,
+        ing3 ? `Pizza ${short1}, ${short2} e ${short3}` : null,
+        ing3 ? `Sapori di ${short1}, ${short2} e ${short3}` : null,
+
+        // Un ingrediente - pattern descrittivi
+        `La ${short1}`,
+        `Pizza ${short1}`,
         `Delizia di ${ing1}`,
-        `Sapori di ${ing1} e ${ing2}`,
-        `Profumi di ${ing1}`,
-        `Tentazione ${ing1}`,
+        `Profumi di ${short1}`,
+        `Tentazione ${short1}`,
+        `Armonia di ${short1}`,
 
-        // Creativi
-        `${ing1} Gourmet`,
-        `Speciale ${ing1}`,
-        `${ing1} Premium`,
-        `Fantasia di ${ing1}`,
+        // === PATTERN REGIONALI CON INGREDIENTI ===
+        ing2 ? `Napoletana ${short1} e ${short2}` : `Napoletana al ${short1}`,
+        ing2 ? `Romana ${short1} e ${short2}` : `Romana con ${short1}`,
+        ing2 ? `Focaccia ${short1} e ${short2}` : `Focaccia ${short1}`,
 
-        // Con tre ingredienti
-        ing3 ? `Trio ${ing1}, ${ing2} e ${ing3}` : null,
-        ing3 ? `${ing1}, ${ing2} e ${ing3}` : null,
+        // === PATTERN CREATIVI ===
+        `${short1} Gourmet`,
+        `Speciale ${short1}`,
+        `${short1} Premium`,
+        `Fantasia di ${short1}`,
+        ing2 ? `Contrasto ${short1} e ${short2}` : `Contrasto ${short1}`,
+        ing2 ? `Equilibrio ${short1} e ${short2}` : `Equilibrio ${short1}`,
+        ing2 ? `Sinfonia ${short1} e ${short2}` : null,
 
-        // Poetici
-        `Armonia di ${ing1}`,
-        `Sinfonia ${ing1} e ${ing2}`,
-        `Contrasto ${ing1}`,
-        `Equilibrio ${ing1}`
+        // === PATTERN POETICI ===
+        ing2 ? `Incontro di ${short1} e ${short2}` : null,
+        ing2 ? `Fusione ${short1} e ${short2}` : null,
+        ing2 ? `Dolce ${short1} al ${short2}` : null,
+        ing2 ? `${short1} in ${short2}` : null,
+
+        // === PATTERN DESCRITTIVI ===
+        ing2 ? `Gusto ${short1} e ${short2}` : `Gusto ${short1}`,
+        ing2 ? `Essenza di ${short1} e ${short2}` : `Essenza di ${short1}`,
+        ing2 ? `Tradizione ${short1} e ${short2}` : `Tradizione ${short1}`
     ].filter(Boolean); // Rimuovi null
 
-    // Shuffle templates per evitare di selezionare sempre gli stessi
+    // Shuffle templates per varietà
     const shuffledTemplates = [...templates].sort(() => Math.random() - 0.5);
 
-    // Prova ogni template una sola volta
+    // FASE 1: Prova tutti i template base
     for (const template of shuffledTemplates) {
         const pizzaName = template.trim().replace(/\s+/g, ' '); // Normalizza spazi
-
-        // Controlla se il nome esiste già
         if (!existingNames.includes(pizzaName)) {
             return pizzaName;
         }
     }
 
-    // Se tutti i template sono usati, aggiungi un suffisso descrittivo
-    const suffixes = [
+    // FASE 2: Aggiungi suffissi creativi e descrittivi
+    const creativeSuffixes = [
+        // Descrittivi di qualità
         'Deluxe',
-        'Speciale',
         'Premium',
+        'Speciale',
+        'Suprema',
+        'Eccellente',
+
+        // Stili
         'Rustica',
         'Contemporanea',
         'Tradizionale',
@@ -295,40 +321,71 @@ async function generatePizzaName(mainIngredients, existingNames = []) {
         'Classica',
         'Moderna',
         'Autentica',
-        'Originale'
+        'Originale',
+        'Raffinata',
+
+        // Regionali
+        'Napoletana',
+        'Romana',
+        'Toscana',
+        'Siciliana',
+        'Pugliese',
+
+        // Creativi
+        'Gourmet',
+        'Signature',
+        'Chef',
+        'Esclusiva',
+        'Unica'
     ];
 
-    // Shuffle suffixes per varietà
-    const shuffledSuffixes = [...suffixes].sort(() => Math.random() - 0.5);
+    const shuffledSuffixes = [...creativeSuffixes].sort(() => Math.random() - 0.5);
 
-    // Prova con suffisso su template casuale
-    for (const suffix of shuffledSuffixes) {
-        const baseTemplate = shuffledTemplates[0];
-        const nameWithSuffix = `${baseTemplate} ${suffix}`.trim().replace(/\s+/g, ' ');
-        if (!existingNames.includes(nameWithSuffix)) {
-            return nameWithSuffix;
+    // Prova con suffissi su vari template
+    for (let i = 0; i < Math.min(3, shuffledTemplates.length); i++) {
+        for (const suffix of shuffledSuffixes) {
+            const nameWithSuffix = `${shuffledTemplates[i]} ${suffix}`.trim().replace(/\s+/g, ' ');
+            if (!existingNames.includes(nameWithSuffix)) {
+                return nameWithSuffix;
+            }
         }
     }
 
-    // Prova con numeri
+    // FASE 3: Combinazioni creative con ingredienti secondari
+    if (ing3) {
+        const secondaryPatterns = [
+            `${short1} e ${short2} al ${short3}`,
+            `${short1} con ${short3}`,
+            `${short2} e ${short3} Speciale`,
+            `Trio ${short1} e ${short3}`
+        ];
+
+        for (const pattern of secondaryPatterns) {
+            if (!existingNames.includes(pattern)) {
+                return pattern;
+            }
+        }
+    }
+
+    // FASE 4: Numeri descrittivi
     const baseTemplate = shuffledTemplates[0];
-    let counter = 1;
-    while (counter < 1000) { // Limite di sicurezza
-        const nameWithNumber = `${baseTemplate} ${counter}`;
-        if (!existingNames.includes(nameWithNumber)) {
-            return nameWithNumber;
+    const numberedPrefixes = ['Ricetta', 'Variante', 'Versione', 'Edizione'];
+
+    for (const prefix of numberedPrefixes) {
+        for (let counter = 1; counter < 100; counter++) {
+            const nameWithNumber = `${baseTemplate} ${prefix} ${counter}`;
+            if (!existingNames.includes(nameWithNumber)) {
+                return nameWithNumber;
+            }
         }
-        counter++;
     }
 
-    // GARANZIA ASSOLUTA: Aggiungi timestamp per unicità garantita
-    // Questo non dovrebbe mai essere raggiunto, ma garantisce zero duplicati
-    const timestamp = Date.now().toString().slice(-6); // Ultimi 6 cifre del timestamp
+    // FASE 5: GARANZIA ASSOLUTA con timestamp
+    const timestamp = Date.now().toString().slice(-6);
     const uniqueName = `${baseTemplate} #${timestamp}`;
 
-    // Verifica finale (dovrebbe sempre passare)
     if (existingNames.includes(uniqueName)) {
-        // Fallback estremo: aggiungi anche un random
+        // Fallback estremo (praticamente impossibile)
         return `${baseTemplate} #${timestamp}-${Math.floor(Math.random() * 1000)}`;
     }
 
