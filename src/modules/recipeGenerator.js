@@ -269,20 +269,17 @@ async function generatePizzaName(mainIngredients, existingNames = []) {
         `Equilibrio ${ing1}`
     ].filter(Boolean); // Rimuovi null
 
-    // Prova a generare un nome unico
-    let attempts = 0;
-    let pizzaName = '';
+    // Shuffle templates per evitare di selezionare sempre gli stessi
+    const shuffledTemplates = [...templates].sort(() => Math.random() - 0.5);
 
-    while (attempts < templates.length) {
-        const template = templates[Math.floor(Math.random() * templates.length)];
-        pizzaName = template.trim().replace(/\s+/g, ' '); // Normalizza spazi
+    // Prova ogni template una sola volta
+    for (const template of shuffledTemplates) {
+        const pizzaName = template.trim().replace(/\s+/g, ' '); // Normalizza spazi
 
         // Controlla se il nome esiste già
         if (!existingNames.includes(pizzaName)) {
             return pizzaName;
         }
-
-        attempts++;
     }
 
     // Se tutti i template sono usati, aggiungi un suffisso descrittivo
@@ -294,24 +291,48 @@ async function generatePizzaName(mainIngredients, existingNames = []) {
         'Contemporanea',
         'Tradizionale',
         'Innovativa',
-        'Artigianale'
+        'Artigianale',
+        'Classica',
+        'Moderna',
+        'Autentica',
+        'Originale'
     ];
 
-    // Prova con suffisso
-    for (const suffix of suffixes) {
-        const nameWithSuffix = `${templates[0]} ${suffix}`;
+    // Shuffle suffixes per varietà
+    const shuffledSuffixes = [...suffixes].sort(() => Math.random() - 0.5);
+
+    // Prova con suffisso su template casuale
+    for (const suffix of shuffledSuffixes) {
+        const baseTemplate = shuffledTemplates[0];
+        const nameWithSuffix = `${baseTemplate} ${suffix}`.trim().replace(/\s+/g, ' ');
         if (!existingNames.includes(nameWithSuffix)) {
             return nameWithSuffix;
         }
     }
 
-    // Ultima risorsa: aggiungi numero
+    // Prova con numeri
+    const baseTemplate = shuffledTemplates[0];
     let counter = 1;
-    while (existingNames.includes(`${templates[0]} ${counter}`)) {
+    while (counter < 1000) { // Limite di sicurezza
+        const nameWithNumber = `${baseTemplate} ${counter}`;
+        if (!existingNames.includes(nameWithNumber)) {
+            return nameWithNumber;
+        }
         counter++;
     }
 
-    return `${templates[0]} ${counter}`;
+    // GARANZIA ASSOLUTA: Aggiungi timestamp per unicità garantita
+    // Questo non dovrebbe mai essere raggiunto, ma garantisce zero duplicati
+    const timestamp = Date.now().toString().slice(-6); // Ultimi 6 cifre del timestamp
+    const uniqueName = `${baseTemplate} #${timestamp}`;
+
+    // Verifica finale (dovrebbe sempre passare)
+    if (existingNames.includes(uniqueName)) {
+        // Fallback estremo: aggiungi anche un random
+        return `${baseTemplate} #${timestamp}-${Math.floor(Math.random() * 1000)}`;
+    }
+
+    return uniqueName;
 }
 
 /**
