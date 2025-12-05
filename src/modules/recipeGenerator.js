@@ -577,8 +577,7 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
                 ingredients.push({ ...crunch, quantity: 30, category: 'Croccante', phase: 'topping', postBake: true });
                 ingredients.unshift({ name: 'Fior di latte', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
 
-                mainIngredientNames = [cheese.name, fruit.name];
-                pizzaName = `Contrasto ${cheese.name.split(' ')[0]}`;
+                mainIngredientNames = [cheese.name, fruit.name, crunch.name];
                 description = `Un perfetto equilibrio tra la sapidità del ${cheese.name.toLowerCase()} e la dolcezza di ${fruit.name.toLowerCase()}, completata dalla croccantezza di ${crunch.name.toLowerCase()}.`;
                 break;
 
@@ -595,7 +594,6 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
                 ingredients.unshift({ name: 'Provola affumicata', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
 
                 mainIngredientNames = [mushroom.name, meat.name];
-                pizzaName = `Bosco ${meat.name.split(' ')[0]}`;
                 description = `I profumi del bosco con ${mushroom.name.toLowerCase()} e ${meat.name.toLowerCase()}, su una base rustica.`;
                 break;
 
@@ -618,8 +616,7 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
                     ingredients.push({ name: 'Limone grattugiato', quantity: 5, unit: 'g', category: 'Aromi', phase: 'topping', postBake: true });
                 }
 
-                mainIngredientNames = [freshCheese.name, freshMeat.name];
-                pizzaName = `Estate ${freshMeat.name.split(' ')[0]}`;
+                mainIngredientNames = [freshCheese.name, freshMeat.name, freshVeg.name];
                 description = `Freschezza assoluta con ${freshCheese.name.toLowerCase()} e ${freshMeat.name.toLowerCase()} aggiunti a crudo.`;
                 break;
 
@@ -638,8 +635,7 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
                 ingredients.push({ ...vegetable, quantity: 50, category: 'Verdure', phase: 'topping', postBake: false });
                 ingredients.push({ ...finish });
 
-                mainIngredientNames = [spicy.name, vegetable.name];
-                pizzaName = `Fuoco e ${finish.name.split(' ')[0]}`;
+                mainIngredientNames = [spicy.name, vegetable.name, finish.name];
                 description = `Il carattere deciso della ${spicy.name.toLowerCase()} bilanciato dalla dolcezza di ${finish.name.toLowerCase()}.`;
                 break;
 
@@ -660,7 +656,6 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
                 if (herb) ingredients.push({ ...herb, quantity: 10, category: 'Erbe', phase: 'topping', postBake: true });
 
                 mainIngredientNames = [seafood.name, seaVeg.name];
-                pizzaName = `Mare ${seafood.name.split(' ')[0]}`;
                 description = `I sapori del mare con ${seafood.name.toLowerCase()} e ${seaVeg.name.toLowerCase()}, esaltati da agrumi e erbe fresche.`;
                 break;
 
@@ -678,7 +673,6 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
                 ingredients.push({ name: 'Basilico fresco', quantity: 10, unit: 'g', category: 'Erbe', phase: 'topping', postBake: true });
 
                 mainIngredientNames = [veganVeg1.name, veganVeg2.name];
-                pizzaName = `Vegana ${veganVeg1.name.split(' ')[0]}`;
                 description = `Una pizza completamente vegetale con ${veganVeg1.name.toLowerCase()} e ${veganVeg2.name.toLowerCase()}, ricca di sapori naturali.`;
                 break;
 
@@ -695,7 +689,6 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
                 if (fusionFinish) ingredients.push({ ...fusionFinish, quantity: 20, category: 'Finish', phase: 'topping', postBake: true });
 
                 mainIngredientNames = [fusionCheese.name, fusionMeat.name, fusionVeg.name];
-                pizzaName = `Fusion ${fusionCheese.name.split(' ')[0]}`;
                 description = `Un'interpretazione contemporanea con ${fusionCheese.name.toLowerCase()}, ${fusionMeat.name.toLowerCase()} e ${fusionVeg.name.toLowerCase()}.`;
                 break;
         }
