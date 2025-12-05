@@ -947,8 +947,3 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
         tags
     };
 }
-
-// Keep original function for backward compatibility
-export async function generateRandomRecipe() {
-    return await generateRandomRecipeWithNames([]);
-}
