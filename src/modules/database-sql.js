@@ -4,7 +4,8 @@
 
 import { generateUUID } from '../utils/helpers.js';
 
-const API_URL = 'http://localhost:3000/api';
+// Use relative URL so it works both locally (with proxy) and in production
+const API_URL = '/api';
 
 /**
  * Initialize Database (No-op for SQL as connection is per request)
