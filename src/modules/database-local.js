@@ -126,6 +126,7 @@ export async function addRecipe(recipeData) {
         ingredients: recipeData.ingredients || [],
         instructions: recipeData.instructions || [],
         imageUrl: recipeData.imageUrl || '',
+        dough: recipeData.dough || '',
         tags: recipeData.tags || [],
         dateAdded: Date.now(),
         isFavorite: false
@@ -260,6 +261,7 @@ export async function createPizzaNight(nightData) {
         name: nightData.name,
         date: nightData.date || Date.now(),
         guestCount: nightData.guestCount || 6,
+        selectedDough: nightData.selectedDough || null, // NUOVO: impasto scelto per la serata
         selectedPizzas: nightData.selectedPizzas || [], // [{ recipeId, quantity }]
         selectedGuests: nightData.selectedGuests || [], // [guestId]
         notes: nightData.notes || '',

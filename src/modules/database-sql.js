@@ -41,6 +41,7 @@ export async function addRecipe(recipeData) {
         ingredients: recipeData.ingredients || [],
         instructions: recipeData.instructions || [],
         imageUrl: recipeData.imageUrl || '',
+        dough: recipeData.dough || '',
         tags: recipeData.tags || [],
         dateAdded: Date.now(),
         isFavorite: false,

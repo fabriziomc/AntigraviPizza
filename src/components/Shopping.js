@@ -6,6 +6,7 @@ import { getAllPizzaNights, getPizzaNightById } from '../modules/database.js';
 import { generateShoppingList, downloadShoppingList } from '../modules/shopping.js';
 import { formatQuantity } from '../utils/helpers.js';
 import { state } from '../store.js';
+import { DOUGH_RECIPES } from '../utils/constants.js';
 
 // ============================================
 // HELPER FUNCTIONS
@@ -97,6 +98,77 @@ export async function renderShopping(appState) {
   });
 }
 
+async function renderDoughRecipeSection(selectedDough, selectedPizzas) {
+  const doughRecipe = DOUGH_RECIPES.find(d => d.type === selectedDough);
+  if (!doughRecipe) return '';
+
+  // Calculate total pizzas and batches needed
+  const totalPizzas = selectedPizzas.reduce((sum, pizza) => sum + pizza.quantity, 0);
+  const batchesNeeded = Math.ceil(totalPizzas / doughRecipe.yield);
+
+  return `
+    <div style="background: rgba(102, 126, 234, 0.1); border: 2px solid rgba(102, 126, 234, 0.3); border-radius: 1rem; padding: 1.5rem; margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <span style="font-size: 2rem;">🥣</span>
+        <div>
+          <h3 style="margin: 0; font-size: 1.25rem;">Ricetta Impasto: ${doughRecipe.type}</h3>
+          <p style="margin: 0; font-size: 0.875rem; color: var(--color-gray-300);">
+            ${totalPizzas} pizze = ${batchesNeeded} ${batchesNeeded === 1 ? 'batch' : 'batch'} (${doughRecipe.yield} pizze per batch)
+          </p>
+        </div>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
+        <div style="text-align: center;">
+          <div style="font-size: 0.75rem; color: var(--color-gray-400);">Idratazione</div>
+          <div style="font-weight: 700; color: var(--color-primary-light);">${doughRecipe.hydration}%</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 0.75rem; color: var(--color-gray-400);">Lievitazione</div>
+          <div style="font-weight: 600; font-size: 0.875rem;">${doughRecipe.fermentation}</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 0.75rem; color: var(--color-gray-400);">Riposo</div>
+          <div style="font-weight: 600; font-size: 0.875rem;">${doughRecipe.restTime}</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 0.75rem; color: var(--color-gray-400);">Difficoltà</div>
+          <div style="font-weight: 600;">${doughRecipe.difficulty}</div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+        <button 
+          onclick="const content = this.nextElementSibling; const arrow = this.querySelector('.arrow'); if (content.style.display === 'none' || !content.style.display) { content.style.display = 'block'; arrow.textContent = '▲'; } else { content.style.display = 'none'; arrow.textContent = '▼'; }"
+          style="width: 100%; cursor: pointer; font-weight: 700; padding: 1rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3)); border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 0.75rem; color: white; display: flex; align-items: center; gap: 0.75rem; font-size: 1rem; transition: all 0.3s;"
+          onmouseover="this.style.background='linear-gradient(135deg, rgba(102, 126, 234, 0.5), rgba(118, 75, 162, 0.5))'; this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.background='linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3))'; this.style.transform='translateY(0)'"
+        >
+          <span style="font-size: 1.5rem;">📝</span>
+          <span style="flex: 1; text-align: left;">Procedimento Completo</span>
+          <span class="arrow" style="font-size: 1.25rem; font-weight: bold;">▼</span>
+        </button>
+        <div style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 0.5rem;">
+          <ol style="margin: 0; padding-left: 1.5rem; line-height: 1.8;">
+            ${doughRecipe.instructions.map(instruction => `<li style="margin-bottom: 0.5rem;">${instruction}</li>`).join('')}
+          </ol>
+          ${doughRecipe.tips && doughRecipe.tips.length > 0 ? `
+            <div style="margin-top: 1rem; padding: 1rem; background: rgba(249, 115, 22, 0.1); border-left: 3px solid var(--color-accent); border-radius: 0.5rem;">
+              <div style="font-weight: 600; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>💡</span>
+                <span>Consigli Utili</span>
+              </div>
+              <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.875rem;">
+                ${doughRecipe.tips.map(tip => `<li style="margin-bottom: 0.25rem;">${tip}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 async function renderShoppingListForNight(nightId) {
   const container = document.getElementById('shoppingListContainer');
   const night = await getPizzaNightById(nightId);
@@ -113,8 +185,8 @@ async function renderShoppingListForNight(nightId) {
   }
 
   try {
-    // Generate shopping list
-    const groupedList = await generateShoppingList(night.selectedPizzas);
+    // Generate shopping list with dough ingredients
+    const groupedList = await generateShoppingList(night.selectedPizzas, night.selectedDough);
 
     // Check if we have any ingredients
     if (!groupedList || Object.keys(groupedList).length === 0) {
@@ -132,11 +204,16 @@ async function renderShoppingListForNight(nightId) {
       return;
     }
 
+    // Generate dough recipe section HTML first (before template string)
+    const doughRecipeHTML = night.selectedDough
+      ? await renderDoughRecipeSection(night.selectedDough, night.selectedPizzas)
+      : '';
+
     container.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
       <div>
         <h2 style="margin: 0;">${night.name}</h2>
-        <p class="text-muted">${night.guestCount} ospiti • ${night.selectedPizzas.length} pizze</p>
+        <p class="text-muted">${night.guestCount} ospiti • ${night.selectedPizzas.length} pizze${night.selectedDough ? ` • ${night.selectedDough}` : ''}</p>
       </div>
       <div style="display: flex; gap: 1rem;">
         <button class="btn btn-secondary" onclick="window.clearSelectedNight()">
@@ -149,6 +226,8 @@ async function renderShoppingListForNight(nightId) {
         </button>
       </div>
     </div>
+    
+    ${doughRecipeHTML}
     
     <div class="shopping-list">
       ${Object.entries(groupedList).map(([category, ingredients]) => `
@@ -203,7 +282,7 @@ window.toggleShoppingItem = (element) => {
 
 window.downloadShoppingListAction = async (nightId, nightName) => {
   const night = await getPizzaNightById(nightId);
-  const groupedList = await generateShoppingList(night.selectedPizzas);
+  const groupedList = await generateShoppingList(night.selectedPizzas, night.selectedDough);
   downloadShoppingList(groupedList, nightName);
 };
 

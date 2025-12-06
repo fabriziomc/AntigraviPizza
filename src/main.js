@@ -20,6 +20,7 @@ import { renderLibrary } from './components/Library.js';
 import { renderPlanner } from './components/Planner.js';
 import { renderShopping } from './components/Shopping.js';
 import { renderCombinations, setupCombinationsListeners } from './components/Combinations.js';
+import { renderDoughs } from './components/Doughs.js';
 import { renderSettings } from './components/Settings.js';
 
 console.log('✅ All imports loaded');
@@ -30,6 +31,7 @@ console.log('✅ All imports loaded');
 
 async function initApp() {
   console.log('🎯 initApp called');
+  console.log('🚀 AntigraviPizza v1.1 - Dough Filter Loaded');
 
   try {
     // Initialize database
@@ -160,6 +162,9 @@ async function renderCurrentView() {
       case VIEWS.COMBINATIONS:
         await renderCombinations();
         setupCombinationsListeners();
+        break;
+      case VIEWS.DOUGHS:
+        await renderDoughs();
         break;
       case VIEWS.SETTINGS:
         await renderSettings();

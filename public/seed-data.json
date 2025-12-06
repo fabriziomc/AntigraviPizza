@@ -10,38 +10,6 @@
       "description": "Una alta idratazione con fior di latte e tartufo bianco, creata secondo la tradizione contemporanea.",
       "ingredients": [
         {
-          "name": "Farina Manitoba",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 380,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito madre",
-          "quantity": 80,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
           "name": "Fior di latte",
           "quantity": 151,
           "unit": "g",
@@ -67,12 +35,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto alta idratazione con farina manitoba, acqua, sale e lievito madre",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 36 ore a temperatura controllata",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Aggiungere fior di latte a pezzetti",
           "All'uscita dal forno, aggiungere: tartufo bianco",
@@ -88,7 +50,8 @@
         "Bianca"
       ],
       "dateAdded": 1764402807242,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
     },
     {
       "id": "19b5b704-b981-4603-bfb7-a6b911b7fcd4",
@@ -97,38 +60,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una alta idratazione con crema di pistacchio e mortadella, creata secondo la tradizione contemporanea.",
       "ingredients": [
-        {
-          "name": "Farina Manitoba",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 380,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito madre",
-          "quantity": 80,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Crema di pistacchio",
           "quantity": 50,
@@ -163,12 +94,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto alta idratazione con farina manitoba, acqua, sale e lievito madre",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 36 ore a temperatura controllata",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "All'uscita dal forno, aggiungere: crema di pistacchio, mortadella, burrata, pistacchi",
           "Infornare a 441°C per 161 secondi",
@@ -181,7 +106,8 @@
         "Classica"
       ],
       "dateAdded": 1764400438825,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
     },
     {
       "id": "2d8edfca-a10b-4378-ac7a-8283366416d2",
@@ -190,38 +116,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una napoletana classica con speck alto adige e taleggio, creata secondo la tradizione napoletana.",
       "ingredients": [
-        {
-          "name": "Farina tipo 00",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 325,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito di birra",
-          "quantity": 2,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Speck Alto Adige",
           "quantity": 60,
@@ -248,12 +142,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto napoletana classica con farina tipo 00, acqua, sale e lievito di birra",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 24 ore a temperatura ambiente",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Aggiungere taleggio a pezzetti",
           "Distribuire radicchio",
@@ -269,7 +157,8 @@
         "Gourmet"
       ],
       "dateAdded": 1764400449966,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Napoletana Classica"
     },
     {
       "id": "37f905c9-e1df-406b-9805-fa292e98c22b",
@@ -278,38 +167,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una alta idratazione con burrata e guanciale croccante, creata secondo la tradizione contemporanea.",
       "ingredients": [
-        {
-          "name": "Farina Manitoba",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 380,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito madre",
-          "quantity": 80,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Pomodoro San Marzano",
           "quantity": 200,
@@ -344,12 +201,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto alta idratazione con farina manitoba, acqua, sale e lievito madre",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 36 ore a temperatura controllata",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Distribuire pomodoro san marzano sulla base",
           "Distribuire guanciale croccante",
@@ -364,7 +215,8 @@
         "Classica"
       ],
       "dateAdded": 1764402845355,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
     },
     {
       "id": "3deb0611-dbed-48bf-9160-300bcaed1456",
@@ -373,38 +225,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una alta idratazione con burrata e pomodorini ciliegino, creata secondo la tradizione contemporanea.",
       "ingredients": [
-        {
-          "name": "Farina Manitoba",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 380,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito madre",
-          "quantity": 80,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Burrata",
           "quantity": 139,
@@ -431,12 +251,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto alta idratazione con farina manitoba, acqua, sale e lievito madre",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 36 ore a temperatura controllata",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Distribuire pomodorini ciliegino",
           "All'uscita dal forno, aggiungere: burrata, basilico fresco",
@@ -451,7 +265,8 @@
         "Gourmet"
       ],
       "dateAdded": 1764400449965,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
     },
     {
       "id": "45d59fa6-daff-4ac5-a937-c0e5f4627c34",
@@ -460,38 +275,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una integrale con funghi porcini e salsiccia fresca, creata secondo la tradizione contemporanea.",
       "ingredients": [
-        {
-          "name": "Farina integrale",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 340,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito di birra",
-          "quantity": 2,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Funghi porcini",
           "quantity": 81,
@@ -518,12 +301,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto integrale con farina integrale, acqua, sale e lievito di birra",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 18 ore a temperatura ambiente",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Distribuire funghi porcini, salsiccia fresca",
           "All'uscita dal forno, aggiungere: tartufo nero",
@@ -538,7 +315,8 @@
         "Bianca"
       ],
       "dateAdded": 1764400452316,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Integrale"
     },
     {
       "id": "5ec1c7c7-a758-4125-9011-eed91c776598",
@@ -547,38 +325,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una contemporanea con provola affumicata e caviale, creata secondo la tradizione contemporanea.",
       "ingredients": [
-        {
-          "name": "Mix farina 00 e integrale",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 350,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito madre",
-          "quantity": 100,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Passata di pomodoro",
           "quantity": 200,
@@ -621,12 +367,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto contemporanea con mix farina 00 e integrale, acqua, sale e lievito madre",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 48 ore con doppia lievitazione",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Distribuire passata di pomodoro sulla base",
           "Aggiungere provola affumicata a pezzetti",
@@ -643,7 +383,8 @@
         "Gourmet"
       ],
       "dateAdded": 1764400587500,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Contemporanea"
     },
     {
       "id": "64d032c2-cf27-4853-b0e0-f1c31775811a",
@@ -652,38 +393,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una napoletana classica con burrata e melanzane grigliate, creata secondo la tradizione napoletana.",
       "ingredients": [
-        {
-          "name": "Farina tipo 00",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 325,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito di birra",
-          "quantity": 2,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Crema di pistacchio",
           "quantity": 200,
@@ -726,12 +435,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto napoletana classica con farina tipo 00, acqua, sale e lievito di birra",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 24 ore a temperatura ambiente",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Distribuire crema di pistacchio sulla base",
           "Distribuire melanzane grigliate, zucchine",
@@ -747,7 +450,8 @@
         "Bianca"
       ],
       "dateAdded": 1764402807243,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Napoletana Classica"
     },
     {
       "id": "7cbd89d2-e1a9-42ae-8bc3-3c7d379e9bd3",
@@ -756,38 +460,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una alta idratazione con pomodoro san marzano e melanzane grigliate, creata secondo la tradizione contemporanea.",
       "ingredients": [
-        {
-          "name": "Farina Manitoba",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 380,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito madre",
-          "quantity": 80,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Pomodoro San Marzano",
           "quantity": 50,
@@ -822,12 +494,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto alta idratazione con farina manitoba, acqua, sale e lievito madre",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 36 ore a temperatura controllata",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Distribuire melanzane grigliate",
           "All'uscita dal forno, aggiungere: ricotta fresca, basilico fresco",
@@ -842,7 +508,8 @@
         "Classica"
       ],
       "dateAdded": 1764400438829,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
     },
     {
       "id": "85f118c2-a355-4736-899d-6843c9c5ad0e",
@@ -851,38 +518,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una napoletana classica con crema di burrata e nduja calabrese, creata secondo la tradizione napoletana.",
       "ingredients": [
-        {
-          "name": "Farina tipo 00",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 325,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito di birra",
-          "quantity": 2,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Crema di burrata",
           "quantity": 50,
@@ -909,12 +544,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto napoletana classica con farina tipo 00, acqua, sale e lievito di birra",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 24 ore a temperatura ambiente",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Distribuire nduja calabrese, cipolla caramellata",
           "All'uscita dal forno, aggiungere: crema di burrata",
@@ -929,7 +558,8 @@
         "Classica"
       ],
       "dateAdded": 1764402807243,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Napoletana Classica"
     },
     {
       "id": "8813fb50-eb8a-4e88-beb9-adb3b2be4732",
@@ -938,38 +568,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una alta idratazione con mozzarella di bufala e funghi porcini, creata secondo la tradizione contemporanea.",
       "ingredients": [
-        {
-          "name": "Farina Manitoba",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 380,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito madre",
-          "quantity": 80,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Pomodoro San Marzano",
           "quantity": 200,
@@ -1020,12 +618,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto alta idratazione con farina manitoba, acqua, sale e lievito madre",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 36 ore a temperatura controllata",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Distribuire pomodoro san marzano sulla base",
           "Aggiungere mozzarella di bufala a pezzetti",
@@ -1042,7 +634,8 @@
         "Gourmet"
       ],
       "dateAdded": 1764400587500,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
     },
     {
       "id": "a722968e-82ca-4cef-a63f-bf83405dca63",
@@ -1051,38 +644,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una alta idratazione con provola affumicata e salame piccante, creata secondo la tradizione contemporanea.",
       "ingredients": [
-        {
-          "name": "Farina Manitoba",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 380,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito madre",
-          "quantity": 80,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Pesto di basilico",
           "quantity": 200,
@@ -1117,12 +678,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto alta idratazione con farina manitoba, acqua, sale e lievito madre",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 36 ore a temperatura controllata",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Distribuire pesto di basilico sulla base",
           "Aggiungere provola affumicata a pezzetti",
@@ -1138,7 +693,8 @@
         "Classica"
       ],
       "dateAdded": 1764400587501,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
     },
     {
       "id": "aea42c39-9abf-4472-b619-cb9d923c687a",
@@ -1147,38 +703,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una romana croccante con provola affumicata e tartufo nero, creata secondo la tradizione romana.",
       "ingredients": [
-        {
-          "name": "Farina tipo 0",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 300,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito di birra",
-          "quantity": 3,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Pomodoro San Marzano",
           "quantity": 200,
@@ -1221,12 +745,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto romana croccante con farina tipo 0, acqua, sale e lievito di birra",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 12 ore in frigo",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Distribuire pomodoro san marzano sulla base",
           "Aggiungere provola affumicata a pezzetti",
@@ -1243,7 +761,8 @@
         "Gourmet"
       ],
       "dateAdded": 1764400438829,
-      "isFavorite": true
+      "isFavorite": true,
+      "suggestedDough": "Romana Croccante"
     },
     {
       "id": "b284ef7f-9895-4b49-bd6c-945ddb4483ef",
@@ -1252,38 +771,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una alta idratazione con tartufo nero e funghi porcini, creata secondo la tradizione contemporanea.",
       "ingredients": [
-        {
-          "name": "Farina Manitoba",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 380,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito madre",
-          "quantity": 80,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Tartufo nero",
           "quantity": 15,
@@ -1310,12 +797,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto alta idratazione con farina manitoba, acqua, sale e lievito madre",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 36 ore a temperatura controllata",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Distribuire funghi porcini",
           "All'uscita dal forno, aggiungere: tartufo nero, stracciatella",
@@ -1331,7 +812,8 @@
         "Bianca"
       ],
       "dateAdded": 1764402845356,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
     },
     {
       "id": "bdeaf026-af84-44a4-aff2-f8503f0e92ba",
@@ -1340,38 +822,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una napoletana classica con fior di latte e carciofi, creata secondo la tradizione napoletana.",
       "ingredients": [
-        {
-          "name": "Farina tipo 00",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 325,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito di birra",
-          "quantity": 2,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Fior di latte",
           "quantity": 129,
@@ -1406,12 +856,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto napoletana classica con farina tipo 00, acqua, sale e lievito di birra",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 24 ore a temperatura ambiente",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Aggiungere fior di latte, pecorino romano a pezzetti",
           "Distribuire carciofi, guanciale croccante",
@@ -1426,7 +870,8 @@
         "Gourmet"
       ],
       "dateAdded": 1764402845355,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Napoletana Classica"
     },
     {
       "id": "d1b3ea6a-bc57-44ca-a8fb-f41856b6ff8c",
@@ -1435,38 +880,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una contemporanea con funghi porcini e salsiccia fresca, creata secondo la tradizione contemporanea.",
       "ingredients": [
-        {
-          "name": "Mix farina 00 e integrale",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 350,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito madre",
-          "quantity": 100,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Funghi porcini",
           "quantity": 85,
@@ -1493,12 +906,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto contemporanea con mix farina 00 e integrale, acqua, sale e lievito madre",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 48 ore con doppia lievitazione",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Distribuire funghi porcini, salsiccia fresca",
           "All'uscita dal forno, aggiungere: tartufo nero",
@@ -1514,7 +921,8 @@
         "Bianca"
       ],
       "dateAdded": 1764400449965,
-      "isFavorite": true
+      "isFavorite": true,
+      "suggestedDough": "Contemporanea"
     },
     {
       "id": "dff950f1-8310-40ca-b3d3-9b0eb3b6b2e4",
@@ -1523,38 +931,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una napoletana classica con mozzarella di bufala e bresaola, creata secondo la tradizione napoletana.",
       "ingredients": [
-        {
-          "name": "Farina tipo 00",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 325,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito di birra",
-          "quantity": 2,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Mozzarella di bufala",
           "quantity": 184,
@@ -1589,12 +965,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto napoletana classica con farina tipo 00, acqua, sale e lievito di birra",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 24 ore a temperatura ambiente",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Aggiungere mozzarella di bufala a pezzetti",
           "All'uscita dal forno, aggiungere: bresaola, riduzione di balsamico, pistacchi",
@@ -1609,7 +979,8 @@
         "Classica"
       ],
       "dateAdded": 1764400452317,
-      "isFavorite": false
+      "isFavorite": false,
+      "suggestedDough": "Napoletana Classica"
     },
     {
       "id": "f3f49a47-318f-4c17-bc1d-4c2da272ae9b",
@@ -1618,38 +989,6 @@
       "source": "Generata da AntigraviPizza",
       "description": "Una alta idratazione con gorgonzola dop e prosciutto crudo di parma, creata secondo la tradizione contemporanea.",
       "ingredients": [
-        {
-          "name": "Farina Manitoba",
-          "quantity": 500,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Acqua",
-          "quantity": 380,
-          "unit": "ml",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Sale marino",
-          "quantity": 10,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
-        {
-          "name": "Lievito madre",
-          "quantity": 80,
-          "unit": "g",
-          "category": "Impasto",
-          "phase": "dough",
-          "postBake": false
-        },
         {
           "name": "Pesto di basilico",
           "quantity": 200,
@@ -1692,12 +1031,6 @@
         }
       ],
       "instructions": {
-        "dough": [
-          "Preparare l'impasto alta idratazione con farina manitoba, acqua, sale e lievito madre",
-          "Impastare fino ad ottenere un composto liscio ed elastico",
-          "Lasciare lievitare: 36 ore a temperatura controllata",
-          "Stendere l'impasto formando un disco di circa 30-35cm di diametro"
-        ],
         "topping": [
           "Distribuire pesto di basilico sulla base",
           "Aggiungere gorgonzola dop a pezzetti",
@@ -1712,40 +1045,8 @@
         "Classica"
       ],
       "dateAdded": 1764400452316,
-      "isFavorite": false
-    }
-  ],
-  "pizzaNights": [
-    {
-      "id": "27706c08-211e-46e9-9eeb-71d025474eb9",
-      "name": "",
-      "date": 1765040400000,
-      "guestCount": 4,
-      "selectedPizzas": [
-        {
-          "recipeId": "2d8edfca-a10b-4378-ac7a-8283366416d2",
-          "recipeName": "La Speck Alto Adige",
-          "quantity": 1
-        },
-        {
-          "recipeId": "45d59fa6-daff-4ac5-a937-c0e5f4627c34",
-          "recipeName": "Funghi porcini Gourmet",
-          "quantity": 1
-        },
-        {
-          "recipeId": "d1b3ea6a-bc57-44ca-a8fb-f41856b6ff8c",
-          "recipeName": "Speciale Funghi porcini",
-          "quantity": 1
-        },
-        {
-          "recipeId": "f3f49a47-318f-4c17-bc1d-4c2da272ae9b",
-          "recipeName": "Speciale Gorgonzola DOP",
-          "quantity": 1
-        }
-      ],
-      "notes": "",
-      "status": "completed",
-      "createdAt": 1764400516609
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
     }
   ]
 }

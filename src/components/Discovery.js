@@ -3,6 +3,7 @@
 // ============================================
 
 import { importRecipeManually, importSampleRecipes } from '../modules/recipeSearch.js';
+import { DOUGH_TYPES } from '../utils/constants.js';
 // refreshData is available globally via window.refreshData
 import { showToast } from '../utils/helpers.js';
 
@@ -47,6 +48,17 @@ function setupDiscoveryListeners() {
         importSamplesBtn.removeEventListener('click', handleImportSamples);
         importSamplesBtn.addEventListener('click', handleImportSamples);
     }
+
+    // Populate Dough Types
+    const doughSelect = document.getElementById('manualDoughType');
+    if (doughSelect && doughSelect.options.length <= 1) { // Only populate if empty (except default)
+        DOUGH_TYPES.forEach(dough => {
+            const option = document.createElement('option');
+            option.value = dough.type;
+            option.textContent = dough.type;
+            doughSelect.appendChild(option);
+        });
+    }
 }
 
 async function handleManualImport(e) {
@@ -82,6 +94,7 @@ async function handleManualImport(e) {
     const recipeData = {
         name: formData.get('name'),
         pizzaiolo: formData.get('pizzaiolo') || 'Sconosciuto',
+        dough: formData.get('dough') || '', // Add dough type
         source: formData.get('source') || '',
         description: formData.get('description') || '',
         imageUrl: formData.get('imageUrl') || '',
@@ -100,9 +113,16 @@ async function handleManualImport(e) {
 }
 
 async function handleImportSamples() {
+    console.log('handleImportSamples called'); // DEBUG
     try {
-        await importSampleRecipes();
-        await refreshData();
+        const imported = await importSampleRecipes();
+        console.log('Imported recipes:', imported); // DEBUG
+
+        if (window.refreshData) {
+            await window.refreshData();
+        } else {
+            console.warn('window.refreshData not available');
+        }
     } catch (error) {
         console.error('Failed to import samples:', error);
         showToast('Errore nell\'importazione delle ricette di esempio', 'error');

@@ -3,7 +3,8 @@
 // ============================================
 
 import { getAllRecipes, getRecipeById, toggleFavorite, deleteRecipe, updateRecipe } from '../modules/database.js';
-import { RECIPE_TAGS } from '../utils/constants.js';
+import { RECIPE_TAGS, DOUGH_TYPES } from '../utils/constants.js';
+import { getRecipeDoughType } from '../utils/doughHelper.js';
 import { debounce, showToast } from '../utils/helpers.js';
 import { state } from '../store.js';
 import { openModal, closeModal } from '../modules/ui.js';
@@ -26,7 +27,12 @@ async function renderFilters() {
       `).join('')}
     </div>
     
-    <div class="filters-sort">
+    <div class="filters-sort" style="display: flex; gap: 0.5rem; align-items: center;">
+      <select id="doughFilter" class="sort-select" style="min-width: 140px;">
+        <option value="all">🥣 Tutti gli impasti</option>
+        ${DOUGH_TYPES.map(d => `<option value="${d.type}">${d.type}</option>`).join('')}
+      </select>
+
       <select id="recipeSort" class="sort-select">
         <option value="newest">📅 Più recenti</option>
         <option value="oldest">📅 Meno recenti</option>
@@ -35,12 +41,6 @@ async function renderFilters() {
       </select>
     </div>
   `;
-
-  // Restore sort state
-  if (state.sortBy) {
-    const sortSelect = document.getElementById('recipeSort');
-    if (sortSelect) sortSelect.value = state.sortBy;
-  }
 }
 
 async function renderRecipes(state) {
@@ -64,6 +64,11 @@ async function renderRecipes(state) {
     } else {
       recipes = recipes.filter(recipe => recipe.tags.includes(state.selectedTag));
     }
+  }
+
+  // Apply dough type filter
+  if (state.selectedDoughType && state.selectedDoughType !== 'all') {
+    recipes = recipes.filter(recipe => getRecipeDoughType(recipe) === state.selectedDoughType);
   }
 
   // Apply sorting
@@ -141,18 +146,47 @@ function setupLibraryListeners() {
     }
   });
 
+  // Dough filter select
+  const doughSelect = document.getElementById('doughFilter');
+  if (doughSelect) {
+    doughSelect.addEventListener('change', (e) => {
+      // Custom event or just re-render?
+      // Since renderRecipes filters based on state, we need to add dough filter to state
+      state.selectedDoughType = e.target.value;
+      renderRecipes(state);
+    });
+  }
+
   // Sort select
   const sortSelect = document.getElementById('recipeSort');
   if (sortSelect) {
     sortSelect.addEventListener('change', (e) => {
-      handleSortChange(e.target.value);
+      state.sortBy = e.target.value;
+      renderRecipes(state);
     });
   }
 
-  // Recipe cards
-  document.getElementById('recipesGrid').addEventListener('click', async (e) => {
-    const card = e.target.closest('.recipe-card');
+  // Global click listener for recipe cards and favorites
+  const grid = document.getElementById('recipesGrid');
+  // Remove existing listener if any (not easily possible with anonymous functions without weakref, 
+  // but we are relying on re-rendering to clear listeners attached to elements, wait, grid is static?)
+  // Actually grid is static in DOM? No, it's part of the view. 
+  // But we are attaching to it every time renderLibrary is called.
+
+  // Better to use a named function or check if listener attached?
+  // For now simpler: clone node to strip listeners? No, that kills internal state.
+  // We'll just assume simple event delegation.
+
+  const newGrid = grid.cloneNode(false);
+  grid.parentNode.replaceChild(newGrid, grid);
+  // Re-render content to new grid
+  // Actually renderRecipes does innerHTML so it's fine.
+  // Wait, we need to re-render recipes if we just replaced the grid node.
+  renderRecipes(state);
+
+  newGrid.addEventListener('click', async (e) => {
     const favoriteBtn = e.target.closest('.recipe-card-favorite');
+    const card = e.target.closest('.recipe-card');
 
     if (favoriteBtn) {
       e.stopPropagation();
@@ -173,17 +207,14 @@ async function handleFilterChange(tag) {
   await renderRecipes(state);
 }
 
-async function handleSortChange(sortBy) {
-  state.sortBy = sortBy;
-  await renderRecipes(state);
-}
-
 async function handleToggleFavorite(recipeId) {
   try {
     await toggleFavorite(recipeId);
     await renderRecipes(state);
+    showToast('Preferiti aggiornati', 'success');
   } catch (error) {
     console.error('Failed to toggle favorite:', error);
+    showToast('Errore nell\'aggiornamento preferiti', 'error');
   }
 }
 
@@ -248,30 +279,19 @@ async function showRecipeModal(recipeId) {
       ${recipe.description ? `<p>${recipe.description}</p>` : ''}
       
       <div class="recipe-modal-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-        <!-- IMPASTO SECTION -->
+        <!-- IMPASTO SUGGERITO SECTION -->
         <div class="recipe-section-group">
             <h3 class="recipe-modal-section-title" style="border-bottom: 1px solid var(--color-primary); padding-bottom: 0.5rem;">🥣 Impasto</h3>
             
-            <div class="recipe-modal-section">
-                <h4 style="color: var(--color-gray-400); font-size: 0.9rem; margin-bottom: 0.5rem;">Ingredienti</h4>
-                <ul class="ingredients-list">
-                ${doughIngredients.map(ing => `
-                    <li class="ingredient-item">
-                    <span class="ingredient-name">${ing.name}</span>
-                    <span class="ingredient-quantity">${ing.quantity} ${ing.unit}</span>
-                    </li>
-                `).join('')}
-                </ul>
+            <div class="recipe-modal-section" style="padding: 1rem; background: rgba(102, 126, 234, 0.1); border-radius: 0.5rem; margin-top: 1rem;">
+                <p style="color: var(--color-gray-400); font-size: 0.875rem; margin-bottom: 0.5rem;">Impasto suggerito:</p>
+                <p style="font-size: 1.1rem; font-weight: 600; color: var(--color-primary-light); margin: 0;">
+                    ${recipe.suggestedDough || 'Napoletana Classica'}
+                </p>
+                <p style="font-size: 0.75rem; color: var(--color-gray-500); margin-top: 0.5rem; margin-bottom: 0;">
+                    Vedi la sezione "Impasti" per la ricetta completa
+                </p>
             </div>
-
-            ${doughInstructions.length > 0 ? `
-            <div class="recipe-modal-section">
-                <h4 style="color: var(--color-gray-400); font-size: 0.9rem; margin-bottom: 0.5rem;">Procedimento</h4>
-                <ol class="instructions-list">
-                    ${renderInstructions(doughInstructions)}
-                </ol>
-            </div>
-            ` : ''}
         </div>
 
         <!-- CONDIMENTO SECTION -->

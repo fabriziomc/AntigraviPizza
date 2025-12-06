@@ -1,27 +1,26 @@
-# Fly.io Configuration for AntigraviPizza
-app = 'antigravipizza'
-primary_region = 'ams' # Amsterdam - closest to Italy
+# fly.toml app configuration file generated for antigravipizza-hidden-pond-1848 on 2025-12-05T17:15:55+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'antigravipizza-hidden-pond-1848'
+primary_region = 'ams'
 
 [build]
 
-[http_service]
-  internal_port = 3000
-  force_https = true
-  auto_stop_machines = false
-  auto_start_machines = true
-  min_machines_running = 1
-
-[[vm]]
-  memory = '256mb'
-  cpu_kind = 'shared'
-  cpus = 1
-
-[[mounts]]
+[mounts]
   source = 'antigravipizza_data'
   destination = '/app/data'
 
-[env]
-  DB_TYPE = 'sqlite'
-  SQLITE_DB_PATH = '/app/data/antigravipizza.db'
-  NODE_ENV = 'production'
-  PORT = '3000'
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = false 
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1

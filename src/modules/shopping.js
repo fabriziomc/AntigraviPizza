@@ -4,13 +4,15 @@
 
 import { getRecipeById } from './database.js';
 import { aggregateIngredients, groupByCategory, formatQuantity } from '../utils/helpers.js';
+import { DOUGH_RECIPES } from '../utils/constants.js';
 
 /**
  * Generate shopping list for a pizza night
  * @param {Array} selectedPizzas - Array of { recipeId, quantity }
+ * @param {String} selectedDough - Type of dough selected for the night
  * @returns {Object} Grouped shopping list by category
  */
-export async function generateShoppingList(selectedPizzas) {
+export async function generateShoppingList(selectedPizzas, selectedDough = null) {
     if (!selectedPizzas || selectedPizzas.length === 0) {
         return {};
     }
@@ -23,8 +25,39 @@ export async function generateShoppingList(selectedPizzas) {
     // Get quantities
     const quantities = selectedPizzas.map(item => item.quantity);
 
-    // Aggregate ingredients
+    // Aggregate ingredients from pizzas (toppings only)
     const aggregated = aggregateIngredients(recipes, quantities);
+
+    // Add dough ingredients if selectedDough is provided
+    if (selectedDough) {
+        const doughRecipe = DOUGH_RECIPES.find(d => d.type === selectedDough);
+        if (doughRecipe) {
+            // Calculate total pizzas needed
+            const totalPizzas = quantities.reduce((sum, qty) => sum + qty, 0);
+
+            // Calculate how many batches of dough we need
+            const batchesNeeded = Math.ceil(totalPizzas / doughRecipe.yield);
+
+            // Add dough ingredients
+            doughRecipe.ingredients.forEach(ingredient => {
+                const existingIndex = aggregated.findIndex(i => i.name === ingredient.name);
+                const totalQuantity = ingredient.quantity * batchesNeeded;
+
+                if (existingIndex >= 0) {
+                    // Ingredient already exists, add to it
+                    aggregated[existingIndex].quantity += totalQuantity;
+                } else {
+                    // New ingredient, add it
+                    aggregated.push({
+                        name: ingredient.name,
+                        quantity: totalQuantity,
+                        unit: ingredient.unit,
+                        category: 'Impasto'
+                    });
+                }
+            });
+        }
+    }
 
     // Group by category
     const grouped = groupByCategory(aggregated);

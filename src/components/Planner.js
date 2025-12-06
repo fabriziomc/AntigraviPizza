@@ -2,15 +2,199 @@
 // PLANNER COMPONENT
 // ============================================
 
-import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, getAllRecipes, getAllGuests, addGuest, deleteGuest } from '../modules/database.js';
+import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, getAllRecipes, getAllGuests, addGuest, deleteGuest, getRecipeById } from '../modules/database.js';
 import { formatDate, formatDateForInput, getNextSaturdayEvening, confirm } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
+import { DOUGH_TYPES, DOUGH_RECIPES } from '../utils/constants.js';
+import { getRecipeDoughType } from '../utils/doughHelper.js';
 import { state } from '../store.js';
 import { DEFAULT_GUEST_COUNT } from '../utils/constants.js';
 
 export async function renderPlanner(appState) {
   await renderPizzaNights();
   setupPlannerListeners();
+}
+
+async function showNewPizzaNightModal() {
+  const recipes = await getAllRecipes(); // Store all recipes
+
+  const modalContent = `
+    <div class="modal-header">
+      <h2 class="modal-title">Nuova Serata Pizza</h2>
+      <button class="modal-close" onclick="window.closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="newPizzaNightForm">
+        <!-- ... existing fields ... -->
+        <div class="form-group">
+          <label class="form-label">Nome Serata *</label>
+          <input type="text" class="form-input" name="name" required placeholder="es. Pizza con gli amici">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Data e Ora *</label>
+          <input type="datetime-local" class="form-input" name="date" required value="${formatDateForInput(getNextSaturdayEvening())}">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Numero Ospiti *</label>
+          <input type="number" class="form-input" name="guestCount" required value="${DEFAULT_GUEST_COUNT}" min="1">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Seleziona Ospiti (Opzionale)</label>
+          <div id="guestSelection" style="max-height: 150px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 0.5rem; padding: 0.5rem;">
+            <!-- Guests will be loaded here -->
+            <p class="text-muted text-sm">Caricamento ospiti...</p>
+          </div>
+        </div>
+        
+        <div class="form-group" style="background: rgba(102, 126, 234, 0.1); border: 2px solid rgba(102, 126, 234, 0.3); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem;">
+          <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; margin-bottom: 1rem;">
+            <span>🥣</span>
+            <span>Tipo di Impasto per la Serata *</span>
+          </label>
+          <p style="color: var(--color-gray-300); font-size: 0.875rem; margin-bottom: 1rem;">
+            Scegli quale impasto preparare. Tutte le pizze della serata useranno questo impasto.
+          </p>
+          <select id="selectedDoughType" name="selectedDough" class="form-input" required style="font-size: 1rem; padding: 0.75rem;">
+            <option value="" style="color: #000; background: #fff;">Seleziona un impasto...</option>
+            ${DOUGH_RECIPES.map(d => `
+              <option value="${d.type}" style="color: #000; background: #fff;">
+                ${d.type} - ${d.hydration}% idratazione (${d.difficulty})
+              </option>
+            `).join('')}
+          </select>
+          <div id="doughInfo" style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; display: none;">
+            <!-- Dough info will be shown here -->
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Seleziona Pizze</label>
+          
+          <div style="margin-bottom: 0.5rem;">
+              <select id="plannerDoughFilter" class="form-input" style="padding: 0.4rem; font-size: 0.9rem;">
+                  <option value="all" style="color: #000; background: #fff;">🔍 Filtra per impasto: Tutti</option>
+                  ${DOUGH_TYPES.map(d => `<option value="${d.type}" style="color: #000; background: #fff;">${d.type}</option>`).join('')}
+              </select>
+          </div>
+
+          <div id="pizzaSelection" style="max-height: 300px; overflow-y: auto;">
+             <!-- Pizza list populated via JS -->
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Note</label>
+          <textarea class="form-textarea" name="notes" placeholder="Note aggiuntive..."></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="window.closeModal()">Annulla</button>
+      <button class="btn btn-accent" onclick="window.submitNewPizzaNight()">
+        <span>➕</span>
+        Crea Serata
+      </button>
+    </div>
+  `;
+
+  openModal(modalContent);
+
+  // Initialize with all recipes
+  renderPizzaSelectionList(recipes);
+
+  // Setup filter listener
+  const filterSelect = document.getElementById('plannerDoughFilter');
+  if (filterSelect) {
+    filterSelect.addEventListener('change', (e) => {
+      const selectedType = e.target.value;
+      let filteredRecipes = recipes;
+      if (selectedType !== 'all') {
+        filteredRecipes = recipes.filter(r => getRecipeDoughType(r) === selectedType);
+      }
+      renderPizzaSelectionList(filteredRecipes);
+    });
+  }
+
+  // Load guests into the selection area
+  // ... existing guest loading logic ...
+  const guests = await getAllGuests();
+  const guestSelection = document.getElementById('guestSelection');
+  if (guestSelection) {
+    if (guests.length > 0) {
+      guestSelection.innerHTML = guests.map(guest => `
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+          <input type="checkbox" name="selectedGuests" value="${guest.id}" id="guest_${guest.id}">
+          <label for="guest_${guest.id}" style="cursor: pointer;">${guest.name}</label>
+        </div>
+      `).join('');
+    } else {
+      guestSelection.innerHTML = '<p class="text-muted text-sm">Nessun ospite salvato. <a href="#" onclick="window.closeModal(); window.showManageGuestsModal(); return false;">Gestisci ospiti</a></p>';
+    }
+  }
+
+  // Setup dough selection listener to show info
+  const doughSelect = document.getElementById('selectedDoughType');
+  if (doughSelect) {
+    doughSelect.addEventListener('change', (e) => {
+      const selectedDoughType = e.target.value;
+      const doughInfoDiv = document.getElementById('doughInfo');
+
+      if (selectedDoughType && doughInfoDiv) {
+        const dough = DOUGH_RECIPES.find(d => d.type === selectedDoughType);
+        if (dough) {
+          doughInfoDiv.style.display = 'block';
+          doughInfoDiv.innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; margin-bottom: 0.75rem;">
+              <div style="text-align: center;">
+                <div style="font-size: 0.75rem; color: var(--color-gray-400);">Idratazione</div>
+                <div style="font-weight: 700; color: var(--color-primary-light);">${dough.hydration}%</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 0.75rem; color: var(--color-gray-400);">Lievitazione</div>
+                <div style="font-weight: 600; font-size: 0.875rem;">${dough.fermentation}</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 0.75rem; color: var(--color-gray-400);">Resa</div>
+                <div style="font-weight: 700; color: var(--color-accent-light);">${dough.yield} pizze</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 0.75rem; color: var(--color-gray-400);">Difficoltà</div>
+                <div style="font-weight: 600;">${dough.difficulty}</div>
+              </div>
+            </div>
+            <p style="font-size: 0.875rem; color: var(--color-gray-300); margin: 0;">
+              ${dough.description}
+            </p>
+          `;
+        }
+      } else if (doughInfoDiv) {
+        doughInfoDiv.style.display = 'none';
+      }
+    });
+  }
+}
+
+function renderPizzaSelectionList(recipes) {
+  const listContainer = document.getElementById('pizzaSelection');
+  if (!listContainer) return;
+
+  if (recipes.length > 0) {
+    listContainer.innerHTML = recipes.map(recipe => `
+            <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; margin-bottom: 0.5rem;">
+            <input type="checkbox" name="selectedPizzas" value="${recipe.id}" style="width: 20px; height: 20px;">
+            <div style="flex: 1;">
+                <div>${recipe.name}</div>
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">${getRecipeDoughType(recipe)}</div>
+            </div>
+            <input type="number" name="quantity_${recipe.id}" value="1" min="1" max="10" style="width: 60px; padding: 0.25rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 0.25rem; color: white; text-align: center;">
+            </div>
+        `).join('');
+  } else {
+    listContainer.innerHTML = '<p class="text-muted" style="padding: 1rem; text-align: center;">Nessuna ricetta trovata con questo filtro.</p>';
+  }
 }
 
 async function renderPizzaNights() {
@@ -94,6 +278,15 @@ function createPizzaNightCard(night) {
             <div class="planner-info-value">${night.selectedPizzas.length}</div>
           </div>
         </div>
+        ${night.selectedDough ? `
+          <div class="planner-info-item">
+            <span class="planner-info-icon">🥣</span>
+            <div>
+              <div class="planner-info-label">Impasto</div>
+              <div class="planner-info-value" style="font-size: 0.875rem;">${night.selectedDough}</div>
+            </div>
+          </div>
+        ` : ''}
       </div>
       
       ${night.selectedPizzas.length > 0 ? `
@@ -209,85 +402,7 @@ async function deleteGuestAction(guestId) {
   }
 }
 
-async function showNewPizzaNightModal() {
-  const recipes = await getAllRecipes();
 
-  const modalContent = `
-    <div class="modal-header">
-      <h2 class="modal-title">Nuova Serata Pizza</h2>
-      <button class="modal-close" onclick="window.closeModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <form id="newPizzaNightForm">
-        <div class="form-group">
-          <label class="form-label">Nome Serata *</label>
-          <input type="text" class="form-input" name="name" required placeholder="es. Pizza con gli amici">
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Data e Ora *</label>
-          <input type="datetime-local" class="form-input" name="date" required value="${formatDateForInput(getNextSaturdayEvening())}">
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Numero Ospiti *</label>
-          <input type="number" class="form-input" name="guestCount" required value="${DEFAULT_GUEST_COUNT}" min="1">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Seleziona Ospiti (Opzionale)</label>
-          <div id="guestSelection" style="max-height: 150px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 0.5rem; padding: 0.5rem;">
-            <!-- Guests will be loaded here -->
-            <p class="text-muted text-sm">Caricamento ospiti...</p>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Seleziona Pizze</label>
-          <div id="pizzaSelection" style="max-height: 300px; overflow-y: auto;">
-            ${recipes.length > 0 ? recipes.map(recipe => `
-              <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; margin-bottom: 0.5rem;">
-                <input type="checkbox" name="selectedPizzas" value="${recipe.id}" style="width: 20px; height: 20px;">
-                <span style="flex: 1;">${recipe.name}</span>
-                <input type="number" name="quantity_${recipe.id}" value="1" min="1" max="10" style="width: 60px; padding: 0.25rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 0.25rem; color: white; text-align: center;">
-              </div>
-            `).join('') : '<p class="text-muted">Nessuna ricetta disponibile. Aggiungine prima!</p>'}
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Note</label>
-          <textarea class="form-textarea" name="notes" placeholder="Note aggiuntive..."></textarea>
-        </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="window.closeModal()">Annulla</button>
-      <button class="btn btn-accent" onclick="window.submitNewPizzaNight()">
-        <span>➕</span>
-        Crea Serata
-      </button>
-    </div>
-  `;
-
-  openModal(modalContent);
-
-  // Load guests into the selection area
-  const guests = await getAllGuests();
-  const guestSelection = document.getElementById('guestSelection');
-  if (guestSelection) {
-    if (guests.length > 0) {
-      guestSelection.innerHTML = guests.map(guest => `
-        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-          <input type="checkbox" name="selectedGuests" value="${guest.id}" id="guest_${guest.id}">
-          <label for="guest_${guest.id}" style="cursor: pointer;">${guest.name}</label>
-        </div>
-      `).join('');
-    } else {
-      guestSelection.innerHTML = '<p class="text-muted text-sm">Nessun ospite salvato. <a href="#" onclick="window.closeModal(); window.showManageGuestsModal(); return false;">Gestisci ospiti</a></p>';
-    }
-  }
-}
 
 async function submitNewPizzaNight() {
   const form = document.getElementById('newPizzaNightForm');
@@ -317,6 +432,7 @@ async function submitNewPizzaNight() {
     name: formData.get('name'),
     date: new Date(formData.get('date')).getTime(),
     guestCount: parseInt(formData.get('guestCount')),
+    selectedDough: formData.get('selectedDough'), // NUOVO: impasto scelto per la serata
     selectedPizzas,
     selectedGuests,
     notes: formData.get('notes') || ''
@@ -365,6 +481,13 @@ async function viewPizzaNightDetails(nightId) {
             </p>
           ` : ''}
         </div>
+        
+        ${night.selectedDough ? `
+          <div>
+            <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">🥣 Impasto</h4>
+            <p>${night.selectedDough}</p>
+          </div>
+        ` : ''}
         
         <div>
           <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">🍕 Pizze Selezionate</h4>

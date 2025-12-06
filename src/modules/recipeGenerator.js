@@ -2,7 +2,7 @@
 // RECIPE GENERATOR - Intelligent Pizza Recipe Creator
 // ============================================
 
-import { FAMOUS_PIZZAIOLOS, FLAVOR_COMBINATIONS } from '../utils/constants.js';
+import { FAMOUS_PIZZAIOLOS, FLAVOR_COMBINATIONS, DOUGH_TYPES, DOUGH_RECIPES } from '../utils/constants.js';
 
 // Database di ingredienti autentici per pizza gourmet
 const INGREDIENTS_DB = {
@@ -174,48 +174,7 @@ const INGREDIENTS_DB = {
 };
 
 // Tipi di impasto
-const DOUGH_TYPES = [
-    {
-        type: 'Napoletana Classica',
-        flour: 'Farina tipo 00',
-        water: 325,
-        yeast: 'Lievito di birra',
-        yeastAmount: 2,
-        fermentation: '24 ore a temperatura ambiente'
-    },
-    {
-        type: 'Romana Croccante',
-        flour: 'Farina tipo 0',
-        water: 300,
-        yeast: 'Lievito di birra',
-        yeastAmount: 3,
-        fermentation: '12 ore in frigo'
-    },
-    {
-        type: 'Contemporanea',
-        flour: 'Mix farina 00 e integrale',
-        water: 350,
-        yeast: 'Lievito madre',
-        yeastAmount: 100,
-        fermentation: '48 ore con doppia lievitazione'
-    },
-    {
-        type: 'Alta Idratazione',
-        flour: 'Farina Manitoba',
-        water: 380,
-        yeast: 'Lievito madre',
-        yeastAmount: 80,
-        fermentation: '36 ore a temperatura controllata'
-    },
-    {
-        type: 'Integrale',
-        flour: 'Farina integrale',
-        water: 340,
-        yeast: 'Lievito di birra',
-        yeastAmount: 2,
-        fermentation: '18 ore a temperatura ambiente'
-    }
-];
+// DOUGH_TYPES moved to constants.js
 
 // Combinazioni di ingredienti che funzionano bene insieme
 // FLAVOR_COMBINATIONS moved to constants.js
@@ -694,16 +653,9 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
         }
     }
 
+    // Select suggested dough type (no longer generating dough ingredients)
     if (!doughType) doughType = DOUGH_TYPES[Math.floor(Math.random() * DOUGH_TYPES.length)];
-
-    const doughIngredients = [
-        { name: doughType.flour, quantity: 500, unit: 'g', category: 'Impasto', phase: 'dough', postBake: false },
-        { name: 'Acqua', quantity: doughType.water, unit: 'ml', category: 'Impasto', phase: 'dough', postBake: false },
-        { name: 'Sale marino', quantity: 10, unit: 'g', category: 'Impasto', phase: 'dough', postBake: false },
-        { name: doughType.yeast, quantity: doughType.yeastAmount, unit: 'g', category: 'Impasto', phase: 'dough', postBake: false }
-    ];
-
-    ingredients = [...doughIngredients, ...ingredients];
+    const suggestedDough = doughType.type;
 
     ingredients = ingredients.map(ing => ({
         ...ing,
@@ -715,13 +667,8 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
 
     const pizzaiolo = FAMOUS_PIZZAIOLOS[Math.floor(Math.random() * FAMOUS_PIZZAIOLOS.length)];
 
+    // Generate only topping instructions (dough instructions are in DOUGH_RECIPES)
     const instructions = {
-        dough: [
-            `Preparare l'impasto ${doughType.type.toLowerCase()} con ${doughType.flour.toLowerCase()}, acqua, sale e ${doughType.yeast.toLowerCase()}`,
-            `Impastare fino ad ottenere un composto liscio ed elastico`,
-            `Lasciare lievitare: ${doughType.fermentation}`,
-            `Stendere l'impasto formando un disco di circa 30-35cm di diametro`
-        ],
         topping: [
             ...generateCookingInstructions(ingredients),
             `Infornare a ${Math.floor(400 + Math.random() * 80)}°C per ${Math.floor(90 + Math.random() * 90)} secondi`,
@@ -742,6 +689,7 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
         ingredients,
         instructions,
         imageUrl,
+        suggestedDough,
         tags
     };
 }
