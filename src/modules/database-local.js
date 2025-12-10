@@ -50,6 +50,14 @@ export async function initDB() {
                 const combinationsStore = database.createObjectStore(STORES.COMBINATIONS, { keyPath: 'id' });
                 combinationsStore.createIndex('ingredients', 'ingredients', { unique: false });
             }
+
+            // Create preparations store
+            if (!database.objectStoreNames.contains(STORES.PREPARATIONS)) {
+                const preparationsStore = database.createObjectStore(STORES.PREPARATIONS, { keyPath: 'id' });
+                preparationsStore.createIndex('category', 'category', { unique: false });
+                preparationsStore.createIndex('difficulty', 'difficulty', { unique: false });
+                preparationsStore.createIndex('name', 'name', { unique: false });
+            }
         };
     });
 }
@@ -123,10 +131,14 @@ export async function addRecipe(recipeData) {
         pizzaiolo: recipeData.pizzaiolo || 'Sconosciuto',
         source: recipeData.source || '',
         description: recipeData.description || '',
-        ingredients: recipeData.ingredients || [],
+        // Support both old and new format
+        baseIngredients: recipeData.baseIngredients || recipeData.ingredients || [],
+        ingredients: recipeData.ingredients || recipeData.baseIngredients || [], // Keep for backward compatibility
+        preparations: recipeData.preparations || [],
         instructions: recipeData.instructions || [],
         imageUrl: recipeData.imageUrl || '',
         dough: recipeData.dough || '',
+        suggestedDough: recipeData.suggestedDough || recipeData.dough || '',
         tags: recipeData.tags || [],
         dateAdded: Date.now(),
         isFavorite: false
@@ -555,3 +567,121 @@ export async function clearAllData() {
         transaction.onerror = () => reject(transaction.error);
     });
 }
+
+// ============================================
+// PREPARATION OPERATIONS
+// ============================================
+
+/**
+ * Add a new preparation
+ */
+export async function createPreparation(prepData) {
+    const preparation = {
+        id: prepData.id || generateUUID(),
+        name: prepData.name,
+        category: prepData.category,
+        description: prepData.description || '',
+        yield: prepData.yield || 4,
+        prepTime: prepData.prepTime || '',
+        difficulty: prepData.difficulty || 'Media',
+        ingredients: prepData.ingredients || [],
+        instructions: prepData.instructions || [],
+        tips: prepData.tips || [],
+        dateAdded: Date.now(),
+        isCustom: prepData.isCustom !== undefined ? prepData.isCustom : true
+    };
+
+    return new Promise((resolve, reject) => {
+        const transaction = getDB().transaction([STORES.PREPARATIONS], 'readwrite');
+        const store = transaction.objectStore(STORES.PREPARATIONS);
+        const request = store.add(preparation);
+
+        request.onsuccess = () => resolve(preparation);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get all preparations
+ */
+export async function getAllPreparations() {
+    return new Promise((resolve, reject) => {
+        const transaction = getDB().transaction([STORES.PREPARATIONS], 'readonly');
+        const store = transaction.objectStore(STORES.PREPARATIONS);
+        const request = store.getAll();
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get preparation by ID
+ */
+export async function getPreparationById(id) {
+    return new Promise((resolve, reject) => {
+        const transaction = getDB().transaction([STORES.PREPARATIONS], 'readonly');
+        const store = transaction.objectStore(STORES.PREPARATIONS);
+        const request = store.get(id);
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Update preparation
+ */
+export async function updatePreparation(id, updates) {
+    const preparation = await getPreparationById(id);
+    if (!preparation) {
+        throw new Error('Preparation not found');
+    }
+
+    const updatedPreparation = { ...preparation, ...updates, id };
+
+    return new Promise((resolve, reject) => {
+        const transaction = getDB().transaction([STORES.PREPARATIONS], 'readwrite');
+        const store = transaction.objectStore(STORES.PREPARATIONS);
+        const request = store.put(updatedPreparation);
+
+        request.onsuccess = () => resolve(updatedPreparation);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Delete preparation
+ */
+export async function deletePreparation(id) {
+    return new Promise((resolve, reject) => {
+        const transaction = getDB().transaction([STORES.PREPARATIONS], 'readwrite');
+        const store = transaction.objectStore(STORES.PREPARATIONS);
+        const request = store.delete(id);
+
+        request.onsuccess = () => resolve(true);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Initialize preparations from constants if empty
+ */
+export async function seedPreparations(preparationsConstants) {
+    try {
+        const existing = await getAllPreparations();
+        if (existing.length > 0) {
+            console.log('Preparations already seeded, skipping...');
+            return;
+        }
+
+        console.log('Seeding preparations from constants...');
+        for (const prep of preparationsConstants) {
+            await createPreparation({ ...prep, isCustom: false });
+        }
+        console.log(`Seeded ${preparationsConstants.length} preparations`);
+    } catch (error) {
+        console.error('Error seeding preparations:', error);
+    }
+}
+

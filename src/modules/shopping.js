@@ -2,7 +2,7 @@
 // SHOPPING LIST MODULE
 // ============================================
 
-import { getRecipeById } from './database.js';
+import { getRecipeById, getAllPreparations } from './database.js';
 import { aggregateIngredients, groupByCategory, formatQuantity } from '../utils/helpers.js';
 import { DOUGH_RECIPES } from '../utils/constants.js';
 
@@ -27,6 +27,56 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null)
 
     // Aggregate ingredients from pizzas (toppings only)
     const aggregated = aggregateIngredients(recipes, quantities);
+
+    // Fetch preparations from database
+    const preparations = await getAllPreparations();
+
+    // Add preparation ingredients
+    recipes.forEach((recipe, index) => {
+        const pizzaQuantity = quantities[index] || 1;
+
+        if (recipe.preparations && recipe.preparations.length > 0) {
+            recipe.preparations.forEach(prep => {
+                // Find preparation data from database
+                const prepData = preparations.find(p => p.id === prep.id);
+                if (!prepData || !prepData.ingredients) return;
+
+                // Calculate scaling factor
+                // prep.quantity is how much we need (e.g., 100g)
+                // prepData.ingredients[].perPortion is how much per portion
+                // We need to scale based on how many portions we're making
+                prepData.ingredients.forEach(ingredient => {
+                    // Calculate how much of this ingredient we need
+                    // If prep.quantity is specified, use it to scale from perPortion
+                    // Otherwise, assume we need 1 full yield worth
+                    let scaledQuantity;
+                    if (ingredient.perPortion && prep.quantity) {
+                        // Scale based on quantity needed vs portion size
+                        scaledQuantity = ingredient.perPortion * (prep.quantity / ingredient.perPortion) * pizzaQuantity;
+                    } else {
+                        // Fallback: use total quantity for the recipe yield
+                        scaledQuantity = ingredient.quantity * pizzaQuantity;
+                    }
+
+                    // Find if ingredient already exists in aggregated list
+                    const existingIndex = aggregated.findIndex(i => i.name.toLowerCase() === ingredient.name.toLowerCase());
+
+                    if (existingIndex >= 0) {
+                        // Ingredient already exists, add to it
+                        aggregated[existingIndex].quantity += scaledQuantity;
+                    } else {
+                        // New ingredient, add it
+                        aggregated.push({
+                            name: ingredient.name,
+                            quantity: scaledQuantity,
+                            unit: ingredient.unit,
+                            category: ingredient.category || 'Altro'
+                        });
+                    }
+                });
+            });
+        }
+    });
 
     // Add dough ingredients if selectedDough is provided
     if (selectedDough) {

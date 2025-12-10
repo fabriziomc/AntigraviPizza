@@ -21,9 +21,10 @@ class DatabaseAdapter {
         if (!record) return null;
         return {
             ...record,
-            ingredients: typeof record.ingredients === 'string' ? JSON.parse(record.ingredients || '[]') : record.ingredients,
-            instructions: typeof record.instructions === 'string' ? JSON.parse(record.instructions || '[]') : record.instructions,
-            tags: typeof record.tags === 'string' ? JSON.parse(record.tags || '[]') : record.tags,
+            baseIngredients: record.baseIngredients ? (typeof record.baseIngredients === 'string' ? JSON.parse(record.baseIngredients) : record.baseIngredients) : [],
+            preparations: record.preparations ? (typeof record.preparations === 'string' ? JSON.parse(record.preparations) : record.preparations) : [],
+            instructions: record.instructions ? (typeof record.instructions === 'string' ? JSON.parse(record.instructions) : record.instructions) : [],
+            tags: record.tags ? (typeof record.tags === 'string' ? JSON.parse(record.tags) : record.tags) : [],
             isFavorite: !!record.isFavorite
         };
     }
@@ -70,14 +71,15 @@ class DatabaseAdapter {
     }
 
     async createRecipe(recipe) {
-        const ingredientsJson = JSON.stringify(recipe.ingredients || []);
+        const baseIngredientsJson = JSON.stringify(recipe.baseIngredients || []);
+        const preparationsJson = JSON.stringify(recipe.preparations || []);
         const instructionsJson = JSON.stringify(recipe.instructions || []);
         const tagsJson = JSON.stringify(recipe.tags || []);
 
         if (this.type === 'sqlite') {
             const stmt = this.db.prepare(`
-                INSERT INTO Recipes (id, name, pizzaiolo, source, description, ingredients, instructions, imageUrl, archetype, createdAt, dateAdded, isFavorite, rating, tags)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, preparations, instructions, imageUrl, dough, suggestedDough, archetype, createdAt, dateAdded, isFavorite, rating, tags)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 recipe.id,
@@ -85,9 +87,12 @@ class DatabaseAdapter {
                 recipe.pizzaiolo || 'Sconosciuto',
                 recipe.source || '',
                 recipe.description || '',
-                ingredientsJson,
+                baseIngredientsJson,
+                preparationsJson,
                 instructionsJson,
                 recipe.imageUrl || '',
+                recipe.dough || '',
+                recipe.suggestedDough || '',
                 recipe.archetype || '',
                 recipe.createdAt || Date.now(),
                 recipe.dateAdded || Date.now(),
@@ -97,17 +102,20 @@ class DatabaseAdapter {
             );
         } else {
             await query(`
-                INSERT INTO Recipes (id, name, pizzaiolo, source, description, ingredients, instructions, imageUrl, archetype, createdAt, dateAdded, isFavorite, rating, tags)
-                VALUES (@id, @name, @pizzaiolo, @source, @description, @ingredients, @instructions, @imageUrl, @archetype, @createdAt, @dateAdded, @isFavorite, @rating, @tags)
+                INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, preparations, instructions, imageUrl, dough, suggestedDough, archetype, createdAt, dateAdded, isFavorite, rating, tags)
+                VALUES (@id, @name, @pizzaiolo, @source, @description, @baseIngredients, @preparations, @instructions, @imageUrl, @dough, @suggestedDough, @archetype, @createdAt, @dateAdded, @isFavorite, @rating, @tags)
             `, {
                 id: recipe.id,
                 name: recipe.name,
                 pizzaiolo: recipe.pizzaiolo || 'Sconosciuto',
                 source: recipe.source || '',
                 description: recipe.description || '',
-                ingredients: ingredientsJson,
+                baseIngredients: baseIngredientsJson,
+                preparations: preparationsJson,
                 instructions: instructionsJson,
                 imageUrl: recipe.imageUrl || '',
+                dough: recipe.dough || '',
+                suggestedDough: recipe.suggestedDough || '',
                 archetype: recipe.archetype || '',
                 createdAt: recipe.createdAt || Date.now(),
                 dateAdded: recipe.dateAdded || Date.now(),
@@ -120,15 +128,16 @@ class DatabaseAdapter {
     }
 
     async updateRecipe(id, recipe) {
-        const ingredientsJson = JSON.stringify(recipe.ingredients || []);
+        const baseIngredientsJson = JSON.stringify(recipe.baseIngredients || []);
+        const preparationsJson = JSON.stringify(recipe.preparations || []);
         const instructionsJson = JSON.stringify(recipe.instructions || []);
         const tagsJson = JSON.stringify(recipe.tags || []);
 
         if (this.type === 'sqlite') {
             const stmt = this.db.prepare(`
                 UPDATE Recipes 
-                SET name=?, pizzaiolo=?, source=?, description=?, ingredients=?, instructions=?, 
-                    imageUrl=?, archetype=?, isFavorite=?, rating=?, tags=?
+                SET name=?, pizzaiolo=?, source=?, description=?, baseIngredients=?, preparations=?, instructions=?, 
+                    imageUrl=?, dough=?, suggestedDough=?, archetype=?, isFavorite=?, rating=?, tags=?
                 WHERE id = ?
             `);
             stmt.run(
@@ -136,9 +145,12 @@ class DatabaseAdapter {
                 recipe.pizzaiolo || 'Sconosciuto',
                 recipe.source || '',
                 recipe.description || '',
-                ingredientsJson,
+                baseIngredientsJson,
+                preparationsJson,
                 instructionsJson,
                 recipe.imageUrl || '',
+                recipe.dough || '',
+                recipe.suggestedDough || '',
                 recipe.archetype || '',
                 recipe.isFavorite ? 1 : 0,
                 recipe.rating || 0,
@@ -149,8 +161,8 @@ class DatabaseAdapter {
             await query(`
                 UPDATE Recipes 
                 SET name=@name, pizzaiolo=@pizzaiolo, source=@source, description=@description, 
-                    ingredients=@ingredients, instructions=@instructions, imageUrl=@imageUrl, 
-                    archetype=@archetype, isFavorite=@isFavorite, rating=@rating, tags=@tags
+                    baseIngredients=@baseIngredients, preparations=@preparations, instructions=@instructions, imageUrl=@imageUrl, 
+                    dough=@dough, suggestedDough=@suggestedDough, archetype=@archetype, isFavorite=@isFavorite, rating=@rating, tags=@tags
                 WHERE id = @id
             `, {
                 id,
@@ -158,9 +170,12 @@ class DatabaseAdapter {
                 pizzaiolo: recipe.pizzaiolo || 'Sconosciuto',
                 source: recipe.source || '',
                 description: recipe.description || '',
-                ingredients: ingredientsJson,
+                baseIngredients: baseIngredientsJson,
+                preparations: preparationsJson,
                 instructions: instructionsJson,
                 imageUrl: recipe.imageUrl || '',
+                dough: recipe.dough || '',
+                suggestedDough: recipe.suggestedDough || '',
                 archetype: recipe.archetype || '',
                 isFavorite: recipe.isFavorite ? 1 : 0,
                 rating: recipe.rating || 0,
@@ -356,6 +371,144 @@ class DatabaseAdapter {
             await query('DELETE FROM Combinations WHERE id=@id', { id });
         }
     }
+
+    // ==========================================
+    // PREPARATIONS
+    // ==========================================
+
+    parsePreparation(record) {
+        if (!record) return null;
+        return {
+            ...record,
+            ingredients: typeof record.ingredients === 'string' ? JSON.parse(record.ingredients || '[]') : record.ingredients,
+            instructions: typeof record.instructions === 'string' ? JSON.parse(record.instructions || '[]') : record.instructions,
+            tips: typeof record.tips === 'string' ? JSON.parse(record.tips || '[]') : record.tips,
+            isCustom: !!record.isCustom
+        };
+    }
+
+    async getAllPreparations() {
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare('SELECT * FROM Preparations ORDER BY name');
+            return stmt.all().map(r => this.parsePreparation(r));
+        } else {
+            const result = await query('SELECT * FROM Preparations ORDER BY name');
+            return result.recordset.map(r => this.parsePreparation(r));
+        }
+    }
+
+    async getPreparationById(id) {
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare('SELECT * FROM Preparations WHERE id = ?');
+            return this.parsePreparation(stmt.get(id));
+        } else {
+            const result = await query('SELECT * FROM Preparations WHERE id = @id', { id });
+            return this.parsePreparation(result.recordset[0]);
+        }
+    }
+
+    async createPreparation(prep) {
+        const ingredientsJson = JSON.stringify(prep.ingredients || []);
+        const instructionsJson = JSON.stringify(prep.instructions || []);
+        const tipsJson = JSON.stringify(prep.tips || []);
+
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare(`
+                INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+            stmt.run(
+                prep.id,
+                prep.name,
+                prep.category,
+                prep.description || '',
+                prep.yield || 4,
+                prep.prepTime || '',
+                prep.difficulty || 'Media',
+                ingredientsJson,
+                instructionsJson,
+                tipsJson,
+                prep.dateAdded || Date.now(),
+                prep.isCustom !== undefined ? (prep.isCustom ? 1 : 0) : 1
+            );
+        } else {
+            await query(`
+                INSERT INTO Preparations (id, name, category, description, [yield], prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom)
+                VALUES (@id, @name, @category, @description, @yield, @prepTime, @difficulty, @ingredients, @instructions, @tips, @dateAdded, @isCustom)
+            `, {
+                id: prep.id,
+                name: prep.name,
+                category: prep.category,
+                description: prep.description || '',
+                yield: prep.yield || 4,
+                prepTime: prep.prepTime || '',
+                difficulty: prep.difficulty || 'Media',
+                ingredients: ingredientsJson,
+                instructions: instructionsJson,
+                tips: tipsJson,
+                dateAdded: prep.dateAdded || Date.now(),
+                isCustom: prep.isCustom !== undefined ? (prep.isCustom ? 1 : 0) : 1
+            });
+        }
+        return prep;
+    }
+
+    async updatePreparation(id, prep) {
+        const ingredientsJson = JSON.stringify(prep.ingredients || []);
+        const instructionsJson = JSON.stringify(prep.instructions || []);
+        const tipsJson = JSON.stringify(prep.tips || []);
+
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare(`
+                UPDATE Preparations 
+                SET name=?, category=?, description=?, yield=?, prepTime=?, difficulty=?, 
+                    ingredients=?, instructions=?, tips=?
+                WHERE id=?
+            `);
+            stmt.run(
+                prep.name,
+                prep.category,
+                prep.description || '',
+                prep.yield || 4,
+                prep.prepTime || '',
+                prep.difficulty || 'Media',
+                ingredientsJson,
+                instructionsJson,
+                tipsJson,
+                id
+            );
+        } else {
+            await query(`
+                UPDATE Preparations 
+                SET name=@name, category=@category, description=@description, [yield]=@yield, 
+                    prepTime=@prepTime, difficulty=@difficulty, ingredients=@ingredients, 
+                    instructions=@instructions, tips=@tips
+                WHERE id=@id
+            `, {
+                id,
+                name: prep.name,
+                category: prep.category,
+                description: prep.description || '',
+                yield: prep.yield || 4,
+                prepTime: prep.prepTime || '',
+                difficulty: prep.difficulty || 'Media',
+                ingredients: ingredientsJson,
+                instructions: instructionsJson,
+                tips: tipsJson
+            });
+        }
+        return prep;
+    }
+
+    async deletePreparation(id) {
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare('DELETE FROM Preparations WHERE id=?');
+            stmt.run(id);
+        } else {
+            await query('DELETE FROM Preparations WHERE id=@id', { id });
+        }
+    }
 }
 
 export default DatabaseAdapter;
+

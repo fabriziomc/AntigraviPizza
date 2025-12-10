@@ -534,8 +534,15 @@ async function viewShoppingListForNight(nightId) {
   state.selectedPizzaNight = nightId;
   closeModal();
 
-  // Navigate to shopping view
-  window.location.hash = 'shopping';
+  // Check if we're already on the shopping view
+  if (state.currentView === 'shopping') {
+    // If already on shopping view, directly render to update the list
+    const { renderShopping } = await import('./Shopping.js');
+    await renderShopping(state);
+  } else {
+    // Navigate to shopping view (hash change will trigger render)
+    window.location.hash = 'shopping';
+  }
 }
 
 // Local action functions

@@ -9,9 +9,9 @@ import { showToast } from '../utils/helpers.js';
  * Render Settings view
  */
 export async function renderSettings() {
-    const settingsView = document.getElementById('settings-view');
+  const settingsView = document.getElementById('settings-view');
 
-    settingsView.innerHTML = `
+  settingsView.innerHTML = `
     <div class="settings-container fade-in">
       <div class="page-header">
         <h1 class="page-title">Impostazioni</h1>
@@ -61,6 +61,14 @@ export async function renderSettings() {
             </p>
             
             <div class="action-group">
+              <button id="btnDeleteRecipes" class="btn btn-danger">
+                <span class="icon">🍕</span>
+                Elimina Tutte le Ricette
+              </button>
+              <p class="action-help">Cancella solo le ricette (mantiene serate pizza e combinazioni).</p>
+            </div>
+
+            <div class="action-group">
               <button id="btnDeleteAll" class="btn btn-danger">
                 <span class="icon">🗑️</span>
                 Elimina Tutto
@@ -73,109 +81,145 @@ export async function renderSettings() {
     </div>
   `;
 
-    setupEventListeners();
+  setupEventListeners();
 }
 
 /**
  * Setup event listeners for Settings view
  */
 function setupEventListeners() {
-    // Export Data
-    document.getElementById('btnExport').addEventListener('click', async () => {
+  // Export Data
+  document.getElementById('btnExport').addEventListener('click', async () => {
+    try {
+      const data = await exportData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `antigravipizza-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('✅ Backup scaricato con successo!', 'success');
+    } catch (error) {
+      console.error('Export failed:', error);
+      showToast('❌ Errore durante il download del backup', 'error');
+    }
+  });
+
+  // Import Data Trigger
+  const fileInput = document.getElementById('fileImport');
+  document.getElementById('btnImport').addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  // Import Data Action
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
         try {
-            const data = await exportData();
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `antigravipizza-backup-${new Date().toISOString().slice(0, 10)}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('✅ Backup scaricato con successo!', 'success');
-        } catch (error) {
-            console.error('Export failed:', error);
-            showToast('❌ Errore durante il download del backup', 'error');
+          const data = JSON.parse(event.target.result);
+          const result = await importData(data);
+
+          let message = `Importazione completata: ${result.recipesImported} ricette`;
+          if (result.pizzaNightsImported > 0) {
+            message += `, ${result.pizzaNightsImported} serate`;
+          }
+
+          if (result.errors.length > 0) {
+            console.warn('Import errors:', result.errors);
+            message += `. ${result.errors.length} errori (vedi console)`;
+            showToast(`⚠️ ${message}`, 'warning');
+          } else {
+            showToast(`✅ ${message}`, 'success');
+          }
+
+          // Refresh app data
+          if (window.refreshData) {
+            await window.refreshData();
+          }
+        } catch (err) {
+          console.error('Import parse error:', err);
+          showToast('❌ File di backup non valido', 'error');
         }
-    });
+      };
+      reader.readAsText(file);
+    } catch (error) {
+      console.error('Import failed:', error);
+      showToast('❌ Errore durante il caricamento del backup', 'error');
+    }
 
-    // Import Data Trigger
-    const fileInput = document.getElementById('fileImport');
-    document.getElementById('btnImport').addEventListener('click', () => {
-        fileInput.click();
-    });
+    // Reset input
+    fileInput.value = '';
+  });
 
-    // Import Data Action
-    fileInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+  // Delete All Recipes (only recipes, not all data)
+  document.getElementById('btnDeleteRecipes').addEventListener('click', async () => {
+    const confirmed = confirm(
+      '⚠️ ELIMINA TUTTE LE RICETTE?\n\n' +
+      'Questa azione cancellerà TUTTE le ricette.\n' +
+      'Le serate pizza e le combinazioni saranno mantenute.\n' +
+      'Non può essere annullata.\n\n' +
+      'Premi OK per confermare.'
+    );
 
-        try {
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                try {
-                    const data = JSON.parse(event.target.result);
-                    const result = await importData(data);
+    if (confirmed) {
+      try {
+        // Import database functions
+        const { getAllRecipes, deleteRecipe } = await import('../modules/database.js');
 
-                    let message = `Importazione completata: ${result.recipesImported} ricette`;
-                    if (result.pizzaNightsImported > 0) {
-                        message += `, ${result.pizzaNightsImported} serate`;
-                    }
+        // Get all recipes
+        const recipes = await getAllRecipes();
 
-                    if (result.errors.length > 0) {
-                        console.warn('Import errors:', result.errors);
-                        message += `. ${result.errors.length} errori (vedi console)`;
-                        showToast(`⚠️ ${message}`, 'warning');
-                    } else {
-                        showToast(`✅ ${message}`, 'success');
-                    }
-
-                    // Refresh app data
-                    if (window.refreshData) {
-                        await window.refreshData();
-                    }
-                } catch (err) {
-                    console.error('Import parse error:', err);
-                    showToast('❌ File di backup non valido', 'error');
-                }
-            };
-            reader.readAsText(file);
-        } catch (error) {
-            console.error('Import failed:', error);
-            showToast('❌ Errore durante il caricamento del backup', 'error');
+        // Delete each recipe
+        for (const recipe of recipes) {
+          await deleteRecipe(recipe.id);
         }
 
-        // Reset input
-        fileInput.value = '';
-    });
+        showToast(`✅ ${recipes.length} ricette eliminate con successo`, 'success');
 
-    // Delete All Data
-    document.getElementById('btnDeleteAll').addEventListener('click', async () => {
-        const confirmed = confirm(
-            '⚠️ SEI SICURO?\n\n' +
-            'Questa azione cancellerà TUTTE le ricette e le serate pizza.\n' +
-            'Non può essere annullata.\n\n' +
-            'Premi OK per confermare.'
-        );
-
-        if (confirmed) {
-            try {
-                await clearAllData();
-
-                // Also clear the seed data flag so it can be reloaded
-                localStorage.removeItem('seedDataLoaded');
-
-                showToast('✅ Tutti i dati sono stati eliminati', 'success');
-
-                // Refresh app data
-                if (window.refreshData) {
-                    await window.refreshData();
-                }
-            } catch (error) {
-                console.error('Delete failed:', error);
-                showToast('❌ Errore durante l\'eliminazione dei dati', 'error');
-            }
+        // Refresh app data
+        if (window.refreshData) {
+          await window.refreshData();
         }
-    });
+      } catch (error) {
+        console.error('Delete recipes failed:', error);
+        showToast('❌ Errore durante l\'eliminazione delle ricette', 'error');
+      }
+    }
+  });
+
+  // Delete All Data
+  document.getElementById('btnDeleteAll').addEventListener('click', async () => {
+    const confirmed = confirm(
+      '⚠️ SEI SICURO?\n\n' +
+      'Questa azione cancellerà TUTTE le ricette e le serate pizza.\n' +
+      'Non può essere annullata.\n\n' +
+      'Premi OK per confermare.'
+    );
+
+    if (confirmed) {
+      try {
+        await clearAllData();
+
+        // Also clear the seed data flag so it can be reloaded
+        localStorage.removeItem('seedDataLoaded');
+
+        showToast('✅ Tutti i dati sono stati eliminati', 'success');
+
+        // Refresh app data
+        if (window.refreshData) {
+          await window.refreshData();
+        }
+      } catch (error) {
+        console.error('Delete failed:', error);
+        showToast('❌ Errore durante l\'eliminazione dei dati', 'error');
+      }
+    }
+  });
 }

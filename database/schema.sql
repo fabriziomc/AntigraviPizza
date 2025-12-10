@@ -9,12 +9,9 @@ CREATE TABLE IF NOT EXISTS Recipes (
     pizzaiolo TEXT,
     source TEXT,
     description TEXT,
-    baseIngredients TEXT, -- JSON (ingredienti base)
-    preparations TEXT, -- JSON (preparazioni)
+    ingredients TEXT, -- JSON
     instructions TEXT, -- JSON
     imageUrl TEXT,
-    dough TEXT,
-    suggestedDough TEXT,
     archetype TEXT,
     createdAt INTEGER,
     dateAdded INTEGER,

@@ -38,10 +38,12 @@ export async function addRecipe(recipeData) {
         pizzaiolo: recipeData.pizzaiolo || 'Sconosciuto',
         source: recipeData.source || '',
         description: recipeData.description || '',
-        ingredients: recipeData.ingredients || [],
+        baseIngredients: recipeData.baseIngredients || [],
+        preparations: recipeData.preparations || [],
         instructions: recipeData.instructions || [],
         imageUrl: recipeData.imageUrl || '',
         dough: recipeData.dough || '',
+        suggestedDough: recipeData.suggestedDough || '',
         tags: recipeData.tags || [],
         dateAdded: Date.now(),
         isFavorite: false,
@@ -286,3 +288,100 @@ export async function clearAllData() {
     console.warn('Clear all data not implemented for SQL mode');
     return false;
 }
+
+// ============================================
+// PREPARATION OPERATIONS
+// ============================================
+
+/**
+ * Create a new preparation
+ */
+export async function createPreparation(prepData) {
+    const preparation = {
+        id: prepData.id || generateUUID(),
+        name: prepData.name,
+        category: prepData.category,
+        description: prepData.description || '',
+        yield: prepData.yield || 4,
+        prepTime: prepData.prepTime || '',
+        difficulty: prepData.difficulty || 'Media',
+        ingredients: prepData.ingredients || [],
+        instructions: prepData.instructions || [],
+        tips: prepData.tips || [],
+        dateAdded: Date.now(),
+        isCustom: prepData.isCustom !== undefined ? prepData.isCustom : true
+    };
+
+    const response = await fetch(`${API_URL}/preparations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(preparation)
+    });
+
+    if (!response.ok) throw new Error('Failed to create preparation');
+    return await response.json();
+}
+
+/**
+ * Get all preparations
+ */
+export async function getAllPreparations() {
+    const response = await fetch(`${API_URL}/preparations`);
+    if (!response.ok) throw new Error('Failed to fetch preparations');
+    return await response.json();
+}
+
+/**
+ * Get preparation by ID
+ */
+export async function getPreparationById(id) {
+    const response = await fetch(`${API_URL}/preparations/${id}`);
+    if (!response.ok) throw new Error('Failed to fetch preparation');
+    return await response.json();
+}
+
+/**
+ * Update preparation
+ */
+export async function updatePreparation(id, updates) {
+    const response = await fetch(`${API_URL}/preparations/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+    });
+    if (!response.ok) throw new Error('Failed to update preparation');
+    return await response.json();
+}
+
+/**
+ * Delete preparation
+ */
+export async function deletePreparation(id) {
+    const response = await fetch(`${API_URL}/preparations/${id}`, {
+        method: 'DELETE'
+    });
+    if (!response.ok) throw new Error('Failed to delete preparation');
+    return true;
+}
+
+/**
+ * Initialize preparations from constants if empty
+ */
+export async function seedPreparations(preparationsConstants) {
+    try {
+        const existing = await getAllPreparations();
+        if (existing.length > 0) {
+            console.log('Preparations already seeded, skipping...');
+            return;
+        }
+
+        console.log('Seeding preparations from constants...');
+        for (const prep of preparationsConstants) {
+            await createPreparation({ ...prep, isCustom: false });
+        }
+        console.log(`Seeded ${preparationsConstants.length} preparations`);
+    } catch (error) {
+        console.error('Error seeding preparations:', error);
+    }
+}
+

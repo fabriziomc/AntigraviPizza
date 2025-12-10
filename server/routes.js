@@ -163,5 +163,57 @@ router.delete('/combinations/:id', async (req, res) => {
     }
 });
 
+// ==========================================
+// PREPARATIONS
+// ==========================================
+
+router.get('/preparations', async (req, res) => {
+    try {
+        const preparations = await dbAdapter.getAllPreparations();
+        res.json(preparations);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/preparations/:id', async (req, res) => {
+    try {
+        const preparation = await dbAdapter.getPreparationById(req.params.id);
+        if (!preparation) {
+            return res.status(404).json({ message: 'Preparation not found' });
+        }
+        res.json(preparation);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/preparations', async (req, res) => {
+    try {
+        const preparation = await dbAdapter.createPreparation(req.body);
+        res.status(201).json(preparation);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.put('/preparations/:id', async (req, res) => {
+    try {
+        const preparation = await dbAdapter.updatePreparation(req.params.id, req.body);
+        res.json(preparation);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.delete('/preparations/:id', async (req, res) => {
+    try {
+        await dbAdapter.deletePreparation(req.params.id);
+        res.json({ message: 'Deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 export default router;
 

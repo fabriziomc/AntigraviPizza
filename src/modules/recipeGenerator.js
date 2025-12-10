@@ -2,7 +2,7 @@
 // RECIPE GENERATOR - Intelligent Pizza Recipe Creator
 // ============================================
 
-import { FAMOUS_PIZZAIOLOS, FLAVOR_COMBINATIONS, DOUGH_TYPES, DOUGH_RECIPES } from '../utils/constants.js';
+import { FAMOUS_PIZZAIOLOS, FLAVOR_COMBINATIONS, DOUGH_TYPES, DOUGH_RECIPES, PREPARATIONS } from '../utils/constants.js';
 
 // Database di ingredienti autentici per pizza gourmet
 const INGREDIENTS_DB = {
@@ -465,6 +465,83 @@ function determineTags(ingredients, doughType) {
 }
 
 /**
+ * Seleziona preparazioni intelligenti basate sugli ingredienti e tipo pizza
+ */
+function selectPreparationsForPizza(ingredients, tags) {
+    const preparations = [];
+    const hasTomato = ingredients.some(i => i.name.includes('Pomodoro'));
+    const hasMeat = ingredients.some(i => i.category === 'Carne');
+    const hasVegetables = ingredients.some(i => i.category === 'Verdure');
+    const isPremium = tags.includes('Premium') || tags.includes('Gourmet');
+
+    // Pizza Bianca -> Alta probabilità creme
+    if (!hasTomato && Math.random() > 0.4) {
+        const creamOptions = ['crema-patate', 'crema-zucca', 'crema-burrata', 'crema-pistacchio'];
+        const selectedCream = creamOptions[Math.floor(Math.random() * creamOptions.length)];
+        preparations.push({
+            id: selectedCream,
+            quantity: Math.floor(80 + Math.random() * 40), // 80-120g
+            unit: 'g',
+            timing: 'before'
+        });
+    }
+
+    // Carne + Verdure -> Possibile salsa/pesto
+    if (hasMeat && hasVegetables && Math.random() > 0.6) {
+        const sauceOptions = ['pesto-basilico', 'salsa-verde', 'pesto-rucola'];
+        const selectedSauce = sauceOptions[Math.floor(Math.random() * sauceOptions.length)];
+        preparations.push({
+            id: selectedSauce,
+            quantity: Math.floor(40 + Math.random() * 30), // 40-70g
+            unit: 'g',
+            timing: 'after'
+        });
+    }
+
+    // Premium/Gourmet -> Preparazioni speciali
+    if (isPremium && Math.random() > 0.5) {
+        const premiumOptions = ['crema-tartufo', 'pesto-pistacchio', 'salsa-balsamico'];
+        const selectedPremium = premiumOptions[Math.floor(Math.random() * premiumOptions.length)];
+
+        // Verifica che la preparazione esista in PREPARATIONS
+        if (PREPARATIONS.find(p => p.id === selectedPremium)) {
+            preparations.push({
+                id: selectedPremium,
+                quantity: Math.floor(30 + Math.random() * 30), // 30-60g
+                unit: 'g',
+                timing: 'after'
+            });
+        }
+    }
+
+    // Ingredienti specifici -> Preparazioni mirate
+    if (ingredients.some(i => i.name.includes('Salsiccia') || i.name.includes('Friarielli'))) {
+        if (PREPARATIONS.find(p => p.id === 'crema-friarielli') && Math.random() > 0.5) {
+            preparations.push({
+                id: 'crema-friarielli',
+                quantity: 80,
+                unit: 'g',
+                timing: 'before'
+            });
+        }
+    }
+
+    if (ingredients.some(i => i.name.includes('Funghi'))) {
+        if (PREPARATIONS.find(p => p.id === 'crema-funghi') && Math.random() > 0.6) {
+            preparations.push({
+                id: 'crema-funghi',
+                quantity: 70,
+                unit: 'g',
+                timing: 'before'
+            });
+        }
+    }
+
+    // Limita a massimo 2 preparazioni per pizza
+    return preparations.slice(0, 2);
+}
+
+/**
  * Genera multiple ricette casuali con nomi garantiti unici
  */
 export async function generateMultipleRecipes(count = 3) {
@@ -678,6 +755,9 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
 
     const tags = determineTags(ingredients, doughType);
 
+    // Seleziona preparazioni intelligenti
+    const preparations = selectPreparationsForPizza(ingredients, tags);
+
     const imagePrompt = `gourmet pizza ${pizzaName}, toppings: ${mainIngredientNames.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
     const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}`;
 
@@ -686,7 +766,8 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
         pizzaiolo,
         source: 'Generata da AntigraviPizza',
         description,
-        ingredients,
+        baseIngredients: ingredients,  // Rinominato da ingredients
+        preparations,                   // NUOVO
         instructions,
         imageUrl,
         suggestedDough,

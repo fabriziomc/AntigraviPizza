@@ -6,9 +6,10 @@ console.log('🚀 main.js is loading...');
 
 import './styles/index.css';
 import './styles/components.css';
+import './styles/preparations-selector.css';
 
-import { initDB, getAllRecipes, getAllPizzaNights, initCombinations, initSeedData } from './modules/database.js';
-import { NAV_ITEMS, VIEWS, FLAVOR_COMBINATIONS } from './utils/constants.js';
+import { initDB, getAllRecipes, getAllPizzaNights, initCombinations, initSeedData, seedPreparations } from './modules/database.js';
+import { NAV_ITEMS, VIEWS, FLAVOR_COMBINATIONS, PREPARATIONS } from './utils/constants.js';
 import { showToast } from './utils/helpers.js';
 import { state } from './store.js';
 import { openModal, closeModal } from './modules/ui.js';
@@ -21,6 +22,7 @@ import { renderPlanner } from './components/Planner.js';
 import { renderShopping } from './components/Shopping.js';
 import { renderCombinations, setupCombinationsListeners } from './components/Combinations.js';
 import { renderDoughs } from './components/Doughs.js';
+import { renderPreparations } from './components/Preparations.js';
 import { renderSettings } from './components/Settings.js';
 
 console.log('✅ All imports loaded');
@@ -54,6 +56,15 @@ async function initApp() {
     } catch (seedError) {
       console.warn('⚠️ Could not load seed data:', seedError.message);
       // Continue anyway - seed data is optional
+    }
+
+    // Initialize preparations from constants
+    try {
+      await seedPreparations(PREPARATIONS);
+      console.log('✅ Preparations initialized');
+    } catch (prepError) {
+      console.warn('⚠️ Could not initialize preparations:', prepError.message);
+      // Continue anyway - preparations are optional
     }
 
     // Load initial data
@@ -165,6 +176,9 @@ async function renderCurrentView() {
         break;
       case VIEWS.DOUGHS:
         await renderDoughs();
+        break;
+      case VIEWS.PREPARATIONS:
+        await renderPreparations();
         break;
       case VIEWS.SETTINGS:
         await renderSettings();

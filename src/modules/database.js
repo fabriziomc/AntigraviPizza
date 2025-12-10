@@ -36,3 +36,10 @@ export const initCombinations = activeDB.initCombinations;
 export const exportData = activeDB.exportData;
 export const importData = activeDB.importData;
 export const clearAllData = activeDB.clearAllData;
+export const createPreparation = activeDB.createPreparation;
+export const getAllPreparations = activeDB.getAllPreparations;
+export const getPreparationById = activeDB.getPreparationById;
+export const updatePreparation = activeDB.updatePreparation;
+export const deletePreparation = activeDB.deletePreparation;
+export const seedPreparations = activeDB.seedPreparations;
+

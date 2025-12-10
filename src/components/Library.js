@@ -3,7 +3,7 @@
 // ============================================
 
 import { getAllRecipes, getRecipeById, toggleFavorite, deleteRecipe, updateRecipe } from '../modules/database.js';
-import { RECIPE_TAGS, DOUGH_TYPES } from '../utils/constants.js';
+import { RECIPE_TAGS, DOUGH_TYPES, PREPARATIONS } from '../utils/constants.js';
 import { getRecipeDoughType } from '../utils/doughHelper.js';
 import { debounce, showToast } from '../utils/helpers.js';
 import { state } from '../store.js';
@@ -223,8 +223,9 @@ async function showRecipeModal(recipeId) {
   if (!recipe) return;
 
   // Helper to split ingredients
-  const doughIngredients = recipe.ingredients.filter(i => i.phase === 'dough' || i.category === 'Impasto');
-  const toppingIngredients = recipe.ingredients.filter(i => i.phase === 'topping' || (i.phase !== 'dough' && i.category !== 'Impasto'));
+  const baseIngredients = recipe.baseIngredients || [];
+  const doughIngredients = baseIngredients.filter(i => i.phase === 'dough' || i.category === 'Impasto');
+  const toppingIngredients = baseIngredients.filter(i => i.phase === 'topping' || (i.phase !== 'dough' && i.category !== 'Impasto'));
 
   // Helper to format instruction list
   const renderInstructions = (list) => list.map(instruction => `
@@ -312,6 +313,26 @@ async function showRecipeModal(recipeId) {
                     </div>
                     </li>
                 `).join('')}
+                ${recipe.preparations && recipe.preparations.length > 0 ? recipe.preparations.map(prep => {
+    const prepData = PREPARATIONS.find(p => p.id === prep.id);
+    if (!prepData) return '';
+    return `
+                    <li class="ingredient-item" style="background: rgba(249, 115, 22, 0.05); border-left: 3px solid var(--color-accent);">
+                    <div style="display: flex; flex-direction: column; width: 100%;">
+                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; gap: 0.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1;">
+                                <span class="ingredient-name">${prepData.name}</span>
+                                <span style="background: rgba(249, 115, 22, 0.3); color: var(--color-accent); padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.65rem; font-weight: 600; white-space: nowrap;">🥫 PREP</span>
+                            </div>
+                            <span class="ingredient-quantity">${prep.quantity}${prep.unit}</span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--color-gray-500); margin-top: 0.25rem;">
+                            ${prepData.category} • ${prepData.prepTime} • ${prep.timing === 'before' ? '📥 Prima cottura' : '📤 Dopo cottura'}
+                        </div>
+                    </div>
+                    </li>
+                  `;
+  }).join('') : ''}
                 </ul>
             </div>
 

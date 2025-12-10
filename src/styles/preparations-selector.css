@@ -1,0 +1,112 @@
+/* ============================================
+   PREPARATIONS SELECTOR (Form)
+   ============================================ */
+
+.preparations-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+}
+
+.preparation-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.preparation-option:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.preparation-option input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.preparation-option-label {
+    font-size: 0.875rem;
+    cursor: pointer;
+    flex: 1;
+}
+
+.preparation-option-category {
+    font-size: 0.75rem;
+    color: var(--color-gray-500);
+    display: block;
+}
+
+.selected-preparations {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.selected-preparation-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: var(--radius-lg);
+}
+
+.selected-preparation-info {
+    flex: 1;
+}
+
+.selected-preparation-name {
+    font-weight: 600;
+    color: var(--color-primary-light);
+    margin-bottom: 0.25rem;
+}
+
+.selected-preparation-details {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-gray-400);
+}
+
+.selected-preparation-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.selected-preparation-controls input {
+    width: 70px;
+    padding: 0.25rem 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-sm);
+    color: var(--color-white);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.selected-preparation-controls select {
+    padding: 0.25rem 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-sm);
+    color: var(--color-white);
+    font-size: 0.875rem;
+}
+
+.selected-preparation-controls button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
