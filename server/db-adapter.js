@@ -508,6 +508,170 @@ class DatabaseAdapter {
             await query('DELETE FROM Preparations WHERE id=@id', { id });
         }
     }
+
+    // ==========================================
+    // INGREDIENTS
+    // ==========================================
+
+    parseIngredient(record) {
+        if (!record) return null;
+        return {
+            ...record,
+            season: record.season ? (typeof record.season === 'string' ? JSON.parse(record.season) : record.season) : null,
+            allergens: record.allergens ? (typeof record.allergens === 'string' ? JSON.parse(record.allergens) : record.allergens) : [],
+            tags: record.tags ? (typeof record.tags === 'string' ? JSON.parse(record.tags) : record.tags) : [],
+            postBake: !!record.postBake,
+            isCustom: !!record.isCustom
+        };
+    }
+
+    async getAllIngredients() {
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare('SELECT * FROM Ingredients ORDER BY category, name');
+            return stmt.all().map(r => this.parseIngredient(r));
+        } else {
+            const result = await query('SELECT * FROM Ingredients ORDER BY category, name');
+            return result.recordset.map(r => this.parseIngredient(r));
+        }
+    }
+
+    async getIngredientById(id) {
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE id = ?');
+            return this.parseIngredient(stmt.get(id));
+        } else {
+            const result = await query('SELECT * FROM Ingredients WHERE id = @id', { id });
+            return this.parseIngredient(result.recordset[0]);
+        }
+    }
+
+    async getIngredientsByCategory(category) {
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE category = ? ORDER BY name');
+            return stmt.all(category).map(r => this.parseIngredient(r));
+        } else {
+            const result = await query('SELECT * FROM Ingredients WHERE category = @category ORDER BY name', { category });
+            return result.recordset.map(r => this.parseIngredient(r));
+        }
+    }
+
+    async searchIngredients(searchQuery) {
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE name LIKE ? ORDER BY name');
+            return stmt.all(`%${searchQuery}%`).map(r => this.parseIngredient(r));
+        } else {
+            const result = await query('SELECT * FROM Ingredients WHERE name LIKE @query ORDER BY name', { query: `%${searchQuery}%` });
+            return result.recordset.map(r => this.parseIngredient(r));
+        }
+    }
+
+    async createIngredient(ingredient) {
+        const seasonJson = ingredient.season ? JSON.stringify(ingredient.season) : null;
+        const allergensJson = JSON.stringify(ingredient.allergens || []);
+        const tagsJson = JSON.stringify(ingredient.tags || []);
+
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare(`
+                INSERT INTO Ingredients (id, name, category, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+            stmt.run(
+                ingredient.id,
+                ingredient.name,
+                ingredient.category,
+                ingredient.subcategory || null,
+                ingredient.minWeight || null,
+                ingredient.maxWeight || null,
+                ingredient.defaultUnit || 'g',
+                ingredient.postBake ? 1 : 0,
+                ingredient.phase || 'topping',
+                seasonJson,
+                allergensJson,
+                tagsJson,
+                ingredient.isCustom ? 1 : 0,
+                ingredient.dateAdded || Date.now()
+            );
+        } else {
+            await query(`
+                INSERT INTO Ingredients (id, name, category, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded)
+                VALUES (@id, @name, @category, @subcategory, @minWeight, @maxWeight, @defaultUnit, @postBake, @phase, @season, @allergens, @tags, @isCustom, @dateAdded)
+            `, {
+                id: ingredient.id,
+                name: ingredient.name,
+                category: ingredient.category,
+                subcategory: ingredient.subcategory || null,
+                minWeight: ingredient.minWeight || null,
+                maxWeight: ingredient.maxWeight || null,
+                defaultUnit: ingredient.defaultUnit || 'g',
+                postBake: ingredient.postBake ? 1 : 0,
+                phase: ingredient.phase || 'topping',
+                season: seasonJson,
+                allergens: allergensJson,
+                tags: tagsJson,
+                isCustom: ingredient.isCustom ? 1 : 0,
+                dateAdded: ingredient.dateAdded || Date.now()
+            });
+        }
+        return ingredient;
+    }
+
+    async updateIngredient(id, ingredient) {
+        const seasonJson = ingredient.season ? JSON.stringify(ingredient.season) : null;
+        const allergensJson = JSON.stringify(ingredient.allergens || []);
+        const tagsJson = JSON.stringify(ingredient.tags || []);
+
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare(`
+                UPDATE Ingredients 
+                SET name=?, category=?, subcategory=?, minWeight=?, maxWeight=?, defaultUnit=?, postBake=?, phase=?, season=?, allergens=?, tags=?
+                WHERE id = ?
+            `);
+            stmt.run(
+                ingredient.name,
+                ingredient.category,
+                ingredient.subcategory || null,
+                ingredient.minWeight || null,
+                ingredient.maxWeight || null,
+                ingredient.defaultUnit || 'g',
+                ingredient.postBake ? 1 : 0,
+                ingredient.phase || 'topping',
+                seasonJson,
+                allergensJson,
+                tagsJson,
+                id
+            );
+        } else {
+            await query(`
+                UPDATE Ingredients 
+                SET name=@name, category=@category, subcategory=@subcategory, minWeight=@minWeight, maxWeight=@maxWeight, 
+                    defaultUnit=@defaultUnit, postBake=@postBake, phase=@phase, season=@season, allergens=@allergens, tags=@tags
+                WHERE id = @id
+            `, {
+                id,
+                name: ingredient.name,
+                category: ingredient.category,
+                subcategory: ingredient.subcategory || null,
+                minWeight: ingredient.minWeight || null,
+                maxWeight: ingredient.maxWeight || null,
+                defaultUnit: ingredient.defaultUnit || 'g',
+                postBake: ingredient.postBake ? 1 : 0,
+                phase: ingredient.phase || 'topping',
+                season: seasonJson,
+                allergens: allergensJson,
+                tags: tagsJson
+            });
+        }
+        return ingredient;
+    }
+
+    async deleteIngredient(id) {
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare('DELETE FROM Ingredients WHERE id=?');
+            stmt.run(id);
+        } else {
+            await query('DELETE FROM Ingredients WHERE id=@id', { id });
+        }
+    }
 }
 
 export default DatabaseAdapter;

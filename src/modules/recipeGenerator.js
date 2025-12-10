@@ -3,8 +3,52 @@
 // ============================================
 
 import { FAMOUS_PIZZAIOLOS, FLAVOR_COMBINATIONS, DOUGH_TYPES, DOUGH_RECIPES, PREPARATIONS } from '../utils/constants.js';
+import { getAllIngredients } from './database.js';
 
-// Database di ingredienti autentici per pizza gourmet
+// Cache for ingredients loaded from database
+let INGREDIENTS_CACHE = null;
+
+/**
+ * Load ingredients from database and organize by category
+ */
+async function loadIngredientsFromDB() {
+    // Return cached ingredients if available
+    if (INGREDIENTS_CACHE) {
+        return INGREDIENTS_CACHE;
+    }
+
+    try {
+        const allIngredients = await getAllIngredients();
+
+        // Organize ingredients by category for easy access
+        const organized = {
+            bases: allIngredients.filter(i => i.category === 'Salsa'),
+            cheeses: allIngredients.filter(i => i.category === 'Formaggi'),
+            meats: allIngredients.filter(i => i.category === 'Carne'),
+            vegetables: allIngredients.filter(i => i.category === 'Verdure'),
+            premium: allIngredients.filter(i => i.category === 'Pesce' || i.tags?.includes('premium')),
+            finishes: allIngredients.filter(i => i.category === 'Erbe e Spezie')
+        };
+
+        // Cache the result
+        INGREDIENTS_CACHE = organized;
+        return organized;
+    } catch (error) {
+        console.error('Error loading ingredients from DB:', error);
+        // Return empty structure as fallback
+        return {
+            bases: [],
+            cheeses: [],
+            meats: [],
+            vegetables: [],
+            premium: [],
+            finishes: []
+        };
+    }
+}
+
+// DEPRECATED: Old hardcoded database - kept for reference only
+// Will be replaced by loadIngredientsFromDB()
 const INGREDIENTS_DB = {
     // Basi e impasti
     bases: [
@@ -367,7 +411,7 @@ export async function generateRandomRecipe() {
     return await generateRandomRecipeWithNames([]);
 }
 
-function findIngredientByName(name) {
+function findIngredientByName(name, INGREDIENTS_DB) {
     const allIngredients = [
         ...INGREDIENTS_DB.cheeses,
         ...INGREDIENTS_DB.meats,
@@ -381,10 +425,12 @@ function findIngredientByName(name) {
     if (found) {
         return {
             name: found.name,
-            quantity: found.weight ? (found.weight[0] + Math.random() * (found.weight[1] - found.weight[0])) : 50,
-            unit: 'g',
-            category: categorizeIngredient(found.name),
-            phase: 'topping',
+            quantity: found.minWeight && found.maxWeight
+                ? (found.minWeight + Math.random() * (found.maxWeight - found.minWeight))
+                : 50,
+            unit: found.defaultUnit || 'g',
+            category: found.category,
+            phase: found.phase || 'topping',
             postBake: found.postBake
         };
     }
@@ -394,7 +440,7 @@ function findIngredientByName(name) {
 /**
  * Categorizza un ingrediente
  */
-function categorizeIngredient(name) {
+function categorizeIngredient(name, INGREDIENTS_DB) {
     if (INGREDIENTS_DB.cheeses.some(c => c.name === name)) return 'Formaggi';
     if (INGREDIENTS_DB.meats.some(m => m.name === name)) return 'Carne';
     if (INGREDIENTS_DB.vegetables.some(v => v.name === name)) return 'Verdure';
@@ -562,6 +608,9 @@ export async function generateMultipleRecipes(count = 3) {
  * Internal function that accepts additional names to avoid
  */
 async function generateRandomRecipeWithNames(additionalNames = []) {
+    // Load ingredients from database
+    const INGREDIENTS_DB = await loadIngredientsFromDB();
+
     // Fetch combinations and existing recipe names from DB
     const { getAllCombinations, getAllRecipes } = await import('./database.js');
     const dbCombinations = await getAllCombinations();
@@ -589,7 +638,7 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
         mainIngredientNames = combo.slice(0, 2);
 
         combo.forEach(ingName => {
-            const found = findIngredientByName(ingName);
+            const found = findIngredientByName(ingName, INGREDIENTS_DB);
             if (found) ingredients.push(found);
         });
 

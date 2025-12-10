@@ -4,7 +4,7 @@
 
 import { importRecipeManually, importSampleRecipes } from '../modules/recipeSearch.js';
 import { DOUGH_TYPES } from '../utils/constants.js';
-import { getAllPreparations } from '../modules/database.js';
+import { getAllPreparations, getAllIngredients } from '../modules/database.js';
 // refreshData is available globally via window.refreshData
 import { showToast } from '../utils/helpers.js';
 
@@ -12,6 +12,11 @@ import { showToast } from '../utils/helpers.js';
 let selectedPreparations = [];
 // Cache preparations from database
 let cachedPreparations = [];
+
+// Track selected ingredients
+let selectedIngredients = [];
+// Cache ingredients from database
+let cachedIngredients = [];
 
 export async function renderDiscovery(state) {
     // Wait a bit for DOM to be ready
@@ -68,6 +73,9 @@ function setupDiscoveryListeners() {
 
     // Populate Preparations Selector
     populatePreparationsSelector();
+
+    // Populate Ingredients Selector
+    populateIngredientsSelector();
 }
 
 /**
@@ -221,24 +229,167 @@ window.removePreparation = function (prepId) {
     }
 };
 
+// ============================================
+// INGREDIENTS SELECTOR
+// ============================================
+
+/**
+ * Populate ingredients selector with dropdown
+ */
+async function populateIngredientsSelector() {
+    const selector = document.getElementById('ingredientsSelector');
+    if (!selector) return;
+
+    // Fetch ingredients from database
+    cachedIngredients = await getAllIngredients();
+
+    // Group by category
+    const byCategory = {};
+    cachedIngredients.forEach(ing => {
+        if (!byCategory[ing.category]) {
+            byCategory[ing.category] = [];
+        }
+        byCategory[ing.category].push(ing);
+    });
+
+    selector.innerHTML = `
+        <style>
+            #ingredientSelect option,
+            #ingredientSelect optgroup {
+                background: #1a1f3a;
+                color: white;
+            }
+        </style>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <select id="ingredientSelect" style="flex: 1; padding: 0.5rem; border-radius: 0.5rem; border: 1px solid var(--color-border); background: var(--color-bg-secondary); color: var(--color-text);">
+                <option value="">Seleziona un ingrediente...</option>
+                ${Object.entries(byCategory).map(([category, ings]) => `
+                    <optgroup label="${category}">
+                        ${ings.map(ing => `
+                            <option value="${ing.id}">${ing.name}</option>
+                        `).join('')}
+                    </optgroup>
+                `).join('')}
+            </select>
+            <button type="button" class="btn btn-sm btn-primary" onclick="window.addIngredient()">
+                ➕ Aggiungi
+            </button>
+        </div>
+    `;
+}
+
+/**
+ * Add ingredient to selection
+ */
+window.addIngredient = function () {
+    const select = document.getElementById('ingredientSelect');
+    if (!select || !select.value) return;
+
+    const ingId = select.value;
+    const ing = cachedIngredients.find(i => i.id === ingId);
+    if (!ing) return;
+
+    // Check if already selected
+    if (selectedIngredients.find(i => i.id === ingId)) {
+        showToast('Ingrediente già aggiunto', 'warning');
+        return;
+    }
+
+    // Add with default values from database
+    selectedIngredients.push({
+        id: ingId,
+        name: ing.name,
+        quantity: ing.minWeight || 50,
+        unit: ing.defaultUnit || 'g',
+        category: ing.category
+    });
+
+    renderSelectedIngredients();
+    select.value = ''; // Reset select
+};
+
+/**
+ * Render selected ingredients
+ */
+function renderSelectedIngredients() {
+    const container = document.getElementById('selectedIngredients');
+    if (!container) return;
+
+    if (selectedIngredients.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    container.innerHTML = selectedIngredients.map(si => {
+        return `
+            <div class="selected-item" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border-radius: 0.5rem; margin-bottom: 0.5rem;">
+                <span style="flex: 1; font-weight: 500;">${si.name}</span>
+                <span style="font-size: 0.75rem; color: var(--color-gray-400);">${si.category}</span>
+                <input 
+                    type="number" 
+                    value="${si.quantity}" 
+                    onchange="window.updateIngredientQuantity('${si.id}', this.value)"
+                    style="width: 80px; padding: 0.25rem 0.5rem; border-radius: 0.25rem; border: 1px solid var(--color-border); background: var(--color-bg-secondary); color: var(--color-text);"
+                    min="1"
+                >
+                <select onchange="window.updateIngredientUnit('${si.id}', this.value)" style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; border: 1px solid var(--color-border); background: var(--color-bg-secondary); color: var(--color-text);">
+                    <option value="g" ${si.unit === 'g' ? 'selected' : ''}>g</option>
+                    <option value="ml" ${si.unit === 'ml' ? 'selected' : ''}>ml</option>
+                    <option value="pz" ${si.unit === 'pz' ? 'selected' : ''}>pz</option>
+                    <option value="cucchiaio" ${si.unit === 'cucchiaio' ? 'selected' : ''}>cucchiaio</option>
+                    <option value="cucchiaino" ${si.unit === 'cucchiaino' ? 'selected' : ''}>cucchiaino</option>
+                </select>
+                <button type="button" class="btn btn-sm btn-ghost" onclick="window.removeIngredient('${si.id}')">
+                    ✕
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Update ingredient quantity
+ */
+window.updateIngredientQuantity = function (ingId, quantity) {
+    const ing = selectedIngredients.find(i => i.id === ingId);
+    if (ing) {
+        ing.quantity = parseInt(quantity) || 50;
+    }
+};
+
+/**
+ * Update ingredient unit
+ */
+window.updateIngredientUnit = function (ingId, unit) {
+    const ing = selectedIngredients.find(i => i.id === ingId);
+    if (ing) {
+        ing.unit = unit;
+    }
+};
+
+/**
+ * Remove ingredient
+ */
+window.removeIngredient = function (ingId) {
+    const index = selectedIngredients.findIndex(i => i.id === ingId);
+    if (index >= 0) {
+        selectedIngredients.splice(index, 1);
+        renderSelectedIngredients();
+    }
+};
+
 async function handleManualImport(e) {
     e.preventDefault();
 
     const formData = new FormData(e.target);
 
-    // Parse ingredients
-    const ingredientsText = formData.get('ingredients');
-    const ingredients = ingredientsText.split('\n')
-        .filter(line => line.trim())
-        .map(line => {
-            const parts = line.split(',').map(p => p.trim());
-            return {
-                name: parts[0] || '',
-                quantity: parseFloat(parts[1]) || 0,
-                unit: parts[2] || 'g',
-                category: parts[3] || 'Altro'
-            };
-        });
+    // Use selected ingredients from selector
+    const ingredients = selectedIngredients.map(ing => ({
+        name: ing.name,
+        quantity: ing.quantity,
+        unit: ing.unit,
+        category: ing.category
+    }));
 
     // Parse instructions
     const instructionsText = formData.get('instructions');
@@ -277,6 +428,10 @@ async function handleManualImport(e) {
         document.querySelectorAll('#preparationsSelector input[type="checkbox"]').forEach(cb => {
             cb.checked = false;
         });
+
+        // Reset ingredients
+        selectedIngredients = [];
+        renderSelectedIngredients();
 
         showToast('Ricetta importata con successo!', 'success');
     } catch (error) {

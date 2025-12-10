@@ -75,3 +75,25 @@ CREATE INDEX IF NOT EXISTS idx_pizzanights_status ON PizzaNights(status);
 CREATE INDEX IF NOT EXISTS idx_preparations_category ON Preparations(category);
 CREATE INDEX IF NOT EXISTS idx_preparations_difficulty ON Preparations(difficulty);
 CREATE INDEX IF NOT EXISTS idx_preparations_name ON Preparations(name);
+
+-- Ingredients Table
+CREATE TABLE IF NOT EXISTS Ingredients (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    category TEXT NOT NULL CHECK (category IN ('Formaggi', 'Carne', 'Verdure', 'Salsa', 'Erbe e Spezie', 'Pesce', 'Altro')),
+    subcategory TEXT,
+    minWeight INTEGER,
+    maxWeight INTEGER,
+    defaultUnit TEXT DEFAULT 'g',
+    postBake INTEGER DEFAULT 0,
+    phase TEXT DEFAULT 'topping',
+    season TEXT, -- JSON: ['primavera', 'estate', 'autunno', 'inverno'] or NULL
+    allergens TEXT, -- JSON: ['lattosio', 'glutine', 'frutta_secca', etc.]
+    tags TEXT, -- JSON: ['vegetariano', 'vegano', 'premium', 'locale', etc.]
+    isCustom INTEGER DEFAULT 0,
+    dateAdded INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_ingredients_category ON Ingredients(category);
+CREATE INDEX IF NOT EXISTS idx_ingredients_custom ON Ingredients(isCustom);
+CREATE INDEX IF NOT EXISTS idx_ingredients_name ON Ingredients(name);

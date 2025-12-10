@@ -385,3 +385,79 @@ export async function seedPreparations(preparationsConstants) {
     }
 }
 
+// ============================================
+// INGREDIENTS OPERATIONS
+// ============================================
+
+export async function getAllIngredients() {
+    const response = await fetch(`${API_URL}/ingredients`);
+    if (!response.ok) throw new Error('Failed to fetch ingredients');
+    return await response.json();
+}
+
+export async function getIngredientById(id) {
+    const response = await fetch(`${API_URL}/ingredients/${id}`);
+    if (!response.ok) throw new Error('Failed to fetch ingredient');
+    return await response.json();
+}
+
+export async function getIngredientsByCategory(category) {
+    const response = await fetch(`${API_URL}/ingredients/category/${encodeURIComponent(category)}`);
+    if (!response.ok) throw new Error('Failed to fetch ingredients by category');
+    return await response.json();
+}
+
+export async function searchIngredients(query) {
+    const response = await fetch(`${API_URL}/ingredients/search?q=${encodeURIComponent(query)}`);
+    if (!response.ok) throw new Error('Failed to search ingredients');
+    return await response.json();
+}
+
+export async function addIngredient(ingredientData) {
+    const ingredient = {
+        id: generateUUID(),
+        name: ingredientData.name,
+        category: ingredientData.category,
+        subcategory: ingredientData.subcategory || null,
+        minWeight: ingredientData.minWeight || null,
+        maxWeight: ingredientData.maxWeight || null,
+        defaultUnit: ingredientData.defaultUnit || 'g',
+        postBake: ingredientData.postBake || false,
+        phase: ingredientData.phase || 'topping',
+        season: ingredientData.season || null,
+        allergens: ingredientData.allergens || [],
+        tags: ingredientData.tags || [],
+        isCustom: ingredientData.isCustom !== undefined ? ingredientData.isCustom : true,
+        dateAdded: Date.now()
+    };
+
+    const response = await fetch(`${API_URL}/ingredients`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ingredient)
+    });
+
+    if (!response.ok) throw new Error('Failed to add ingredient');
+    return await response.json();
+}
+
+export async function updateIngredient(id, updates) {
+    const response = await fetch(`${API_URL}/ingredients/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+    });
+
+    if (!response.ok) throw new Error('Failed to update ingredient');
+    return await response.json();
+}
+
+export async function deleteIngredient(id) {
+    const response = await fetch(`${API_URL}/ingredients/${id}`, {
+        method: 'DELETE'
+    });
+
+    if (!response.ok) throw new Error('Failed to delete ingredient');
+    return await response.json();
+}
+

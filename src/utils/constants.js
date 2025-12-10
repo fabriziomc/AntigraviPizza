@@ -100,6 +100,7 @@ export const VIEWS = {
     LIBRARY: 'library',
     DOUGHS: 'doughs',
     PREPARATIONS: 'preparations',
+    INGREDIENTS: 'ingredients',
     PLANNER: 'planner',
     SHOPPING: 'shopping',
     COMBINATIONS: 'combinations',
@@ -114,6 +115,7 @@ export const NAV_ITEMS = [
     { id: VIEWS.COMBINATIONS, label: 'Abbinamenti', icon: '🧪' },
     { id: VIEWS.DOUGHS, label: 'Impasti', icon: '🥣' },
     { id: VIEWS.PREPARATIONS, label: 'Preparazioni', icon: '🥫' },
+    { id: VIEWS.INGREDIENTS, label: 'Ingredienti', icon: '🥗' },
     { id: VIEWS.PLANNER, label: 'Pianifica Serata', icon: '🎉' },
     { id: VIEWS.SHOPPING, label: 'Lista Spesa', icon: '🛒' },
     { id: VIEWS.SETTINGS, label: 'Impostazioni', icon: '⚙️' }

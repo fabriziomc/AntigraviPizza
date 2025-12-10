@@ -107,9 +107,17 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label">Ingredienti (uno per riga: nome, quantità, unità, categoria)</label>
-                <textarea class="form-textarea" name="ingredients"
-                  placeholder="Farina tipo 00, 500, g, Impasto&#10;Mozzarella, 200, g, Formaggi"></textarea>
+                <label class="form-label">🥗 Ingredienti Base</label>
+                <p class="form-help-text"
+                  style="font-size: 0.875rem; color: var(--color-gray-400); margin-bottom: 0.5rem;">
+                  Seleziona ingredienti dall'archivio. Puoi specificare quantità e unità per ciascuno.
+                </p>
+                <div id="ingredientsSelector" class="ingredients-selector">
+                  <!-- Populated via JS -->
+                </div>
+                <div id="selectedIngredients" class="selected-ingredients" style="margin-top: 1rem;">
+                  <!-- Selected ingredients will appear here -->
+                </div>
               </div>
 
               <div class="form-group">
@@ -253,6 +261,11 @@
       <!-- Preparations View -->
       <div id="preparations-view" class="view">
         <!-- Preparations content will be loaded here -->
+      </div>
+
+      <!-- Ingredients View -->
+      <div id="ingredients-view" class="view">
+        <!-- Ingredients content will be loaded here -->
       </div>
 
       <!-- Settings View -->

@@ -2,12 +2,13 @@
 // PREPARATIONS COMPONENT
 // ============================================
 
-import { getAllPreparations, createPreparation, updatePreparation, deletePreparation } from '../modules/database.js';
+import { getAllPreparations, createPreparation, updatePreparation, deletePreparation, getAllIngredients } from '../modules/database.js';
 import { PREPARATION_CATEGORIES } from '../utils/constants.js';
 import { showToast } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
 
 let currentPreparations = [];
+let cachedIngredients = [];
 
 /**
  * Render Preparations view
@@ -293,11 +294,13 @@ async function showPreparationForm(prepId = null) {
 
   // Initialize dynamic lists
   if (prep) {
-    prep.ingredients.forEach(ing => addIngredientRow(ing));
+    for (const ing of prep.ingredients) {
+      await addIngredientRow(ing);
+    }
     prep.instructions.forEach(inst => addInstructionRow(inst));
     if (prep.tips) prep.tips.forEach(tip => addTipRow(tip));
   } else {
-    addIngredientRow();
+    await addIngredientRow();
     addInstructionRow();
   }
 
@@ -311,15 +314,46 @@ async function showPreparationForm(prepId = null) {
 /**
  * Add ingredient row
  */
-function addIngredientRow(data = null) {
+async function addIngredientRow(data = null) {
+  // Load ingredients if not cached
+  if (cachedIngredients.length === 0) {
+    cachedIngredients = await getAllIngredients();
+  }
+
   const container = document.getElementById('ingredientsList');
   const index = container.children.length;
 
   const row = document.createElement('div');
   row.className = 'ingredient-row';
   row.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;';
+
+  // Group ingredients by category
+  const byCategory = {};
+  cachedIngredients.forEach(ing => {
+    if (!byCategory[ing.category]) {
+      byCategory[ing.category] = [];
+    }
+    byCategory[ing.category].push(ing);
+  });
+
   row.innerHTML = `
-    <input type="text" class="form-input" name="ing_name[]" placeholder="Nome" value="${data?.name || ''}" required>
+    <style>
+      .ing-select-${index} option,
+      .ing-select-${index} optgroup {
+        background: #1a1f3a;
+        color: white;
+      }
+    </style>
+    <select class="form-input ing-select-${index}" name="ing_name[]" required>
+      <option value="">Seleziona ingrediente...</option>
+      ${Object.entries(byCategory).map(([category, ings]) => `
+        <optgroup label="${category}">
+          ${ings.map(ing => `
+            <option value="${ing.name}" ${data?.name === ing.name ? 'selected' : ''}>${ing.name}</option>
+          `).join('')}
+        </optgroup>
+      `).join('')}
+    </select>
     <input type="number" class="form-input ing-quantity" placeholder="Qtà totale" value="${data?.quantity || ''}" step="0.01" required>
     <input type="text" class="form-input" name="ing_unit[]" placeholder="Unità" value="${data?.unit || ''}" required>
     <input type="number" class="form-input ing-per-portion" placeholder="Per porz." value="${data?.perPortion || ''}" step="0.01" readonly style="background: #e8e8e8; color: #333; font-weight: 500; cursor: not-allowed;" title="Calcolato automaticamente: Qtà ÷ Porzioni">

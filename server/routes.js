@@ -215,5 +215,76 @@ router.delete('/preparations/:id', async (req, res) => {
     }
 });
 
+// ==========================================
+// INGREDIENTS
+// ==========================================
+
+router.get('/ingredients', async (req, res) => {
+    try {
+        const ingredients = await dbAdapter.getAllIngredients();
+        res.json(ingredients);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/ingredients/search', async (req, res) => {
+    try {
+        const query = req.query.q || '';
+        const ingredients = await dbAdapter.searchIngredients(query);
+        res.json(ingredients);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/ingredients/category/:category', async (req, res) => {
+    try {
+        const ingredients = await dbAdapter.getIngredientsByCategory(req.params.category);
+        res.json(ingredients);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/ingredients/:id', async (req, res) => {
+    try {
+        const ingredient = await dbAdapter.getIngredientById(req.params.id);
+        if (!ingredient) {
+            return res.status(404).json({ error: 'Ingredient not found' });
+        }
+        res.json(ingredient);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/ingredients', async (req, res) => {
+    try {
+        const ingredient = await dbAdapter.createIngredient(req.body);
+        res.json(ingredient);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.put('/ingredients/:id', async (req, res) => {
+    try {
+        const ingredient = await dbAdapter.updateIngredient(req.params.id, req.body);
+        res.json(ingredient);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.delete('/ingredients/:id', async (req, res) => {
+    try {
+        await dbAdapter.deleteIngredient(req.params.id);
+        res.json({ message: 'Deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 export default router;
 

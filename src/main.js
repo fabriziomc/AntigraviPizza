@@ -7,6 +7,7 @@ console.log('🚀 main.js is loading...');
 import './styles/index.css';
 import './styles/components.css';
 import './styles/preparations-selector.css';
+import './styles/ingredients.css';
 
 import { initDB, getAllRecipes, getAllPizzaNights, initCombinations, initSeedData, seedPreparations } from './modules/database.js';
 import { NAV_ITEMS, VIEWS, FLAVOR_COMBINATIONS, PREPARATIONS } from './utils/constants.js';
@@ -23,6 +24,7 @@ import { renderShopping } from './components/Shopping.js';
 import { renderCombinations, setupCombinationsListeners } from './components/Combinations.js';
 import { renderDoughs } from './components/Doughs.js';
 import { renderPreparations } from './components/Preparations.js';
+import { renderIngredients } from './components/Ingredients.js';
 import { renderSettings } from './components/Settings.js';
 
 console.log('✅ All imports loaded');
@@ -179,6 +181,9 @@ async function renderCurrentView() {
         break;
       case VIEWS.PREPARATIONS:
         await renderPreparations();
+        break;
+      case VIEWS.INGREDIENTS:
+        await renderIngredients(state);
         break;
       case VIEWS.SETTINGS:
         await renderSettings();
