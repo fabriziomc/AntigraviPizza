@@ -128,7 +128,8 @@ export function aggregateIngredients(recipes, quantities) {
     recipes.forEach((recipe, index) => {
         const multiplier = quantities[index] || 1;
 
-        recipe.ingredients.forEach(ingredient => {
+        const ingredients = recipe.baseIngredients || recipe.ingredients || [];
+        ingredients.forEach(ingredient => {
             const key = ingredient.name.toLowerCase();
 
             if (!aggregated[key]) {

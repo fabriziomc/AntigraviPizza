@@ -2,12 +2,13 @@
 // PLANNER COMPONENT
 // ============================================
 
-import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, getAllRecipes, getAllGuests, addGuest, deleteGuest, getRecipeById } from '../modules/database.js';
-import { formatDate, formatDateForInput, getNextSaturdayEvening, confirm } from '../utils/helpers.js';
+import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, getAllRecipes, getAllGuests, addGuest, deleteGuest, getRecipeById, getPizzaNightById } from '../modules/database.js';
+import { formatDate, formatDateForInput, getNextSaturdayEvening, confirm, formatQuantity } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
 import { DOUGH_TYPES, DOUGH_RECIPES } from '../utils/constants.js';
 import { getRecipeDoughType } from '../utils/doughHelper.js';
 import { state } from '../store.js';
+import { generateShoppingList, downloadShoppingList } from '../modules/shopping.js';
 import { DEFAULT_GUEST_COUNT } from '../utils/constants.js';
 
 export async function renderPlanner(appState) {
@@ -531,18 +532,81 @@ async function viewPizzaNightDetails(nightId) {
 }
 
 async function viewShoppingListForNight(nightId) {
-  state.selectedPizzaNight = nightId;
   closeModal();
 
-  // Check if we're already on the shopping view
-  if (state.currentView === 'shopping') {
-    // If already on shopping view, directly render to update the list
-    const { renderShopping } = await import('./Shopping.js');
-    await renderShopping(state);
-  } else {
-    // Navigate to shopping view (hash change will trigger render)
-    window.location.hash = 'shopping';
+  // Get pizza night data
+  const night = await getPizzaNightById(nightId);
+  if (!night) return;
+
+  // Generate shopping list
+  const groupedList = await generateShoppingList(night.selectedPizzas, night.selectedDough);
+
+  // Helper to get category icon
+  const getCategoryIcon = (category) => {
+    const icons = {
+      'Impasto': '🌾',
+      'Salsa': '🍅',
+      'Formaggi': '🧀',
+      'Carne': '🥓',
+      'Verdure': '🥬',
+      'Pesce': '🐟',
+      'Erbe e Spezie': '🌿',
+      'Altro': '📦'
+    };
+    return icons[category] || '📦';
+  };
+
+  // Build items HTML
+  let itemsHTML = '';
+  for (const [category, items] of Object.entries(groupedList)) {
+    const icon = getCategoryIcon(category);
+    itemsHTML += `
+      <div class="shopping-category">
+        <h3 class="category-title">${icon} ${category}</h3>
+        <div class="shopping-items">
+          ${items.map(item => `
+            <div class="shopping-item">
+              <div class="shopping-item-checkbox" onclick="this.classList.toggle('checked'); this.closest('.shopping-item').classList.toggle('checked');"></div>
+              <div class="shopping-item-content">
+                <span class="item-name">${item.name}</span>
+                <span class="item-quantity">${formatQuantity(item.quantity, item.unit)}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
   }
+
+  // Create and show modal
+  const modalContent = `
+    <div class="modal-header">
+      <h2>🛒 Lista Spesa - ${night.name}</h2>
+      <button class="modal-close" onclick="window.closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="shopping-list-container">
+        ${itemsHTML}
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="window.closeModal()">
+        Chiudi
+      </button>
+      <button class="btn btn-primary" onclick="window.downloadShoppingListForNight('${nightId}', '${night.name}')">
+        📥 Scarica PDF
+      </button>
+    </div>
+  `;
+
+  openModal(modalContent);
+}
+
+// Helper function for downloading shopping list from modal
+async function downloadShoppingListForNight(nightId, nightName) {
+  const night = await getPizzaNightById(nightId);
+  const groupedList = await generateShoppingList(night.selectedPizzas, night.selectedDough);
+  downloadShoppingList(groupedList, nightName);
 }
 
 // Local action functions
@@ -589,6 +653,7 @@ async function confirmDeletePizzaNight(nightId) {
 window.viewPizzaNightDetails = viewPizzaNightDetails;
 window.submitNewPizzaNight = submitNewPizzaNight;
 window.viewShoppingListForNight = viewShoppingListForNight;
+window.downloadShoppingListForNight = downloadShoppingListForNight;
 window.completePizzaNightAction = completePizzaNightAction;
 window.deletePizzaNightAction = deletePizzaNightAction;
 window.confirmDeletePizzaNight = confirmDeletePizzaNight;

@@ -286,3 +286,58 @@ window.downloadShoppingListAction = async (nightId, nightName) => {
   downloadShoppingList(groupedList, nightName);
 };
 
+// Show shopping list in a modal
+window.showShoppingListModal = async (nightId) => {
+  const night = await getPizzaNightById(nightId);
+  if (!night) return;
+
+  const groupedList = await generateShoppingList(night.selectedPizzas, night.selectedDough);
+
+  let itemsHTML = '';
+  for (const [category, items] of Object.entries(groupedList)) {
+    const icon = getCategoryIcon(category);
+    itemsHTML += `
+      <div class="shopping-category">
+        <h3 class="category-title">${icon} ${category}</h3>
+        <div class="shopping-items">
+          ${items.map(item => `
+            <div class="shopping-item">
+              <div class="shopping-item-checkbox" onclick="window.toggleShoppingItem(this)"></div>
+              <div class="shopping-item-content">
+                <span class="item-name">${item.name}</span>
+                <span class="item-quantity">${formatQuantity(item.quantity, item.unit)}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  const modal = document.createElement('div');
+  modal.className = 'modal active';
+  modal.innerHTML = `
+    <div class="modal-content large">
+      <div class="modal-header">
+        <h2>🛒 Lista Spesa - ${night.name}</h2>
+        <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="shopping-list-container">
+          ${itemsHTML}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">
+          Chiudi
+        </button>
+        <button class="btn btn-primary" onclick="window.downloadShoppingListAction('${nightId}', '${night.name}')">
+          📥 Scarica PDF
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+};
+
