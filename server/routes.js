@@ -286,5 +286,31 @@ router.delete('/ingredients/:id', async (req, res) => {
     }
 });
 
+// ============================================
+// SEED ENDPOINT (for Railway deployment)
+// ============================================
+
+router.post('/seed-ingredients', async (req, res) => {
+    try {
+        // Import seed function
+        const { seedIngredients } = await import('./seed-ingredients.js');
+
+        // Run seed
+        await seedIngredients();
+
+        res.json({
+            success: true,
+            message: 'Ingredients seeded successfully',
+            count: 136
+        });
+    } catch (err) {
+        console.error('Seed error:', err);
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
+    }
+});
+
 export default router;
 

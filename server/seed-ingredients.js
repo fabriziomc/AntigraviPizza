@@ -255,5 +255,10 @@ function seedIngredients() {
     console.log(`   - Erbe e Spezie: ${ingredients.filter(i => i.category === 'Erbe e Spezie').length}`);
 }
 
-// Run seed
-seedIngredients();
+// Export for API use
+export { seedIngredients };
+
+// Run seed if executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+    seedIngredients();
+}
