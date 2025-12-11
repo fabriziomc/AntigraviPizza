@@ -355,5 +355,33 @@ router.post('/archetype-weights/reset', async (req, res) => {
     }
 });
 
+// Seed archetype weights (temporary endpoint for production setup)
+router.post('/seed-archetype-weights', async (req, res) => {
+    try {
+        const weights = [
+            { archetype: 'combinazioni_db', weight: 30 },
+            { archetype: 'classica', weight: 28 },
+            { archetype: 'tradizionale', weight: 21 },
+            { archetype: 'terra_bosco', weight: 7 },
+            { archetype: 'fresca_estiva', weight: 7 },
+            { archetype: 'piccante_decisa', weight: 4 },
+            { archetype: 'mare', weight: 2 },
+            { archetype: 'vegana', weight: 1 }
+        ];
+
+        for (const w of weights) {
+            await dbAdapter.updateArchetypeWeight('default', w.archetype, w.weight);
+        }
+
+        res.json({
+            success: true,
+            message: 'Seeded 8 archetype weights',
+            weights: weights
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 export default router;
 
