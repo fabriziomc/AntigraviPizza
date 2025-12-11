@@ -2,7 +2,7 @@
 // SETTINGS COMPONENT
 // ============================================
 
-import { exportData, importData, clearAllData } from '../modules/database.js';
+import { exportData, importData, clearAllData, getArchetypeWeights, updateArchetypeWeight, resetArchetypeWeights } from '../modules/database.js';
 import { showToast } from '../utils/helpers.js';
 
 /**
@@ -49,6 +49,37 @@ export async function renderSettings() {
           </div>
         </section>
 
+        <!-- Archetype Weights Section -->
+        <section class="settings-card">
+          <div class="card-header">
+            <span class="card-icon">⚖️</span>
+            <h2>Pesi Archetipi Ricette</h2>
+          </div>
+          <div class="card-body">
+            <p class="card-description">
+              Controlla la frequenza con cui vengono generati i diversi tipi di pizza.
+              I valori rappresentano la probabilità relativa (totale: 100%).
+            </p>
+            
+            <div id="archetypeWeightsContainer" class="archetype-weights-grid">
+              <!-- Will be populated by JavaScript -->
+            </div>
+            
+            <div class="weight-total" id="weightTotal">
+              Totale: <span id="totalValue">100</span>%
+            </div>
+            
+            <div class="settings-actions">
+              <button class="btn btn-secondary" id="resetWeightsBtn">
+                🔄 Ripristina Default
+              </button>
+              <button class="btn btn-primary" id="saveWeightsBtn">
+                💾 Salva Modifiche
+              </button>
+            </div>
+          </div>
+        </section>
+
         <!-- Danger Zone Section -->
         <section class="settings-card danger-zone">
           <div class="card-header">
@@ -82,6 +113,7 @@ export async function renderSettings() {
   `;
 
   setupEventListeners();
+  populateArchetypeWeights(); // Load and display archetype weights
 }
 
 /**
@@ -222,4 +254,142 @@ function setupEventListeners() {
       }
     }
   });
+}
+
+// ============================================
+// ARCHETYPE WEIGHTS FUNCTIONS
+// ============================================
+
+const ARCHETYPE_LABELS = {
+  'combinazioni_db': '📚 Combinazioni Salvate',
+  'classica': '🍕 Classica',
+  'tradizionale': '👨‍🍳 Tradizionale',
+  'terra_bosco': '🍄 Terra e Bosco',
+  'fresca_estiva': '🌿 Fresca Estiva',
+  'piccante_decisa': '🌶️ Piccante',
+  'mare': '🐟 Mare',
+  'vegana': '🌱 Vegana'
+};
+
+const ARCHETYPE_DESCRIPTIONS = {
+  'combinazioni_db': 'Combinazioni salvate nel database',
+  'classica': 'Margherita, Marinara style',
+  'tradizionale': 'Prosciutto, Funghi, Capricciosa',
+  'terra_bosco': 'Funghi porcini, tartufo',
+  'fresca_estiva': 'Verdure, pomodorini',
+  'piccante_decisa': 'Nduja, peperoncino',
+  'mare': 'Pesce, frutti di mare',
+  'vegana': 'Solo vegetali'
+};
+
+async function populateArchetypeWeights() {
+  const container = document.getElementById('archetypeWeightsContainer');
+  if (!container) return;
+
+  try {
+    const weights = await getArchetypeWeights('default');
+    console.log('🔍 Archetype weights received:', weights);
+    console.log('🔍 Weights length:', weights.length);
+
+    if (!weights || weights.length === 0) {
+      container.innerHTML = '<p class="error-message">Nessun peso archetipo trovato nel database</p>';
+      return;
+    }
+
+    container.innerHTML = weights.map(w => `
+      <div class="weight-control">
+        <div class="weight-header">
+          <label class="weight-label">${ARCHETYPE_LABELS[w.archetype] || w.archetype}</label>
+          <span class="weight-value" id="weight-value-${w.archetype}">${w.weight}%</span>
+        </div>
+        <input 
+          type="range" 
+          class="weight-slider" 
+          id="weight-${w.archetype}"
+          min="0" 
+          max="50" 
+          value="${w.weight}"
+          data-archetype="${w.archetype}"
+        >
+        <p class="weight-description">${ARCHETYPE_DESCRIPTIONS[w.archetype] || w.description || ''}</p>
+      </div>
+    `).join('');
+
+    console.log('✅ Rendered', weights.length, 'weight controls');
+
+    // Setup slider event listeners
+    setupArchetypeWeightsListeners();
+
+    // Calculate initial total
+    updateTotalWeight();
+  } catch (error) {
+    console.error('Error loading archetype weights:', error);
+    container.innerHTML = '<p class="error-message">Errore nel caricamento dei pesi archetipi</p>';
+  }
+}
+
+function setupArchetypeWeightsListeners() {
+  // Update sliders
+  document.querySelectorAll('.weight-slider').forEach(slider => {
+    slider.addEventListener('input', (e) => {
+      const archetype = e.target.dataset.archetype;
+      const value = e.target.value;
+      const valueDisplay = document.getElementById(`weight-value-${archetype}`);
+      if (valueDisplay) {
+        valueDisplay.textContent = `${value}%`;
+      }
+      updateTotalWeight();
+    });
+  });
+
+  // Save button
+  const saveBtn = document.getElementById('saveWeightsBtn');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', async () => {
+      const sliders = document.querySelectorAll('.weight-slider');
+
+      try {
+        for (const slider of sliders) {
+          const archetype = slider.dataset.archetype;
+          const weight = parseInt(slider.value);
+          await updateArchetypeWeight(archetype, weight, 'default');
+        }
+
+        showToast('✅ Pesi archetipi salvati con successo!', 'success');
+      } catch (error) {
+        console.error('Error saving weights:', error);
+        showToast('❌ Errore nel salvataggio dei pesi', 'error');
+      }
+    });
+  }
+
+  // Reset button
+  const resetBtn = document.getElementById('resetWeightsBtn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', async () => {
+      if (confirm('Ripristinare i pesi predefiniti?')) {
+        try {
+          await resetArchetypeWeights('default');
+          showToast('✅ Pesi ripristinati ai valori predefiniti', 'success');
+
+          // Reload weights
+          await populateArchetypeWeights();
+        } catch (error) {
+          console.error('Error resetting weights:', error);
+          showToast('❌ Errore nel ripristino dei pesi', 'error');
+        }
+      }
+    });
+  }
+}
+
+function updateTotalWeight() {
+  const sliders = document.querySelectorAll('.weight-slider');
+  const total = Array.from(sliders).reduce((sum, slider) => sum + parseInt(slider.value), 0);
+
+  const totalElement = document.getElementById('totalValue');
+  if (totalElement) {
+    totalElement.textContent = total;
+    totalElement.style.color = total === 100 ? 'var(--color-success)' : 'var(--color-warning)';
+  }
 }

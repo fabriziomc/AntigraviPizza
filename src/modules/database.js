@@ -52,3 +52,8 @@ export const addIngredient = activeDB.addIngredient;
 export const updateIngredient = activeDB.updateIngredient;
 export const deleteIngredient = activeDB.deleteIngredient;
 
+// Archetype Weights
+export const getArchetypeWeights = activeDB.getArchetypeWeights;
+export const updateArchetypeWeight = activeDB.updateArchetypeWeight;
+export const resetArchetypeWeights = activeDB.resetArchetypeWeights;
+

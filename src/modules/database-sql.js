@@ -461,3 +461,33 @@ export async function deleteIngredient(id) {
     return await response.json();
 }
 
+// ============================================
+// ARCHETYPE WEIGHTS
+// ============================================
+
+export async function getArchetypeWeights(userId = 'default') {
+    const response = await fetch(`${API_URL}/archetype-weights?userId=${userId}`);
+    if (!response.ok) throw new Error('Failed to fetch archetype weights');
+    return response.json();
+}
+
+export async function updateArchetypeWeight(archetype, weight, userId = 'default') {
+    const response = await fetch(`${API_URL}/archetype-weights/${archetype}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ weight, userId })
+    });
+    if (!response.ok) throw new Error('Failed to update archetype weight');
+    return response.json();
+}
+
+export async function resetArchetypeWeights(userId = 'default') {
+    const response = await fetch(`${API_URL}/archetype-weights/reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+    });
+    if (!response.ok) throw new Error('Failed to reset archetype weights');
+    return response.json();
+}
+

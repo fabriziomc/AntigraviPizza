@@ -97,3 +97,16 @@ CREATE TABLE IF NOT EXISTS Ingredients (
 CREATE INDEX IF NOT EXISTS idx_ingredients_category ON Ingredients(category);
 CREATE INDEX IF NOT EXISTS idx_ingredients_custom ON Ingredients(isCustom);
 CREATE INDEX IF NOT EXISTS idx_ingredients_name ON Ingredients(name);
+
+-- Archetype Weights Table
+CREATE TABLE IF NOT EXISTS ArchetypeWeights (
+    id TEXT PRIMARY KEY,
+    userId TEXT DEFAULT 'default',
+    archetype TEXT NOT NULL,
+    weight INTEGER NOT NULL,
+    description TEXT,
+    dateModified INTEGER NOT NULL,
+    UNIQUE(userId, archetype)
+);
+
+CREATE INDEX IF NOT EXISTS idx_archetype_weights_user ON ArchetypeWeights(userId);

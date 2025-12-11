@@ -312,5 +312,48 @@ router.post('/seed-ingredients', async (req, res) => {
     }
 });
 
+// ============================================
+// ARCHETYPE WEIGHTS ENDPOINTS
+// ============================================
+
+// Get archetype weights
+router.get('/archetype-weights', async (req, res) => {
+    try {
+        const userId = req.query.userId || 'default';
+        const weights = await dbAdapter.getArchetypeWeights(userId);
+        res.json(weights);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Update archetype weight
+router.put('/archetype-weights/:archetype', async (req, res) => {
+    try {
+        const { archetype } = req.params;
+        const { weight, userId = 'default' } = req.body;
+
+        if (weight < 0 || weight > 100) {
+            return res.status(400).json({ error: 'Weight must be between 0 and 100' });
+        }
+
+        const result = await dbAdapter.updateArchetypeWeight(userId, archetype, weight);
+        res.json(result);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Reset to defaults
+router.post('/archetype-weights/reset', async (req, res) => {
+    try {
+        const { userId = 'default' } = req.body;
+        const result = await dbAdapter.resetArchetypeWeights(userId);
+        res.json(result);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 export default router;
 

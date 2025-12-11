@@ -672,6 +672,154 @@ class DatabaseAdapter {
             await query('DELETE FROM Ingredients WHERE id=@id', { id });
         }
     }
+
+    // ============================================
+    // ARCHETYPE WEIGHTS
+    // ============================================
+
+    async getArchetypeWeights(userId = 'default') {
+        console.log('🔍 Backend getArchetypeWeights called with userId:', userId);
+        console.log('🔍 Database type:', this.type);
+        console.log('🔍 Database instance:', this.db ? 'exists' : 'null');
+
+        if (this.type === 'sqlite') {
+            const rows = this.db.prepare(`
+                SELECT archetype, weight, description
+                FROM ArchetypeWeights
+                WHERE userId = ?
+                ORDER BY weight DESC
+            `).all(userId);
+
+            console.log('🔍 Query returned', rows.length, 'rows');
+            console.log('🔍 Rows:', JSON.stringify(rows, null, 2));
+
+            return rows;
+        } else {
+            console.log('⚠️ SQL Server mode - not implemented');
+            // SQL Server not yet implemented
+            return [];
+        }
+    }
+
+    async updateArchetypeWeight(userId, archetype, weight) {
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare(`
+                UPDATE ArchetypeWeights
+                SET weight = ?, dateModified = ?
+                WHERE userId = ? AND archetype = ?
+            `);
+            stmt.run(weight, Date.now(), userId, archetype);
+            return { userId, archetype, weight };
+        } else {
+            // SQL Server not yet implemented
+            return { userId, archetype, weight };
+        }
+    }
+
+    async resetArchetypeWeights(userId = 'default') {
+        if (this.type === 'sqlite') {
+            const defaults = [
+                { archetype: 'combinazioni_db', weight: 30 },
+                { archetype: 'classica', weight: 28 },
+                { archetype: 'tradizionale', weight: 21 },
+                { archetype: 'terra_bosco', weight: 7 },
+                { archetype: 'fresca_estiva', weight: 7 },
+                { archetype: 'piccante_decisa', weight: 4 },
+                { archetype: 'mare', weight: 2 },
+                { archetype: 'vegana', weight: 1 }
+            ];
+
+            const stmt = this.db.prepare(`
+                UPDATE ArchetypeWeights
+                SET weight = ?, dateModified = ?
+                WHERE userId = ? AND archetype = ?
+            `);
+
+            const now = Date.now();
+            defaults.forEach(d => {
+                stmt.run(d.weight, now, userId, d.archetype);
+            });
+
+            return { success: true, userId };
+        } else {
+            // SQL Server not yet implemented
+            return { success: true, userId };
+        }
+    }
+}
+
+// ============================================
+// ARCHETYPE WEIGHTS
+// ============================================
+
+/**
+ * Get archetype weights for user
+ */
+export function getArchetypeWeights(userId = 'default') {
+    if (useSql) {
+        // SQL Server not yet implemented for archetype weights
+        return [];
+    } else {
+        const rows = db.prepare(`
+            SELECT archetype, weight, description
+            FROM ArchetypeWeights
+            WHERE userId = ?
+            ORDER BY weight DESC
+        `).all(userId);
+
+        return rows;
+    }
+}
+
+/**
+ * Update archetype weight
+ */
+export function updateArchetypeWeight(userId = 'default', archetype, weight) {
+    if (useSql) {
+        // SQL Server not yet implemented
+        return { success: false, error: 'Not implemented for SQL Server' };
+    } else {
+        const id = `aw-${userId}-${archetype}`;
+        const now = Date.now();
+
+        db.prepare(`
+            INSERT INTO ArchetypeWeights (id, userId, archetype, weight, dateModified)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(userId, archetype) DO UPDATE SET
+                weight = excluded.weight,
+                dateModified = excluded.dateModified
+        `).run(id, userId, archetype, weight, now);
+
+        return { success: true };
+    }
+}
+
+/**
+ * Reset archetype weights to default
+ */
+export function resetArchetypeWeights(userId = 'default') {
+    if (useSql) {
+        // SQL Server not yet implemented
+        return { success: false, error: 'Not implemented for SQL Server' };
+    } else {
+        db.prepare(`DELETE FROM ArchetypeWeights WHERE userId = ?`).run(userId);
+
+        // Copy from default
+        db.prepare(`
+            INSERT INTO ArchetypeWeights (id, userId, archetype, weight, description, dateModified)
+            SELECT 
+                'aw-' || ? || '-' || archetype,
+                ?,
+                archetype,
+                weight,
+                description,
+                ?
+            FROM ArchetypeWeights
+            WHERE userId = 'default'
+        `).run(userId, userId, Date.now());
+
+        return { success: true };
+    }
 }
 
 export default DatabaseAdapter;

@@ -3,10 +3,13 @@
 // ============================================
 
 import { FAMOUS_PIZZAIOLOS, FLAVOR_COMBINATIONS, DOUGH_TYPES, DOUGH_RECIPES, PREPARATIONS } from '../utils/constants.js';
-import { getAllIngredients } from './database.js';
+import { getAllIngredients, getArchetypeWeights } from './database.js';
 
 // Cache for ingredients loaded from database
 let INGREDIENTS_CACHE = null;
+
+// Cache for archetype weights
+let ARCHETYPE_WEIGHTS_CACHE = null;
 
 /**
  * Load ingredients from database and organize by category
@@ -45,6 +48,58 @@ async function loadIngredientsFromDB() {
             finishes: []
         };
     }
+}
+
+/**
+ * Load archetype weights from database
+ */
+async function loadArchetypeWeights() {
+    if (ARCHETYPE_WEIGHTS_CACHE) {
+        return ARCHETYPE_WEIGHTS_CACHE;
+    }
+
+    try {
+        const weights = await getArchetypeWeights('default');
+
+        // Convert to object
+        const weightsObj = {};
+        weights.forEach(w => {
+            weightsObj[w.archetype] = w.weight;
+        });
+
+        ARCHETYPE_WEIGHTS_CACHE = weightsObj;
+        return weightsObj;
+    } catch (error) {
+        console.error('Error loading archetype weights:', error);
+        // Fallback to defaults
+        return {
+            'combinazioni_db': 30,
+            'classica': 28,
+            'tradizionale': 21,
+            'terra_bosco': 7,
+            'fresca_estiva': 7,
+            'piccante_decisa': 4,
+            'mare': 2,
+            'vegana': 1
+        };
+    }
+}
+
+/**
+ * Select archetype based on weights
+ */
+function selectWeightedArchetype(weights) {
+    const total = Object.values(weights).reduce((a, b) => a + b, 0);
+    let random = Math.random() * total;
+
+    for (const [archetype, weight] of Object.entries(weights)) {
+        random -= weight;
+        if (random <= 0) {
+            return archetype;
+        }
+    }
+
+    return 'classica'; // fallback
 }
 
 // DEPRECATED: Old hardcoded database - kept for reference only
