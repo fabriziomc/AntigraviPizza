@@ -359,29 +359,42 @@ router.post('/archetype-weights/reset', async (req, res) => {
 router.post('/seed-archetype-weights', async (req, res) => {
     try {
         const weights = [
-            { archetype: 'combinazioni_db', weight: 30 },
-            { archetype: 'classica', weight: 28 },
-            { archetype: 'tradizionale', weight: 21 },
-            { archetype: 'terra_bosco', weight: 7 },
-            { archetype: 'fresca_estiva', weight: 7 },
-            { archetype: 'piccante_decisa', weight: 4 },
-            { archetype: 'mare', weight: 2 },
-            { archetype: 'vegana', weight: 1 }
+            { archetype: 'combinazioni_db', weight: 30, description: 'Combinazioni salvate nel database' },
+            { archetype: 'classica', weight: 28, description: 'Margherita, Marinara style' },
+            { archetype: 'tradizionale', weight: 21, description: 'Prosciutto, Funghi, Capricciosa' },
+            { archetype: 'terra_bosco', weight: 7, description: 'Funghi porcini, tartufo' },
+            { archetype: 'fresca_estiva', weight: 7, description: 'Verdure, pomodorini' },
+            { archetype: 'piccante_decisa', weight: 4, description: 'Nduja, peperoncino' },
+            { archetype: 'mare', weight: 2, description: 'Pesce, frutti di mare' },
+            { archetype: 'vegana', weight: 1, description: 'Solo vegetali' }
         ];
 
-        for (const w of weights) {
-            await dbAdapter.updateArchetypeWeight('default', w.archetype, w.weight);
-        }
+        const userId = 'default';
+        const now = Date.now();
 
-        res.json({
-            success: true,
-            message: 'Seeded 8 archetype weights',
-            weights: weights
-        });
+        // Direct database access for seeding
+        if (dbAdapter.type === 'sqlite') {
+            const stmt = dbAdapter.db.prepare(`
+                INSERT OR REPLACE INTO ArchetypeWeights (id, userId, archetype, weight, description, dateModified)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `);
+
+            weights.forEach(w => {
+                stmt.run(`aw-${userId}-${w.archetype}`, userId, w.archetype, w.weight, w.description, now);
+            });
+
+            res.json({
+                success: true,
+                message: `Seeded ${weights.length} archetype weights`,
+                weights: weights
+            });
+        } else {
+            res.status(501).json({ error: 'SQL Server seeding not implemented yet' });
+        }
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('Seed error:', err);
+        res.status(500).json({ error: err.message, stack: err.stack });
     }
 });
 
 export default router;
-
