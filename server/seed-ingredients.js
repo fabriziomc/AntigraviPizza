@@ -259,6 +259,4 @@ function seedIngredients() {
 export { seedIngredients };
 
 // Run seed if executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-    seedIngredients();
-}
+seedIngredients().catch(console.error);

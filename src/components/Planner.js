@@ -5,6 +5,7 @@
 import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, getAllRecipes, getAllGuests, addGuest, deleteGuest, getRecipeById, getPizzaNightById } from '../modules/database.js';
 import { formatDate, formatDateForInput, getNextSaturdayEvening, confirm, formatQuantity } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
+import { getCookingInstructions } from '../utils/cookingCalculator.js';
 import { DOUGH_TYPES, DOUGH_RECIPES } from '../utils/constants.js';
 import { getRecipeDoughType } from '../utils/doughHelper.js';
 import { state } from '../store.js';
@@ -18,7 +19,7 @@ export async function renderPlanner(appState) {
   // Inject live mode HTML structure if not already present
   if (!document.getElementById('liveModeContainer')) {
     const liveModeHTML = `
-      <div id="liveModeContainer" style="display: none;">
+  <div id="liveModeContainer" style="display: none;">
         <!-- Header -->
         <div class="live-header">
           <h1>🍕 Serata Pizza</h1>
@@ -54,19 +55,19 @@ export async function renderPlanner(appState) {
         </div>
 
         <!-- Navigation -->
-        <div class="live-footer">
-          <button class="btn btn-secondary" onclick="window.previousPizza()" id="btnPrev" style="display: none;">
-            ← Precedente
-          </button>
-          <button class="btn btn-primary" onclick="window.nextPizza()" id="btnNext">
-            Prossima →
-          </button>
-          <button class="btn btn-success" onclick="window.completePizzaNightLive()" id="btnComplete" style="display: none;">
-            ✓ Completa Serata
-          </button>
-        </div>
-      </div>
-    `;
+  <div class="live-footer">
+    <button class="btn btn-secondary" onclick="window.previousPizza()" id="btnPrev" style="display: none;">
+      ← Precedente
+    </button>
+    <button class="btn btn-primary" onclick="window.nextPizza()" id="btnNext">
+      Prossima →
+    </button>
+    <button class="btn btn-success" onclick="window.completePizzaNightLive()" id="btnComplete" style="display: none;">
+      ✓ Completa Serata
+    </button>
+  </div>
+      </div >
+  `;
 
     document.body.insertAdjacentHTML('beforeend', liveModeHTML);
   }
@@ -228,7 +229,7 @@ async function showNewPizzaNightModal() {
         Crea Serata
       </button>
     </div>
-  `;
+`;
 
   openModal(modalContent);
 
@@ -255,11 +256,11 @@ async function showNewPizzaNightModal() {
   if (guestSelection) {
     if (guests.length > 0) {
       guestSelection.innerHTML = guests.map(guest => `
-        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-          <input type="checkbox" name="selectedGuests" value="${guest.id}" id="guest_${guest.id}">
-          <label for="guest_${guest.id}" style="cursor: pointer;">${guest.name}</label>
-        </div>
-      `).join('');
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+    <input type="checkbox" name="selectedGuests" value="${guest.id}" id="guest_${guest.id}">
+      <label for="guest_${guest.id}" style="cursor: pointer;">${guest.name}</label>
+    </div>
+`).join('');
     } else {
       guestSelection.innerHTML = '<p class="text-muted text-sm">Nessun ospite salvato. <a href="#" onclick="window.closeModal(); window.showManageGuestsModal(); return false;">Gestisci ospiti</a></p>';
     }
@@ -277,7 +278,7 @@ async function showNewPizzaNightModal() {
         if (dough) {
           doughInfoDiv.style.display = 'block';
           doughInfoDiv.innerHTML = `
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; margin-bottom: 0.75rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; margin-bottom: 0.75rem;">
               <div style="text-align: center;">
                 <div style="font-size: 0.75rem; color: var(--color-gray-400);">Idratazione</div>
                 <div style="font-weight: 700; color: var(--color-primary-light);">${dough.hydration}%</div>
@@ -294,11 +295,11 @@ async function showNewPizzaNightModal() {
                 <div style="font-size: 0.75rem; color: var(--color-gray-400);">Difficoltà</div>
                 <div style="font-weight: 600;">${dough.difficulty}</div>
               </div>
-            </div>
-            <p style="font-size: 0.875rem; color: var(--color-gray-300); margin: 0;">
-              ${dough.description}
-            </p>
-          `;
+            </div >
+  <p style="font-size: 0.875rem; color: var(--color-gray-300); margin: 0;">
+    ${dough.description}
+  </p>
+`;
         }
       } else if (doughInfoDiv) {
         doughInfoDiv.style.display = 'none';
@@ -366,14 +367,15 @@ function updateFixedPizzasList() {
     });
 
     fixedList.innerHTML = `
-      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-        ${pizzaNames.map(name => `
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+    ${pizzaNames.map(name => `
           <span style="padding: 0.25rem 0.75rem; background: rgba(99, 102, 241, 0.3); border-radius: 1rem; font-size: 0.875rem;">
             📌 ${name}
           </span>
-        `).join('')}
-      </div>
-    `;
+        `).join('')
+      }
+      </div >
+  `;
 
     if (generateBtn) generateBtn.disabled = false;
   } else {
@@ -476,14 +478,14 @@ async function generateMixedPizzas() {
 
   } catch (error) {
     console.error('Error generating mixed pizzas:', error);
-    resultsDiv.innerHTML = `<p style="color: var(--color-error);">❌ Errore: ${error.message}</p>`;
+    resultsDiv.innerHTML = `< p style = "color: var(--color-error);" >❌ Errore: ${error.message}</p > `;
   }
 }
 
 // Display generated pizzas
 function displayGeneratedPizzas(pizzas, container, title = 'Pizze Generate') {
   container.innerHTML = `
-    <h5 style="margin: 0 0 0.75rem 0;">${title} (${pizzas.length})</h5>
+  < h5 style = "margin: 0 0 0.75rem 0;" > ${title} (${pizzas.length})</h5 >
     <div style="display: flex; flex-direction: column; gap: 0.5rem;">
       ${pizzas.map(pizza => `
         <div style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
@@ -494,7 +496,7 @@ function displayGeneratedPizzas(pizzas, container, title = 'Pizze Generate') {
         </div>
       `).join('')}
     </div>
-  `;
+`;
   container.style.display = 'block';
 }
 
@@ -504,7 +506,7 @@ function displayMetrics(metrics, container) {
   if (!metricsContent) return;
 
   metricsContent.innerHTML = `
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
       <div style="text-align: center;">
         <div style="font-size: 2rem; font-weight: 700; color: var(--color-primary);">${metrics.totalScore}</div>
         <div style="font-size: 0.875rem; color: var(--color-gray-400);">Score Totale</div>
@@ -517,19 +519,19 @@ function displayMetrics(metrics, container) {
         <div style="font-size: 2rem; font-weight: 700; color: var(--color-accent);">${metrics.totalIngredients}</div>
         <div style="font-size: 0.875rem; color: var(--color-gray-400);">Ingredienti Totali</div>
       </div>
-    </div>
-    <div style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 0.5rem;">
-      <div style="font-weight: 600; margin-bottom: 0.5rem;">📦 Ingredienti:</div>
-      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-        ${metrics.ingredientList.slice(0, 10).map(ing => `
+    </div >
+  <div style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 0.5rem;">
+    <div style="font-weight: 600; margin-bottom: 0.5rem;">📦 Ingredienti:</div>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+      ${metrics.ingredientList.slice(0, 10).map(ing => `
           <span style="padding: 0.25rem 0.75rem; background: ${ing.shared ? 'rgba(34, 197, 94, 0.2)' : 'rgba(251, 146, 60, 0.2)'}; border-radius: 1rem; font-size: 0.875rem;">
             ${ing.shared ? '✓' : ''} ${ing.name}
           </span>
         `).join('')}
-        ${metrics.ingredientList.length > 10 ? `<span style="color: var(--color-gray-400); font-size: 0.875rem;">+${metrics.ingredientList.length - 10} altri</span>` : ''}
-      </div>
+      ${metrics.ingredientList.length > 10 ? `<span style="color: var(--color-gray-400); font-size: 0.875rem;">+${metrics.ingredientList.length - 10} altri</span>` : ''}
     </div>
-  `;
+  </div>
+`;
 
   container.style.display = 'block';
 }
@@ -541,7 +543,7 @@ function selectGeneratedPizzas(pizzas) {
 
   // Select generated pizzas
   pizzas.forEach(pizza => {
-    const checkbox = document.querySelector(`#pizzaSelection input[value="${pizza.id}"]`);
+    const checkbox = document.querySelector(`#pizzaSelection input[value = "${pizza.id}"]`);
     if (checkbox) checkbox.checked = true;
   });
 }
@@ -553,14 +555,14 @@ function renderPizzaSelectionList(recipes) {
   if (recipes.length > 0) {
     listContainer.innerHTML = recipes.map(recipe => `
             <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; margin-bottom: 0.5rem;">
-            <input type="checkbox" name="selectedPizzas" value="${recipe.id}" style="width: 20px; height: 20px;">
-            <div style="flex: 1;">
-                <div>${recipe.name}</div>
-                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">${getRecipeDoughType(recipe)}</div>
-            </div>
-            <input type="number" name="quantity_${recipe.id}" value="1" min="1" max="10" style="width: 60px; padding: 0.25rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 0.25rem; color: white; text-align: center;">
-            </div>
-        `).join('');
+    <input type="checkbox" name="selectedPizzas" value="${recipe.id}" style="width: 20px; height: 20px;">
+      <div style="flex: 1;">
+        <div>${recipe.name}</div>
+        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">${getRecipeDoughType(recipe)}</div>
+      </div>
+      <input type="number" name="quantity_${recipe.id}" value="1" min="1" max="10" style="width: 60px; padding: 0.25rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 0.25rem; color: white; text-align: center;">
+      </div>
+      `).join('');
   } else {
     listContainer.innerHTML = '<p class="text-muted" style="padding: 1rem; text-align: center;">Nessuna ricetta trovata con questo filtro.</p>';
   }
@@ -620,34 +622,34 @@ function attachCardListeners(container) {
 
 function createPizzaNightCard(night) {
   return `
-    <div class="planner-card">
-      <div class="planner-card-header">
-        <div>
-          <h3 class="planner-card-title">${night.name}</h3>
-          <div class="planner-card-date">
-            <span>📅</span>
-            <span>${formatDate(night.date)}</span>
-          </div>
-        </div>
-        <span class="planner-card-status ${night.status}">${night.status === 'planned' ? 'Pianificata' : 'Completata'}</span>
-      </div>
-      
-      <div class="planner-card-info">
-        <div class="planner-info-item">
-          <span class="planner-info-icon">👥</span>
+      <div class="planner-card">
+        <div class="planner-card-header">
           <div>
-            <div class="planner-info-label">Ospiti</div>
-            <div class="planner-info-value">${night.guestCount}</div>
+            <h3 class="planner-card-title">${night.name}</h3>
+            <div class="planner-card-date">
+              <span>📅</span>
+              <span>${formatDate(night.date)}</span>
+            </div>
           </div>
+          <span class="planner-card-status ${night.status}">${night.status === 'planned' ? 'Pianificata' : 'Completata'}</span>
         </div>
-        <div class="planner-info-item">
-          <span class="planner-info-icon">🍕</span>
-          <div>
-            <div class="planner-info-label">Pizze</div>
-            <div class="planner-info-value">${night.selectedPizzas.length}</div>
+
+        <div class="planner-card-info">
+          <div class="planner-info-item">
+            <span class="planner-info-icon">👥</span>
+            <div>
+              <div class="planner-info-label">Ospiti</div>
+              <div class="planner-info-value">${night.guestCount}</div>
+            </div>
           </div>
-        </div>
-        ${night.selectedDough ? `
+          <div class="planner-info-item">
+            <span class="planner-info-icon">🍕</span>
+            <div>
+              <div class="planner-info-label">Pizze</div>
+              <div class="planner-info-value">${night.selectedPizzas.length}</div>
+            </div>
+          </div>
+          ${night.selectedDough ? `
           <div class="planner-info-item">
             <span class="planner-info-icon">🥣</span>
             <div>
@@ -656,9 +658,9 @@ function createPizzaNightCard(night) {
             </div>
           </div>
         ` : ''}
-      </div>
-      
-      ${night.selectedPizzas.length > 0 ? `
+        </div>
+
+        ${night.selectedPizzas.length > 0 ? `
         <ul class="planner-pizzas-list">
           ${night.selectedPizzas.slice(0, 3).map(pizza => `
             <li class="planner-pizza-item">
@@ -673,26 +675,26 @@ function createPizzaNightCard(night) {
           ` : ''}
         </ul>
       ` : ''}
-      
-      ${night.notes ? `<p class="text-muted" style="font-size: 0.875rem; margin-top: 1rem;">${night.notes}</p>` : ''}
-      
-      <div class="planner-card-actions">
-        <button class="btn btn-primary btn-sm btn-details" data-night-id="${night.id}">
-          <span>👁️</span>
-          Dettagli
-        </button>
-        ${night.status === 'planned' ? `
+
+        ${night.notes ? `<p class="text-muted" style="font-size: 0.875rem; margin-top: 1rem;">${night.notes}</p>` : ''}
+
+        <div class="planner-card-actions">
+          <button class="btn btn-primary btn-sm btn-details" data-night-id="${night.id}">
+            <span>👁️</span>
+            Dettagli
+          </button>
+          ${night.status === 'planned' ? `
           <button class="btn btn-secondary btn-sm btn-complete" data-night-id="${night.id}">
             <span>✓</span>
             Completa
           </button>
         ` : ''}
-        <button class="btn btn-ghost btn-sm btn-delete" data-night-id="${night.id}">
-          <span>🗑️</span>
-        </button>
+          <button class="btn btn-ghost btn-sm btn-delete" data-night-id="${night.id}">
+            <span>🗑️</span>
+          </button>
+        </div>
       </div>
-    </div>
-  `;
+      `;
 }
 
 function setupPlannerListeners() {
@@ -711,35 +713,35 @@ async function showManageGuestsModal() {
   const guests = await getAllGuests();
 
   const modalContent = `
-    <div class="modal-header">
-      <h2 class="modal-title">Gestisci Ospiti</h2>
-      <button class="modal-close" onclick="window.closeModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Aggiungi Nuovo Ospite</label>
-        <div style="display: flex; gap: 0.5rem;">
-          <input type="text" id="newGuestName" class="form-input" placeholder="Nome e Cognome">
-          <button class="btn btn-primary" onclick="window.submitNewGuest()">Aggiungi</button>
-        </div>
+      <div class="modal-header">
+        <h2 class="modal-title">Gestisci Ospiti</h2>
+        <button class="modal-close" onclick="window.closeModal()">×</button>
       </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Aggiungi Nuovo Ospite</label>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="newGuestName" class="form-input" placeholder="Nome e Cognome">
+              <button class="btn btn-primary" onclick="window.submitNewGuest()">Aggiungi</button>
+          </div>
+        </div>
 
-      <div class="form-group">
-        <label class="form-label">Lista Ospiti</label>
-        <div id="guestsList" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
-          ${guests.length > 0 ? guests.map(guest => `
+        <div class="form-group">
+          <label class="form-label">Lista Ospiti</label>
+          <div id="guestsList" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+            ${guests.length > 0 ? guests.map(guest => `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
               <span>${guest.name}</span>
               <button class="btn btn-ghost btn-sm" onclick="window.deleteGuestAction('${guest.id}')" style="color: var(--color-error);">🗑️</button>
             </div>
           `).join('') : '<p class="text-muted">Nessun ospite salvato.</p>'}
+          </div>
         </div>
       </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
-    </div>
-  `;
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
+      </div>
+      `;
 
   openModal(modalContent);
 }
@@ -807,6 +809,9 @@ async function submitNewPizzaNight() {
     notes: formData.get('notes') || ''
   };
 
+  console.log('💾 Saving pizza night with data:', nightData);
+  console.log('  - selectedDough value:', nightData.selectedDough);
+
   try {
     await createPizzaNight(nightData);
     closeModal();
@@ -830,37 +835,37 @@ async function viewPizzaNightDetails(nightId) {
   }
 
   const modalContent = `
-    <div class="modal-header">
-      <h2 class="modal-title">${night.name}</h2>
-      <button class="modal-close" onclick="window.closeModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div style="display: grid; gap: 1.5rem;">
-        <div>
-          <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">📅 Data</h4>
-          <p>${formatDate(night.date)}</p>
-        </div>
-        
-        <div>
-          <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">👥 Ospiti</h4>
-          <p>${night.guestCount} persone</p>
-          ${guestNames.length > 0 ? `
+      <div class="modal-header">
+        <h2 class="modal-title">${night.name}</h2>
+        <button class="modal-close" onclick="window.closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: grid; gap: 1.5rem;">
+          <div>
+            <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">📅 Data</h4>
+            <p>${formatDate(night.date)}</p>
+          </div>
+
+          <div>
+            <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">👥 Ospiti</h4>
+            <p>${night.guestCount} persone</p>
+            ${guestNames.length > 0 ? `
             <p class="text-muted text-sm" style="margin-top: 0.25rem;">
               ${guestNames.join(', ')}
             </p>
           ` : ''}
-        </div>
-        
-        ${night.selectedDough ? `
+          </div>
+
+          ${night.selectedDough ? `
           <div>
             <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">🥣 Impasto</h4>
             <p>${night.selectedDough}</p>
           </div>
         ` : ''}
-        
-        <div>
-          <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">🍕 Pizze Selezionate</h4>
-          ${night.selectedPizzas.length > 0 ? `
+
+          <div>
+            <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">🍕 Pizze Selezionate</h4>
+            ${night.selectedPizzas.length > 0 ? `
             <ul style="list-style: none; padding: 0;">
               ${night.selectedPizzas.map(pizza => `
                 <li style="padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
@@ -870,37 +875,37 @@ async function viewPizzaNightDetails(nightId) {
               `).join('')}
             </ul>
           ` : '<p class="text-muted">Nessuna pizza selezionata</p>'}
-        </div>
-        
-        ${night.notes ? `
+          </div>
+
+          ${night.notes ? `
           <div>
             <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">📝 Note</h4>
             <p>${night.notes}</p>
           </div>
         ` : ''}
-        
-        <div>
-          <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">📊 Stato</h4>
-          <span class="planner-card-status ${night.status}">${night.status === 'planned' ? 'Pianificata' : 'Completata'}</span>
+
+          <div>
+            <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">📊 Stato</h4>
+            <span class="planner-card-status ${night.status}">${night.status === 'planned' ? 'Pianificata' : 'Completata'}</span>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
-      ${night.selectedPizzas.length > 0 && night.status === 'planned' ? `
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
+        ${night.selectedPizzas.length > 0 && night.status === 'planned' ? `
         <button class="btn btn-success" onclick="window.startLiveMode('${night.id}')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
           <span>🍕</span>
           Avvia Serata
         </button>
       ` : ''}
-      ${night.selectedPizzas.length > 0 ? `
+        ${night.selectedPizzas.length > 0 ? `
         <button class="btn btn-primary" onclick="window.viewShoppingListForNight('${night.id}')">
           <span>🛒</span>
           Lista Spesa
         </button>
       ` : ''}
-    </div>
-  `;
+      </div>
+      `;
 
   openModal(modalContent);
 }
@@ -949,29 +954,29 @@ async function viewShoppingListForNight(nightId) {
           `).join('')}
         </div>
       </div>
-    `;
+      `;
   }
 
   // Create and show modal
   const modalContent = `
-    <div class="modal-header">
-      <h2>🛒 Lista Spesa - ${night.name}</h2>
-      <button class="modal-close" onclick="window.closeModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="shopping-list-container">
-        ${itemsHTML}
+      <div class="modal-header">
+        <h2>🛒 Lista Spesa - ${night.name}</h2>
+        <button class="modal-close" onclick="window.closeModal()">×</button>
       </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="window.closeModal()">
-        Chiudi
-      </button>
-      <button class="btn btn-primary" onclick="window.downloadShoppingListForNight('${nightId}', '${night.name}')">
-        📥 Scarica PDF
-      </button>
-    </div>
-  `;
+      <div class="modal-body">
+        <div class="shopping-list-container">
+          ${itemsHTML}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.closeModal()">
+          Chiudi
+        </button>
+        <button class="btn btn-primary" onclick="window.downloadShoppingListForNight('${nightId}', '${night.name}')">
+          📥 Scarica PDF
+        </button>
+      </div>
+      `;
 
   openModal(modalContent);
 }
@@ -995,20 +1000,20 @@ async function completePizzaNightAction(nightId) {
 
 async function deletePizzaNightAction(nightId) {
   const modalContent = `
-    <div class="modal-header">
-      <h2 class="modal-title">Elimina Serata</h2>
-      <button class="modal-close" onclick="window.closeModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <p>Sei sicuro di voler eliminare questa serata? L'azione non può essere annullata.</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="window.closeModal()">Annulla</button>
-      <button class="btn btn-primary" style="background-color: var(--color-error, #ef4444);" onclick="window.confirmDeletePizzaNight('${nightId}')">
-        <span>🗑️</span> Elimina
-      </button>
-    </div>
-  `;
+      <div class="modal-header">
+        <h2 class="modal-title">Elimina Serata</h2>
+        <button class="modal-close" onclick="window.closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Sei sicuro di voler eliminare questa serata? L'azione non può essere annullata.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.closeModal()">Annulla</button>
+        <button class="btn btn-primary" style="background-color: var(--color-error, #ef4444);" onclick="window.confirmDeletePizzaNight('${nightId}')">
+          <span>🗑️</span> Elimina
+        </button>
+      </div>
+      `;
   openModal(modalContent);
 }
 
@@ -1041,6 +1046,8 @@ async function startLiveMode(nightId) {
     const night = await getPizzaNightById(nightId);
 
     console.log('🔍 Night data:', night);
+    console.log('🔍 selectedDough from DB:', night.selectedDough);
+    console.log('🔍 Full night object:', JSON.stringify(night, null, 2));
 
     if (!night || !night.selectedPizzas || night.selectedPizzas.length === 0) {
       alert('Nessuna pizza trovata per questa serata!');
@@ -1095,12 +1102,26 @@ async function startLiveMode(nightId) {
       return;
     }
 
+    // Calculate cooking instructions based on oven temp and dough type
+    const maxOvenTemp = parseInt(localStorage.getItem('maxOvenTemp') || '250');
+    const doughType = night.selectedDough || 'default';
+
+    console.log('🔥 Cooking calculation:');
+    console.log('  - maxOvenTemp from localStorage:', maxOvenTemp);
+    console.log('  - doughType from night:', doughType);
+    console.log('  - night.selectedDough:', night.selectedDough);
+
+    const cookingInfo = getCookingInstructions(doughType, maxOvenTemp);
+
+    console.log('  - cookingInfo result:', cookingInfo);
+
     // Initialize state
     liveModeState.nightId = nightId;
     liveModeState.pizzas = pizzas;
     liveModeState.currentIndex = 0;
     liveModeState.checkedIngredients = {};
     liveModeState.checkedPreparations = {};
+    liveModeState.cookingInstructions = cookingInfo.formatted;
 
     // Show live mode UI
     const container = document.getElementById('liveModeContainer');
@@ -1108,14 +1129,18 @@ async function startLiveMode(nightId) {
       container.style.display = 'flex';
       document.body.style.overflow = 'hidden'; // Prevent scroll
 
-      // Render first pizza
-      renderLivePizza();
-
-      // Close modal
+      // Close modal first
       closeModal();
+
+      // Render first pizza after DOM is ready
+      setTimeout(() => {
+        renderLivePizza();
+      }, 0);
     }
   } catch (error) {
     console.error('Failed to start live mode:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error message:', error.message);
     alert('Errore nell\'avvio della serata: ' + error.message);
   }
 }
@@ -1148,6 +1173,12 @@ function renderLivePizza() {
   // Render AFTER cooking content
   renderCookingPhaseContent('afterCookingContent', afterIngredients, afterPreparations, 'after');
 
+  // Update cooking instructions
+  const cookingInstructionsEl = document.getElementById('liveCookingInstructions');
+  if (cookingInstructionsEl && liveModeState.cookingInstructions) {
+    cookingInstructionsEl.textContent = liveModeState.cookingInstructions;
+  }
+
   // Update navigation buttons
   updateLiveNavigation();
 }
@@ -1179,14 +1210,14 @@ function renderCookingPhaseContent(containerId, ingredients, preparations, phase
 
       return `
         <div class="ingredient-item">
-          <input type="checkbox" id="ing-${phase}-${i}" 
+          <input type="checkbox" id="ing-${phase}-${i}"
             ${isChecked ? 'checked' : ''}
             onchange="window.saveIngredientCheck('${phase}-${i}', this.checked)">
-          <label for="ing-${phase}-${i}">
-            ${ingName}${quantity ? ` - ${quantity}${unit}` : ''}
-          </label>
+            <label for="ing-${phase}-${i}">
+              ${ingName}${quantity ? ` - ${quantity}${unit}` : ''}
+            </label>
         </div>
-      `;
+        `;
     }).join('');
 
     html += '</div></div>';

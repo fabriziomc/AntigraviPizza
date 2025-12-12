@@ -126,6 +126,7 @@ export async function createPizzaNight(nightData) {
         name: nightData.name,
         date: nightData.date || Date.now(),
         guestCount: nightData.guestCount || 6,
+        selectedDough: nightData.selectedDough || null, // NUOVO: impasto scelto per la serata
         selectedPizzas: nightData.selectedPizzas || [],
         selectedGuests: nightData.selectedGuests || [],
         notes: nightData.notes || '',

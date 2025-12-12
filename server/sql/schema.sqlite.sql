@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS PizzaNights (
     name TEXT NOT NULL,
     date INTEGER,
     guestCount INTEGER DEFAULT 6,
+    selectedDough TEXT, -- Tipo di impasto scelto per la serata
     selectedPizzas TEXT, -- JSON
     selectedGuests TEXT, -- JSON
     notes TEXT,

@@ -214,14 +214,15 @@ class DatabaseAdapter {
 
         if (this.type === 'sqlite') {
             const stmt = this.db.prepare(`
-                INSERT INTO PizzaNights (id, name, date, guestCount, selectedPizzas, selectedGuests, notes, status, createdAt)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, selectedPizzas, selectedGuests, notes, status, createdAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 night.id,
                 night.name,
                 night.date,
                 night.guestCount,
+                night.selectedDough || null,
                 selectedPizzasJson,
                 selectedGuestsJson,
                 night.notes || '',

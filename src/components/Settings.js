@@ -11,6 +11,9 @@ import { showToast } from '../utils/helpers.js';
 export async function renderSettings() {
   const settingsView = document.getElementById('settings-view');
 
+  // Load saved oven temperature
+  const savedOvenTemp = localStorage.getItem('maxOvenTemp') || '250';
+
   settingsView.innerHTML = `
     <div class="settings-container fade-in">
       <div class="page-header">
@@ -19,6 +22,33 @@ export async function renderSettings() {
       </div>
 
       <div class="settings-grid">
+        <!-- Oven Settings Section -->
+        <section class="settings-card">
+          <div class="card-header">
+            <span class="card-icon">🔥</span>
+            <h2>Impostazioni Forno</h2>
+          </div>
+          <div class="card-body">
+            <p class="card-description">
+              Indica la temperatura massima raggiungibile dal tuo forno per calcolare i tempi di cottura ottimali.
+            </p>
+            
+            <div class="form-group">
+              <label for="maxOvenTemp" class="form-label">Temperatura Massima (°C)</label>
+              <input type="number" id="maxOvenTemp" class="form-input" 
+                     min="200" max="500" step="10" value="${savedOvenTemp}">
+              <small class="text-muted" style="display: block; margin-top: 0.5rem;">
+                Tipiche: 250°C (domestico), 280°C (gas), 350°C (professionale), 450°C (legna)
+              </small>
+            </div>
+            
+            <button id="btnSaveOvenSettings" class="btn btn-primary">
+              <span class="icon">💾</span>
+              Salva Impostazioni Forno
+            </button>
+          </div>
+        </section>
+
         <!-- Data Management Section -->
         <section class="settings-card">
           <div class="card-header">
@@ -120,6 +150,20 @@ export async function renderSettings() {
  * Setup event listeners for Settings view
  */
 function setupEventListeners() {
+  // Save Oven Settings
+  document.getElementById('btnSaveOvenSettings').addEventListener('click', () => {
+    const temp = document.getElementById('maxOvenTemp').value;
+    const tempNum = parseInt(temp);
+
+    if (tempNum < 200 || tempNum > 500) {
+      showToast('⚠️ Temperatura deve essere tra 200°C e 500°C', 'warning');
+      return;
+    }
+
+    localStorage.setItem('maxOvenTemp', temp);
+    showToast('✅ Impostazioni forno salvate!', 'success');
+  });
+
   // Export Data
   document.getElementById('btnExport').addEventListener('click', async () => {
     try {
