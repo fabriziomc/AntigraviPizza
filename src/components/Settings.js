@@ -128,6 +128,14 @@ export async function renderSettings() {
               </button>
               <p class="action-help">Cancella tutte le ricette e serate pizza. Mantiene ospiti, ingredienti, preparazioni e archetipi.</p>
             </div>
+
+            <div class="action-group">
+              <button id="btnReseedIngredients" class="btn btn-warning">
+                <span class="icon">🌱</span>
+                Reseed Ingredienti
+              </button>
+              <p class="action-help">Ripopola il database con gli ingredienti base. Usa dopo un reset o se mancano ingredienti.</p>
+            </div>
           </div>
         </section>
       </div>
@@ -269,6 +277,42 @@ function setupEventListeners() {
       } catch (error) {
         console.error('Reset failed:', error);
         showToast('❌ Errore durante il reset', 'error');
+      }
+    }
+  });
+
+  // Reseed Ingredients
+  document.getElementById('btnReseedIngredients').addEventListener('click', async () => {
+    const confirmed = confirm(
+      '🌱 RESEED INGREDIENTI?\\n\\n' +
+      'Questa azione ripopolerà il database con gli ingredienti base.\\n' +
+      'Gli ingredienti custom aggiunti manualmente NON saranno eliminati.\\n\\n' +
+      'Premi OK per confermare.'
+    );
+
+    if (confirmed) {
+      try {
+        showToast('🌱 Seeding ingredienti in corso...', 'info');
+
+        const response = await fetch('/api/seed-ingredients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) throw new Error('Failed to seed ingredients');
+
+        const result = await response.json();
+        showToast(`✅ ${result.count || 136} ingredienti seedati con successo!`, 'success');
+
+        // Also seed archetype weights
+        await fetch('/api/seed-archetype-weights', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+      } catch (error) {
+        console.error('Reseed failed:', error);
+        showToast('❌ Errore durante il reseed', 'error');
       }
     }
   });
