@@ -325,21 +325,25 @@
     background: rgba(255, 255, 255, 0.08);
 }
 
-.shopping-checkbox {
+.shopping-checkbox,
+.shopping-item-checkbox {
     width: 20px;
     height: 20px;
     border: 2px solid var(--color-primary);
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all var(--transition-base);
+    flex-shrink: 0;
 }
 
-.shopping-checkbox.checked {
+.shopping-checkbox.checked,
+.shopping-item-checkbox.checked {
     background: var(--gradient-primary);
     position: relative;
 }
 
-.shopping-checkbox.checked::after {
+.shopping-checkbox.checked::after,
+.shopping-item-checkbox.checked::after {
     content: '✓';
     position: absolute;
     top: 50%;
@@ -348,6 +352,13 @@
     color: white;
     font-size: var(--text-sm);
     font-weight: 700;
+}
+
+.shopping-item-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex: 1;
 }
 
 .shopping-item-name {

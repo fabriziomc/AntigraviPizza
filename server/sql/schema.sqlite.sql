@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS PizzaNights (
     date INTEGER,
     guestCount INTEGER DEFAULT 6,
     selectedDough TEXT, -- Tipo di impasto scelto per la serata
+    availableIngredients TEXT, -- JSON array of ingredient names already available
     selectedPizzas TEXT, -- JSON
     selectedGuests TEXT, -- JSON
     notes TEXT,

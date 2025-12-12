@@ -122,19 +122,11 @@ export async function renderSettings() {
             </p>
             
             <div class="action-group">
-              <button id="btnDeleteRecipes" class="btn btn-danger">
-                <span class="icon">🍕</span>
-                Elimina Tutte le Ricette
+              <button id="btnResetRecipesAndNights" class="btn btn-danger">
+                <span class="icon">🔄</span>
+                Reset Ricette/Serate
               </button>
-              <p class="action-help">Cancella solo le ricette (mantiene serate pizza e combinazioni).</p>
-            </div>
-
-            <div class="action-group">
-              <button id="btnDeleteAll" class="btn btn-danger">
-                <span class="icon">🗑️</span>
-                Elimina Tutto
-              </button>
-              <p class="action-help">Cancella permanentemente tutte le ricette e i dati.</p>
+              <p class="action-help">Cancella tutte le ricette e serate pizza. Mantiene ospiti, ingredienti, preparazioni e archetipi.</p>
             </div>
           </div>
         </section>
@@ -234,12 +226,17 @@ function setupEventListeners() {
     fileInput.value = '';
   });
 
-  // Delete All Recipes (only recipes, not all data)
-  document.getElementById('btnDeleteRecipes').addEventListener('click', async () => {
+  // Reset Recipes and Pizza Nights
+  document.getElementById('btnResetRecipesAndNights').addEventListener('click', async () => {
     const confirmed = confirm(
-      '⚠️ ELIMINA TUTTE LE RICETTE?\n\n' +
-      'Questa azione cancellerà TUTTE le ricette.\n' +
-      'Le serate pizza e le combinazioni saranno mantenute.\n' +
+      '🔄 RESET RICETTE E SERATE?\n\n' +
+      'Questa azione cancellerà:\n' +
+      '• TUTTE le ricette\n' +
+      '• TUTTE le serate pizza\n\n' +
+      'Saranno mantenuti:\n' +
+      '• Ospiti\n' +
+      '• Ingredienti e preparazioni\n' +
+      '• Archetipi\n\n' +
       'Non può essere annullata.\n\n' +
       'Premi OK per confermare.'
     );
@@ -247,54 +244,31 @@ function setupEventListeners() {
     if (confirmed) {
       try {
         // Import database functions
-        const { getAllRecipes, deleteRecipe } = await import('../modules/database.js');
+        const { getAllRecipes, deleteRecipe, getAllPizzaNights, deletePizzaNight } = await import('../modules/database.js');
 
-        // Get all recipes
+        // Get all recipes and pizza nights
         const recipes = await getAllRecipes();
+        const nights = await getAllPizzaNights();
 
-        // Delete each recipe
+        // Delete all recipes
         for (const recipe of recipes) {
           await deleteRecipe(recipe.id);
         }
 
-        showToast(`✅ ${recipes.length} ricette eliminate con successo`, 'success');
+        // Delete all pizza nights
+        for (const night of nights) {
+          await deletePizzaNight(night.id);
+        }
+
+        showToast(`✅ Reset completato: ${recipes.length} ricette e ${nights.length} serate eliminate`, 'success');
 
         // Refresh app data
         if (window.refreshData) {
           await window.refreshData();
         }
       } catch (error) {
-        console.error('Delete recipes failed:', error);
-        showToast('❌ Errore durante l\'eliminazione delle ricette', 'error');
-      }
-    }
-  });
-
-  // Delete All Data
-  document.getElementById('btnDeleteAll').addEventListener('click', async () => {
-    const confirmed = confirm(
-      '⚠️ SEI SICURO?\n\n' +
-      'Questa azione cancellerà TUTTE le ricette e le serate pizza.\n' +
-      'Non può essere annullata.\n\n' +
-      'Premi OK per confermare.'
-    );
-
-    if (confirmed) {
-      try {
-        await clearAllData();
-
-        // Also clear the seed data flag so it can be reloaded
-        localStorage.removeItem('seedDataLoaded');
-
-        showToast('✅ Tutti i dati sono stati eliminati', 'success');
-
-        // Refresh app data
-        if (window.refreshData) {
-          await window.refreshData();
-        }
-      } catch (error) {
-        console.error('Delete failed:', error);
-        showToast('❌ Errore durante l\'eliminazione dei dati', 'error');
+        console.error('Reset failed:', error);
+        showToast('❌ Errore durante il reset', 'error');
       }
     }
   });

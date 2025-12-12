@@ -34,7 +34,8 @@ class DatabaseAdapter {
         return {
             ...record,
             selectedPizzas: typeof record.selectedPizzas === 'string' ? JSON.parse(record.selectedPizzas || '[]') : record.selectedPizzas,
-            selectedGuests: typeof record.selectedGuests === 'string' ? JSON.parse(record.selectedGuests || '[]') : record.selectedGuests
+            selectedGuests: typeof record.selectedGuests === 'string' ? JSON.parse(record.selectedGuests || '[]') : record.selectedGuests,
+            availableIngredients: typeof record.availableIngredients === 'string' ? JSON.parse(record.availableIngredients || '[]') : (record.availableIngredients || [])
         };
     }
 
@@ -211,11 +212,12 @@ class DatabaseAdapter {
     async createPizzaNight(night) {
         const selectedPizzasJson = JSON.stringify(night.selectedPizzas || []);
         const selectedGuestsJson = JSON.stringify(night.selectedGuests || []);
+        const availableIngredientsJson = JSON.stringify(night.availableIngredients || []);
 
         if (this.type === 'sqlite') {
             const stmt = this.db.prepare(`
-                INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, selectedPizzas, selectedGuests, notes, status, createdAt)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 night.id,
@@ -223,6 +225,7 @@ class DatabaseAdapter {
                 night.date,
                 night.guestCount,
                 night.selectedDough || null,
+                availableIngredientsJson,
                 selectedPizzasJson,
                 selectedGuestsJson,
                 night.notes || '',
@@ -251,17 +254,20 @@ class DatabaseAdapter {
     async updatePizzaNight(id, night) {
         const selectedPizzasJson = JSON.stringify(night.selectedPizzas || []);
         const selectedGuestsJson = JSON.stringify(night.selectedGuests || []);
+        const availableIngredientsJson = JSON.stringify(night.availableIngredients || []);
 
         if (this.type === 'sqlite') {
             const stmt = this.db.prepare(`
                 UPDATE PizzaNights 
-                SET name=?, date=?, guestCount=?, selectedPizzas=?, selectedGuests=?, notes=?, status=?
+                SET name=?, date=?, guestCount=?, selectedDough=?, availableIngredients=?, selectedPizzas=?, selectedGuests=?, notes=?, status=?
                 WHERE id=?
             `);
             stmt.run(
                 night.name,
                 night.date,
                 night.guestCount,
+                night.selectedDough || null,
+                availableIngredientsJson,
                 selectedPizzasJson,
                 selectedGuestsJson,
                 night.notes || '',

@@ -10,9 +10,10 @@ import { DOUGH_RECIPES } from '../utils/constants.js';
  * Generate shopping list for a pizza night
  * @param {Array} selectedPizzas - Array of { recipeId, quantity }
  * @param {String} selectedDough - Type of dough selected for the night
+ * @param {Array} availableIngredients - Array of ingredient names already available
  * @returns {Object} Grouped shopping list by category
  */
-export async function generateShoppingList(selectedPizzas, selectedDough = null) {
+export async function generateShoppingList(selectedPizzas, selectedDough = null, availableIngredients = []) {
     if (!selectedPizzas || selectedPizzas.length === 0) {
         return {};
     }
@@ -109,8 +110,15 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null)
         }
     }
 
+    // Filter out available ingredients (case-insensitive matching)
+    const filtered = aggregated.filter(ingredient =>
+        !availableIngredients.some(avail =>
+            avail.toLowerCase() === ingredient.name.toLowerCase()
+        )
+    );
+
     // Group by category
-    const grouped = groupByCategory(aggregated);
+    const grouped = groupByCategory(filtered);
 
     return grouped;
 }
