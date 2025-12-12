@@ -28,7 +28,12 @@ const INGREDIENTS_DB = {
         { name: 'Crema di peperoni', category: 'Salsa', phase: 'topping', postBake: false },
         { name: 'Pesto di rucola', category: 'Salsa', phase: 'topping', postBake: true },
         { name: 'Pesto rosso', category: 'Salsa', phase: 'topping', postBake: true },
-        { name: 'Salsa al pesto di olive', category: 'Salsa', phase: 'topping', postBake: true }
+        { name: 'Salsa al pesto di olive', category: 'Salsa', phase: 'topping', postBake: true },
+        // Nuove salse aggiunte
+        { name: 'Ketchup', category: 'Salsa', phase: 'topping', postBake: true },
+        { name: 'Salsa BBQ', category: 'Salsa', phase: 'topping', postBake: true },
+        { name: 'Senape', category: 'Salsa', phase: 'topping', postBake: true },
+        { name: 'Salsa al tartufo', category: 'Salsa', phase: 'topping', postBake: true }
     ],
 
     // Formaggi
@@ -54,7 +59,12 @@ const INGREDIENTS_DB = {
         { name: 'Brie', weight: [80, 120], phase: 'topping', postBake: false },
         { name: 'Grana Padano', weight: [40, 60], phase: 'topping', postBake: false },
         { name: 'Caprino fresco', weight: [70, 100], phase: 'topping', postBake: true },
-        { name: 'Stracchino', weight: [80, 120], phase: 'topping', postBake: true }
+        { name: 'Stracchino', weight: [80, 120], phase: 'topping', postBake: true },
+        // Nuovi formaggi aggiunti
+        { name: 'Bitto', weight: [70, 100], phase: 'topping', postBake: false },
+        { name: 'Casera', weight: [70, 100], phase: 'topping', postBake: false },
+        { name: 'Cheddar', weight: [80, 120], phase: 'topping', postBake: false },
+        { name: 'Feta', weight: [60, 90], phase: 'topping', postBake: true }
     ],
 
     // Carni e salumi
@@ -80,7 +90,9 @@ const INGREDIENTS_DB = {
         { name: 'Capocollo', weight: [50, 70], phase: 'topping', postBake: true },
         { name: 'Salamino piccante', weight: [50, 80], phase: 'topping', postBake: false },
         { name: 'Prosciutto di San Daniele', weight: [60, 80], phase: 'topping', postBake: true },
-        { name: 'Cotechino', weight: [80, 120], phase: 'topping', postBake: false }
+        { name: 'Cotechino', weight: [80, 120], phase: 'topping', postBake: false },
+        // Nuovi salumi aggiunti
+        { name: 'Wurstel', weight: [60, 100], phase: 'topping', postBake: false }
     ],
 
     // Verdure
@@ -117,7 +129,20 @@ const INGREDIENTS_DB = {
         { name: 'Puntarelle', weight: [50, 80], phase: 'topping', postBake: true },
         { name: 'Agretti', weight: [50, 80], phase: 'topping', postBake: false },
         { name: 'Cipolla rossa', weight: [50, 80], phase: 'topping', postBake: false },
-        { name: 'Porri', weight: [60, 100], phase: 'topping', postBake: false }
+        { name: 'Porri', weight: [60, 100], phase: 'topping', postBake: false },
+        // Nuove verdure aggiunte
+        { name: 'Pomodoro giallo', weight: [100, 150], phase: 'topping', postBake: false },
+        { name: 'Pomodorini Pachino', weight: [100, 150], phase: 'topping', postBake: false },
+        { name: 'Pomodorini gialli', weight: [100, 150], phase: 'topping', postBake: false },
+        { name: 'Carciofini', weight: [60, 100], phase: 'topping', postBake: false },
+        { name: 'Fiori di zucca', weight: [40, 70], phase: 'topping', postBake: false },
+        { name: 'Scarola', weight: [70, 100], phase: 'topping', postBake: false },
+        { name: 'Verza', weight: [80, 120], phase: 'topping', postBake: false },
+        { name: 'Aglio', weight: [10, 20], phase: 'topping', postBake: false },
+        { name: 'Olive nere', weight: [40, 60], phase: 'topping', postBake: true },
+        { name: 'Olive verdi', weight: [40, 60], phase: 'topping', postBake: true },
+        { name: 'Pappacelle', weight: [50, 80], phase: 'topping', postBake: true },
+        { name: 'Fiori di cappero', weight: [20, 40], phase: 'topping', postBake: true }
     ],
 
     // Premium (pesce e ingredienti pregiati)
@@ -136,7 +161,11 @@ const INGREDIENTS_DB = {
         { name: 'Vongole', weight: [80, 120], phase: 'topping', postBake: false },
         { name: 'Capesante', weight: [60, 100], phase: 'topping', postBake: false },
         { name: 'Tonno fresco', weight: [70, 100], phase: 'topping', postBake: true },
-        { name: 'Acciughe', weight: [30, 50], phase: 'topping', postBake: true }
+        { name: 'Acciughe', weight: [30, 50], phase: 'topping', postBake: true },
+        // Nuovo pesce aggiunto
+        { name: 'Carpaccio di tonno', weight: [60, 90], phase: 'topping', postBake: true },
+        { name: 'Gamberetti', weight: [70, 100], phase: 'topping', postBake: false },
+        { name: 'Misto pesce paella', weight: [100, 150], phase: 'topping', postBake: false }
     ],
 
     // Finishes (erbe, spezie, condimenti)
@@ -168,7 +197,18 @@ const INGREDIENTS_DB = {
         { name: 'Nocciole', weight: [30, 50], phase: 'topping', postBake: true },
         { name: 'Pinoli', weight: [20, 40], phase: 'topping', postBake: true },
         { name: 'Miele di castagno', weight: [15, 30], phase: 'topping', postBake: true },
-        { name: 'Scaglie di cioccolato', weight: [20, 40], phase: 'topping', postBake: true }
+        { name: 'Scaglie di cioccolato', weight: [20, 40], phase: 'topping', postBake: true },
+        // Nuovi condimenti/dolci aggiunti
+        { name: 'Zafferano', weight: [1, 3], phase: 'topping', postBake: false },
+        { name: 'Rafano', weight: [10, 20], phase: 'topping', postBake: true },
+        { name: 'Liquirizia in polvere', weight: [5, 10], phase: 'topping', postBake: true },
+        { name: 'Scorza di limone', weight: [5, 10], phase: 'topping', postBake: true },
+        { name: 'Scorzette di arancia', weight: [5, 10], phase: 'topping', postBake: true },
+        { name: 'Semi di sesamo tostati', weight: [10, 20], phase: 'topping', postBake: true },
+        { name: 'Fragole', weight: [60, 100], phase: 'topping', postBake: true },
+        { name: 'Confettura di fichi', weight: [30, 50], phase: 'topping', postBake: true },
+        { name: 'Confettura di pere', weight: [30, 50], phase: 'topping', postBake: true },
+        { name: 'Granella di pistacchi', weight: [20, 40], phase: 'topping', postBake: true }
     ]
 };
 
