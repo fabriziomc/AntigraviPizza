@@ -395,6 +395,29 @@ router.post('/seed-archetype-weights', async (req, res) => {
     }
 });
 
+// Seed Preparations
+router.post('/seed-preparations', async (req, res) => {
+    try {
+        // Import seed function
+        const { seedPreparations } = await import('./seed-preparations.js');
+
+        // Run seed
+        await seedPreparations();
+
+        res.json({
+            success: true,
+            message: 'Preparations seeded successfully',
+            count: 43
+        });
+    } catch (err) {
+        console.error('Seed preparations error:', err);
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
+    }
+});
+
 // ============================================
 // PIZZA OPTIMIZER ENDPOINTS
 // ============================================

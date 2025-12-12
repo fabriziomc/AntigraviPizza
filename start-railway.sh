@@ -25,6 +25,8 @@ if [ "$INGREDIENT_COUNT" = "0" ]; then
     node server/seed-ingredients.js
     echo "🎨 Seeding archetype weights..."
     node server/seed-archetype-weights.js
+    echo "🍳 Seeding preparations..."
+    node server/seed-preparations.js
     echo "✅ Database seeded successfully!"
 else
     echo "✅ Database already has $INGREDIENT_COUNT ingredients, skipping seed"
