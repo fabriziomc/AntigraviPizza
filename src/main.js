@@ -8,6 +8,7 @@ import './styles/index.css';
 import './styles/components.css';
 import './styles/preparations-selector.css';
 import './styles/ingredients.css';
+import './styles/live-mode.css';
 
 import { initDB, getAllRecipes, getAllPizzaNights, initCombinations, initSeedData, seedPreparations } from './modules/database.js';
 import { NAV_ITEMS, VIEWS, FLAVOR_COMBINATIONS, PREPARATIONS } from './utils/constants.js';

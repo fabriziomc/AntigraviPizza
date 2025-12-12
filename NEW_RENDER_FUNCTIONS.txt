@@ -1,0 +1,109 @@
+// NEW RENDER FUNCTIONS - Replace renderLivePizza, renderLiveIngredients, renderLivePreparations
+
+function renderLivePizza() {
+  const pizza = liveModeState.pizzas[liveModeState.currentIndex];
+  const total = liveModeState.pizzas.length;
+  const current = liveModeState.currentIndex + 1;
+  
+  // Update progress
+  document.querySelector('.progress-indicator').textContent = 
+    `Pizza ${current} di ${total}`;
+  
+  // Update pizza name
+  document.querySelector('.pizza-name').textContent = pizza.name || 'Pizza';
+  
+  // Separate ingredients and preparations by phase
+  const ingredients = pizza.baseIngredients || [];
+  const preparations = pizza.preparations || [];
+  
+  const beforeIngredients = ingredients.filter(ing => !ing.postBake);
+  const afterIngredients = ingredients.filter(ing => ing.postBake === true);
+  
+  const beforePreparations = preparations.filter(prep => !prep.timing || prep.timing === 'before');
+  const afterPreparations = preparations.filter(prep => prep.timing === 'after');
+  
+  // Render BEFORE cooking content
+  renderCookingPhaseContent('beforeCookingContent', beforeIngredients, beforePreparations, 'before');
+  
+  // Render AFTER cooking content
+  renderCookingPhaseContent('afterCookingContent', afterIngredients, afterPreparations, 'after');
+  
+  // Update navigation buttons
+  updateLiveNavigation();
+}
+
+function renderCookingPhaseContent(containerId, ingredients, preparations, phase) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  let html = '';
+  
+  // Check if there's any content for this phase
+  if (ingredients.length === 0 && preparations.length === 0) {
+    html = `<p class="text-muted" style="text-align: center; padding: 2rem;">Nessun ingrediente o preparazione per questa fase</p>`;
+    container.innerHTML = html;
+    return;
+  }
+  
+  // Render ingredients for this phase
+  if (ingredients.length > 0) {
+    html += '<div style="margin-bottom: 2rem;"><h4 style="color: var(--color-primary-light); margin-bottom: 1rem;">📦 Ingredienti</h4>';
+    html += '<div class="ingredient-grid">';
+    
+    html += ingredients.map((ing, i) => {
+      const ingName = ing.name || ing;
+      const quantity = ing.quantity || '';
+      const unit = ing.unit || '';
+      const checkKey = `${liveModeState.currentIndex}-ing-${phase}-${i}`;
+      const isChecked = liveModeState.checkedIngredients[checkKey] || false;
+      
+      return `
+        <div class="ingredient-item">
+          <input type="checkbox" id="ing-${phase}-${i}" 
+            ${isChecked ? 'checked' : ''}
+            onchange="window.saveIngredientCheck('${phase}-${i}', this.checked)">
+          <label for="ing-${phase}-${i}">
+            ${ingName}${quantity ? ` - ${quantity}${unit}` : ''}
+          </label>
+        </div>
+      `;
+    }).join('');
+    
+    html += '</div></div>';
+  }
+  
+  // Render preparations for this phase
+  if (preparations.length > 0) {
+    html += '<div><h4 style="color: var(--color-primary-light); margin-bottom: 1rem;">👨‍🍳 Preparazioni</h4>';
+    html += '<div class="preparation-steps">';
+    
+    html += preparations.map((prep, i) => {
+      let prepName = '';
+      if (typeof prep === 'string') {
+        prepName = prep;
+      } else if (prep && typeof prep === 'object') {
+        prepName = prep.name || prep.preparationName || prep.id || 'Preparazione';
+      } else {
+        prepName = 'Preparazione';
+      }
+      
+      const checkKey = `${liveModeState.currentIndex}-prep-${phase}-${i}`;
+      const isChecked = liveModeState.checkedPreparations[checkKey] || false;
+      
+      return `
+        <div class="step">
+          <input type="checkbox" id="prep-${phase}-${i}"
+            ${isChecked ? 'checked' : ''}
+            onchange="window.savePrepCheck('${phase}-${i}', this.checked)">
+          <label for="prep-${phase}-${i}">
+            ${prepName}
+          </label>
+        </div>
+      `;
+    }).join('');
+    
+    html += '</div></div>';
+  }
+  
+  container.innerHTML = html;
+}

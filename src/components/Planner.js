@@ -14,6 +14,62 @@ import { DEFAULT_GUEST_COUNT } from '../utils/constants.js';
 export async function renderPlanner(appState) {
   await renderPizzaNights();
   setupPlannerListeners();
+
+  // Inject live mode HTML structure if not already present
+  if (!document.getElementById('liveModeContainer')) {
+    const liveModeHTML = `
+      <div id="liveModeContainer" style="display: none;">
+        <!-- Header -->
+        <div class="live-header">
+          <h1>🍕 Serata Pizza</h1>
+          <div class="progress-indicator">Pizza 1 di 1</div>
+          <button class="btn-exit" onclick="window.exitLiveMode()">✕ Esci</button>
+        </div>
+
+        <!-- Current Pizza Display -->
+        <div class="live-pizza-card">
+          <h2 class="pizza-name">Caricamento...</h2>
+          
+          <!-- Before Cooking Section -->
+          <div class="cooking-phase-section">
+            <h3 style="color: var(--color-primary-light); font-size: 1.75rem; margin-bottom: 1.5rem;">🔥 Prima della Cottura</h3>
+            <div id="beforeCookingContent">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Cooking Instructions -->
+          <div class="cooking-section">
+            <h3>🔥 Cottura</h3>
+            <p id="liveCookingInstructions">Forno a 250°C per 8-10 minuti</p>
+          </div>
+          
+          <!-- After Cooking Section -->
+          <div class="cooking-phase-section">
+            <h3 style="color: var(--color-accent-light); font-size: 1.75rem; margin-bottom: 1.5rem;">✨ Dopo la Cottura</h3>
+            <div id="afterCookingContent">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="live-footer">
+          <button class="btn btn-secondary" onclick="window.previousPizza()" id="btnPrev" style="display: none;">
+            ← Precedente
+          </button>
+          <button class="btn btn-primary" onclick="window.nextPizza()" id="btnNext">
+            Prossima →
+          </button>
+          <button class="btn btn-success" onclick="window.completePizzaNightLive()" id="btnComplete" style="display: none;">
+            ✓ Completa Serata
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', liveModeHTML);
+  }
 }
 
 async function showNewPizzaNightModal() {
@@ -831,6 +887,12 @@ async function viewPizzaNightDetails(nightId) {
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
+      ${night.selectedPizzas.length > 0 && night.status === 'planned' ? `
+        <button class="btn btn-success" onclick="window.startLiveMode('${night.id}')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+          <span>🍕</span>
+          Avvia Serata
+        </button>
+      ` : ''}
       ${night.selectedPizzas.length > 0 ? `
         <button class="btn btn-primary" onclick="window.viewShoppingListForNight('${night.id}')">
           <span>🛒</span>
@@ -961,6 +1023,290 @@ async function confirmDeletePizzaNight(nightId) {
   }
 }
 
+// ============================================
+// LIVE MODE FUNCTIONS
+// ============================================
+
+let liveModeState = {
+  nightId: null,
+  pizzas: [],
+  currentIndex: 0,
+  checkedIngredients: {},
+  checkedPreparations: {}
+};
+
+async function startLiveMode(nightId) {
+  try {
+    // Fetch pizza night data
+    const night = await getPizzaNightById(nightId);
+
+    console.log('🔍 Night data:', night);
+
+    if (!night || !night.selectedPizzas || night.selectedPizzas.length === 0) {
+      alert('Nessuna pizza trovata per questa serata!');
+      return;
+    }
+
+    // Load full recipe data for each selected pizza
+    const pizzas = [];
+    for (const selectedPizza of night.selectedPizzas) {
+      const recipeId = selectedPizza.recipeId || selectedPizza.id;
+      const recipe = await getRecipeById(recipeId);
+
+
+      if (recipe) {
+        // Add quantity info to recipe
+        recipe.quantity = selectedPizza.quantity || 1;
+
+        // Load full preparation data if preparations exist
+        if (recipe.preparations && recipe.preparations.length > 0) {
+          const fullPreparations = [];
+          for (const prep of recipe.preparations) {
+            if (typeof prep === 'object' && prep.id) {
+              // Load full preparation data from database
+              const { getPreparationById } = await import('../modules/database.js');
+              const fullPrep = await getPreparationById(prep.id);
+              if (fullPrep) {
+                // Merge quantity/timing info with full preparation data
+                fullPreparations.push({
+                  ...fullPrep,
+                  quantity: prep.quantity,
+                  unit: prep.unit,
+                  timing: prep.timing
+                });
+              } else {
+                // Fallback if preparation not found
+                fullPreparations.push({ name: prep.id, ...prep });
+              }
+            } else {
+              // Already a string or full object
+              fullPreparations.push(prep);
+            }
+          }
+          recipe.preparations = fullPreparations;
+        }
+
+        pizzas.push(recipe);
+      }
+    }
+
+    if (pizzas.length === 0) {
+      alert('Impossibile caricare i dati delle pizze!');
+      return;
+    }
+
+    // Initialize state
+    liveModeState.nightId = nightId;
+    liveModeState.pizzas = pizzas;
+    liveModeState.currentIndex = 0;
+    liveModeState.checkedIngredients = {};
+    liveModeState.checkedPreparations = {};
+
+    // Show live mode UI
+    const container = document.getElementById('liveModeContainer');
+    if (container) {
+      container.style.display = 'flex';
+      document.body.style.overflow = 'hidden'; // Prevent scroll
+
+      // Render first pizza
+      renderLivePizza();
+
+      // Close modal
+      closeModal();
+    }
+  } catch (error) {
+    console.error('Failed to start live mode:', error);
+    alert('Errore nell\'avvio della serata: ' + error.message);
+  }
+}
+
+function renderLivePizza() {
+  const pizza = liveModeState.pizzas[liveModeState.currentIndex];
+  const total = liveModeState.pizzas.length;
+  const current = liveModeState.currentIndex + 1;
+
+  // Update progress
+  document.querySelector('.progress-indicator').textContent =
+    `Pizza ${current} di ${total}`;
+
+  // Update pizza name
+  document.querySelector('.pizza-name').textContent = pizza.name || 'Pizza';
+
+  // Separate ingredients and preparations by phase
+  const ingredients = pizza.baseIngredients || [];
+  const preparations = pizza.preparations || [];
+
+  const beforeIngredients = ingredients.filter(ing => !ing.postBake);
+  const afterIngredients = ingredients.filter(ing => ing.postBake === true);
+
+  const beforePreparations = preparations.filter(prep => !prep.timing || prep.timing === 'before');
+  const afterPreparations = preparations.filter(prep => prep.timing === 'after');
+
+  // Render BEFORE cooking content
+  renderCookingPhaseContent('beforeCookingContent', beforeIngredients, beforePreparations, 'before');
+
+  // Render AFTER cooking content
+  renderCookingPhaseContent('afterCookingContent', afterIngredients, afterPreparations, 'after');
+
+  // Update navigation buttons
+  updateLiveNavigation();
+}
+
+function renderCookingPhaseContent(containerId, ingredients, preparations, phase) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  let html = '';
+
+  // Check if there's any content for this phase
+  if (ingredients.length === 0 && preparations.length === 0) {
+    html = `<p class="text-muted" style="text-align: center; padding: 2rem;">Nessun ingrediente o preparazione per questa fase</p>`;
+    container.innerHTML = html;
+    return;
+  }
+
+  // Render ingredients for this phase
+  if (ingredients.length > 0) {
+    html += '<div style="margin-bottom: 2rem;"><h4 style="color: var(--color-primary-light); margin-bottom: 1rem;">📦 Ingredienti</h4>';
+    html += '<div class="ingredient-grid">';
+
+    html += ingredients.map((ing, i) => {
+      const ingName = ing.name || ing;
+      const quantity = ing.quantity || '';
+      const unit = ing.unit || '';
+      const checkKey = `${liveModeState.currentIndex}-ing-${phase}-${i}`;
+      const isChecked = liveModeState.checkedIngredients[checkKey] || false;
+
+      return `
+        <div class="ingredient-item">
+          <input type="checkbox" id="ing-${phase}-${i}" 
+            ${isChecked ? 'checked' : ''}
+            onchange="window.saveIngredientCheck('${phase}-${i}', this.checked)">
+          <label for="ing-${phase}-${i}">
+            ${ingName}${quantity ? ` - ${quantity}${unit}` : ''}
+          </label>
+        </div>
+      `;
+    }).join('');
+
+    html += '</div></div>';
+  }
+
+  // Render preparations for this phase
+  if (preparations.length > 0) {
+    html += '<div><h4 style="color: var(--color-primary-light); margin-bottom: 1rem;">👨‍🍳 Preparazioni</h4>';
+    html += '<div class="preparation-steps">';
+
+    html += preparations.map((prep, i) => {
+      let prepName = '';
+      if (typeof prep === 'string') {
+        prepName = prep;
+      } else if (prep && typeof prep === 'object') {
+        prepName = prep.name || prep.preparationName || prep.id || 'Preparazione';
+      } else {
+        prepName = 'Preparazione';
+      }
+
+      const checkKey = `${liveModeState.currentIndex}-prep-${phase}-${i}`;
+      const isChecked = liveModeState.checkedPreparations[checkKey] || false;
+
+      return `
+        <div class="step">
+          <input type="checkbox" id="prep-${phase}-${i}"
+            ${isChecked ? 'checked' : ''}
+            onchange="window.savePrepCheck('${phase}-${i}', this.checked)">
+          <label for="prep-${phase}-${i}">
+            ${prepName}
+          </label>
+        </div>
+      `;
+    }).join('');
+
+    html += '</div></div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function saveIngredientCheck(index, checked) {
+  const checkKey = `${liveModeState.currentIndex}-ing-${index}`;
+  liveModeState.checkedIngredients[checkKey] = checked;
+}
+
+function savePrepCheck(index, checked) {
+  const checkKey = `${liveModeState.currentIndex}-prep-${index}`;
+  liveModeState.checkedPreparations[checkKey] = checked;
+}
+
+function updateLiveNavigation() {
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  const btnComplete = document.getElementById('btnComplete');
+
+  if (!btnPrev || !btnNext || !btnComplete) return;
+
+  // Show/hide previous button
+  btnPrev.style.display = liveModeState.currentIndex > 0 ? 'block' : 'none';
+
+  // Show next or complete button
+  const isLast = liveModeState.currentIndex === liveModeState.pizzas.length - 1;
+  btnNext.style.display = isLast ? 'none' : 'block';
+  btnComplete.style.display = isLast ? 'block' : 'none';
+}
+
+function previousPizza() {
+  if (liveModeState.currentIndex > 0) {
+    liveModeState.currentIndex--;
+    renderLivePizza();
+
+    // Scroll to top
+    const container = document.getElementById('liveModeContainer');
+    if (container) container.scrollTop = 0;
+  }
+}
+
+function nextPizza() {
+  if (liveModeState.currentIndex < liveModeState.pizzas.length - 1) {
+    liveModeState.currentIndex++;
+    renderLivePizza();
+
+    // Scroll to top
+    const container = document.getElementById('liveModeContainer');
+    if (container) container.scrollTop = 0;
+  }
+}
+
+async function completePizzaNightLive() {
+  if (confirm('Segnare la serata come completata?')) {
+    try {
+      await completePizzaNight(liveModeState.nightId);
+      exitLiveMode();
+      await renderPizzaNights(); // Refresh list
+      alert('🎉 Serata completata! Buon appetito!');
+    } catch (error) {
+      console.error('Failed to complete pizza night:', error);
+      alert('Errore nel completare la serata: ' + error.message);
+    }
+  }
+}
+
+function exitLiveMode() {
+  const container = document.getElementById('liveModeContainer');
+  if (container) {
+    container.style.display = 'none';
+  }
+  document.body.style.overflow = 'auto';
+
+  // Reset state
+  liveModeState = {
+    nightId: null,
+    pizzas: [],
+    currentIndex: 0,
+    checkedIngredients: {},
+    checkedPreparations: {}
+  };
+}
+
 // Global functions for modals (still needed for inline onclick in modals)
 window.viewPizzaNightDetails = viewPizzaNightDetails;
 window.submitNewPizzaNight = submitNewPizzaNight;
@@ -974,3 +1320,10 @@ window.submitNewGuest = submitNewGuest;
 window.deleteGuestAction = deleteGuestAction;
 window.generateAutoPizzas = generateAutoPizzas;
 window.generateMixedPizzas = generateMixedPizzas;
+window.startLiveMode = startLiveMode;
+window.exitLiveMode = exitLiveMode;
+window.previousPizza = previousPizza;
+window.nextPizza = nextPizza;
+window.completePizzaNightLive = completePizzaNightLive;
+window.saveIngredientCheck = saveIngredientCheck;
+window.savePrepCheck = savePrepCheck;
