@@ -2,8 +2,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install curl for healthcheck
-RUN apk add --no-cache curl
+# Install curl for healthcheck and sqlite3 for database checks
+RUN apk add --no-cache curl sqlite
 
 # Copy package files
 COPY package*.json ./
@@ -23,6 +23,9 @@ RUN npm prune --production
 # Create data directory for SQLite database
 RUN mkdir -p /app/data
 
+# Make startup script executable
+RUN chmod +x /app/start-railway.sh
+
 # Expose port
 EXPOSE 3000
 
@@ -31,5 +34,5 @@ ENV DB_TYPE=sqlite
 ENV SQLITE_DB_PATH=/app/data/antigravipizza.db
 ENV NODE_ENV=production
 
-# Start server (serves both API and built frontend)
-CMD ["node", "server/index.js"]
+# Start with initialization script
+CMD ["/app/start-railway.sh"]
