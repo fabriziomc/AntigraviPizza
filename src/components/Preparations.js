@@ -590,6 +590,7 @@ function showPreparationModal(prepId) {
         </div>
         
         <!-- Instructions -->
+        ${prep.instructions && prep.instructions.length > 0 ? `
         <div class="preparation-section">
           <h3 class="section-title">👨‍🍳 Procedimento</h3>
           <ol class="instructions-list">
@@ -598,6 +599,12 @@ function showPreparationModal(prepId) {
             `).join('')}
           </ol>
         </div>
+        ` : prep.description ? `
+        <div class="preparation-section">
+          <h3 class="section-title">📝 Ricetta</h3>
+          <p>${prep.description.startsWith('http') ? `<a href="${prep.description}" target="_blank" rel="noopener">Vedi ricetta completa →</a>` : prep.description}</p>
+        </div>
+        ` : ''}
       </div>
       
       ${prep.tips && prep.tips.length > 0 ? `
