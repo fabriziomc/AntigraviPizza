@@ -409,5 +409,7 @@ function seedPreparations() {
 // Export for API use
 export { seedPreparations };
 
-// Run seed if executed directly
-seedPreparations().catch(console.error);
+// Run seed if executed directly (not via import)
+if (import.meta.url === `file://${process.argv[1]}`) {
+    seedPreparations().catch(console.error);
+}
