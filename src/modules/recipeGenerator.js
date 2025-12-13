@@ -566,75 +566,194 @@ function determineTags(ingredients, doughType) {
 }
 
 /**
- * Seleziona preparazioni intelligenti basate sugli ingredienti e tipo pizza
+ * Seleziona preparazioni intelligenti dal database basate sugli ingredienti e tipo pizza
  */
-function selectPreparationsForPizza(ingredients, tags) {
+async function selectPreparationsForPizza(ingredients, tags) {
+    // Carica tutte le preparazioni dal database
+    const { getAllPreparations } = await import('./database.js');
+    const allPreparations = await getAllPreparations();
+
+    if (!allPreparations || allPreparations.length === 0) {
+        return [];
+    }
+
     const preparations = [];
-    const hasTomato = ingredients.some(i => i.name.includes('Pomodoro'));
+    const hasTomato = ingredients.some(i => i.name.toLowerCase().includes('pomodoro'));
     const hasMeat = ingredients.some(i => i.category === 'Carne');
     const hasVegetables = ingredients.some(i => i.category === 'Verdure');
     const isPremium = tags.includes('Premium') || tags.includes('Gourmet');
+    const isVegetarian = tags.includes('Vegetariana');
 
-    // Pizza Bianca -> Alta probabilità creme
-    if (!hasTomato && Math.random() > 0.4) {
-        const creamOptions = ['crema-patate', 'crema-zucca', 'crema-burrata', 'crema-pistacchio'];
-        const selectedCream = creamOptions[Math.floor(Math.random() * creamOptions.length)];
-        preparations.push({
-            id: selectedCream,
-            quantity: Math.floor(80 + Math.random() * 40), // 80-120g
-            unit: 'g',
-            timing: 'before'
-        });
-    }
+    // Estrai nomi ingredienti per matching
+    const ingredientNames = ingredients.map(i => i.name.toLowerCase());
 
-    // Carne + Verdure -> Possibile salsa/pesto
-    if (hasMeat && hasVegetables && Math.random() > 0.6) {
-        const sauceOptions = ['pesto-basilico', 'salsa-verde', 'pesto-rucola'];
-        const selectedSauce = sauceOptions[Math.floor(Math.random() * sauceOptions.length)];
-        preparations.push({
-            id: selectedSauce,
-            quantity: Math.floor(40 + Math.random() * 30), // 40-70g
-            unit: 'g',
-            timing: 'after'
-        });
-    }
+    // STRATEGIA 1: Matching per ingredienti specifici (priorità alta)
+    const ingredientMatches = [];
 
-    // Premium/Gourmet -> Preparazioni speciali
-    if (isPremium && Math.random() > 0.5) {
-        const premiumOptions = ['crema-tartufo', 'pesto-pistacchio', 'salsa-balsamico'];
-        const selectedPremium = premiumOptions[Math.floor(Math.random() * premiumOptions.length)];
-
-        // Verifica che la preparazione esista in PREPARATIONS
-        if (PREPARATIONS.find(p => p.id === selectedPremium)) {
-            preparations.push({
-                id: selectedPremium,
-                quantity: Math.floor(30 + Math.random() * 30), // 30-60g
-                unit: 'g',
-                timing: 'after'
-            });
-        }
-    }
-
-    // Ingredienti specifici -> Preparazioni mirate
-    if (ingredients.some(i => i.name.includes('Salsiccia') || i.name.includes('Friarielli'))) {
-        if (PREPARATIONS.find(p => p.id === 'crema-friarielli') && Math.random() > 0.5) {
-            preparations.push({
-                id: 'crema-friarielli',
-                quantity: 80,
+    // Funghi -> Funghi trifolati
+    if (ingredientNames.some(n => n.includes('funghi'))) {
+        const prep = allPreparations.find(p => p.id === 'funghi-trifolati');
+        if (prep && Math.random() > 0.4) {
+            ingredientMatches.push({
+                id: prep.id,
+                quantity: Math.floor(60 + Math.random() * 40), // 60-100g
                 unit: 'g',
                 timing: 'before'
             });
         }
     }
 
-    if (ingredients.some(i => i.name.includes('Funghi'))) {
-        if (PREPARATIONS.find(p => p.id === 'crema-funghi') && Math.random() > 0.6) {
-            preparations.push({
-                id: 'crema-funghi',
-                quantity: 70,
+    // Patate -> Crema di patate o dadolata
+    if (ingredientNames.some(n => n.includes('patate') || n.includes('patata'))) {
+        const options = allPreparations.filter(p =>
+            p.id.includes('patate') && p.category === 'Creme'
+        );
+        if (options.length > 0 && Math.random() > 0.5) {
+            const selected = options[Math.floor(Math.random() * options.length)];
+            ingredientMatches.push({
+                id: selected.id,
+                quantity: Math.floor(80 + Math.random() * 40), // 80-120g
                 unit: 'g',
                 timing: 'before'
             });
+        }
+    }
+
+    // Nduja/Piccante -> Salsa nduja
+    if (ingredientNames.some(n => n.includes('nduja') || n.includes('piccante'))) {
+        const prep = allPreparations.find(p => p.id === 'salsa-nduja');
+        if (prep && Math.random() > 0.6) {
+            ingredientMatches.push({
+                id: prep.id,
+                quantity: Math.floor(40 + Math.random() * 30), // 40-70g
+                unit: 'g',
+                timing: 'before'
+            });
+        }
+    }
+
+    // Aggiungi match ingredienti trovati
+    preparations.push(...ingredientMatches);
+
+    // STRATEGIA 2: Matching per stile pizza (se non abbiamo già troppe preparazioni)
+    if (preparations.length < 2) {
+        // Pizza Bianca -> Creme
+        if (!hasTomato && Math.random() > 0.4) {
+            const creamOptions = allPreparations.filter(p =>
+                p.category === 'Creme' &&
+                !preparations.some(prep => prep.id === p.id) // Evita duplicati
+            );
+
+            if (creamOptions.length > 0) {
+                const selected = creamOptions[Math.floor(Math.random() * creamOptions.length)];
+                preparations.push({
+                    id: selected.id,
+                    quantity: Math.floor(80 + Math.random() * 40), // 80-120g
+                    unit: 'g',
+                    timing: 'before'
+                });
+            }
+        }
+
+        // Pizza con Carne -> Salse saporite
+        if (hasMeat && Math.random() > 0.5) {
+            const sauceOptions = allPreparations.filter(p =>
+                (p.category === 'Salse' || p.category === 'Condimenti') &&
+                !p.name.toLowerCase().includes('pesto') && // Escludi pesti per carne
+                !preparations.some(prep => prep.id === p.id)
+            );
+
+            if (sauceOptions.length > 0) {
+                const selected = sauceOptions[Math.floor(Math.random() * sauceOptions.length)];
+                preparations.push({
+                    id: selected.id,
+                    quantity: Math.floor(50 + Math.random() * 30), // 50-80g
+                    unit: 'g',
+                    timing: Math.random() > 0.5 ? 'before' : 'after'
+                });
+            }
+        }
+
+        // Pizza Vegetariana -> Pesti e creme vegetali
+        if (isVegetarian && hasVegetables && Math.random() > 0.5) {
+            const pestoOptions = allPreparations.filter(p =>
+                (p.name.toLowerCase().includes('pesto') ||
+                    (p.category === 'Creme' && !p.name.toLowerCase().includes('carne'))) &&
+                !preparations.some(prep => prep.id === p.id)
+            );
+
+            if (pestoOptions.length > 0) {
+                const selected = pestoOptions[Math.floor(Math.random() * pestoOptions.length)];
+                preparations.push({
+                    id: selected.id,
+                    quantity: Math.floor(40 + Math.random() * 30), // 40-70g
+                    unit: 'g',
+                    timing: 'after' // Pesti meglio a crudo
+                });
+            }
+        }
+
+        // Pizza Premium/Gourmet -> Preparazioni raffinate
+        if (isPremium && Math.random() > 0.5) {
+            const premiumOptions = allPreparations.filter(p =>
+                (p.name.toLowerCase().includes('tartufo') ||
+                    p.name.toLowerCase().includes('pistacchio') ||
+                    p.name.toLowerCase().includes('balsamico') ||
+                    p.name.toLowerCase().includes('gorgonzola')) &&
+                !preparations.some(prep => prep.id === p.id)
+            );
+
+            if (premiumOptions.length > 0) {
+                const selected = premiumOptions[Math.floor(Math.random() * premiumOptions.length)];
+                preparations.push({
+                    id: selected.id,
+                    quantity: Math.floor(30 + Math.random() * 30), // 30-60g
+                    unit: 'g',
+                    timing: 'after'
+                });
+            }
+        }
+    }
+
+    // STRATEGIA 3: Matching per categoria verdure specifiche
+    if (preparations.length < 2) {
+        // Melanzane -> Melanzane grigliate
+        if (ingredientNames.some(n => n.includes('melanzane'))) {
+            const prep = allPreparations.find(p => p.id === 'melanzane-grigliate' || p.id === 'prep-melanzane-grigliate');
+            if (prep && Math.random() > 0.6) {
+                preparations.push({
+                    id: prep.id,
+                    quantity: Math.floor(60 + Math.random() * 40),
+                    unit: 'g',
+                    timing: 'before'
+                });
+            }
+        }
+
+        // Cipolla -> Cipolla caramellata
+        if (ingredientNames.some(n => n.includes('cipolla'))) {
+            const prep = allPreparations.find(p => p.id === 'cipolla-caramellata' || p.id === 'prep-cipolla-caramellata');
+            if (prep && Math.random() > 0.6) {
+                preparations.push({
+                    id: prep.id,
+                    quantity: Math.floor(50 + Math.random() * 30),
+                    unit: 'g',
+                    timing: 'before'
+                });
+            }
+        }
+
+        // Pomodorini -> Pomodori confit
+        if (ingredientNames.some(n => n.includes('pomodorini'))) {
+            const prep = allPreparations.find(p => p.id === 'pomodori-confit' || p.id === 'prep-pomodorini-confit');
+            if (prep && Math.random() > 0.7) {
+                preparations.push({
+                    id: prep.id,
+                    quantity: Math.floor(60 + Math.random() * 40),
+                    unit: 'g',
+                    timing: 'before'
+                });
+            }
         }
     }
 
@@ -860,7 +979,7 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
     const tags = determineTags(ingredients, doughType);
 
     // Seleziona preparazioni intelligenti
-    const preparations = selectPreparationsForPizza(ingredients, tags);
+    const preparations = await selectPreparationsForPizza(ingredients, tags);
 
     const imagePrompt = `gourmet pizza ${pizzaName}, toppings: ${mainIngredientNames.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
     const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}`;
