@@ -533,11 +533,26 @@ function seedPreparations() {
     let inserted = 0;
     PREPARATIONS_DB.forEach(prep => {
         try {
+            // Convert ingredients from strings to objects if needed
+            let ingredientsData = prep.ingredients;
+
+            // Check if ingredients are strings (old format)
+            if (ingredientsData.length > 0 && typeof ingredientsData[0] === 'string') {
+                // Convert strings to objects
+                ingredientsData = ingredientsData.map(ingName => ({
+                    name: ingName,
+                    quantity: 100, // Default quantity
+                    unit: 'g',      // Default unit
+                    perPortion: 25, // Default per portion (assuming 4 portions)
+                    category: 'Altro'
+                }));
+            }
+
             const result = stmt.run(
                 generateId(prep.name),
                 prep.name,
                 prep.description,
-                JSON.stringify(prep.ingredients),
+                JSON.stringify(ingredientsData),
                 prep.category,
                 now,
                 0 // isCustom = 0 for seeded preparations
