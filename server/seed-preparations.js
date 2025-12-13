@@ -347,11 +347,166 @@ const PREPARATIONS_DB = [
         phase: 'topping',
         postBake: true
     },
+    // ============================================
+    // ADDITIONAL COMMON PREPARATIONS
+    // ============================================
     {
-        name: 'Ragù napoletano',
-        description: 'Ragù tradizionale napoletano con carne mista',
-        ingredients: ['Carne macinata', 'Pomodoro', 'Cipolla', 'Carota', 'Sedano', 'Vino rosso'],
+        name: 'Crema di Patate',
+        description: 'Crema vellutata di patate per base pizza',
+        ingredients: ['Patate', 'Latte', 'Burro', 'Sale'],
+        category: 'Creme',
+        phase: 'topping',
+        postBake: false
+    },
+    {
+        name: 'Crema di Zucca',
+        description: 'Crema dolce di zucca per pizze gourmet',
+        ingredients: ['Zucca', 'Olio', 'Sale', 'Pepe'],
+        category: 'Creme',
+        phase: 'topping',
+        postBake: false
+    },
+    {
+        name: 'Crema di Carciofi',
+        description: 'Crema delicata di carciofi',
+        ingredients: ['Carciofi', 'Limone', 'Olio', 'Aglio'],
+        category: 'Creme',
+        phase: 'topping',
+        postBake: false
+    },
+    {
+        name: 'Crema di Pistacchio',
+        description: 'Crema dolce di pistacchi per pizze creative',
+        ingredients: ['Pistacchi', 'Olio', 'Sale'],
+        category: 'Creme',
+        phase: 'topping',
+        postBake: true
+    },
+    {
+        name: 'Crema di Gorgonzola',
+        description: 'Crema saporita di gorgonzola',
+        ingredients: ['Gorgonzola', 'Panna', 'Latte'],
+        category: 'Creme',
+        phase: 'topping',
+        postBake: false
+    },
+    {
+        name: 'Crema di Burrata',
+        description: 'Crema delicata di burrata',
+        ingredients: ['Burrata', 'Olio', 'Sale'],
+        category: 'Basi',
+        phase: 'topping',
+        postBake: true
+    },
+    {
+        name: 'Crema di Ricotta',
+        description: 'Crema leggera di ricotta',
+        ingredients: ['Ricotta', 'Olio', 'Sale', 'Pepe'],
+        category: 'Basi',
+        phase: 'topping',
+        postBake: false
+    },
+    {
+        name: 'Pesto di Basilico',
+        description: 'Pesto classico genovese',
+        ingredients: ['Basilico', 'Pinoli', 'Parmigiano', 'Aglio', 'Olio'],
         category: 'Salse',
+        phase: 'topping',
+        postBake: true
+    },
+    {
+        name: 'Pesto di Olive Taggiasche',
+        description: 'Pesto di olive taggiasche',
+        ingredients: ['Olive taggiasche', 'Olio', 'Aglio'],
+        category: 'Salse',
+        phase: 'topping',
+        postBake: true
+    },
+    {
+        name: 'Pesto di Pomodori Secchi',
+        description: 'Pesto intenso di pomodori secchi',
+        ingredients: ['Pomodori secchi', 'Olio', 'Aglio', 'Basilico'],
+        category: 'Salse',
+        phase: 'topping',
+        postBake: true
+    },
+    {
+        name: 'Salsa BBQ',
+        description: 'Salsa barbecue americana',
+        ingredients: ['Pomodoro', 'Zucchero di canna', 'Aceto', 'Spezie'],
+        category: 'Salse',
+        phase: 'topping',
+        postBake: false
+    },
+    {
+        name: 'Salsa di Nduja',
+        description: 'Salsa piccante calabrese',
+        ingredients: ['Nduja', 'Olio', 'Aglio'],
+        category: 'Salse',
+        phase: 'topping',
+        postBake: false
+    },
+    {
+        name: 'Salsa al Tartufo',
+        description: 'Salsa cremosa al tartufo',
+        ingredients: ['Tartufo nero', 'Panna', 'Olio', 'Sale'],
+        category: 'Salse',
+        phase: 'topping',
+        postBake: true
+    },
+    {
+        name: 'Riduzione di Aceto Balsamico',
+        description: 'Aceto balsamico ridotto e concentrato',
+        ingredients: ['Aceto balsamico', 'Zucchero'],
+        category: 'Salse',
+        phase: 'topping',
+        postBake: true
+    },
+    {
+        name: 'Cipolla Caramellata',
+        description: 'Cipolle rosse caramellate',
+        ingredients: ['Cipolle rosse', 'Zucchero di canna', 'Burro'],
+        category: 'Condimenti',
+        phase: 'topping',
+        postBake: false
+    },
+    {
+        name: 'Funghi Trifolati',
+        description: 'Funghi saltati in padella con aglio e prezzemolo',
+        ingredients: ['Funghi', 'Aglio', 'Prezzemolo', 'Olio'],
+        category: 'Condimenti',
+        phase: 'topping',
+        postBake: false
+    },
+    {
+        name: 'Guanciale Croccante',
+        description: 'Guanciale croccante tagliato a cubetti',
+        ingredients: ['Guanciale'],
+        category: 'Condimenti',
+        phase: 'topping',
+        postBake: false
+    },
+    {
+        name: 'Melanzane Grigliate',
+        description: 'Melanzane grigliate a fette',
+        ingredients: ['Melanzane', 'Olio', 'Sale'],
+        category: 'Condimenti',
+        phase: 'topping',
+        postBake: false
+    },
+    {
+        name: 'Peperoni Arrosto',
+        description: 'Peperoni arrostiti e pelati',
+        ingredients: ['Peperoni', 'Olio', 'Aglio'],
+        category: 'Condimenti',
+        phase: 'topping',
+        postBake: false
+    },
+    {
+        name: 'Pomodori Confit',
+        description: 'Pomodorini confit al forno',
+        ingredients: ['Pomodorini', 'Olio', 'Timo', 'Aglio'],
+        category: 'Condimenti',
         phase: 'topping',
         postBake: false
     }

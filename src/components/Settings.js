@@ -122,11 +122,11 @@ export async function renderSettings() {
             </p>
             
             <div class="action-group">
-              <button id="btnResetRecipesAndNights" class="btn btn-danger">
+              <button id="btnResetArchives" class="btn btn-danger">
                 <span class="icon">🔄</span>
-                Reset Ricette/Serate
+                Reset Archivi
               </button>
-              <p class="action-help">Cancella tutte le ricette e serate pizza, poi ripopola gli ingredienti base. Mantiene ospiti, preparazioni e archetipi.</p>
+              <p class="action-help">Cancella tutte le ricette e serate pizza, poi ripopola ingredienti base (136) e preparazioni base (64). Mantiene dati custom, ospiti e archetipi.</p>
             </div>
           </div>
         </section>
@@ -226,17 +226,19 @@ function setupEventListeners() {
     fileInput.value = '';
   });
 
-  // Reset Recipes and Pizza Nights
-  document.getElementById('btnResetRecipesAndNights').addEventListener('click', async () => {
+  // Reset Archives (Recipes, Nights) and Reseed (Ingredients, Preparations)
+  document.getElementById('btnResetArchives').addEventListener('click', async () => {
     const confirmed = confirm(
-      '🔄 RESET RICETTE E SERATE?\n\n' +
+      '🔄 RESET ARCHIVI?\n\n' +
       'Questa azione:\n' +
       '• Cancellerà TUTTE le ricette\n' +
       '• Cancellerà TUTTE le serate pizza\n' +
-      '• Ripopolerà gli ingredienti base\n\n' +
+      '• Ripopolerà gli ingredienti base (136)\n' +
+      '• Ripopolerà le preparazioni base (64)\n\n' +
       'Saranno mantenuti:\n' +
+      '• Ingredienti custom aggiunti manualmente\n' +
+      '• Preparazioni custom aggiunte manualmente\n' +
       '• Ospiti\n' +
-      '• Preparazioni\n' +
       '• Pesi archetipi\n\n' +
       'Non può essere annullata.\n\n' +
       'Premi OK per confermare.'
@@ -265,15 +267,29 @@ function setupEventListeners() {
 
         // Reseed ingredients
         showToast('🌱 Ripopolamento ingredienti in corso...', 'info');
-        const response = await fetch('/api/seed-ingredients', {
+        const ingredientsResponse = await fetch('/api/seed-ingredients', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         });
 
-        if (!response.ok) throw new Error('Failed to seed ingredients');
+        if (!ingredientsResponse.ok) throw new Error('Failed to seed ingredients');
 
-        const result = await response.json();
-        showToast(`✅ ${result.count || 136} ingredienti ripopolati con successo!`, 'success');
+        const ingredientsResult = await ingredientsResponse.json();
+        showToast(`✅ ${ingredientsResult.count || 136} ingredienti ripopolati!`, 'success');
+
+        // Reseed preparations
+        showToast('🌱 Ripopolamento preparazioni in corso...', 'info');
+        const preparationsResponse = await fetch('/api/seed-preparations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!preparationsResponse.ok) throw new Error('Failed to seed preparations');
+
+        const preparationsResult = await preparationsResponse.json();
+        showToast(`✅ ${preparationsResult.count || 64} preparazioni ripopolate!`, 'success');
+
+        showToast('🎉 Reset archivi completato con successo!', 'success');
 
         // Refresh app data
         if (window.refreshData) {
@@ -281,7 +297,7 @@ function setupEventListeners() {
         }
       } catch (error) {
         console.error('Reset failed:', error);
-        showToast('❌ Errore durante il reset', 'error');
+        showToast('❌ Errore durante il reset: ' + error.message, 'error');
       }
     }
   });
