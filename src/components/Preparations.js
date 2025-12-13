@@ -576,17 +576,21 @@ function showPreparationModal(prepId) {
         <!-- Ingredients -->
         <div class="preparation-section">
           <h3 class="section-title">🛒 Ingredienti</h3>
-          <ul class="ingredients-list">
-            ${prep.ingredients.map(ing => `
-              <li class="ingredient-item">
-                <span class="ingredient-name">${ing.name}</span>
-                <span class="ingredient-quantity">${ing.quantity} ${ing.unit}</span>
-              </li>
-            `).join('')}
-          </ul>
-          <p class="ingredients-note">
-            <em>Per porzione: ${prep.ingredients.map(i => `${i.name} ${i.perPortion}${i.unit}`).join(', ')}</em>
-          </p>
+          ${prep.ingredients && prep.ingredients.length > 0 ? `
+            <ul class="ingredients-list">
+              ${prep.ingredients.map(ing => `
+                <li class="ingredient-item">
+                  <span class="ingredient-name">${ing.name}</span>
+                  <span class="ingredient-quantity">${ing.quantity} ${ing.unit}</span>
+                </li>
+              `).join('')}
+            </ul>
+            <p class="ingredients-note">
+              <em>Per porzione: ${prep.ingredients.map(i => `${i.name} ${i.perPortion}${i.unit}`).join(', ')}</em>
+            </p>
+          ` : `
+            <p class="empty-message">Nessun ingrediente specificato</p>
+          `}
         </div>
         
         <!-- Instructions -->

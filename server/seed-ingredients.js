@@ -298,5 +298,12 @@ function seedIngredients() {
 // Export for API use
 export { seedIngredients };
 
-// Run seed if executed directly
-seedIngredients().catch(console.error);
+// Run seed if executed directly (only when running as a standalone script)
+if (import.meta.url === `file://${process.argv[1]}`) {
+    try {
+        seedIngredients();
+    } catch (error) {
+        console.error('Seed error:', error);
+        process.exit(1);
+    }
+}

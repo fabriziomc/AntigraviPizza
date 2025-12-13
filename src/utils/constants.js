@@ -110,7 +110,7 @@ export const VIEWS = {
 // Navigation items
 export const NAV_ITEMS = [
     { id: VIEWS.DASHBOARD, label: 'Dashboard', icon: '🏠' },
-    { id: VIEWS.DISCOVERY, label: 'Scopri Ricette', icon: '🔍' },
+    { id: VIEWS.DISCOVERY, label: 'Genera Ricette', icon: '🔍' },
     { id: VIEWS.LIBRARY, label: 'Pizze', icon: '🍕' },
     { id: VIEWS.COMBINATIONS, label: 'Abbinamenti', icon: '🧪' },
     { id: VIEWS.DOUGHS, label: 'Impasti', icon: '🥣' },

@@ -724,32 +724,39 @@ class DatabaseAdapter {
     }
 
     async resetArchetypeWeights(userId = 'default') {
+        console.log('🔄 resetArchetypeWeights called with userId:', userId);
         if (this.type === 'sqlite') {
             const defaults = [
-                { archetype: 'combinazioni_db', weight: 30 },
-                { archetype: 'classica', weight: 28 },
-                { archetype: 'tradizionale', weight: 21 },
-                { archetype: 'terra_bosco', weight: 7 },
-                { archetype: 'fresca_estiva', weight: 7 },
-                { archetype: 'piccante_decisa', weight: 4 },
-                { archetype: 'mare', weight: 2 },
-                { archetype: 'vegana', weight: 1 }
+                { archetype: 'combinazioni_db', weight: 30, description: 'Combinazioni salvate nel database' },
+                { archetype: 'classica', weight: 28, description: 'Margherita, Marinara style' },
+                { archetype: 'tradizionale', weight: 21, description: 'Prosciutto, Funghi, Capricciosa' },
+                { archetype: 'terra_bosco', weight: 7, description: 'Funghi porcini, tartufo' },
+                { archetype: 'fresca_estiva', weight: 7, description: 'Verdure, pomodorini' },
+                { archetype: 'piccante_decisa', weight: 4, description: 'Nduja, peperoncino' },
+                { archetype: 'mare', weight: 2, description: 'Pesce, frutti di mare' },
+                { archetype: 'vegana', weight: 1, description: 'Solo vegetali' }
             ];
 
+            // Use INSERT OR REPLACE to handle both initialization and reset
             const stmt = this.db.prepare(`
-                UPDATE ArchetypeWeights
-                SET weight = ?, dateModified = ?
-                WHERE userId = ? AND archetype = ?
+                INSERT OR REPLACE INTO ArchetypeWeights (id, userId, archetype, weight, description, dateModified)
+                VALUES (?, ?, ?, ?, ?, ?)
             `);
 
             const now = Date.now();
+            let updated = 0;
             defaults.forEach(d => {
-                stmt.run(d.weight, now, userId, d.archetype);
+                const id = `aw-${userId}-${d.archetype}`;
+                const result = stmt.run(id, userId, d.archetype, d.weight, d.description, now);
+                console.log(`  Updated ${d.archetype}: ${result.changes} rows`);
+                updated += result.changes;
             });
 
-            return { success: true, userId };
+            console.log(`✅ Reset complete: ${updated} weights updated`);
+            return { success: true, userId, updated };
         } else {
             // SQL Server not yet implemented
+            console.log('⚠️ SQL Server mode - reset not implemented');
             return { success: true, userId };
         }
     }

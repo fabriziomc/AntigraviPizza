@@ -126,15 +126,7 @@ export async function renderSettings() {
                 <span class="icon">🔄</span>
                 Reset Ricette/Serate
               </button>
-              <p class="action-help">Cancella tutte le ricette e serate pizza. Mantiene ospiti, ingredienti, preparazioni e archetipi.</p>
-            </div>
-
-            <div class="action-group">
-              <button id="btnReseedIngredients" class="btn btn-warning">
-                <span class="icon">🌱</span>
-                Reseed Ingredienti
-              </button>
-              <p class="action-help">Ripopola il database con gli ingredienti base. Usa dopo un reset o se mancano ingredienti.</p>
+              <p class="action-help">Cancella tutte le ricette e serate pizza, poi ripopola gli ingredienti base. Mantiene ospiti, preparazioni e archetipi.</p>
             </div>
           </div>
         </section>
@@ -238,13 +230,14 @@ function setupEventListeners() {
   document.getElementById('btnResetRecipesAndNights').addEventListener('click', async () => {
     const confirmed = confirm(
       '🔄 RESET RICETTE E SERATE?\n\n' +
-      'Questa azione cancellerà:\n' +
-      '• TUTTE le ricette\n' +
-      '• TUTTE le serate pizza\n\n' +
+      'Questa azione:\n' +
+      '• Cancellerà TUTTE le ricette\n' +
+      '• Cancellerà TUTTE le serate pizza\n' +
+      '• Ripopolerà gli ingredienti base\n\n' +
       'Saranno mantenuti:\n' +
       '• Ospiti\n' +
-      '• Ingredienti e preparazioni\n' +
-      '• Archetipi\n\n' +
+      '• Preparazioni\n' +
+      '• Pesi archetipi\n\n' +
       'Non può essere annullata.\n\n' +
       'Premi OK per confermare.'
     );
@@ -270,6 +263,18 @@ function setupEventListeners() {
 
         showToast(`✅ Reset completato: ${recipes.length} ricette e ${nights.length} serate eliminate`, 'success');
 
+        // Reseed ingredients
+        showToast('🌱 Ripopolamento ingredienti in corso...', 'info');
+        const response = await fetch('/api/seed-ingredients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) throw new Error('Failed to seed ingredients');
+
+        const result = await response.json();
+        showToast(`✅ ${result.count || 136} ingredienti ripopolati con successo!`, 'success');
+
         // Refresh app data
         if (window.refreshData) {
           await window.refreshData();
@@ -281,41 +286,7 @@ function setupEventListeners() {
     }
   });
 
-  // Reseed Ingredients
-  document.getElementById('btnReseedIngredients').addEventListener('click', async () => {
-    const confirmed = confirm(
-      '🌱 RESEED INGREDIENTI?\\n\\n' +
-      'Questa azione ripopolerà il database con gli ingredienti base.\\n' +
-      'Gli ingredienti custom aggiunti manualmente NON saranno eliminati.\\n\\n' +
-      'Premi OK per confermare.'
-    );
 
-    if (confirmed) {
-      try {
-        showToast('🌱 Seeding ingredienti in corso...', 'info');
-
-        const response = await fetch('/api/seed-ingredients', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (!response.ok) throw new Error('Failed to seed ingredients');
-
-        const result = await response.json();
-        showToast(`✅ ${result.count || 136} ingredienti seedati con successo!`, 'success');
-
-        // Also seed archetype weights
-        await fetch('/api/seed-archetype-weights', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-
-      } catch (error) {
-        console.error('Reseed failed:', error);
-        showToast('❌ Errore durante il reseed', 'error');
-      }
-    }
-  });
 }
 
 // ============================================
@@ -354,7 +325,38 @@ async function populateArchetypeWeights() {
     console.log('🔍 Weights length:', weights.length);
 
     if (!weights || weights.length === 0) {
-      container.innerHTML = '<p class="error-message">Nessun peso archetipo trovato nel database</p>';
+      // Show initialization message and button
+      container.innerHTML = `
+        <div class="empty-state">
+          <p class="info-message">⚠️ Nessun peso archetipo trovato nel database</p>
+          <p class="help-text">Clicca il pulsante qui sotto per inizializzare i pesi con i valori predefiniti.</p>
+          <button id="initWeightsBtn" class="btn btn-primary" style="margin-top: 1rem;">
+            🌱 Inizializza Pesi Predefiniti
+          </button>
+        </div>
+      `;
+
+      // Setup initialization button
+      const initBtn = document.getElementById('initWeightsBtn');
+      if (initBtn) {
+        initBtn.addEventListener('click', async () => {
+          try {
+            showToast('🌱 Inizializzazione pesi in corso...', 'info');
+
+            // Call the reset endpoint which will create the default weights
+            const result = await resetArchetypeWeights('default');
+            console.log('📥 Init result:', result);
+
+            showToast('✅ Pesi archetipi inizializzati!', 'success');
+
+            // Reload the page to show the weights
+            await populateArchetypeWeights();
+          } catch (error) {
+            console.error('❌ Error initializing weights:', error);
+            showToast('❌ Errore durante l\'inizializzazione', 'error');
+          }
+        });
+      }
       return;
     }
 
@@ -427,21 +429,32 @@ function setupArchetypeWeightsListeners() {
 
   // Reset button
   const resetBtn = document.getElementById('resetWeightsBtn');
+  console.log('🔍 Reset button element:', resetBtn);
   if (resetBtn) {
     resetBtn.addEventListener('click', async () => {
+      console.log('🔘 Reset button clicked');
       if (confirm('Ripristinare i pesi predefiniti?')) {
+        console.log('✅ User confirmed reset');
         try {
-          await resetArchetypeWeights('default');
+          console.log('📡 Calling resetArchetypeWeights...');
+          const result = await resetArchetypeWeights('default');
+          console.log('📥 Reset result:', result);
           showToast('✅ Pesi ripristinati ai valori predefiniti', 'success');
 
           // Reload weights
+          console.log('🔄 Reloading weights...');
           await populateArchetypeWeights();
+          console.log('✅ Weights reloaded');
         } catch (error) {
-          console.error('Error resetting weights:', error);
+          console.error('❌ Error resetting weights:', error);
           showToast('❌ Errore nel ripristino dei pesi', 'error');
         }
+      } else {
+        console.log('❌ User cancelled reset');
       }
     });
+  } else {
+    console.error('❌ Reset button not found!');
   }
 }
 
