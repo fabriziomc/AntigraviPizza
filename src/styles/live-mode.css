@@ -241,6 +241,13 @@
         padding: 1rem;
     }
 
+    .ingredients-section h3,
+    .preparations-section h3,
+    .cooking-section h3,
+    .cooking-phase-section h3 {
+        text-align: right;
+    }
+
     .live-footer {
         flex-direction: column;
         padding: 1rem;
