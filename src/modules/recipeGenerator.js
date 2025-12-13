@@ -567,6 +567,8 @@ function determineTags(ingredients, doughType) {
 
 /**
  * Seleziona preparazioni intelligenti dal database basate sugli ingredienti e tipo pizza
+ * Rimuove gli ingredienti base quando viene aggiunta la preparazione corrispondente
+ * @returns {Object} { preparations: Array, cleanedIngredients: Array }
  */
 async function selectPreparationsForPizza(ingredients, tags) {
     // Carica tutte le preparazioni dal database
@@ -574,10 +576,12 @@ async function selectPreparationsForPizza(ingredients, tags) {
     const allPreparations = await getAllPreparations();
 
     if (!allPreparations || allPreparations.length === 0) {
-        return [];
+        return { preparations: [], cleanedIngredients: ingredients };
     }
 
     const preparations = [];
+    let cleanedIngredients = [...ingredients]; // Copia per non modificare l'originale
+
     const hasTomato = ingredients.some(i => i.name.toLowerCase().includes('pomodoro'));
     const hasMeat = ingredients.some(i => i.category === 'Carne');
     const hasVegetables = ingredients.some(i => i.category === 'Verdure');
@@ -587,53 +591,64 @@ async function selectPreparationsForPizza(ingredients, tags) {
     // Estrai nomi ingredienti per matching
     const ingredientNames = ingredients.map(i => i.name.toLowerCase());
 
+    // Helper function per rimuovere ingrediente base quando si aggiunge preparazione
+    const addPreparationAndRemoveBase = (prep, quantity, timing, baseIngredientKeyword) => {
+        preparations.push({
+            id: prep.id,
+            quantity,
+            unit: 'g',
+            timing
+        });
+        // Rimuovi l'ingrediente base che contiene la keyword
+        cleanedIngredients = cleanedIngredients.filter(ing =>
+            !ing.name.toLowerCase().includes(baseIngredientKeyword)
+        );
+    };
+
     // STRATEGIA 1: Matching per ingredienti specifici (priorità alta)
     const ingredientMatches = [];
 
-    // Funghi -> Funghi trifolati
+    // Funghi -> Funghi trifolati (rimuove funghi base)
     if (ingredientNames.some(n => n.includes('funghi'))) {
         const prep = allPreparations.find(p => p.id === 'funghi-trifolati');
         if (prep && Math.random() > 0.4) {
-            ingredientMatches.push({
-                id: prep.id,
-                quantity: Math.floor(60 + Math.random() * 40), // 60-100g
-                unit: 'g',
-                timing: 'before'
-            });
+            addPreparationAndRemoveBase(
+                prep,
+                Math.floor(60 + Math.random() * 40),
+                'before',
+                'funghi'
+            );
         }
     }
 
-    // Patate -> Crema di patate o dadolata
+    // Patate -> Crema di patate (rimuove patate base)
     if (ingredientNames.some(n => n.includes('patate') || n.includes('patata'))) {
         const options = allPreparations.filter(p =>
             p.id.includes('patate') && p.category === 'Creme'
         );
         if (options.length > 0 && Math.random() > 0.5) {
             const selected = options[Math.floor(Math.random() * options.length)];
-            ingredientMatches.push({
-                id: selected.id,
-                quantity: Math.floor(80 + Math.random() * 40), // 80-120g
-                unit: 'g',
-                timing: 'before'
-            });
+            addPreparationAndRemoveBase(
+                selected,
+                Math.floor(80 + Math.random() * 40),
+                'before',
+                'patate'
+            );
         }
     }
 
-    // Nduja/Piccante -> Salsa nduja
+    // Nduja/Piccante -> Salsa nduja (rimuove nduja base)
     if (ingredientNames.some(n => n.includes('nduja') || n.includes('piccante'))) {
         const prep = allPreparations.find(p => p.id === 'salsa-nduja');
         if (prep && Math.random() > 0.6) {
-            ingredientMatches.push({
-                id: prep.id,
-                quantity: Math.floor(40 + Math.random() * 30), // 40-70g
-                unit: 'g',
-                timing: 'before'
-            });
+            addPreparationAndRemoveBase(
+                prep,
+                Math.floor(40 + Math.random() * 30),
+                'before',
+                'nduja'
+            );
         }
     }
-
-    // Aggiungi match ingredienti trovati
-    preparations.push(...ingredientMatches);
 
     // STRATEGIA 2: Matching per stile pizza (se non abbiamo già troppe preparazioni)
     if (preparations.length < 2) {
@@ -717,48 +732,51 @@ async function selectPreparationsForPizza(ingredients, tags) {
 
     // STRATEGIA 3: Matching per categoria verdure specifiche
     if (preparations.length < 2) {
-        // Melanzane -> Melanzane grigliate
+        // Melanzane -> Melanzane grigliate (rimuove melanzane base)
         if (ingredientNames.some(n => n.includes('melanzane'))) {
             const prep = allPreparations.find(p => p.id === 'melanzane-grigliate' || p.id === 'prep-melanzane-grigliate');
             if (prep && Math.random() > 0.6) {
-                preparations.push({
-                    id: prep.id,
-                    quantity: Math.floor(60 + Math.random() * 40),
-                    unit: 'g',
-                    timing: 'before'
-                });
+                addPreparationAndRemoveBase(
+                    prep,
+                    Math.floor(60 + Math.random() * 40),
+                    'before',
+                    'melanzane'
+                );
             }
         }
 
-        // Cipolla -> Cipolla caramellata
+        // Cipolla -> Cipolla caramellata (rimuove cipolla base)
         if (ingredientNames.some(n => n.includes('cipolla'))) {
             const prep = allPreparations.find(p => p.id === 'cipolla-caramellata' || p.id === 'prep-cipolla-caramellata');
             if (prep && Math.random() > 0.6) {
-                preparations.push({
-                    id: prep.id,
-                    quantity: Math.floor(50 + Math.random() * 30),
-                    unit: 'g',
-                    timing: 'before'
-                });
+                addPreparationAndRemoveBase(
+                    prep,
+                    Math.floor(50 + Math.random() * 30),
+                    'before',
+                    'cipolla'
+                );
             }
         }
 
-        // Pomodorini -> Pomodori confit
+        // Pomodorini -> Pomodori confit (rimuove pomodorini base)
         if (ingredientNames.some(n => n.includes('pomodorini'))) {
             const prep = allPreparations.find(p => p.id === 'pomodori-confit' || p.id === 'prep-pomodorini-confit');
             if (prep && Math.random() > 0.7) {
-                preparations.push({
-                    id: prep.id,
-                    quantity: Math.floor(60 + Math.random() * 40),
-                    unit: 'g',
-                    timing: 'before'
-                });
+                addPreparationAndRemoveBase(
+                    prep,
+                    Math.floor(60 + Math.random() * 40),
+                    'before',
+                    'pomodorini'
+                );
             }
         }
     }
 
     // Limita a massimo 2 preparazioni per pizza
-    return preparations.slice(0, 2);
+    return {
+        preparations: preparations.slice(0, 2),
+        cleanedIngredients
+    };
 }
 
 /**
@@ -978,8 +996,8 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
 
     const tags = determineTags(ingredients, doughType);
 
-    // Seleziona preparazioni intelligenti
-    const preparations = await selectPreparationsForPizza(ingredients, tags);
+    // Seleziona preparazioni intelligenti e rimuovi ingredienti base sostituiti
+    const { preparations, cleanedIngredients } = await selectPreparationsForPizza(ingredients, tags);
 
     const imagePrompt = `gourmet pizza ${pizzaName}, toppings: ${mainIngredientNames.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
     const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}`;
@@ -989,8 +1007,8 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
         pizzaiolo,
         source: 'Generata da AntigraviPizza',
         description,
-        baseIngredients: ingredients,  // Rinominato da ingredients
-        preparations,                   // NUOVO
+        baseIngredients: cleanedIngredients,  // Usa ingredienti puliti (senza duplicati con preparazioni)
+        preparations,                          // Preparazioni selezionate
         instructions,
         imageUrl,
         suggestedDough,
