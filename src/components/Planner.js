@@ -595,7 +595,7 @@ async function showPizzaPreviewInPlanner(recipeId) {
   const modalContent = `
     <div class="modal-header">
       <h2 class="modal-title">👁️ ${recipe.name}</h2>
-      <button class="modal-close" onclick="window.closeModal()">×</button>
+      <button class="modal-close" onclick="window.closePizzaPreview()">×</button>
     </div>
     <div class="modal-body">
       <div style="margin-bottom: 1rem;">
@@ -648,12 +648,19 @@ async function showPizzaPreviewInPlanner(recipeId) {
       ` : ''}
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
+      <button class="btn btn-secondary" onclick="window.closePizzaPreview()">Chiudi</button>
     </div>
   `;
 
   openModal(modalContent);
 }
+
+// Helper function to close preview and reopen pizza night modal
+window.closePizzaPreview = async function () {
+  closeModal();
+  // Reopen the pizza night modal
+  await showNewPizzaNightModal();
+};
 
 async function renderPizzaNights() {
   const grid = document.getElementById('pizzaNightsGrid');
