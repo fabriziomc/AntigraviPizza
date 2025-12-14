@@ -528,13 +528,11 @@ function generateCookingInstructions(ingredients) {
 
     // Ingredienti in uscita (postBake)
     const postBakeIngredients = ingredients.filter(i => i.postBake);
-    const hasPostBake = postBakeIngredients.length > 0;
-
-    if (hasPostBake) {
+    if (postBakeIngredients.length > 0) {
         instructions.push(`All'uscita dal forno, aggiungere: ${postBakeIngredients.map(i => i.name.toLowerCase()).join(', ')}`);
     }
 
-    return { instructions, hasPostBake };
+    return instructions;
 }
 
 /**
@@ -988,12 +986,10 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
     const pizzaiolo = FAMOUS_PIZZAIOLOS[Math.floor(Math.random() * FAMOUS_PIZZAIOLOS.length)];
 
     // Generate only topping instructions (dough instructions are in DOUGH_RECIPES)
-    const cookingResult = generateCookingInstructions(ingredients);
     const instructions = {
         topping: [
-            ...cookingResult.instructions,
+            ...generateCookingInstructions(ingredients),
             `Infornare a ${Math.floor(400 + Math.random() * 80)}°C per ${Math.floor(90 + Math.random() * 90)} secondi`,
-            // Add serving instruction only after all post-bake additions
             `Servire immediatamente ben calda`
         ]
     };
