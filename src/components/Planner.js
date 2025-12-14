@@ -6,7 +6,7 @@ import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNig
 import { formatDate, formatDateForInput, getNextSaturdayEvening, confirm, formatQuantity, showToast } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
 import { getCookingInstructions } from '../utils/cookingCalculator.js';
-import { DOUGH_TYPES, DOUGH_RECIPES } from '../utils/constants.js';
+import { DOUGH_TYPES, DOUGH_RECIPES, PREPARATIONS } from '../utils/constants.js';
 import { getRecipeDoughType } from '../utils/doughHelper.js';
 import { state } from '../store.js';
 import { generateShoppingList, downloadShoppingList } from '../modules/shopping.js';
@@ -554,18 +554,105 @@ function renderPizzaSelectionList(recipes) {
 
   if (recipes.length > 0) {
     listContainer.innerHTML = recipes.map(recipe => `
-            <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; margin-bottom: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; margin-bottom: 0.5rem;">
     <input type="checkbox" name="selectedPizzas" value="${recipe.id}" style="width: 20px; height: 20px;">
       <div style="flex: 1;">
-        <div>${recipe.name}</div>
-        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">${getRecipeDoughType(recipe)}</div>
+        <div style="font-weight: 600;">${recipe.name}</div>
+        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">👨‍🍳 ${recipe.pizzaiolo || 'Pizzaiolo sconosciuto'}</div>
       </div>
+      <button 
+        class="btn-preview-pizza" 
+        data-recipe-id="${recipe.id}"
+        style="padding: 0.5rem 0.75rem; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--color-primary); border-radius: 0.375rem; color: var(--color-primary); cursor: pointer; font-size: 0.875rem; white-space: nowrap;"
+        title="Vedi ingredienti"
+      >
+        👁️ Vedi
+      </button>
       <input type="number" name="quantity_${recipe.id}" value="1" min="1" max="10" style="width: 60px; padding: 0.25rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 0.25rem; color: white; text-align: center;">
       </div>
       `).join('');
+
+    // Attach preview button listeners
+    document.querySelectorAll('.btn-preview-pizza').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const recipeId = btn.dataset.recipeId;
+        showPizzaPreviewInPlanner(recipeId);
+      });
+    });
   } else {
     listContainer.innerHTML = '<p class="text-muted" style="padding: 1rem; text-align: center;">Nessuna ricetta trovata con questo filtro.</p>';
   }
+}
+
+async function showPizzaPreviewInPlanner(recipeId) {
+  const recipe = await getRecipeById(recipeId);
+  if (!recipe) return;
+
+  const baseIngredients = recipe.baseIngredients || [];
+  const preparations = recipe.preparations || [];
+
+  const modalContent = `
+    <div class="modal-header">
+      <h2 class="modal-title">👁️ ${recipe.name}</h2>
+      <button class="modal-close" onclick="window.closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 1rem;">
+        <div style="font-size: 0.875rem; color: var(--color-gray-400);">👨‍🍳 ${recipe.pizzaiolo}</div>
+      </div>
+
+      ${recipe.description ? `<p style="margin-bottom: 1.5rem; color: var(--color-gray-300);">${recipe.description}</p>` : ''}
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div>
+          <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--color-primary);">🥗 Ingredienti Base</h3>
+          ${baseIngredients.length > 0 ? `
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              ${baseIngredients.map(ing => `
+                <li style="padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 0.25rem; margin-bottom: 0.25rem; font-size: 0.875rem;">
+                  <span style="font-weight: 600;">${ing.name}</span>
+                  ${ing.quantity && ing.unit ? `<span style="color: var(--color-gray-400); float: right;">${ing.quantity} ${ing.unit}</span>` : ''}
+                </li>
+              `).join('')}
+            </ul>
+          ` : '<p style="color: var(--color-gray-500); font-size: 0.875rem;">Nessun ingrediente</p>'}
+        </div>
+
+        <div>
+          <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--color-accent);">🥫 Preparazioni</h3>
+          ${preparations.length > 0 ? `
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              ${preparations.map(prep => {
+    const prepData = PREPARATIONS.find(p => p.id === prep.id);
+    return prepData ? `
+                  <li style="padding: 0.5rem; background: rgba(249, 115, 22, 0.1); border-radius: 0.25rem; margin-bottom: 0.25rem; font-size: 0.875rem; border-left: 3px solid var(--color-accent);">
+                    <span style="font-weight: 600;">${prepData.name}</span>
+                    <div style="font-size: 0.75rem; color: var(--color-gray-400); margin-top: 0.25rem;">
+                      ${prepData.category} • ${prepData.prepTime}
+                    </div>
+                  </li>
+                ` : '';
+  }).join('')}
+            </ul>
+          ` : '<p style="color: var(--color-gray-500); font-size: 0.875rem;">Nessuna preparazione</p>'}
+        </div>
+      </div>
+
+      ${recipe.tags && recipe.tags.length > 0 ? `
+        <div style="margin-top: 1.5rem;">
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
+    </div>
+  `;
+
+  openModal(modalContent);
 }
 
 async function renderPizzaNights() {
