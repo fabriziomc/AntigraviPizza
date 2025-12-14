@@ -339,15 +339,33 @@ async function showRecipeModal(recipeId) {
             <div class="recipe-modal-section">
                 <h4 style="color: var(--color-gray-400); font-size: 0.9rem; margin-bottom: 0.5rem;">📥 Distribuzione Ingredienti e Cottura</h4>
                 <ol class="instructions-list">
-                    ${renderInstructions(toppingInstructions.filter(inst => !inst.toLowerCase().includes("all'uscita dal forno")))}
+                    ${renderInstructions(toppingInstructions.filter(inst => {
+    const lower = inst.toLowerCase();
+    // Exclude post-bake instructions
+    if (lower.includes("all'uscita dal forno")) return false;
+    // If there are post-bake instructions, also exclude "Servire" (it will go at the end)
+    if (toppingInstructions.some(i => i.toLowerCase().includes("all'uscita dal forno")) &&
+      lower.includes("servire")) return false;
+    return true;
+  }))}
                 </ol>
             </div>
 
             ${toppingInstructions.some(inst => inst.toLowerCase().includes("all'uscita dal forno")) ? `
             <div class="recipe-modal-section" style="margin-top: 1rem;">
                 <h4 style="color: var(--color-accent); font-size: 0.9rem; margin-bottom: 0.5rem;">📤 Ingredienti Post Cottura</h4>
-                <ol class="instructions-list" start="${toppingInstructions.filter(inst => !inst.toLowerCase().includes("all'uscita dal forno")).length + 1}">
-                    ${renderInstructions(toppingInstructions.filter(inst => inst.toLowerCase().includes("all'uscita dal forno")))}
+                <ol class="instructions-list" start="${toppingInstructions.filter(inst => {
+    const lower = inst.toLowerCase();
+    if (lower.includes("all'uscita dal forno")) return false;
+    if (toppingInstructions.some(i => i.toLowerCase().includes("all'uscita dal forno")) &&
+      lower.includes("servire")) return false;
+    return true;
+  }).length + 1}">
+                    ${renderInstructions(toppingInstructions.filter(inst => {
+    const lower = inst.toLowerCase();
+    // Include post-bake instructions and "Servire"
+    return lower.includes("all'uscita dal forno") || lower.includes("servire");
+  }))}
                 </ol>
             </div>
             ` : ''}
