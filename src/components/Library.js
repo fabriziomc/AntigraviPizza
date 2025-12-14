@@ -337,11 +337,20 @@ async function showRecipeModal(recipeId) {
             </div>
 
             <div class="recipe-modal-section">
-                <h4 style="color: var(--color-gray-400); font-size: 0.9rem; margin-bottom: 0.5rem;">Cottura e Farcitura</h4>
+                <h4 style="color: var(--color-gray-400); font-size: 0.9rem; margin-bottom: 0.5rem;">📥 Distribuzione Ingredienti e Cottura</h4>
                 <ol class="instructions-list">
-                    ${renderInstructions(toppingInstructions)}
+                    ${renderInstructions(toppingInstructions.filter(inst => !inst.toLowerCase().includes("all'uscita dal forno")))}
                 </ol>
             </div>
+
+            ${toppingInstructions.some(inst => inst.toLowerCase().includes("all'uscita dal forno")) ? `
+            <div class="recipe-modal-section" style="margin-top: 1rem;">
+                <h4 style="color: var(--color-accent); font-size: 0.9rem; margin-bottom: 0.5rem;">📤 Ingredienti Post Cottura</h4>
+                <ol class="instructions-list" start="${toppingInstructions.filter(inst => !inst.toLowerCase().includes("all'uscita dal forno")).length + 1}">
+                    ${renderInstructions(toppingInstructions.filter(inst => inst.toLowerCase().includes("all'uscita dal forno")))}
+                </ol>
+            </div>
+            ` : ''}
         </div>
       </div>
       
