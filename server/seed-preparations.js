@@ -351,14 +351,6 @@ const PREPARATIONS_DB = [
     // ADDITIONAL COMMON PREPARATIONS
     // ============================================
     {
-        name: 'Crema di Patate',
-        description: 'Crema vellutata di patate per base pizza',
-        ingredients: ['Patate', 'Latte', 'Burro', 'Sale'],
-        category: 'Creme',
-        phase: 'topping',
-        postBake: false
-    },
-    {
         name: 'Crema di Zucca',
         description: 'Crema dolce di zucca per pizze gourmet',
         ingredients: ['Zucca', 'Olio', 'Sale', 'Pepe'],
@@ -462,14 +454,7 @@ const PREPARATIONS_DB = [
         phase: 'topping',
         postBake: true
     },
-    {
-        name: 'Cipolla Caramellata',
-        description: 'Cipolle rosse caramellate',
-        ingredients: ['Cipolle rosse', 'Zucchero di canna', 'Burro'],
-        category: 'Condimenti',
-        phase: 'topping',
-        postBake: false
-    },
+
     {
         name: 'Funghi Trifolati',
         description: 'Funghi saltati in padella con aglio e prezzemolo',
@@ -486,14 +471,7 @@ const PREPARATIONS_DB = [
         phase: 'topping',
         postBake: false
     },
-    {
-        name: 'Melanzane Grigliate',
-        description: 'Melanzane grigliate a fette',
-        ingredients: ['Melanzane', 'Olio', 'Sale'],
-        category: 'Condimenti',
-        phase: 'topping',
-        postBake: false
-    },
+
     {
         name: 'Peperoni Arrosto',
         description: 'Peperoni arrostiti e pelati',
@@ -502,14 +480,7 @@ const PREPARATIONS_DB = [
         phase: 'topping',
         postBake: false
     },
-    {
-        name: 'Pomodori Confit',
-        description: 'Pomodorini confit al forno',
-        ingredients: ['Pomodorini', 'Olio', 'Timo', 'Aglio'],
-        category: 'Condimenti',
-        phase: 'topping',
-        postBake: false
-    }
+
 ];
 
 function generateId(name) {
