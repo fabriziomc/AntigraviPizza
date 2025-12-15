@@ -193,27 +193,28 @@ async function restoreFromData(backupData) {
 
             // Restore Recipes
             if (backupData.data.recipes && backupData.data.recipes.length > 0) {
+                // Check which columns exist in the Recipes table
+                const tableInfo = db.prepare("PRAGMA table_info(Recipes)").all();
+                const existingColumns = new Set(tableInfo.map(col => col.name));
+
+                // Build dynamic INSERT based on existing columns
+                const recipeColumns = ['id', 'name', 'description', 'baseIngredients', 'preparations',
+                    'instructions', 'tags', 'pizzaiolo', 'dateAdded', 'isFavorite', 'source', 'doughType'];
+                const availableColumns = recipeColumns.filter(col => existingColumns.has(col));
+                const placeholders = availableColumns.map(() => '?').join(', ');
+
                 const stmt = db.prepare(`
                     INSERT OR REPLACE INTO Recipes 
-                    (id, name, description, baseIngredients, preparations, instructions, tags, pizzaiolo, dateAdded, isFavorite, source, doughType)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (${availableColumns.join(', ')})
+                    VALUES (${placeholders})
                 `);
 
                 for (const recipe of backupData.data.recipes) {
-                    stmt.run(
-                        recipe.id,
-                        recipe.name,
-                        recipe.description,
-                        recipe.baseIngredients,
-                        recipe.preparations,
-                        recipe.instructions,
-                        recipe.tags,
-                        recipe.pizzaiolo,
-                        recipe.dateAdded,
-                        recipe.isFavorite || 0,
-                        recipe.source,
-                        recipe.doughType
-                    );
+                    const values = availableColumns.map(col => {
+                        if (col === 'isFavorite') return recipe[col] || 0;
+                        return recipe[col];
+                    });
+                    stmt.run(...values);
                 }
                 totalRestored += backupData.data.recipes.length;
                 console.log(`  ✓ Restored ${backupData.data.recipes.length} recipes`);
