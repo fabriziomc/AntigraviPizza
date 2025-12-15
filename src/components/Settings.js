@@ -168,12 +168,9 @@ function setupEventListeners() {
 
       const result = await response.json();
 
-      if (result.success) {
-        // Download the backup file
-        const backupResponse = await fetch('/backups/latest-backup.json');
-        const backupData = await backupResponse.json();
-
-        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      if (result.success && result.backup) {
+        // Download the backup data
+        const blob = new Blob([JSON.stringify(result.backup, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;

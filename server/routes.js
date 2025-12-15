@@ -625,12 +625,32 @@ router.post('/pizza-optimizer/analyze', async (req, res) => {
 // DATABASE BACKUP/RESTORE ENDPOINTS
 // ============================================
 
-// Manual backup endpoint
+// Manual backup endpoint - returns backup data directly
 router.post('/backup', async (req, res) => {
     try {
         const { backupDatabase } = await import('./backup-db.js');
         const result = await backupDatabase();
-        res.json(result);
+
+        if (result.success) {
+            // Read the backup file and send it
+            const fs = await import('fs');
+            const path = await import('path');
+            const { fileURLToPath } = await import('url');
+
+            const __filename = fileURLToPath(import.meta.url);
+            const __dirname = path.dirname(__filename);
+            const backupFilePath = path.join(__dirname, '..', 'backups', 'latest-backup.json');
+
+            const backupData = JSON.parse(fs.readFileSync(backupFilePath, 'utf8'));
+
+            res.json({
+                success: true,
+                counts: result.counts,
+                backup: backupData
+            });
+        } else {
+            throw new Error(result.error || 'Backup failed');
+        }
     } catch (err) {
         console.error('Backup error:', err);
         res.status(500).json({
