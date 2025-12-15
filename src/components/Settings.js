@@ -57,32 +57,24 @@ export async function renderSettings() {
           </div>
           <div class="card-body">
             <p class="card-description">
-              Esporta i tuoi dati per backup o importali su un altro dispositivo.
+              Esporta e importa il database completo (ricette, serate, ospiti).
             </p>
             
             <div class="action-group">
-              <button id="btnBackupDatabase" class="btn btn-accent">
-                <span class="icon">💾</span>
-                Backup Database (Server)
-              </button>
-              <p class="action-help">Salva un backup del database sul server (per Railway). Il backup verrà ripristinato automaticamente al prossimo deploy.</p>
-            </div>
-
-            <div class="action-group">
-              <button id="btnExport" class="btn btn-primary">
+              <button id="btnExportDB" class="btn btn-primary">
                 <span class="icon">⬇️</span>
-                Download Backup
+                Esporta Database
               </button>
-              <p class="action-help">Scarica tutte le ricette e le serate pizza in un file JSON.</p>
+              <p class="action-help">Scarica un backup completo del database sul tuo PC. Fai questo PRIMA di ogni deploy per salvare i tuoi dati.</p>
             </div>
 
             <div class="action-group">
-              <input type="file" id="fileImport" accept=".json" style="display: none;">
-              <button id="btnImport" class="btn btn-secondary">
+              <input type="file" id="fileImportDB" accept=".json" style="display: none;">
+              <button id="btnImportDB" class="btn btn-secondary">
                 <span class="icon">⬆️</span>
-                Carica Backup
+                Importa Database
               </button>
-              <p class="action-help">Ripristina i dati da un file di backup precedente.</p>
+              <p class="action-help">Ripristina il database da un file di backup precedente. Sostituirà tutti i dati attuali.</p>
             </div>
           </div>
         </section>
@@ -164,8 +156,8 @@ function setupEventListeners() {
     showToast('✅ Impostazioni forno salvate!', 'success');
   });
 
-  // Backup Database (Server)
-  document.getElementById('btnBackupDatabase').addEventListener('click', async () => {
+  // Export Database (download backup from server)
+  document.getElementById('btnExportDB').addEventListener('click', async () => {
     try {
       showToast('💾 Creazione backup in corso...', 'info');
 
@@ -177,84 +169,91 @@ function setupEventListeners() {
       const result = await response.json();
 
       if (result.success) {
-        showToast(`✅ Backup creato! ${result.counts.recipes} ricette, ${result.counts.pizzaNights} serate`, 'success');
+        // Download the backup file
+        const backupResponse = await fetch('/backups/latest-backup.json');
+        const backupData = await backupResponse.json();
+
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `antigravipizza-db-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast(`✅ Backup scaricato! ${result.counts.recipes} ricette, ${result.counts.pizzaNights} serate`, 'success');
       } else {
         throw new Error(result.error || 'Backup failed');
       }
     } catch (error) {
-      console.error('Backup failed:', error);
-      showToast('❌ Errore durante il backup: ' + error.message, 'error');
-    }
-  });
-
-  // Export Data
-  document.getElementById('btnExport').addEventListener('click', async () => {
-    try {
-      const data = await exportData();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `antigravipizza-backup-${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast('✅ Backup scaricato con successo!', 'success');
-    } catch (error) {
       console.error('Export failed:', error);
-      showToast('❌ Errore durante il download del backup', 'error');
+      showToast('❌ Errore durante l\'export: ' + error.message, 'error');
     }
   });
 
-  // Import Data Trigger
-  const fileInput = document.getElementById('fileImport');
-  document.getElementById('btnImport').addEventListener('click', () => {
-    fileInput.click();
+  // Import Database (upload and restore)
+  const fileInputDB = document.getElementById('fileImportDB');
+  document.getElementById('btnImportDB').addEventListener('click', () => {
+    fileInputDB.click();
   });
 
-  // Import Data Action
-  fileInput.addEventListener('change', async (e) => {
+  fileInputDB.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    const confirmed = confirm(
+      '⚠️ ATTENZIONE!\n\n' +
+      'Questa operazione sostituirà TUTTI i dati attuali con quelli del backup.\n\n' +
+      'Vuoi continuare?'
+    );
+
+    if (!confirmed) {
+      fileInputDB.value = '';
+      return;
+    }
+
     try {
+      showToast('📥 Caricamento backup in corso...', 'info');
+
       const reader = new FileReader();
       reader.onload = async (event) => {
         try {
-          const data = JSON.parse(event.target.result);
-          const result = await importData(data);
+          const backupData = JSON.parse(event.target.result);
 
-          let message = `Importazione completata: ${result.recipesImported} ricette`;
-          if (result.pizzaNightsImported > 0) {
-            message += `, ${result.pizzaNightsImported} serate`;
-          }
+          // Send backup data to server for restore
+          const response = await fetch('/api/restore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(backupData)
+          });
 
-          if (result.errors.length > 0) {
-            console.warn('Import errors:', result.errors);
-            message += `. ${result.errors.length} errori (vedi console)`;
-            showToast(`⚠️ ${message}`, 'warning');
+          const result = await response.json();
+
+          if (result.success) {
+            showToast(`✅ Database ripristinato! ${result.counts.recipes} ricette, ${result.counts.pizzaNights} serate`, 'success');
+
+            // Refresh app data
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
           } else {
-            showToast(`✅ ${message}`, 'success');
-          }
-
-          // Refresh app data
-          if (window.refreshData) {
-            await window.refreshData();
+            throw new Error(result.error || 'Restore failed');
           }
         } catch (err) {
           console.error('Import parse error:', err);
-          showToast('❌ File di backup non valido', 'error');
+          showToast('❌ File di backup non valido o corrotto', 'error');
         }
       };
       reader.readAsText(file);
     } catch (error) {
       console.error('Import failed:', error);
-      showToast('❌ Errore durante il caricamento del backup', 'error');
+      showToast('❌ Errore durante l\'import: ' + error.message, 'error');
     }
 
     // Reset input
-    fileInput.value = '';
+    fileInputDB.value = '';
   });
 
   // Reset Archives (Recipes, Nights) and Reseed (Ingredients, Preparations)

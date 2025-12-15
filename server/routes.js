@@ -643,8 +643,18 @@ router.post('/backup', async (req, res) => {
 // Manual restore endpoint
 router.post('/restore', async (req, res) => {
     try {
-        const { restoreDatabase } = await import('./restore-db.js');
-        const result = await restoreDatabase();
+        const backupData = req.body;
+
+        if (!backupData || !backupData.data) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid backup data format'
+            });
+        }
+
+        // Import restore function and pass backup data
+        const { restoreFromData } = await import('./restore-db.js');
+        const result = await restoreFromData(backupData);
         res.json(result);
     } catch (err) {
         console.error('Restore error:', err);
