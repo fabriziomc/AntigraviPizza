@@ -585,9 +585,18 @@ function renderPizzaSelectionList(recipes) {
   }
 }
 
+// Store the parent modal content
+let savedModalContent = null;
+
 async function showPizzaPreviewInPlanner(recipeId) {
   const recipe = await getRecipeById(recipeId);
   if (!recipe) return;
+
+  // Save current modal content before opening preview
+  const currentModalContent = document.getElementById('modalContent');
+  if (currentModalContent) {
+    savedModalContent = currentModalContent.innerHTML;
+  }
 
   const baseIngredients = recipe.baseIngredients || [];
   const preparations = recipe.preparations || [];
@@ -655,11 +664,17 @@ async function showPizzaPreviewInPlanner(recipeId) {
   openModal(modalContent);
 }
 
-// Helper function to close preview and reopen pizza night modal
-window.closePizzaPreview = async function () {
-  closeModal();
-  // Reopen the pizza night modal
-  await showNewPizzaNightModal();
+// Helper function to close preview and restore parent modal
+window.closePizzaPreview = function () {
+  if (savedModalContent) {
+    const modalContentEl = document.getElementById('modalContent');
+    if (modalContentEl) {
+      modalContentEl.innerHTML = savedModalContent;
+      savedModalContent = null;
+    }
+  } else {
+    closeModal();
+  }
 };
 
 async function renderPizzaNights() {
