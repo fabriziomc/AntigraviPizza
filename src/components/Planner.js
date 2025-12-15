@@ -585,18 +585,9 @@ function renderPizzaSelectionList(recipes) {
   }
 }
 
-// Store the parent modal content
-let savedModalContent = null;
-
 async function showPizzaPreviewInPlanner(recipeId) {
   const recipe = await getRecipeById(recipeId);
   if (!recipe) return;
-
-  // Save current modal content before opening preview
-  const currentModalContent = document.getElementById('modalContent');
-  if (currentModalContent) {
-    savedModalContent = currentModalContent.innerHTML;
-  }
 
   const baseIngredients = recipe.baseIngredients || [];
   const preparations = recipe.preparations || [];
@@ -604,7 +595,7 @@ async function showPizzaPreviewInPlanner(recipeId) {
   const modalContent = `
     <div class="modal-header">
       <h2 class="modal-title">👁️ ${recipe.name}</h2>
-      <button class="modal-close" onclick="window.closePizzaPreview()">×</button>
+      <button class="modal-close" onclick="window.closePreviewModal()">×</button>
     </div>
     <div class="modal-body">
       <div style="margin-bottom: 1rem;">
@@ -657,23 +648,25 @@ async function showPizzaPreviewInPlanner(recipeId) {
       ` : ''}
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="window.closePizzaPreview()">Chiudi</button>
+      <button class="btn btn-secondary" onclick="window.closePreviewModal()">Chiudi</button>
     </div>
   `;
 
-  openModal(modalContent);
+  // Use secondary modal for preview
+  const previewBackdrop = document.getElementById('previewModalBackdrop');
+  const previewContent = document.getElementById('previewModalContent');
+
+  if (previewContent && previewBackdrop) {
+    previewContent.innerHTML = modalContent;
+    previewBackdrop.classList.add('active');
+  }
 }
 
-// Helper function to close preview and restore parent modal
-window.closePizzaPreview = function () {
-  if (savedModalContent) {
-    const modalContentEl = document.getElementById('modalContent');
-    if (modalContentEl) {
-      modalContentEl.innerHTML = savedModalContent;
-      savedModalContent = null;
-    }
-  } else {
-    closeModal();
+// Helper function to close preview modal (secondary modal)
+window.closePreviewModal = function () {
+  const previewBackdrop = document.getElementById('previewModalBackdrop');
+  if (previewBackdrop) {
+    previewBackdrop.classList.remove('active');
   }
 };
 
