@@ -130,11 +130,11 @@ async function restoreDatabase() {
             return {
                 success: true,
                 totalRestored,
-                timestamp: backupData.timestamp,
+                timestamp: timestamp,
                 counts: {
-                    recipes: backupData.data.recipes?.length || 0,
-                    pizzaNights: backupData.data.pizzaNights?.length || 0,
-                    guests: backupData.data.guests?.length || 0
+                    recipes: data.recipes?.length || 0,
+                    pizzaNights: data.pizzaNights?.length || 0,
+                    guests: data.guests?.length || 0
                 }
             };
 
@@ -157,127 +157,122 @@ async function restoreFromData(backupData) {
     console.log('📂 Database path:', DB_PATH);
 
     try {
-        if (!backupData || !backupData.data) {
+        // Accept both full backup format and data-only format
+        const data = backupData.data || backupData;
+
+        if (!data || (!data.recipes && !data.pizzaNights && !data.guests)) {
             throw new Error('Invalid backup data format');
         }
 
-        console.log('📂 Loaded backup from:', new Date(backupData.timestamp).toISOString());
-        console.log('📋 Backup version:', backupData.version);
-
-        // Check if database exists
-        if (!fs.existsSync(DB_PATH)) {
-            console.log('⚠️  Database file not found at:', DB_PATH);
-            console.log('⚠️  Database must be created first by the server');
-            return { success: false, message: 'Database not found' };
-        }
+    }
 
         // Connect to database
         const db = new Database(DB_PATH);
-        console.log('📂 Connected to database:', DB_PATH);
+    console.log('📂 Connected to database:', DB_PATH);
 
-        // Start transaction for atomic restore
-        db.prepare('BEGIN TRANSACTION').run();
+    // Start transaction for atomic restore
+    db.prepare('BEGIN TRANSACTION').run();
 
-        try {
-            let totalRestored = 0;
+    try {
+        let totalRestored = 0;
 
-            // Restore Recipes
-            if (backupData.data.recipes && backupData.data.recipes.length > 0) {
-                const stmt = db.prepare(`
+        // Restore Recipes
+        if (backupData.data.recipes && backupData.data.recipes.length > 0) {
+            const stmt = db.prepare(`
                     INSERT OR REPLACE INTO Recipes 
                     (id, name, description, baseIngredients, preparations, instructions, tags, pizzaiolo, dateAdded, isFavorite, source, doughType)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `);
 
-                for (const recipe of backupData.data.recipes) {
-                    stmt.run(
-                        recipe.id,
-                        recipe.name,
-                        recipe.description,
-                        recipe.baseIngredients,
-                        recipe.preparations,
-                        recipe.instructions,
-                        recipe.tags,
-                        recipe.pizzaiolo,
-                        recipe.dateAdded,
-                        recipe.isFavorite || 0,
-                        recipe.source,
-                        recipe.doughType
-                    );
-                }
-                totalRestored += backupData.data.recipes.length;
-                console.log(`  ✓ Restored ${backupData.data.recipes.length} recipes`);
+            for (const recipe of backupData.data.recipes) {
+                stmt.run(
+                    recipe.id,
+                    recipe.name,
+                    recipe.description,
+                    recipe.baseIngredients,
+                    recipe.preparations,
+                    recipe.instructions,
+                    recipe.tags,
+                    recipe.pizzaiolo,
+                    recipe.dateAdded,
+                    recipe.isFavorite || 0,
+                    recipe.source,
+                    recipe.doughType
+                );
             }
+            totalRestored += backupData.data.recipes.length;
+            console.log(`  ✓ Restored ${backupData.data.recipes.length} recipes`);
+        }
 
-            // Restore Pizza Nights
-            if (backupData.data.pizzaNights && backupData.data.pizzaNights.length > 0) {
-                const stmt = db.prepare(`
+        // Restore Pizza Nights
+        if (backupData.data.pizzaNights && backupData.data.pizzaNights.length > 0) {
+            const stmt = db.prepare(`
                     INSERT OR REPLACE INTO PizzaNights 
                     (id, name, date, guestCount, selectedPizzas, selectedGuests, selectedDough, notes, status, availableIngredients, dateAdded)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `);
 
-                for (const night of backupData.data.pizzaNights) {
-                    stmt.run(
-                        night.id,
-                        night.name,
-                        night.date,
-                        night.guestCount,
-                        night.selectedPizzas,
-                        night.selectedGuests,
-                        night.selectedDough,
-                        night.notes,
-                        night.status,
-                        night.availableIngredients,
-                        night.dateAdded
-                    );
-                }
-                totalRestored += backupData.data.pizzaNights.length;
-                console.log(`  ✓ Restored ${backupData.data.pizzaNights.length} pizza nights`);
+            for (const night of backupData.data.pizzaNights) {
+                stmt.run(
+                    night.id,
+                    night.name,
+                    night.date,
+                    night.guestCount,
+                    night.selectedPizzas,
+                    night.selectedGuests,
+                    night.selectedDough,
+                    night.notes,
+                    night.status,
+                    night.availableIngredients,
+                    night.dateAdded
+                );
             }
+            totalRestored += backupData.data.pizzaNights.length;
+            console.log(`  ✓ Restored ${backupData.data.pizzaNights.length} pizza nights`);
+        }
 
-            // Restore Guests
-            if (backupData.data.guests && backupData.data.guests.length > 0) {
-                const stmt = db.prepare(`
+        // Restore Guests
+        if (backupData.data.guests && backupData.data.guests.length > 0) {
+            const stmt = db.prepare(`
                     INSERT OR REPLACE INTO Guests (id, name, dateAdded)
                     VALUES (?, ?, ?)
                 `);
 
-                for (const guest of backupData.data.guests) {
-                    stmt.run(guest.id, guest.name, guest.dateAdded);
-                }
-                totalRestored += backupData.data.guests.length;
-                console.log(`  ✓ Restored ${backupData.data.guests.length} guests`);
+            for (const guest of backupData.data.guests) {
+                stmt.run(guest.id, guest.name, guest.dateAdded);
             }
-
-            db.prepare('COMMIT').run();
-            console.log(`✅ Restore completed successfully!`);
-            console.log(`📊 Total records restored: ${totalRestored}`);
-
-            db.close();
-
-            return {
-                success: true,
-                totalRestored,
-                timestamp: backupData.timestamp,
-                counts: {
-                    recipes: backupData.data.recipes?.length || 0,
-                    pizzaNights: backupData.data.pizzaNights?.length || 0,
-                    guests: backupData.data.guests?.length || 0
-                }
-            };
-
-        } catch (error) {
-            db.prepare('ROLLBACK').run();
-            db.close();
-            throw error;
+            totalRestored += backupData.data.guests.length;
+            console.log(`  ✓ Restored ${backupData.data.guests.length} guests`);
         }
 
+        db.prepare('COMMIT').run();
+        console.log(`✅ Restore completed successfully!`);
+        console.log(`📊 Total records restored: ${totalRestored}`);
+
+        db.close();
+
+        return {
+            success: true,
+            totalRestored,
+            timestamp: backupData.timestamp,
+            counts: {
+                recipes: backupData.data.recipes?.length || 0,
+                pizzaNights: backupData.data.pizzaNights?.length || 0,
+                guests: backupData.data.guests?.length || 0
+            }
+        };
+
     } catch (error) {
-        console.error('❌ Restore failed:', error.message);
-        console.error('Stack:', error.stack);
+        db.prepare('ROLLBACK').run();
+        db.close();
         throw error;
     }
+
+} catch (error) {
+    console.error('❌ Restore failed:', error.message);
+    console.error('Stack:', error.stack);
+    throw error;
+}
 }
 
 // Export for API use
