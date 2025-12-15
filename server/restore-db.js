@@ -11,17 +11,27 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DB_PATH = process.env.SQLITE_DB_PATH || path.join(__dirname, '..', 'antigravipizza.db');
+// Use same path logic as db.js
+const DB_PATH = path.join(__dirname, '..', 'antigravipizza.db');
 const BACKUP_FILE = path.join(__dirname, '..', 'backups', 'latest-backup.json');
 
 async function restoreDatabase() {
     console.log('📥 Starting database restore...');
+    console.log('📂 Database path:', DB_PATH);
+    console.log('📁 Backup file:', BACKUP_FILE);
 
     try {
         // Check if backup file exists
         if (!fs.existsSync(BACKUP_FILE)) {
             console.log('⚠️  No backup file found at:', BACKUP_FILE);
             return { success: false, message: 'No backup file found' };
+        }
+
+        // Check if database exists
+        if (!fs.existsSync(DB_PATH)) {
+            console.log('⚠️  Database file not found at:', DB_PATH);
+            console.log('⚠️  Database must be created first by the server');
+            return { success: false, message: 'Database not found' };
         }
 
         // Read backup file
@@ -136,6 +146,7 @@ async function restoreDatabase() {
 
     } catch (error) {
         console.error('❌ Restore failed:', error.message);
+        console.error('Stack:', error.stack);
         throw error;
     }
 }
