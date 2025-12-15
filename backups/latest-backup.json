@@ -1,0 +1,28 @@
+{
+    "version": "1.0",
+    "timestamp": 1734253500000,
+    "date": "2024-12-15T09:05:00.000Z",
+    "data": {
+        "recipes": [
+            {
+                "id": "test-recipe-1",
+                "name": "Pizza Margherita Test",
+                "description": "Pizza di test per verificare il restore",
+                "baseIngredients": "[{\"name\":\"Pomodoro\",\"quantity\":100,\"unit\":\"g\"},{\"name\":\"Mozzarella\",\"quantity\":150,\"unit\":\"g\"},{\"name\":\"Basilico\",\"quantity\":5,\"unit\":\"foglie\"}]",
+                "preparations": "[]",
+                "instructions": "{\"dough\":[\"Preparare l'impasto\"],\"topping\":[\"Stendere la base\",\"Aggiungere pomodoro e mozzarella\",\"Cuocere a 250°C per 10 minuti\",\"Aggiungere basilico fresco\",\"Servire immediatamente ben calda\"]}",
+                "tags": "[\"Classica\",\"Vegetariana\"]",
+                "pizzaiolo": "Test Chef",
+                "dateAdded": 1734253500000,
+                "isFavorite": 0,
+                "source": "test",
+                "doughType": "Classica"
+            }
+        ],
+        "pizzaNights": [],
+        "guests": [],
+        "ingredients": [],
+        "preparations": [],
+        "archetypeWeights": []
+    }
+}
