@@ -157,6 +157,16 @@ async function restoreFromData(backupData) {
     console.log('📂 Database path:', DB_PATH);
 
     try {
+        // Normalize backup format: accept both full format (with metadata) and data-only format
+        if (!backupData.data && (backupData.recipes || backupData.pizzaNights || backupData.guests)) {
+            // Data-only format, wrap it with metadata
+            backupData = {
+                version: '1.0',
+                timestamp: Date.now(),
+                data: backupData
+            };
+        }
+
         if (!backupData || !backupData.data) {
             throw new Error('Invalid backup data format');
         }
