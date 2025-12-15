@@ -17,8 +17,17 @@ const BACKUP_FILE = path.join(BACKUP_DIR, 'latest-backup.json');
 
 async function backupDatabase() {
     console.log('💾 Starting database backup...');
+    console.log('📂 Database path:', DB_PATH);
+    console.log('📁 Backup directory:', BACKUP_DIR);
 
     try {
+        // Check if database file exists
+        if (!fs.existsSync(DB_PATH)) {
+            const error = new Error(`Database file not found at: ${DB_PATH}`);
+            console.error('❌', error.message);
+            throw error;
+        }
+
         // Ensure backup directory exists
         if (!fs.existsSync(BACKUP_DIR)) {
             fs.mkdirSync(BACKUP_DIR, { recursive: true });
@@ -99,6 +108,7 @@ async function backupDatabase() {
 
     } catch (error) {
         console.error('❌ Backup failed:', error.message);
+        console.error('Stack:', error.stack);
         throw error;
     }
 }
