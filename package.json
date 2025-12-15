@@ -8,7 +8,7 @@
     "dev:sql": "concurrently \"node server/index.js\" \"vite\"",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node server/index.js"
+    "start": "sh start-railway.sh"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.7.10",
