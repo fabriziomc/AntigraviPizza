@@ -61,6 +61,14 @@ export async function renderSettings() {
             </p>
             
             <div class="action-group">
+              <button id="btnBackupDatabase" class="btn btn-accent">
+                <span class="icon">💾</span>
+                Backup Database (Server)
+              </button>
+              <p class="action-help">Salva un backup del database sul server (per Railway). Il backup verrà ripristinato automaticamente al prossimo deploy.</p>
+            </div>
+
+            <div class="action-group">
               <button id="btnExport" class="btn btn-primary">
                 <span class="icon">⬇️</span>
                 Download Backup
@@ -154,6 +162,29 @@ function setupEventListeners() {
 
     localStorage.setItem('maxOvenTemp', temp);
     showToast('✅ Impostazioni forno salvate!', 'success');
+  });
+
+  // Backup Database (Server)
+  document.getElementById('btnBackupDatabase').addEventListener('click', async () => {
+    try {
+      showToast('💾 Creazione backup in corso...', 'info');
+
+      const response = await fetch('/api/backup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast(`✅ Backup creato! ${result.counts.recipes} ricette, ${result.counts.pizzaNights} serate`, 'success');
+      } else {
+        throw new Error(result.error || 'Backup failed');
+      }
+    } catch (error) {
+      console.error('Backup failed:', error);
+      showToast('❌ Errore durante il backup: ' + error.message, 'error');
+    }
   });
 
   // Export Data

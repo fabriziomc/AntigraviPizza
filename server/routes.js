@@ -621,4 +621,38 @@ router.post('/pizza-optimizer/analyze', async (req, res) => {
     }
 });
 
+// ============================================
+// DATABASE BACKUP/RESTORE ENDPOINTS
+// ============================================
+
+// Manual backup endpoint
+router.post('/backup', async (req, res) => {
+    try {
+        const { backupDatabase } = await import('./backup-db.js');
+        const result = await backupDatabase();
+        res.json(result);
+    } catch (err) {
+        console.error('Backup error:', err);
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
+    }
+});
+
+// Manual restore endpoint
+router.post('/restore', async (req, res) => {
+    try {
+        const { restoreDatabase } = await import('./restore-db.js');
+        const result = await restoreDatabase();
+        res.json(result);
+    } catch (err) {
+        console.error('Restore error:', err);
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
+    }
+});
+
 export default router;
