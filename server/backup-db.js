@@ -3,40 +3,42 @@
 // ============================================
 // Exports entire database to JSON format for backup
 
-import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { getDb, getDbType } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DB_PATH = process.env.SQLITE_DB_PATH || path.join(__dirname, '..', 'antigravipizza.db');
 const BACKUP_DIR = path.join(__dirname, '..', 'backups');
 const BACKUP_FILE = path.join(BACKUP_DIR, 'latest-backup.json');
 
 async function backupDatabase() {
     console.log('💾 Starting database backup...');
-    console.log('📂 Database path:', DB_PATH);
     console.log('📁 Backup directory:', BACKUP_DIR);
 
     try {
-        // Check if database file exists
-        if (!fs.existsSync(DB_PATH)) {
-            const error = new Error(`Database file not found at: ${DB_PATH}`);
-            console.error('❌', error.message);
-            throw error;
+        // Get database instance from db.js (same instance used by the app)
+        const dbType = getDbType();
+
+        if (dbType !== 'sqlite') {
+            throw new Error(`Backup only supported for SQLite, current type: ${dbType}`);
         }
+
+        const db = getDb();
+
+        if (!db) {
+            throw new Error('Database not initialized');
+        }
+
+        console.log('📂 Using application database instance');
 
         // Ensure backup directory exists
         if (!fs.existsSync(BACKUP_DIR)) {
             fs.mkdirSync(BACKUP_DIR, { recursive: true });
             console.log('📁 Created backups directory');
         }
-
-        // Connect to database
-        const db = new Database(DB_PATH, { readonly: true });
-        console.log('📂 Connected to database:', DB_PATH);
 
         // Export all tables
         const backup = {
@@ -80,8 +82,6 @@ async function backupDatabase() {
             console.log('  ⚠ ArchetypeWeights table not found, skipping');
             backup.data.archetypeWeights = [];
         }
-
-        db.close();
 
         // Write backup to file
         fs.writeFileSync(BACKUP_FILE, JSON.stringify(backup, null, 2), 'utf8');
