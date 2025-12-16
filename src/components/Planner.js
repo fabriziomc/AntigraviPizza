@@ -22,7 +22,6 @@ export async function renderPlanner(appState) {
   <div id="liveModeContainer" style="display: none;">
         <!-- Header -->
         <div class="live-header">
-          <h1>🍕 Serata Pizza</h1>
           <div class="progress-indicator">Pizza 1 di 1</div>
           <button class="btn-exit" onclick="window.exitLiveMode()">✕ Esci</button>
         </div>
