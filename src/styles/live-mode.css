@@ -13,6 +13,8 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    /* Prevent browser back/forward gestures but allow vertical scroll */
+    touch-action: pan-y;
 }
 
 /* Header */
