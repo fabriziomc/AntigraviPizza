@@ -999,7 +999,18 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
     // Seleziona preparazioni intelligenti e rimuovi ingredienti base sostituiti
     const { preparations, cleanedIngredients } = await selectPreparationsForPizza(ingredients, tags);
 
-    const imagePrompt = `gourmet pizza ${pizzaName}, toppings: ${mainIngredientNames.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
+    // Detect if pizza is white (no tomato) or red (with tomato)
+    const hasTomato = ingredients.some(ing =>
+        ing.name.toLowerCase().includes('pomodor') ||
+        ing.name.toLowerCase().includes('salsa') ||
+        ing.name.toLowerCase().includes('passata')
+    );
+
+    const pizzaStyle = hasTomato
+        ? 'pizza with red tomato sauce base'
+        : 'pizza bianca, white pizza with NO tomato sauce, white base with olive oil';
+
+    const imagePrompt = `gourmet ${pizzaStyle}, ${pizzaName}, toppings: ${mainIngredientNames.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
     const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}`;
 
     return {
