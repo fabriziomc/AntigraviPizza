@@ -32,7 +32,7 @@ export async function renderPlanner(appState) {
           
           <!-- Before Cooking Section -->
           <div class="cooking-phase-section">
-            <h3 style="color: var(--color-primary-light); font-size: 1.75rem; margin-bottom: 1.5rem;">🔥 Prima della Cottura</h3>
+            <h3 style="color: var(--color-primary-light); font-size: 1.25rem; margin-bottom: 1rem;">🔥 Prima cottura</h3>
             <div id="beforeCookingContent">
               <!-- Populated by JS -->
             </div>
@@ -46,7 +46,7 @@ export async function renderPlanner(appState) {
           
           <!-- After Cooking Section -->
           <div class="cooking-phase-section">
-            <h3 style="color: var(--color-accent-light); font-size: 1.75rem; margin-bottom: 1.5rem;">✨ Dopo la Cottura</h3>
+            <h3 style="color: var(--color-accent-light); font-size: 1.25rem; margin-bottom: 1rem;">✨ Dopo cottura</h3>
             <div id="afterCookingContent">
               <!-- Populated by JS -->
             </div>
@@ -1552,24 +1552,17 @@ function renderCookingPhaseContent(containerId, ingredients, preparations, phase
 
   // Render ingredients for this phase
   if (ingredients.length > 0) {
-    html += '<div style="margin-bottom: 2rem;"><h4 style="color: var(--color-primary-light); margin-bottom: 1rem;">📦 Ingredienti</h4>';
+    html += '<div style="margin-bottom: 1.5rem;">';
     html += '<div class="ingredient-grid">';
 
     html += ingredients.map((ing, i) => {
       const ingName = ing.name || ing;
       const quantity = ing.quantity || '';
       const unit = ing.unit || '';
-      const checkKey = `${liveModeState.currentIndex}-ing-${phase}-${i}`;
-      const isChecked = liveModeState.checkedIngredients[checkKey] || false;
 
       return `
         <div class="ingredient-item">
-          <input type="checkbox" id="ing-${phase}-${i}"
-            ${isChecked ? 'checked' : ''}
-            onchange="window.saveIngredientCheck('${phase}-${i}', this.checked)">
-            <label for="ing-${phase}-${i}">
-              ${ingName}${quantity ? ` - ${quantity}${unit}` : ''}
-            </label>
+          <span>${ingName}${quantity ? ` - ${quantity}${unit}` : ''}</span>
         </div>
         `;
     }).join('');
@@ -1592,17 +1585,9 @@ function renderCookingPhaseContent(containerId, ingredients, preparations, phase
         prepName = 'Preparazione';
       }
 
-      const checkKey = `${liveModeState.currentIndex}-prep-${phase}-${i}`;
-      const isChecked = liveModeState.checkedPreparations[checkKey] || false;
-
       return `
         <div class="step">
-          <input type="checkbox" id="prep-${phase}-${i}"
-            ${isChecked ? 'checked' : ''}
-            onchange="window.savePrepCheck('${phase}-${i}', this.checked)">
-          <label for="prep-${phase}-${i}">
-            ${prepName}
-          </label>
+          <span>${prepName}</span>
         </div>
       `;
     }).join('');
