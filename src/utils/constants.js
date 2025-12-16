@@ -21,10 +21,8 @@ export const RECIPE_TAGS = [
     'Gourmet',
     'Napoletana',
     'Romana',
-    'Contemporanea',
     'Vegetariana',
     'Vegana',
-    'Senza Glutine',
     'Bianca',
     'Rossa'
 ];

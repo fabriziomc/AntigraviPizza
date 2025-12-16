@@ -67,11 +67,6 @@ async function renderFilters(recipes) {
         ${sortedIngredients.map(ing => `<option value="${ing}">${ing}</option>`).join('')}
       </select>
 
-      <select id="doughFilter" class="sort-select" style="min-width: 140px;">
-        <option value="all">🥣 Tutti gli impasti</option>
-        ${DOUGH_TYPES.map(d => `<option value="${d.type}">${d.type}</option>`).join('')}
-      </select>
-
       <select id="recipeSort" class="sort-select">
         <option value="newest">📅 Più recenti</option>
         <option value="oldest">📅 Meno recenti</option>
@@ -103,11 +98,6 @@ async function renderRecipes(state) {
     } else {
       recipes = recipes.filter(recipe => recipe.tags.includes(state.selectedTag));
     }
-  }
-
-  // Apply dough type filter
-  if (state.selectedDoughType && state.selectedDoughType !== 'all') {
-    recipes = recipes.filter(recipe => getRecipeDoughType(recipe) === state.selectedDoughType);
   }
 
   // Apply ingredient filter
@@ -215,15 +205,6 @@ function setupLibraryListeners() {
       handleFilterChange(chip.dataset.tag);
     }
   });
-
-  // Dough filter select
-  const doughSelect = document.getElementById('doughFilter');
-  if (doughSelect) {
-    doughSelect.addEventListener('change', (e) => {
-      state.selectedDoughType = e.target.value;
-      renderRecipes(state);
-    });
-  }
 
   // Ingredient filter select
   const ingredientSelect = document.getElementById('ingredientFilter');
