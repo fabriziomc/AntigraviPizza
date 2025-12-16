@@ -1450,6 +1450,7 @@ function setupSwipeGestures(container) {
   let touchEndX = 0;
   let touchStartY = 0;
   let touchEndY = 0;
+  let isSwiping = false;
 
   const minSwipeDistance = 50; // Minimum distance for a swipe
   const maxVerticalDistance = 100; // Maximum vertical movement to still count as horizontal swipe
@@ -1457,7 +1458,23 @@ function setupSwipeGestures(container) {
   container.addEventListener('touchstart', (e) => {
     touchStartX = e.changedTouches[0].screenX;
     touchStartY = e.changedTouches[0].screenY;
+    isSwiping = false;
   }, { passive: true });
+
+  container.addEventListener('touchmove', (e) => {
+    // Detect if this is a horizontal swipe
+    const currentX = e.changedTouches[0].screenX;
+    const currentY = e.changedTouches[0].screenY;
+    const diffX = Math.abs(currentX - touchStartX);
+    const diffY = Math.abs(currentY - touchStartY);
+
+    // If horizontal movement is greater than vertical, it's a swipe
+    if (diffX > diffY && diffX > 10) {
+      isSwiping = true;
+      // Prevent browser back/forward gesture
+      e.preventDefault();
+    }
+  }, { passive: false }); // Must be non-passive to use preventDefault
 
   container.addEventListener('touchend', (e) => {
     touchEndX = e.changedTouches[0].screenX;
