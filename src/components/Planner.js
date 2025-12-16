@@ -1428,6 +1428,9 @@ async function startLiveMode(nightId) {
       // Close modal first
       closeModal();
 
+      // Setup swipe gestures for mobile
+      setupSwipeGestures(container);
+
       // Render first pizza after DOM is ready
       setTimeout(() => {
         renderLivePizza();
@@ -1438,6 +1441,45 @@ async function startLiveMode(nightId) {
     console.error('Error stack:', error.stack);
     console.error('Error message:', error.message);
     alert('Errore nell\'avvio della serata: ' + error.message);
+  }
+}
+
+// Setup swipe gestures for mobile navigation
+function setupSwipeGestures(container) {
+  let touchStartX = 0;
+  let touchEndX = 0;
+  let touchStartY = 0;
+  let touchEndY = 0;
+
+  const minSwipeDistance = 50; // Minimum distance for a swipe
+  const maxVerticalDistance = 100; // Maximum vertical movement to still count as horizontal swipe
+
+  container.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  container.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;
+    handleGesture();
+  }, { passive: true });
+
+  function handleGesture() {
+    const horizontalDistance = touchEndX - touchStartX;
+    const verticalDistance = Math.abs(touchEndY - touchStartY);
+
+    // Only trigger swipe if horizontal movement is significant
+    // and vertical movement is minimal (to avoid interfering with scrolling)
+    if (Math.abs(horizontalDistance) > minSwipeDistance && verticalDistance < maxVerticalDistance) {
+      if (horizontalDistance < 0) {
+        // Swipe left - next pizza
+        nextPizza();
+      } else {
+        // Swipe right - previous pizza
+        previousPizza();
+      }
+    }
   }
 }
 
