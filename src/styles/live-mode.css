@@ -133,10 +133,10 @@
 
 /* Cooking Section */
 .cooking-section p {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     color: var(--color-accent-light);
     margin: 0;
-    padding: 1rem;
+    padding: 0.75rem;
     background: rgba(251, 146, 60, 0.1);
     border-radius: var(--radius-md);
     text-align: center;
@@ -219,8 +219,8 @@
     }
 
     .cooking-section p {
-        font-size: 1rem;
-        padding: 0.75rem;
+        font-size: 0.95rem;
+        padding: 0.6rem;
     }
 
     .live-footer {
