@@ -25,8 +25,8 @@ export const RECIPE_TAGS = [
     'Vegetariana',
     'Vegana',
     'Senza Glutine',
-    'Fritta',
-    'Al Tegamino'
+    'Bianca',
+    'Rossa'
 ];
 
 // Famous pizzaiolos

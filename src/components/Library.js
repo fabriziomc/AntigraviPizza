@@ -10,13 +10,47 @@ import { state } from '../store.js';
 import { openModal, closeModal } from '../modules/ui.js';
 
 export async function renderLibrary(appState) {
-  await renderFilters();
+  const recipes = await getAllRecipes();
+  await renderFilters(recipes);
   await renderRecipes(appState);
   setupLibraryListeners();
 }
 
-async function renderFilters() {
+async function renderFilters(recipes) {
   const filtersContainer = document.getElementById('recipeFilters');
+
+  // Extract unique ingredients from all recipes
+  const ingredientsSet = new Set();
+  recipes.forEach(recipe => {
+    try {
+      // Parse baseIngredients
+      if (recipe.baseIngredients) {
+        const baseIng = typeof recipe.baseIngredients === 'string'
+          ? JSON.parse(recipe.baseIngredients)
+          : recipe.baseIngredients;
+        baseIng.forEach(ing => {
+          if (ing.name) ingredientsSet.add(ing.name);
+        });
+      }
+
+      // Parse preparations
+      if (recipe.preparations) {
+        const preps = typeof recipe.preparations === 'string'
+          ? JSON.parse(recipe.preparations)
+          : recipe.preparations;
+        preps.forEach(prep => {
+          if (prep.id) {
+            const prepData = PREPARATIONS.find(p => p.id === prep.id);
+            if (prepData) ingredientsSet.add(prepData.name);
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Error parsing ingredients for recipe:', recipe.name, e);
+    }
+  });
+
+  const sortedIngredients = Array.from(ingredientsSet).sort();
 
   filtersContainer.innerHTML = `
     <div class="filters-scroll">
@@ -27,7 +61,12 @@ async function renderFilters() {
       `).join('')}
     </div>
     
-    <div class="filters-sort" style="display: flex; gap: 0.5rem; align-items: center;">
+    <div class="filters-sort" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+      <select id="ingredientFilter" class="sort-select" style="min-width: 160px;">
+        <option value="all">🥘 Tutti gli ingredienti</option>
+        ${sortedIngredients.map(ing => `<option value="${ing}">${ing}</option>`).join('')}
+      </select>
+
       <select id="doughFilter" class="sort-select" style="min-width: 140px;">
         <option value="all">🥣 Tutti gli impasti</option>
         ${DOUGH_TYPES.map(d => `<option value="${d.type}">${d.type}</option>`).join('')}
@@ -36,6 +75,7 @@ async function renderFilters() {
       <select id="recipeSort" class="sort-select">
         <option value="newest">📅 Più recenti</option>
         <option value="oldest">📅 Meno recenti</option>
+        <option value="rating">⭐ Rating</option>
         <option value="az">🔤 A-Z</option>
         <option value="za">🔤 Z-A</option>
       </select>
@@ -52,7 +92,6 @@ async function renderRecipes(state) {
     const term = state.searchTerm.toLowerCase();
     recipes = recipes.filter(recipe =>
       recipe.name.toLowerCase().includes(term) ||
-      recipe.pizzaiolo.toLowerCase().includes(term) ||
       recipe.description.toLowerCase().includes(term)
     );
   }
@@ -71,6 +110,37 @@ async function renderRecipes(state) {
     recipes = recipes.filter(recipe => getRecipeDoughType(recipe) === state.selectedDoughType);
   }
 
+  // Apply ingredient filter
+  if (state.selectedIngredient && state.selectedIngredient !== 'all') {
+    recipes = recipes.filter(recipe => {
+      try {
+        // Check baseIngredients
+        if (recipe.baseIngredients) {
+          const baseIng = typeof recipe.baseIngredients === 'string'
+            ? JSON.parse(recipe.baseIngredients)
+            : recipe.baseIngredients;
+          if (baseIng.some(ing => ing.name === state.selectedIngredient)) {
+            return true;
+          }
+        }
+
+        // Check preparations
+        if (recipe.preparations) {
+          const preps = typeof recipe.preparations === 'string'
+            ? JSON.parse(recipe.preparations)
+            : recipe.preparations;
+          return preps.some(prep => {
+            const prepData = PREPARATIONS.find(p => p.id === prep.id);
+            return prepData && prepData.name === state.selectedIngredient;
+          });
+        }
+      } catch (e) {
+        console.warn('Error filtering by ingredient:', e);
+      }
+      return false;
+    });
+  }
+
   // Apply sorting
   const sortBy = state.sortBy || 'newest';
   recipes.sort((a, b) => {
@@ -79,6 +149,10 @@ async function renderRecipes(state) {
         return (b.dateAdded || 0) - (a.dateAdded || 0);
       case 'oldest':
         return (a.dateAdded || 0) - (b.dateAdded || 0);
+      case 'rating':
+        // Sort by rating (highest first), then by date for ties
+        const ratingDiff = (b.rating || 0) - (a.rating || 0);
+        return ratingDiff !== 0 ? ratingDiff : (b.dateAdded || 0) - (a.dateAdded || 0);
       case 'az':
         return a.name.localeCompare(b.name);
       case 'za':
@@ -116,10 +190,6 @@ function createRecipeCard(recipe) {
       </button>
       <div class="recipe-card-body">
         <h3 class="recipe-card-title">${recipe.name}</h3>
-        <div class="recipe-card-pizzaiolo">
-          <span>👨‍🍳</span>
-          <span>${recipe.pizzaiolo}</span>
-        </div>
         <div class="recipe-card-tags">
           ${recipe.tags.slice(0, 3).map(tag => `
             <span class="tag">${tag}</span>
@@ -150,9 +220,16 @@ function setupLibraryListeners() {
   const doughSelect = document.getElementById('doughFilter');
   if (doughSelect) {
     doughSelect.addEventListener('change', (e) => {
-      // Custom event or just re-render?
-      // Since renderRecipes filters based on state, we need to add dough filter to state
       state.selectedDoughType = e.target.value;
+      renderRecipes(state);
+    });
+  }
+
+  // Ingredient filter select
+  const ingredientSelect = document.getElementById('ingredientFilter');
+  if (ingredientSelect) {
+    ingredientSelect.addEventListener('change', (e) => {
+      state.selectedIngredient = e.target.value;
       renderRecipes(state);
     });
   }
@@ -269,11 +346,8 @@ async function showRecipeModal(recipeId) {
         </button>
       </div>
       
+      
       <div class="recipe-modal-meta">
-        <div class="recipe-modal-pizzaiolo">
-          <span>👨‍🍳</span>
-          <span>${recipe.pizzaiolo}</span>
-        </div>
         ${recipe.source ? `<a href="${recipe.source}" target="_blank" class="recipe-modal-source">🔗 Fonte</a>` : ''}
       </div>
       
