@@ -19,8 +19,6 @@ export const STORES = {
 export const RECIPE_TAGS = [
     'Classica',
     'Gourmet',
-    'Napoletana',
-    'Romana',
     'Vegetariana',
     'Vegana',
     'Bianca',
