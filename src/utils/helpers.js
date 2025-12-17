@@ -130,6 +130,9 @@ export function aggregateIngredients(recipes, quantities) {
 
         const ingredients = recipe.baseIngredients || recipe.ingredients || [];
         ingredients.forEach(ingredient => {
+            // Safety check
+            if (!ingredient || !ingredient.name) return;
+
             const key = ingredient.name.toLowerCase();
 
             if (!aggregated[key]) {
