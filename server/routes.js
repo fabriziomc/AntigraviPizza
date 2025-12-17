@@ -731,4 +731,141 @@ router.post('/seed', async (req, res) => {
     }
 });
 
+// ==========================================
+// BACKUP & RESTORE (for Render free tier without persistent disk)
+// ==========================================
+
+router.post('/backup', async (req, res) => {
+    try {
+        const backup = {
+            version: '2.0', // Post-reorganization
+            timestamp: new Date().toISOString(),
+            data: {
+                categories: await dbAdapter.getAllCategories(),
+                ingredients: await dbAdapter.getAllIngredients(),
+                preparations: await dbAdapter.getAllPreparations(),
+                recipes: await dbAdapter.getAllRecipes(),
+                pizzaNights: await dbAdapter.getAllPizzaNights(),
+                guests: await dbAdapter.getAllGuests(),
+                combinations: await dbAdapter.getAllCombinations()
+            }
+        };
+
+        const counts = {
+            categories: backup.data.categories.length,
+            ingredients: backup.data.ingredients.length,
+            preparations: backup.data.preparations.length,
+            recipes: backup.data.recipes.length,
+            pizzaNights: backup.data.pizzaNights.length,
+            guests: backup.data.guests.length
+        };
+
+        res.json({
+            success: true,
+            backup,
+            counts
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
+    }
+});
+
+router.post('/restore', async (req, res) => {
+    try {
+        const backup = req.body;
+
+        if (!backup || !backup.data) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid backup format'
+            });
+        }
+
+        // Clear existing data (except categories - they're standard)
+        const { db } = await import('./db.js');
+
+        db.prepare('DELETE FROM Recipes').run();
+        db.prepare('DELETE FROM PizzaNights').run();
+        db.prepare('DELETE FROM Guests').run();
+        db.prepare('DELETE FROM Combinations').run();
+
+        // Only clear custom ingredients/preparations
+        db.prepare('DELETE FROM Ingredients WHERE isCustom = 1').run();
+        db.prepare('DELETE FROM Preparations WHERE isCustom = 1').run();
+
+        // Restore data
+        const counts = {
+            recipes: 0,
+            pizzaNights: 0,
+            guests: 0,
+            ingredients: 0,
+            preparations: 0
+        };
+
+        // Restore custom ingredients
+        if (backup.data.ingredients) {
+            for (const ing of backup.data.ingredients) {
+                if (ing.isCustom) {
+                    await dbAdapter.createIngredient(ing);
+                    counts.ingredients++;
+                }
+            }
+        }
+
+        // Restore custom preparations
+        if (backup.data.preparations) {
+            for (const prep of backup.data.preparations) {
+                if (prep.isCustom) {
+                    await dbAdapter.createPreparation(prep);
+                    counts.preparations++;
+                }
+            }
+        }
+
+        // Restore recipes
+        if (backup.data.recipes) {
+            for (const recipe of backup.data.recipes) {
+                await dbAdapter.createRecipe(recipe);
+                counts.recipes++;
+            }
+        }
+
+        // Restore guests
+        if (backup.data.guests) {
+            for (const guest of backup.data.guests) {
+                await dbAdapter.createGuest(guest);
+                counts.guests++;
+            }
+        }
+
+        // Restore pizza nights
+        if (backup.data.pizzaNights) {
+            for (const night of backup.data.pizzaNights) {
+                await dbAdapter.createPizzaNight(night);
+                counts.pizzaNights++;
+            }
+        }
+
+        // Restore combinations
+        if (backup.data.combinations) {
+            for (const combo of backup.data.combinations) {
+                await dbAdapter.createCombination(combo);
+            }
+        }
+
+        res.json({
+            success: true,
+            counts
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
+    }
+});
+
 export default router;
