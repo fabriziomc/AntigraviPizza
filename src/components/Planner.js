@@ -542,19 +542,38 @@ async function generateMixedPizzas() {
 // Display generated pizzas
 function displayGeneratedPizzas(pizzas, container, title = 'Pizze Generate') {
   container.innerHTML = `
-  < h5 style = "margin: 0 0 0.75rem 0;" > ${title} (${pizzas.length})</h5 >
+    <h5 style="margin: 0 0 0.75rem 0;">${title} (${pizzas.length})</h5>
     <div style="display: flex; flex-direction: column; gap: 0.5rem;">
       ${pizzas.map(pizza => `
-        <div style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
-          <div style="font-weight: 600; margin-bottom: 0.25rem;">🍕 ${pizza.name}</div>
-          <div style="font-size: 0.875rem; color: var(--color-gray-400);">
-            ${pizza.baseIngredients.map(i => i.name || i).join(', ')}
+        <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
+          <div style="flex: 1;">
+            <div style="font-weight: 600;">🍕 ${pizza.name}</div>
+            <div style="font-size: 0.875rem; color: var(--color-gray-400);">
+              ${pizza.baseIngredients.map(i => i.name || i).join(', ')}
+            </div>
           </div>
+          <button 
+            class="btn-preview-generated" 
+            data-recipe-id="${pizza.id}"
+            style="padding: 0.5rem 0.75rem; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--color-primary); border-radius: 0.375rem; color: var(--color-primary); cursor: pointer; font-size: 0.875rem; white-space: nowrap;"
+            title="Vedi ingredienti"
+          >
+            👁️ Vedi
+          </button>
         </div>
       `).join('')}
     </div>
-`;
+  `;
   container.style.display = 'block';
+
+  // Attach preview button listeners
+  container.querySelectorAll('.btn-preview-generated').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const recipeId = btn.dataset.recipeId;
+      showPizzaPreviewInPlanner(recipeId);
+    });
+  });
 }
 
 // Display metrics
