@@ -22,4 +22,4 @@ fi
 
 # Start the application
 echo "🎯 Starting application..."
-exec npm run preview
+exec node server/index.js

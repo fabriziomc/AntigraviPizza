@@ -26,13 +26,12 @@ RUN mkdir -p /app/data
 # Make startup script executable
 RUN chmod +x /app/start-railway.sh
 
-# Expose port
-EXPOSE 3000
+# Expose port (Railway will use $PORT env var)
+EXPOSE 5173
 
 # Set environment variables
 ENV DB_TYPE=sqlite
 ENV NODE_ENV=production
-ENV PORT=5173
 
 # Start with initialization script
 CMD ["/app/start-railway.sh"]
