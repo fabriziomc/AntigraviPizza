@@ -1232,16 +1232,16 @@ async function manageAvailableIngredients(nightId) {
   // Get currently available ingredients
   const availableIngredients = night.availableIngredients || [];
 
-  // Helper to get category icon
+  // Helper to get category icon (aligned with Ingredients component)
   const getCategoryIcon = (category) => {
     const icons = {
-      'Impasto': '🌾',
-      'Salsa': '🍅',
       'Formaggi': '🧀',
       'Carne': '🥓',
-      'Verdure': '🥬',
-      'Pesce': '🐟',
+      'Verdure': '�',
+      'Salsa': '🍅',
       'Erbe e Spezie': '🌿',
+      'Pesce': '🐟',
+      'Impasto': '�',
       'Altro': '📦'
     };
     return icons[category] || '📦';
