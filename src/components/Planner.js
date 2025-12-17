@@ -528,11 +528,8 @@ async function generateMixedPizzas() {
       return;
     }
 
-    // Display suggestions
-    displayGeneratedPizzas(data.suggestions, resultsDiv, 'Pizze Suggerite');
-    displayMetrics(data.metrics, metricsDiv);
 
-    // Clear previous auto-selections (uncheck previously generated pizzas)
+    // Clear previous auto-selections FIRST (uncheck previously generated pizzas)
     const manuallySelectedIds = Array.from(checkedBoxes).map(cb => cb.value);
     document.querySelectorAll('#pizzaSelection input[type="checkbox"]:checked').forEach(checkbox => {
       // Only uncheck if it's not a manually selected pizza
@@ -541,6 +538,10 @@ async function generateMixedPizzas() {
         checkbox.checked = false;
       }
     });
+
+    // Display suggestions (this replaces the HTML content)
+    displayGeneratedPizzas(data.suggestions, resultsDiv, 'Pizze Suggerite');
+    displayMetrics(data.metrics, metricsDiv);
 
     // Auto-select suggested pizzas (replaces previous suggestions)
     selectGeneratedPizzas(data.suggestions);
