@@ -27,8 +27,5 @@ RUN mkdir -p /app/data
 ENV DB_TYPE=sqlite
 ENV NODE_ENV=production
 
-# Expose port (Railway will use $PORT env var)
-EXPOSE 5173
-
-# Start directly with node server (not vite preview!)
+# Start directly with node server (Railway will set PORT env var)
 CMD ["node", "server/index.js"]
