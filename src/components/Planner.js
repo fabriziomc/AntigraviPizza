@@ -6,7 +6,7 @@ import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNig
 import { formatDate, formatDateForInput, getNextSaturdayEvening, confirm, formatQuantity, showToast } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
 import { getCookingInstructions } from '../utils/cookingCalculator.js';
-import { DOUGH_TYPES, DOUGH_RECIPES, PREPARATIONS } from '../utils/constants.js';
+import { DOUGH_TYPES, DOUGH_RECIPES, PREPARATIONS, RECIPE_TAGS } from '../utils/constants.js';
 import { getRecipeDoughType } from '../utils/doughHelper.js';
 import { state } from '../store.js';
 import { generateShoppingList, downloadShoppingList } from '../modules/shopping.js';
@@ -71,6 +71,20 @@ export async function renderPlanner(appState) {
     document.body.insertAdjacentHTML('beforeend', liveModeHTML);
   }
 }
+
+// ============================================
+// PLANNER FILTER STATE
+// ============================================
+
+const plannerFilterState = {
+  selectedTag: null,
+  selectedIngredient: 'all',
+  sortBy: 'az'
+};
+
+// ============================================
+// NEW PIZZA NIGHT MODAL
+// ============================================
 
 async function showNewPizzaNightModal() {
   const recipes = await getAllRecipes(); // Store all recipes
@@ -203,11 +217,25 @@ async function showNewPizzaNightModal() {
         <div class="form-group" id="manualPizzaSelection">
           <label class="form-label">Seleziona Pizze</label>
           
-          <div style="margin-bottom: 0.5rem;">
-              <select id="plannerDoughFilter" class="form-input" style="padding: 0.4rem; font-size: 0.9rem;">
-                  <option value="all" style="color: #000; background: #fff;">🔍 Filtra per impasto: Tutti</option>
-                  ${DOUGH_TYPES.map(d => `<option value="${d.type}" style="color: #000; background: #fff;">${d.type}</option>`).join('')}
+          <!-- Filter UI -->
+          <div style="margin-bottom: 1rem;">
+            <!-- Tag filters -->
+            <div id="plannerTagFilters" class="filter-chips" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;"></div>
+            
+            <!-- Dropdowns -->
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <select id="plannerIngredientFilter" class="sort-select" style="min-width: 160px;">
+                <option value="all">🥘 Tutti gli ingredienti</option>
               </select>
+              
+              <select id="plannerRecipeSort" class="sort-select">
+                <option value="az">🔤 A-Z</option>
+                <option value="za">🔤 Z-A</option>
+                <option value="rating">⭐ Rating</option>
+                <option value="newest">📅 Più recenti</option>
+                <option value="oldest">📅 Meno recenti</option>
+              </select>
+            </div>
           </div>
 
           <div id="pizzaSelection" style="max-height: 300px; overflow-y: auto;">
@@ -232,19 +260,49 @@ async function showNewPizzaNightModal() {
 
   openModal(modalContent);
 
-  // Initialize with all recipes
-  renderPizzaSelectionList(recipes);
+  // Reset filter state
+  plannerFilterState.selectedTag = null;
+  plannerFilterState.selectedIngredient = 'all';
+  plannerFilterState.sortBy = 'az';
 
-  // Setup filter listener
-  const filterSelect = document.getElementById('plannerDoughFilter');
-  if (filterSelect) {
-    filterSelect.addEventListener('change', (e) => {
-      const selectedType = e.target.value;
-      let filteredRecipes = recipes;
-      if (selectedType !== 'all') {
-        filteredRecipes = recipes.filter(r => getRecipeDoughType(r) === selectedType);
+  // Setup filters
+  populatePlannerIngredientFilter(recipes);
+  renderPlannerTagFilters();
+
+  // Initial render with filters
+  const filtered = filterAndSortPlannerRecipes(recipes);
+  renderPizzaSelectionList(filtered);
+
+  // Setup filter event listeners
+  const tagFiltersContainer = document.getElementById('plannerTagFilters');
+  if (tagFiltersContainer) {
+    tagFiltersContainer.addEventListener('click', (e) => {
+      if (e.target.classList.contains('filter-chip')) {
+        const tag = e.target.dataset.tag;
+        plannerFilterState.selectedTag =
+          plannerFilterState.selectedTag === tag ? null : tag;
+        renderPlannerTagFilters();
+        const filtered = filterAndSortPlannerRecipes(recipes);
+        renderPizzaSelectionList(filtered);
       }
-      renderPizzaSelectionList(filteredRecipes);
+    });
+  }
+
+  const ingredientFilter = document.getElementById('plannerIngredientFilter');
+  if (ingredientFilter) {
+    ingredientFilter.addEventListener('change', (e) => {
+      plannerFilterState.selectedIngredient = e.target.value;
+      const filtered = filterAndSortPlannerRecipes(recipes);
+      renderPizzaSelectionList(filtered);
+    });
+  }
+
+  const sortSelect = document.getElementById('plannerRecipeSort');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      plannerFilterState.sortBy = e.target.value;
+      const filtered = filterAndSortPlannerRecipes(recipes);
+      renderPizzaSelectionList(filtered);
     });
   }
 
@@ -547,6 +605,111 @@ function selectGeneratedPizzas(pizzas) {
   });
 }
 
+// ============================================
+// PLANNER FILTER FUNCTIONS
+// ============================================
+
+function filterAndSortPlannerRecipes(recipes) {
+  let filtered = [...recipes];
+
+  // Tag filter
+  if (plannerFilterState.selectedTag) {
+    filtered = filtered.filter(r =>
+      r.tags && r.tags.includes(plannerFilterState.selectedTag)
+    );
+  }
+
+  // Ingredient filter
+  if (plannerFilterState.selectedIngredient !== 'all') {
+    filtered = filtered.filter(recipe => {
+      const baseIngs = recipe.baseIngredients || [];
+      const preps = recipe.preparations || [];
+
+      const hasInBase = baseIngs.some(ing =>
+        (ing.name || ing) === plannerFilterState.selectedIngredient
+      );
+
+      const hasInPrep = preps.some(prep => {
+        if (!prep.ingredients) return false;
+        return prep.ingredients.some(ing =>
+          (ing.name || ing) === plannerFilterState.selectedIngredient
+        );
+      });
+
+      return hasInBase || hasInPrep;
+    });
+  }
+
+  // Sort
+  switch (plannerFilterState.sortBy) {
+    case 'rating':
+      filtered.sort((a, b) => {
+        const ratingDiff = (b.rating || 0) - (a.rating || 0);
+        return ratingDiff !== 0 ? ratingDiff : b.dateAdded - a.dateAdded;
+      });
+      break;
+    case 'az':
+      filtered.sort((a, b) => a.name.localeCompare(b.name));
+      break;
+    case 'za':
+      filtered.sort((a, b) => b.name.localeCompare(a.name));
+      break;
+    case 'newest':
+      filtered.sort((a, b) => b.dateAdded - a.dateAdded);
+      break;
+    case 'oldest':
+      filtered.sort((a, b) => a.dateAdded - b.dateAdded);
+      break;
+  }
+
+  return filtered;
+}
+
+function populatePlannerIngredientFilter(recipes) {
+  const ingredients = new Set();
+
+  recipes.forEach(recipe => {
+    (recipe.baseIngredients || []).forEach(ing => {
+      ingredients.add(ing.name || ing);
+    });
+
+    (recipe.preparations || []).forEach(prep => {
+      if (prep.ingredients) {
+        prep.ingredients.forEach(ing => {
+          ingredients.add(ing.name || ing);
+        });
+      }
+    });
+  });
+
+  const sorted = Array.from(ingredients).sort();
+  const select = document.getElementById('plannerIngredientFilter');
+  if (!select) return;
+
+  // Clear existing options except first
+  select.innerHTML = '<option value="all">🥘 Tutti gli ingredienti</option>';
+
+  sorted.forEach(ing => {
+    const option = document.createElement('option');
+    option.value = ing;
+    option.textContent = ing;
+    select.appendChild(option);
+  });
+}
+
+function renderPlannerTagFilters() {
+  const container = document.getElementById('plannerTagFilters');
+  if (!container) return;
+
+  container.innerHTML = RECIPE_TAGS.map(tag => `
+    <div class="filter-chip ${plannerFilterState.selectedTag === tag ? 'active' : ''}"
+         data-tag="${tag}"
+         style="cursor: pointer;">
+      ${tag}
+    </div>
+  `).join('');
+}
+
 function renderPizzaSelectionList(recipes) {
   const listContainer = document.getElementById('pizzaSelection');
   if (!listContainer) return;
@@ -557,7 +720,6 @@ function renderPizzaSelectionList(recipes) {
     <input type="checkbox" name="selectedPizzas" value="${recipe.id}" style="width: 20px; height: 20px;">
       <div style="flex: 1;">
         <div style="font-weight: 600;">${recipe.name}</div>
-        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">👨‍🍳 ${recipe.pizzaiolo || 'Pizzaiolo sconosciuto'}</div>
       </div>
       <button 
         class="btn-preview-pizza" 
