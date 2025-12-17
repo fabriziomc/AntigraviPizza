@@ -419,8 +419,10 @@ function updateFixedPizzasList() {
 
   if (checkedBoxes.length > 0) {
     const pizzaNames = Array.from(checkedBoxes).map(cb => {
-      const label = cb.closest('div').querySelector('strong');
-      return label ? label.textContent : 'Pizza';
+      // Find the pizza name - it's in a div with font-weight: 600
+      const parentDiv = cb.closest('div');
+      const nameDiv = parentDiv.querySelector('div[style*="font-weight"]');
+      return nameDiv ? nameDiv.textContent.trim() : 'Pizza';
     });
 
     fixedList.innerHTML = `
