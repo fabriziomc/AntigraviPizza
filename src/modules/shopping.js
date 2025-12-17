@@ -7,39 +7,6 @@ import { aggregateIngredients, groupByCategory, formatQuantity } from '../utils/
 import { DOUGH_RECIPES } from '../utils/constants.js';
 
 /**
- * Normalize ingredient categories to standard ones
- * Maps non-standard categories (from custom ingredients or old data) to standard categories
- */
-function normalizeCategory(category) {
-    if (!category) return 'Altro';
-
-    const categoryMap = {
-        // Standard categories (pass through)
-        'Formaggi': 'Formaggi',
-        'Carne': 'Carne',
-        'Verdure': 'Verdure',
-        'Salsa': 'Salsa',
-        'Erbe e Spezie': 'Erbe e Spezie',
-        'Pesce': 'Pesce',
-        'Impasto': 'Impasto',
-        'Altro': 'Altro',
-
-        // Non-standard mappings
-        'Croccante': 'Altro',
-        'Oli': 'Salsa',
-        'Finish': 'Erbe e Spezie',
-        'Salse': 'Salsa',
-        'Creme': 'Salsa',
-        'Basi': 'Salsa',
-        'Dolci': 'Altro',
-        'Preparazioni Base': 'Altro',
-        'Condimenti': 'Salsa'
-    };
-
-    return categoryMap[category] || 'Altro';
-}
-
-/**
  * Generate shopping list for a pizza night
  * @param {Array} selectedPizzas - Array of { recipeId, quantity }
  * @param {String} selectedDough - Type of dough selected for the night
@@ -104,7 +71,7 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
                             name: ingredient.name,
                             quantity: scaledQuantity,
                             unit: ingredient.unit,
-                            category: normalizeCategory(ingredient.category || 'Altro')
+                            category: ingredient.category || 'Altro'
                         });
                     }
                 });
@@ -136,7 +103,7 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
                         name: ingredient.name,
                         quantity: totalQuantity,
                         unit: ingredient.unit,
-                        category: normalizeCategory('Impasto')
+                        category: ingredient.category || 'Impasto'
                     });
                 }
             });

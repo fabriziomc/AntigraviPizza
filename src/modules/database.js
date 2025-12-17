@@ -57,3 +57,7 @@ export const getArchetypeWeights = activeDB.getArchetypeWeights;
 export const updateArchetypeWeight = activeDB.updateArchetypeWeight;
 export const resetArchetypeWeights = activeDB.resetArchetypeWeights;
 
+// Categories
+export const getAllCategories = activeDB.getAllCategories;
+export const getCategoryById = activeDB.getCategoryById;
+

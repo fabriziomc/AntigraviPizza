@@ -397,20 +397,90 @@ class DatabaseAdapter {
     async getAllPreparations() {
         if (this.type === 'sqlite') {
             const stmt = this.db.prepare('SELECT * FROM Preparations ORDER BY name');
-            return stmt.all().map(r => this.parsePreparation(r));
+            const preps = stmt.all().map(r => this.parsePreparation(r));
+
+            // Expand ingredients for each preparation
+            for (const prep of preps) {
+                prep.ingredients = await this.expandIngredients(prep.ingredients);
+            }
+
+            return preps;
         } else {
             const result = await query('SELECT * FROM Preparations ORDER BY name');
-            return result.recordset.map(r => this.parsePreparation(r));
+            const preps = result.recordset.map(r => this.parsePreparation(r));
+
+            // Expand ingredients for each preparation
+            for (const prep of preps) {
+                prep.ingredients = await this.expandIngredients(prep.ingredients);
+            }
+
+            return preps;
         }
+    }
+
+    // Helper to expand ingredient references
+    async expandIngredients(ingredients) {
+        if (!ingredients || ingredients.length === 0) return [];
+
+        const expanded = [];
+
+        for (const ing of ingredients) {
+            // If it already has a name, it's already expanded
+            if (ing.name) {
+                expanded.push(ing);
+                continue;
+            }
+
+            // Otherwise, fetch from database
+            if (ing.ingredientId) {
+                try {
+                    const stmt = this.db.prepare(`
+                        SELECT i.*, c.name as categoryName, c.icon as categoryIcon
+                        FROM Ingredients i
+                        LEFT JOIN Categories c ON i.categoryId = c.id
+                        WHERE i.id = ?
+                    `);
+                    const ingredient = stmt.get(ing.ingredientId);
+
+                    if (ingredient) {
+                        expanded.push({
+                            ...ing,
+                            name: ingredient.name,
+                            category: ingredient.categoryName,
+                            categoryIcon: ingredient.categoryIcon,
+                            defaultUnit: ingredient.defaultUnit
+                        });
+                    } else {
+                        console.warn(`Ingredient not found: ${ing.ingredientId}`);
+                        expanded.push(ing);
+                    }
+                } catch (error) {
+                    console.error(`Error expanding ingredient ${ing.ingredientId}:`, error);
+                    expanded.push(ing);
+                }
+            } else {
+                expanded.push(ing);
+            }
+        }
+
+        return expanded;
     }
 
     async getPreparationById(id) {
         if (this.type === 'sqlite') {
             const stmt = this.db.prepare('SELECT * FROM Preparations WHERE id = ?');
-            return this.parsePreparation(stmt.get(id));
+            const prep = this.parsePreparation(stmt.get(id));
+            if (prep) {
+                prep.ingredients = await this.expandIngredients(prep.ingredients);
+            }
+            return prep;
         } else {
             const result = await query('SELECT * FROM Preparations WHERE id = @id', { id });
-            return this.parsePreparation(result.recordset[0]);
+            const prep = this.parsePreparation(result.recordset[0]);
+            if (prep) {
+                prep.ingredients = await this.expandIngredients(prep.ingredients);
+            }
+            return prep;
         }
     }
 
@@ -534,11 +604,32 @@ class DatabaseAdapter {
 
     async getAllIngredients() {
         if (this.type === 'sqlite') {
-            const stmt = this.db.prepare('SELECT * FROM Ingredients ORDER BY category, name');
-            return stmt.all().map(r => this.parseIngredient(r));
+            const stmt = this.db.prepare(`
+                SELECT i.*, c.name as categoryName, c.icon as categoryIcon
+                FROM Ingredients i
+                LEFT JOIN Categories c ON i.categoryId = c.id
+                ORDER BY c.displayOrder, i.name
+            `);
+            return stmt.all().map(r => {
+                const parsed = this.parseIngredient(r);
+                // Add category info
+                parsed.category = r.categoryName;
+                parsed.categoryIcon = r.categoryIcon;
+                return parsed;
+            });
         } else {
-            const result = await query('SELECT * FROM Ingredients ORDER BY category, name');
-            return result.recordset.map(r => this.parseIngredient(r));
+            const result = await query(`
+                SELECT i.*, c.name as categoryName, c.icon as categoryIcon
+                FROM Ingredients i
+                LEFT JOIN Categories c ON i.categoryId = c.id
+                ORDER BY c.displayOrder, i.name
+            `);
+            return result.recordset.map(r => {
+                const parsed = this.parseIngredient(r);
+                parsed.category = r.categoryName;
+                parsed.categoryIcon = r.categoryIcon;
+                return parsed;
+            });
         }
     }
 
@@ -758,6 +849,30 @@ class DatabaseAdapter {
             // SQL Server not yet implemented
             console.log('⚠️ SQL Server mode - reset not implemented');
             return { success: true, userId };
+        }
+    }
+
+    // ==========================================
+    // CATEGORIES
+    // ==========================================
+
+    async getAllCategories() {
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare('SELECT * FROM Categories ORDER BY displayOrder');
+            return stmt.all();
+        } else {
+            const result = await query('SELECT * FROM Categories ORDER BY displayOrder');
+            return result.recordset;
+        }
+    }
+
+    async getCategoryById(id) {
+        if (this.type === 'sqlite') {
+            const stmt = this.db.prepare('SELECT * FROM Categories WHERE id = ?');
+            return stmt.get(id);
+        } else {
+            const result = await query('SELECT * FROM Categories WHERE id = @id', { id });
+            return result.recordset[0];
         }
     }
 }

@@ -1,5 +1,5 @@
 // ============================================
-// FIX MISCATEGORIZED INGREDIENTS
+// FIX MISCATEGORIZED INGREDIENTS - COMPREHENSIVE
 // ============================================
 
 import Database from 'better-sqlite3';
@@ -10,9 +10,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const dbPath = path.join(__dirname, '../antigravipizza.db');
 
-// Mapping of ingredient names to correct categories
+// Comprehensive mapping of ingredient names to correct categories
 const INGREDIENT_CATEGORY_MAP = {
-    // Erbe e Spezie
+    // === FORMAGGI ===
+    'Pecorino': 'Formaggi',
+    'Parmigiano': 'Formaggi',
+
+    // === LATTICINI → ALTRO (dairy products) ===
+    'Burro': 'Altro',
+    'Latte': 'Altro',
+    'Latte intero': 'Altro',
+    'Panna': 'Altro',
+    'Panna fresca': 'Altro',
+    'Yogurt': 'Altro',
+    'Uova': 'Altro',
+    'Crema di burrata': 'Altro',
+
+    // === ERBE E SPEZIE ===
     'Rosmarino': 'Erbe e Spezie',
     'Basilico': 'Erbe e Spezie',
     'Basilico fresco': 'Erbe e Spezie',
@@ -26,9 +40,16 @@ const INGREDIENT_CATEGORY_MAP = {
     'Pepe nero': 'Erbe e Spezie',
     'Sale': 'Erbe e Spezie',
     'Aglio': 'Erbe e Spezie',
+    'Alloro': 'Erbe e Spezie',
+    'Noce moscata': 'Erbe e Spezie',
+    'Paprika affumicata': 'Erbe e Spezie',
+    'Zenzero': 'Erbe e Spezie',
+    'Wasabi': 'Erbe e Spezie',
+    'Senape': 'Erbe e Spezie',
 
-    // Verdure
+    // === VERDURE ===
     'Sedano': 'Verdure',
+    'Carota': 'Verdure',
     'Carote': 'Verdure',
     'Cipolla': 'Verdure',
     'Cipolle': 'Verdure',
@@ -43,21 +64,79 @@ const INGREDIENT_CATEGORY_MAP = {
     'Spinaci': 'Verdure',
     'Lattuga': 'Verdure',
     'Radicchio': 'Verdure',
+    'Piselli': 'Verdure',
+    'Ceci': 'Verdure',
+    'Patate': 'Verdure',
+    'Patate viola': 'Verdure',
+    'Finocchi': 'Verdure',
+    'Friarielli': 'Verdure',
+    'Cavolo nero': 'Verdure',
+    'Verza': 'Verdure',
+    'Porri': 'Verdure',
+    'Barbabietola': 'Verdure',
 
-    // Salsa
+    // === SALSA ===
     'Olio': 'Salsa',
     'Olio EVO': 'Salsa',
     'Aceto': 'Salsa',
     'Limone': 'Salsa',
+    'Lime': 'Salsa',
+    'Crema di zucca': 'Salsa',
+    'Crema di ceci': 'Salsa',
+    'Crema di pistacchio': 'Salsa',
+    'Pasta di tartufo nero': 'Salsa',
+    'Salsa di Soia': 'Salsa',
+    'Salsa di soia': 'Salsa',
+    'Tabasco': 'Salsa',
+    'Worchester': 'Salsa',
 
-    // Altro (frutta secca, semi, etc)
+    // === CARNE ===
+    'Carne': 'Carne',
+    'Carne macinata': 'Carne',
+    'Carpaccio di manzo': 'Carne',
+    'Fassona': 'Carne',
+    'Anatra': 'Carne',
+    'Brodo di carne': 'Carne',
+
+    // === PESCE ===
+    'Baccalà': 'Pesce',
+    'Stoccafisso ammollato': 'Pesce',
+    'Filetti di tonno': 'Pesce',
+    'Gamberi': 'Pesce',
+
+    // === IMPASTO ===
+    'Farina': 'Impasto',
+    'Farina 00': 'Impasto',
+    'Farina Grano saraceno': 'Impasto',
+    'Farina di castagne': 'Impasto',
+
+    // === ALTRO (frutta, semi, dolcificanti, etc) ===
     'Noci': 'Altro',
     'Mandorle': 'Altro',
+    'Granella di mandorle': 'Altro',
     'Pistacchi': 'Altro',
+    'Pistacchi di Bronte': 'Altro',
     'Pinoli': 'Altro',
     'Semi di sesamo': 'Altro',
+    'Semi di Sesamo': 'Altro',
     'Zucchero': 'Altro',
-    'Miele': 'Altro'
+    'Zucchero di canna': 'Altro',
+    'Miele': 'Altro',
+    'Miele di acacia': 'Altro',
+    'Miele di castagno': 'Altro',
+    'Capperi': 'Altro',
+    'Olive taggiasche': 'Altro',
+    'Ananas': 'Altro',
+    'Arancia': 'Altro',
+    'Avocado': 'Altro',
+    'Fichi': 'Altro',
+    'Kiwi': 'Altro',
+    'Mango': 'Altro',
+    'Melone': 'Altro',
+    'Pere': 'Altro',
+    'Cocco': 'Altro',
+    'Agar Agar': 'Altro',
+    'Vino rosso': 'Altro'
 };
 
 function fixIngredientCategory(ingredientName) {

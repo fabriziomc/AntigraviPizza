@@ -1237,11 +1237,12 @@ async function manageAvailableIngredients(nightId) {
     const icons = {
       'Formaggi': '🧀',
       'Carne': '🥓',
-      'Verdure': '�',
+      'Verdure': '🥬',
       'Salsa': '🍅',
       'Erbe e Spezie': '🌿',
       'Pesce': '🐟',
-      'Impasto': '�',
+      'Latticini': '🥛',
+      'Impasto': '🌾',
       'Altro': '📦'
     };
     return icons[category] || '📦';
@@ -1424,6 +1425,7 @@ async function viewShoppingListForNight(nightId) {
       'Carne': '🥓',
       'Verdure': '🥬',
       'Pesce': '🐟',
+      'Latticini': '🥛',
       'Erbe e Spezie': '🌿',
       'Altro': '📦'
     };

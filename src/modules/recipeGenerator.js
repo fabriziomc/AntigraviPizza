@@ -24,13 +24,14 @@ async function loadIngredientsFromDB() {
         const allIngredients = await getAllIngredients();
 
         // Organize ingredients by category for easy access
+        // Using NEW category names from hierarchical structure
         const organized = {
-            bases: allIngredients.filter(i => i.category === 'Salsa'),
+            bases: allIngredients.filter(i => i.category === 'Basi e Salse'),
             cheeses: allIngredients.filter(i => i.category === 'Formaggi'),
-            meats: allIngredients.filter(i => i.category === 'Carne'),
-            vegetables: allIngredients.filter(i => i.category === 'Verdure'),
-            premium: allIngredients.filter(i => i.category === 'Pesce' || i.tags?.includes('premium')),
-            finishes: allIngredients.filter(i => i.category === 'Erbe e Spezie')
+            meats: allIngredients.filter(i => i.category === 'Carni e Salumi'),
+            vegetables: allIngredients.filter(i => i.category === 'Verdure e Ortaggi'),
+            premium: allIngredients.filter(i => i.category === 'Pesce e Frutti di Mare' || i.tags?.includes('premium')),
+            finishes: allIngredients.filter(i => i.category === 'Erbe e Spezie' || i.category === 'Frutta e Frutta Secca')
         };
 
         // Cache the result

@@ -49,7 +49,7 @@ export const INGREDIENT_CATEGORIES = {
     VEGETABLES: 'Verdure',
     SEAFOOD: 'Pesce',
     HERBS: 'Erbe e Spezie',
-    OIL: 'Oli',
+    DAIRY: 'Latticini',
     OTHER: 'Altro'
 };
 

@@ -76,11 +76,23 @@ CREATE INDEX IF NOT EXISTS idx_preparations_category ON Preparations(category);
 CREATE INDEX IF NOT EXISTS idx_preparations_difficulty ON Preparations(difficulty);
 CREATE INDEX IF NOT EXISTS idx_preparations_name ON Preparations(name);
 
+-- Categories Table
+CREATE TABLE IF NOT EXISTS Categories (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    icon TEXT,
+    displayOrder INTEGER,
+    description TEXT,
+    createdAt INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_categories_order ON Categories(displayOrder);
+
 -- Ingredients Table
 CREATE TABLE IF NOT EXISTS Ingredients (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
-    category TEXT NOT NULL CHECK (category IN ('Formaggi', 'Carne', 'Verdure', 'Salsa', 'Erbe e Spezie', 'Pesce', 'Altro')),
+    categoryId TEXT NOT NULL,
     subcategory TEXT,
     minWeight INTEGER,
     maxWeight INTEGER,
@@ -91,9 +103,10 @@ CREATE TABLE IF NOT EXISTS Ingredients (
     allergens TEXT, -- JSON: ['lattosio', 'glutine', 'frutta_secca', etc.]
     tags TEXT, -- JSON: ['vegetariano', 'vegano', 'premium', 'locale', etc.]
     isCustom INTEGER DEFAULT 0,
-    dateAdded INTEGER NOT NULL
+    dateAdded INTEGER NOT NULL,
+    FOREIGN KEY (categoryId) REFERENCES Categories(id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_ingredients_category ON Ingredients(category);
+CREATE INDEX IF NOT EXISTS idx_ingredients_categoryId ON Ingredients(categoryId);
 CREATE INDEX IF NOT EXISTS idx_ingredients_custom ON Ingredients(isCustom);
 CREATE INDEX IF NOT EXISTS idx_ingredients_name ON Ingredients(name);

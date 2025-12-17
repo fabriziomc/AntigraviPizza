@@ -41,6 +41,22 @@ if (DB_TYPE === 'sqlite') {
 
     // Initialize schema on first run
     initSchema();
+
+    // Seed initial data (Categories, Ingredients, Preparations)
+    console.log('🌱 Seeding initial data...');
+    try {
+        const { seedCategories } = await import('./seed-categories.js');
+        const { seedIngredients } = await import('./seed-ingredients.js');
+        const { seedPreparations } = await import('./seed-preparations.js');
+
+        await seedCategories();
+        await seedIngredients();
+        await seedPreparations();
+
+        console.log('✅ Database seeding completed\n');
+    } catch (error) {
+        console.error('⚠️  Seeding error:', error.message);
+    }
 } else if (DB_TYPE === 'mssql') {
     // SQL Server implementation
     console.log('✅ SQL Server mode enabled');

@@ -2,15 +2,15 @@
 // INGREDIENTS COMPONENT
 // ============================================
 
-import { getAllIngredients, getIngredientsByCategory, searchIngredients, addIngredient, updateIngredient, deleteIngredient } from '../modules/database.js';
+import { getAllIngredients, getAllCategories, getIngredientsByCategory, searchIngredients, addIngredient, updateIngredient, deleteIngredient } from '../modules/database.js';
 import { openModal, closeModal } from '../modules/ui.js';
 
-const CATEGORIES = ['Formaggi', 'Carne', 'Verdure', 'Salsa', 'Erbe e Spezie', 'Pesce', 'Altro'];
 const UNITS = ['g', 'ml', 'pz', 'cucchiaio', 'cucchiaino'];
 
 let currentFilter = 'all';
 let currentSearch = '';
 let allIngredients = [];
+let categories = []; // Will be loaded from database
 
 // ============================================
 // MAIN RENDER
@@ -21,7 +21,8 @@ export async function renderIngredients(appState) {
     if (!container) return;
 
     try {
-        // Load ingredients
+        // Load categories and ingredients
+        categories = await getAllCategories();
         allIngredients = await getAllIngredients();
 
         container.innerHTML = `
@@ -47,11 +48,11 @@ export async function renderIngredients(appState) {
                         <button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" onclick="window.filterIngredients('all')">
                             Tutti (${allIngredients.length})
                         </button>
-                        ${CATEGORIES.map(cat => {
-            const count = allIngredients.filter(i => i.category === cat).length;
+                        ${categories.map(cat => {
+            const count = allIngredients.filter(i => i.category === cat.name).length;
             return `
-                                <button class="filter-btn ${currentFilter === cat ? 'active' : ''}" onclick="window.filterIngredients('${cat}')">
-                                    ${cat} (${count})
+                                <button class="filter-btn ${currentFilter === cat.name ? 'active' : ''}" onclick="window.filterIngredients('${cat.name}')">
+                                    ${cat.icon} ${cat.name} (${count})
                                 </button>
                             `;
         }).join('')}

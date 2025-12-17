@@ -286,6 +286,31 @@ router.delete('/ingredients/:id', async (req, res) => {
     }
 });
 
+// ==========================================
+// CATEGORIES
+// ==========================================
+
+router.get('/categories', async (req, res) => {
+    try {
+        const categories = await dbAdapter.getAllCategories();
+        res.json(categories);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/categories/:id', async (req, res) => {
+    try {
+        const category = await dbAdapter.getCategoryById(req.params.id);
+        if (!category) {
+            return res.status(404).json({ error: 'Category not found' });
+        }
+        res.json(category);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ============================================
 // SEED ENDPOINT (for Railway deployment)
 // ============================================

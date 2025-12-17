@@ -464,6 +464,22 @@ export async function deleteIngredient(id) {
 }
 
 // ============================================
+// CATEGORIES
+// ============================================
+
+export async function getAllCategories() {
+    const response = await fetch(`${API_URL}/categories`);
+    if (!response.ok) throw new Error('Failed to fetch categories');
+    return await response.json();
+}
+
+export async function getCategoryById(id) {
+    const response = await fetch(`${API_URL}/categories/${id}`);
+    if (!response.ok) throw new Error('Failed to fetch category');
+    return await response.json();
+}
+
+// ============================================
 // ARCHETYPE WEIGHTS
 // ============================================
 
