@@ -16,7 +16,11 @@ if (DB_TYPE === 'sqlite') {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
 
-    const dbPath = path.join(__dirname, '..', 'antigravipizza.db');
+    // Use volume path in production (Railway), local path otherwise
+    const dbPath = process.env.NODE_ENV === 'production'
+        ? '/app/data/antigravipizza.db'
+        : path.join(__dirname, '..', 'antigravipizza.db');
+
     db = new Database(dbPath);
 
     // Enable foreign keys

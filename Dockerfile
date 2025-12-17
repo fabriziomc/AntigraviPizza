@@ -31,8 +31,8 @@ EXPOSE 3000
 
 # Set environment variables
 ENV DB_TYPE=sqlite
-ENV SQLITE_DB_PATH=/app/data/antigravipizza.db
 ENV NODE_ENV=production
+ENV PORT=5173
 
 # Start with initialization script
 CMD ["/app/start-railway.sh"]
