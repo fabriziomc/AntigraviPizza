@@ -23,15 +23,12 @@ RUN npm prune --production
 # Create data directory for SQLite database
 RUN mkdir -p /app/data
 
-# Make startup script executable
-RUN chmod +x /app/start-railway.sh
-
-# Expose port (Railway will use $PORT env var)
-EXPOSE 5173
-
 # Set environment variables
 ENV DB_TYPE=sqlite
 ENV NODE_ENV=production
 
-# Start with initialization script
-CMD ["/app/start-railway.sh"]
+# Expose port (Railway will use $PORT env var)
+EXPOSE 5173
+
+# Start directly with node server (not vite preview!)
+CMD ["node", "server/index.js"]
