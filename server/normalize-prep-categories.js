@@ -34,7 +34,11 @@ function normalizeCategory(category) {
         'Basi': 'Salsa',
         'Dolci': 'Altro',
         'Preparazioni Base': 'Altro',
-        'Condimenti': 'Salsa'
+        'Condimenti': 'Salsa',
+        'Erbe': 'Erbe e Spezie',
+        'Spezie': 'Erbe e Spezie',
+        'Frutta Secca': 'Altro',
+        'Latticini': 'Formaggi'
     };
 
     return categoryMap[category] || 'Altro';
