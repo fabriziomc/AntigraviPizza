@@ -1200,11 +1200,11 @@ async function viewPizzaNightDetails(nightId) {
         </button>
       ` : ''}
         ${night.selectedPizzas.length > 0 ? `
-        <button class="btn btn-secondary" onclick="window.manageAvailableIngredients('${night.id}')">
+        <button class="btn btn-secondary" onclick="window.closeModal(); setTimeout(() => window.manageAvailableIngredients('${night.id}'), 100);">
           <span>✓</span>
           Ingredienti Disponibili
         </button>
-        <button class="btn btn-primary" onclick="window.viewShoppingListForNight('${night.id}')">
+        <button class="btn btn-primary" onclick="window.closeModal(); setTimeout(() => window.viewShoppingListForNight('${night.id}'), 100);">
           <span>🛒</span>
           Lista Spesa
         </button>
@@ -1232,17 +1232,18 @@ async function manageAvailableIngredients(nightId) {
   // Get currently available ingredients
   const availableIngredients = night.availableIngredients || [];
 
-  // Helper to get category icon (aligned with Ingredients component)
+  // Helper to get category icon (aligned with new hierarchical structure)
   const getCategoryIcon = (category) => {
     const icons = {
-      'Formaggi': '🧀',
-      'Carne': '🥓',
-      'Verdure': '🥬',
-      'Salsa': '🍅',
-      'Erbe e Spezie': '🌿',
-      'Pesce': '🐟',
+      'Impasti': '🌾',
+      'Basi e Salse': '🍅',
+      'Formaggi': '�',
       'Latticini': '🥛',
-      'Impasto': '🌾',
+      'Carni e Salumi': '🥓',
+      'Pesce e Frutti di Mare': '🐟',
+      'Verdure e Ortaggi': '�',
+      'Erbe e Spezie': '🌿',
+      'Frutta e Frutta Secca': '🥜',
       'Altro': '📦'
     };
     return icons[category] || '📦';
@@ -1717,8 +1718,16 @@ function renderLivePizza() {
   const ingredients = pizza.baseIngredients || [];
   const preparations = pizza.preparations || [];
 
+  console.log('🔍 Live Mode Debug:');
+  console.log('  - Pizza:', pizza.name);
+  console.log('  - baseIngredients:', ingredients);
+  console.log('  - preparations:', preparations);
+
   const beforeIngredients = ingredients.filter(ing => !ing.postBake);
   const afterIngredients = ingredients.filter(ing => ing.postBake === true);
+
+  console.log('  - beforeIngredients:', beforeIngredients);
+  console.log('  - afterIngredients:', afterIngredients);
 
   const beforePreparations = preparations.filter(prep => !prep.timing || prep.timing === 'before');
   const afterPreparations = preparations.filter(prep => prep.timing === 'after');
