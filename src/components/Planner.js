@@ -482,13 +482,22 @@ async function generateAutoPizzas() {
 }
 
 // Generate mixed pizzas
+let manuallySelectedPizzaIds = []; // Track manually selected pizzas
+
 async function generateMixedPizzas() {
-  const checkedBoxes = document.querySelectorAll('#pizzaSelection input[type="checkbox"]:checked');
+  const allCheckedBoxes = document.querySelectorAll('#pizzaSelection input[type="checkbox"]:checked');
   const numToGenerate = parseInt(document.getElementById('mixedNumToGenerate').value);
   const resultsDiv = document.getElementById('mixedResults');
   const metricsDiv = document.getElementById('metricsDisplay');
 
-  if (checkedBoxes.length === 0) {
+  // On first call or when user changes selection, update manually selected IDs
+  // We need to identify which pizzas were manually selected vs auto-generated
+  if (manuallySelectedPizzaIds.length === 0 || resultsDiv.style.display === 'none') {
+    // First time or after reset - all checked boxes are manual selections
+    manuallySelectedPizzaIds = Array.from(allCheckedBoxes).map(cb => cb.value);
+  }
+
+  if (manuallySelectedPizzaIds.length === 0) {
     alert('Seleziona almeno una pizza fissa');
     return;
   }
@@ -498,9 +507,7 @@ async function generateMixedPizzas() {
     return;
   }
 
-  const fixedPizzaIds = Array.from(checkedBoxes).map(cb => cb.value);
-
-  console.log('🔍 Mixed mode - Fixed pizza IDs:', fixedPizzaIds);
+  console.log('🔍 Mixed mode - Fixed pizza IDs:', manuallySelectedPizzaIds);
   console.log('🔍 Mixed mode - Num to generate:', numToGenerate);
 
   resultsDiv.innerHTML = '<p class="text-muted">🔄 Generazione in corso...</p>';
@@ -510,7 +517,7 @@ async function generateMixedPizzas() {
     const response = await fetch('/api/pizza-optimizer/complete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fixedPizzaIds, numToGenerate })
+      body: JSON.stringify({ fixedPizzaIds: manuallySelectedPizzaIds, numToGenerate })
     });
 
     console.log('🔍 API Response status:', response.status);
@@ -530,11 +537,10 @@ async function generateMixedPizzas() {
 
 
     // Clear previous auto-selections FIRST (uncheck previously generated pizzas)
-    const manuallySelectedIds = Array.from(checkedBoxes).map(cb => cb.value);
     document.querySelectorAll('#pizzaSelection input[type="checkbox"]:checked').forEach(checkbox => {
       // Only uncheck if it's not a manually selected pizza
       const recipeId = checkbox.value;
-      if (!manuallySelectedIds.includes(recipeId)) {
+      if (!manuallySelectedPizzaIds.includes(recipeId)) {
         checkbox.checked = false;
       }
     });
