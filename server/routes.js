@@ -710,4 +710,25 @@ router.post('/restore', async (req, res) => {
     }
 });
 
+// ==========================================
+// SEED (One-time database initialization)
+// ==========================================
+
+router.post('/seed', async (req, res) => {
+    try {
+        const { seedAll } = await import('./seed-service.js');
+        const results = await seedAll();
+        res.json({
+            success: true,
+            message: 'Database seeded successfully!',
+            results
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
+    }
+});
+
 export default router;
