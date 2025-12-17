@@ -76,6 +76,14 @@ export async function renderSettings() {
               </button>
               <p class="action-help">Ripristina il database da un file di backup precedente. Sostituirà tutti i dati attuali.</p>
             </div>
+
+            <div class="action-group">
+              <button id="btnReseedDB" class="btn btn-secondary">
+                <span class="icon">🌱</span>
+                Ripristina Dati Base
+              </button>
+              <p class="action-help">Ripopola il database con 192 ingredienti base e 64 preparazioni base. Utile dopo un deploy su Render.</p>
+            </div>
           </div>
         </section>
 
@@ -251,6 +259,49 @@ function setupEventListeners() {
 
     // Reset input
     fileInputDB.value = '';
+  });
+
+  // Reseed Database (restore base ingredients and preparations)
+  document.getElementById('btnReseedDB').addEventListener('click', async () => {
+    const confirmed = confirm(
+      '🌱 RIPRISTINA DATI BASE?\n\n' +
+      'Questa azione ripopolerà il database con:\n' +
+      '• 192 ingredienti base\n' +
+      '• 64 preparazioni base\n' +
+      '• 10 categorie standard\n\n' +
+      'I tuoi dati custom e ricette NON saranno toccati.\n\n' +
+      'Vuoi continuare?'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      showToast('🌱 Ripristino dati base in corso...', 'info');
+
+      const response = await fetch('/api/seed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast(
+          `✅ Dati base ripristinati! ${result.results.categories} categorie, ${result.results.ingredients} ingredienti, ${result.results.preparations} preparazioni`,
+          'success'
+        );
+
+        // Refresh app
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        throw new Error(result.error || 'Reseed failed');
+      }
+    } catch (error) {
+      console.error('Reseed failed:', error);
+      showToast('❌ Errore durante il ripristino: ' + error.message, 'error');
+    }
   });
 
   // Reset Archives (Recipes, Nights) and Reseed (Ingredients, Preparations)
