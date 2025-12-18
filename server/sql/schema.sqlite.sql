@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS PizzaNights (
     selectedGuests TEXT, -- JSON
     notes TEXT,
     status TEXT DEFAULT 'planned',
-    createdAt INTEGER
+    createdAt INTEGER,
+    dateAdded INTEGER
 );
 
 -- Guests Table

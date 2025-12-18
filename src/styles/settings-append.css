@@ -85,6 +85,19 @@
     color: var(--color-error);
 }
 
+.danger-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+}
+
+@media (max-width: 768px) {
+    .danger-actions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* === ARCHETYPE WEIGHTS === */
 .archetype-weights-grid {
     display: grid;

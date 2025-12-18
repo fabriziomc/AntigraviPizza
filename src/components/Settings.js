@@ -77,13 +77,7 @@ export async function renderSettings() {
               <p class="action-help">Ripristina il database da un file di backup precedente. Sostituirà tutti i dati attuali.</p>
             </div>
 
-            <div class="action-group">
-              <button id="btnReseedDB" class="btn btn-secondary">
-                <span class="icon">🌱</span>
-                Ripristina Dati Base
-              </button>
-              <p class="action-help">Ripopola il database con 192 ingredienti base e 64 preparazioni base. Utile dopo un deploy su Render.</p>
-            </div>
+
           </div>
         </section>
 
@@ -129,12 +123,22 @@ export async function renderSettings() {
               Queste azioni sono distruttive e non possono essere annullate.
             </p>
             
-            <div class="action-group">
-              <button id="btnResetArchives" class="btn btn-danger">
-                <span class="icon">🔄</span>
-                Reset Archivi
-              </button>
-              <p class="action-help">Cancella tutte le ricette e serate pizza, poi ripopola ingredienti base (136) e preparazioni base (64). Mantiene dati custom, ospiti e archetipi.</p>
+            <div class="danger-actions-grid">
+              <div class="action-group">
+                <button id="btnResetArchives" class="btn btn-danger">
+                  <span class="icon">🔄</span>
+                  Reset Archivi
+                </button>
+                <p class="action-help">Cancella tutte le ricette e serate pizza, poi ripopola ingredienti base (192) e preparazioni base (64).</p>
+              </div>
+              
+              <div class="action-group">
+                <button id="btnReseedDB" class="btn btn-danger">
+                  <span class="icon">🌱</span>
+                  Ripristina Dati Base
+                </button>
+                <p class="action-help">Ripopola il database con 192 ingredienti base e 64 preparazioni base. Utile dopo un deploy su Render.</p>
+              </div>
             </div>
           </div>
         </section>
@@ -261,6 +265,72 @@ function setupEventListeners() {
     fileInputDB.value = '';
   });
 
+
+
+  // Reset Archives (Recipes, Nights) and Reseed (Ingredients, Preparations)
+  document.getElementById('btnResetArchives').addEventListener('click', async () => {
+    const confirmed = confirm(
+      '🔄 RESET ARCHIVI?\n\n' +
+      'Questa azione:\n' +
+      '• Cancellerà TUTTE le ricette\n' +
+      '• Cancellerà TUTTE le serate pizza\n' +
+      '• Ripopolerà gli ingredienti base (192)\n' +
+      '• Ripopolerà le preparazioni base (64)\n' +
+      '• Ripopolerà le categorie (10)\n\n' +
+      'Non può essere annullata.\n\n' +
+      'Premi OK per confermare.'
+    );
+
+    if (confirmed) {
+      try {
+        // Import database functions
+        const { getAllRecipes, deleteRecipe, getAllPizzaNights, deletePizzaNight } = await import('../modules/database.js');
+
+        // Get all recipes and pizza nights
+        const recipes = await getAllRecipes();
+        const nights = await getAllPizzaNights();
+
+        // Delete all recipes
+        for (const recipe of recipes) {
+          await deleteRecipe(recipe.id);
+        }
+
+        // Delete all pizza nights
+        for (const night of nights) {
+          await deletePizzaNight(night.id);
+        }
+
+        showToast(`✅ Reset completato: ${recipes.length} ricette e ${nights.length} serate eliminate`, 'success');
+
+        // Use unified seed endpoint
+        showToast('🌱 Ripopolamento dati base in corso...', 'info');
+        const response = await fetch('/api/seed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showToast(
+            `✅ Dati base ripristinati! ${result.results.categories} categorie, ${result.results.ingredients} ingredienti, ${result.results.preparations} preparazioni`,
+            'success'
+          );
+
+          // Refresh app data
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          throw new Error(result.error || 'Seed failed');
+        }
+      } catch (error) {
+        console.error('Reset failed:', error);
+        showToast('❌ Errore durante il reset: ' + error.message, 'error');
+      }
+    }
+  });
+
   // Reseed Database (restore base ingredients and preparations)
   document.getElementById('btnReseedDB').addEventListener('click', async () => {
     const confirmed = confirm(
@@ -301,82 +371,6 @@ function setupEventListeners() {
     } catch (error) {
       console.error('Reseed failed:', error);
       showToast('❌ Errore durante il ripristino: ' + error.message, 'error');
-    }
-  });
-
-  // Reset Archives (Recipes, Nights) and Reseed (Ingredients, Preparations)
-  document.getElementById('btnResetArchives').addEventListener('click', async () => {
-    const confirmed = confirm(
-      '🔄 RESET ARCHIVI?\n\n' +
-      'Questa azione:\n' +
-      '• Cancellerà TUTTE le ricette\n' +
-      '• Cancellerà TUTTE le serate pizza\n' +
-      '• Ripopolerà gli ingredienti base (136)\n' +
-      '• Ripopolerà le preparazioni base (64)\n\n' +
-      'Saranno mantenuti:\n' +
-      '• Ingredienti custom aggiunti manualmente\n' +
-      '• Preparazioni custom aggiunte manualmente\n' +
-      '• Ospiti\n' +
-      '• Pesi archetipi\n\n' +
-      'Non può essere annullata.\n\n' +
-      'Premi OK per confermare.'
-    );
-
-    if (confirmed) {
-      try {
-        // Import database functions
-        const { getAllRecipes, deleteRecipe, getAllPizzaNights, deletePizzaNight } = await import('../modules/database.js');
-
-        // Get all recipes and pizza nights
-        const recipes = await getAllRecipes();
-        const nights = await getAllPizzaNights();
-
-        // Delete all recipes
-        for (const recipe of recipes) {
-          await deleteRecipe(recipe.id);
-        }
-
-        // Delete all pizza nights
-        for (const night of nights) {
-          await deletePizzaNight(night.id);
-        }
-
-        showToast(`✅ Reset completato: ${recipes.length} ricette e ${nights.length} serate eliminate`, 'success');
-
-        // Reseed ingredients
-        showToast('🌱 Ripopolamento ingredienti in corso...', 'info');
-        const ingredientsResponse = await fetch('/api/seed-ingredients', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (!ingredientsResponse.ok) throw new Error('Failed to seed ingredients');
-
-        const ingredientsResult = await ingredientsResponse.json();
-        showToast(`✅ ${ingredientsResult.count || 136} ingredienti ripopolati!`, 'success');
-
-        // Reseed preparations
-        showToast('🌱 Ripopolamento preparazioni in corso...', 'info');
-        const preparationsResponse = await fetch('/api/seed-preparations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (!preparationsResponse.ok) throw new Error('Failed to seed preparations');
-
-        const preparationsResult = await preparationsResponse.json();
-        showToast(`✅ ${preparationsResult.count || 64} preparazioni ripopolate!`, 'success');
-
-        showToast('🎉 Reset archivi completato con successo!', 'success');
-
-        // Refresh app data
-        if (window.refreshData) {
-          await window.refreshData();
-        }
-      } catch (error) {
-        console.error('Reset failed:', error);
-        showToast('❌ Errore durante il reset: ' + error.message, 'error');
-      }
     }
   });
 
