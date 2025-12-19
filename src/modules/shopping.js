@@ -47,6 +47,12 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
                 // prepData.ingredients[].perPortion is how much per portion
                 // We need to scale based on how many portions we're making
                 prepData.ingredients.forEach(ingredient => {
+                    // Skip if ingredient doesn't have a name
+                    if (!ingredient || !ingredient.name) {
+                        console.warn('Skipping ingredient without name:', ingredient);
+                        return;
+                    }
+
                     // Calculate how much of this ingredient we need
                     // If prep.quantity is specified, use it to scale from perPortion
                     // Otherwise, assume we need 1 full yield worth
