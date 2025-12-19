@@ -808,4 +808,53 @@ router.post('/restore', async (req, res) => {
     }
 });
 
+// ==========================================
+// HEALTH CHECK & KEEP-ALIVE (for Render free tier)
+// ==========================================
+
+// Health check endpoint - responds quickly to confirm service is alive
+router.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        service: 'AntigraviPizza API'
+    });
+});
+
+// Keep-alive endpoint - same as health but named more explicitly
+router.get('/keep-alive', (req, res) => {
+    res.status(200).json({
+        status: 'alive',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
+// Status endpoint with more detailed info
+router.get('/status', async (req, res) => {
+    try {
+        const recipeCount = (await dbAdapter.getAllRecipes()).length;
+        const ingredientCount = (await dbAdapter.getAllIngredients()).length;
+
+        res.status(200).json({
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            uptime: process.uptime(),
+            database: {
+                connected: true,
+                recipes: recipeCount,
+                ingredients: ingredientCount
+            },
+            service: 'AntigraviPizza API',
+            version: '2.0'
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: 'unhealthy',
+            error: err.message
+        });
+    }
+});
+
 export default router;
