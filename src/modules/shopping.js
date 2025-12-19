@@ -2,7 +2,7 @@
 // SHOPPING LIST MODULE
 // ============================================
 
-import { getRecipeById, getAllPreparations } from './database.js';
+import { getRecipeById, getAllPreparations, getAllIngredients, getAllCategories } from './database.js';
 import { aggregateIngredients, groupByCategory, formatQuantity } from '../utils/helpers.js';
 import { DOUGH_RECIPES } from '../utils/constants.js';
 
@@ -17,6 +17,36 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
     if (!selectedPizzas || selectedPizzas.length === 0) {
         return {};
     }
+
+    // Load all ingredients and categories upfront for resolution
+    const allIngredients = await getAllIngredients();
+    const allCategories = await getAllCategories();
+
+    // Create lookup maps
+    const ingredientMap = {};
+    allIngredients.forEach(ing => {
+        ingredientMap[ing.id] = ing;
+    });
+
+    const categoryMap = {};
+    allCategories.forEach(cat => {
+        categoryMap[cat.id] = cat.name;
+    });
+
+    // Helper to resolve ingredient
+    const resolveIngredient = (ing) => {
+        if (ing.ingredientId && ingredientMap[ing.ingredientId]) {
+            const resolved = ingredientMap[ing.ingredientId];
+            return {
+                ...ing,
+                name: resolved.name,
+                category: categoryMap[resolved.categoryId] || 'Altro',
+                categoryId: resolved.categoryId
+            };
+        }
+        // Fallback to embedded data
+        return ing;
+    };
 
     // Fetch all recipes
     const recipes = await Promise.all(
@@ -42,31 +72,26 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
                 const prepData = preparations.find(p => p.id === prep.id);
                 if (!prepData || !prepData.ingredients) return;
 
-                // Calculate scaling factor
-                // prep.quantity is how much we need (e.g., 100g)
-                // prepData.ingredients[].perPortion is how much per portion
-                // We need to scale based on how many portions we're making
                 prepData.ingredients.forEach(ingredient => {
+                    // Resolve ingredient
+                    const ingredientData = resolveIngredient(ingredient);
+
                     // Skip if ingredient doesn't have a name
-                    if (!ingredient || !ingredient.name) {
+                    if (!ingredientData || !ingredientData.name) {
                         console.warn('Skipping ingredient without name:', ingredient);
                         return;
                     }
 
                     // Calculate how much of this ingredient we need
-                    // If prep.quantity is specified, use it to scale from perPortion
-                    // Otherwise, assume we need 1 full yield worth
                     let scaledQuantity;
-                    if (ingredient.perPortion && prep.quantity) {
-                        // Scale based on quantity needed vs portion size
-                        scaledQuantity = ingredient.perPortion * (prep.quantity / ingredient.perPortion) * pizzaQuantity;
+                    if (ingredientData.perPortion && prep.quantity) {
+                        scaledQuantity = ingredientData.perPortion * (prep.quantity / ingredientData.perPortion) * pizzaQuantity;
                     } else {
-                        // Fallback: use total quantity for the recipe yield
-                        scaledQuantity = ingredient.quantity * pizzaQuantity;
+                        scaledQuantity = ingredientData.quantity * pizzaQuantity;
                     }
 
                     // Find if ingredient already exists in aggregated list
-                    const existingIndex = aggregated.findIndex(i => i.name.toLowerCase() === ingredient.name.toLowerCase());
+                    const existingIndex = aggregated.findIndex(i => i.name.toLowerCase() === ingredientData.name.toLowerCase());
 
                     if (existingIndex >= 0) {
                         // Ingredient already exists, add to it
@@ -74,10 +99,10 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
                     } else {
                         // New ingredient, add it
                         aggregated.push({
-                            name: ingredient.name,
+                            name: ingredientData.name,
                             quantity: scaledQuantity,
-                            unit: ingredient.unit,
-                            category: ingredient.category || 'Altro'
+                            unit: ingredientData.unit,
+                            category: ingredientData.category || 'Altro'
                         });
                     }
                 });
