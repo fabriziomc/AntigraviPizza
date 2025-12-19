@@ -4,6 +4,38 @@
 
 import { exportData, importData, clearAllData, getArchetypeWeights, updateArchetypeWeight, resetArchetypeWeights } from '../modules/database.js';
 import { showToast } from '../utils/helpers.js';
+import { openModal, closeModal } from '../modules/ui.js';
+
+/**
+ * Show a custom confirmation modal
+ * @param {string} title - Modal title
+ * @param {string} message - Modal message (can include HTML)
+ * @param {Function} onConfirm - Callback function to execute on confirmation
+ */
+function showConfirmModal(title, message, onConfirm) {
+  const modalContent = `
+    <div class="confirm-modal">
+      <h2 class="confirm-title">${title}</h2>
+      <div class="confirm-message">${message}</div>
+      <div class="confirm-actions">
+        <button id="confirmCancel" class="btn btn-secondary">❌ Annulla</button>
+        <button id="confirmOK" class="btn btn-danger">✅ Conferma</button>
+      </div>
+    </div>
+  `;
+
+  openModal(modalContent);
+
+  // Setup button listeners
+  document.getElementById('confirmCancel').addEventListener('click', () => {
+    closeModal();
+  });
+
+  document.getElementById('confirmOK').addEventListener('click', () => {
+    closeModal();
+    onConfirm();
+  });
+}
 
 /**
  * Render Settings view
@@ -190,7 +222,11 @@ function setupEventListeners() {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+
+        // NOTE: We intentionally do NOT revoke the blob URL.
+        // Revoking too early causes empty/corrupted downloads.
+        // The browser will automatically clean up when the page is closed.
+        // This is the recommended approach for download operations.
 
         showToast(`✅ Backup scaricato! ${result.counts.recipes} ricette, ${result.counts.pizzaNights} serate`, 'success');
       } else {
@@ -269,109 +305,106 @@ function setupEventListeners() {
 
   // Reset Archives (Recipes, Nights) and Reseed (Ingredients, Preparations)
   document.getElementById('btnResetArchives').addEventListener('click', async () => {
-    const confirmed = confirm(
-      '🔄 RESET ARCHIVI?\n\n' +
-      'Questa azione:\n' +
-      '• Cancellerà TUTTE le ricette\n' +
-      '• Cancellerà TUTTE le serate pizza\n' +
-      '• Ripopolerà gli ingredienti base (192)\n' +
-      '• Ripopolerà le preparazioni base (64)\n' +
-      '• Ripopolerà le categorie (10)\n\n' +
-      'Non può essere annullata.\n\n' +
-      'Premi OK per confermare.'
-    );
+    // Use custom modal instead of confirm()
+    showConfirmModal(
+      '🔄 RESET ARCHIVI?',
+      'Questa azione:<br>' +
+      '• Cancellerà TUTTE le ricette<br>' +
+      '• Cancellerà TUTTE le serate pizza<br>' +
+      '• Ripopolerà gli ingredienti base (192)<br>' +
+      '• Ripopolerà le preparazioni base (64)<br>' +
+      '• Ripopolerà le categorie (10)<br><br>' +
+      '<strong>Non può essere annullata.</strong>',
+      async () => {
+        try {
+          // Import database functions
+          const { getAllRecipes, deleteRecipe, getAllPizzaNights, deletePizzaNight } = await import('../modules/database.js');
 
-    if (confirmed) {
-      try {
-        // Import database functions
-        const { getAllRecipes, deleteRecipe, getAllPizzaNights, deletePizzaNight } = await import('../modules/database.js');
+          // Get all recipes and pizza nights
+          const recipes = await getAllRecipes();
+          const nights = await getAllPizzaNights();
 
-        // Get all recipes and pizza nights
-        const recipes = await getAllRecipes();
-        const nights = await getAllPizzaNights();
+          // Delete all recipes
+          for (const recipe of recipes) {
+            await deleteRecipe(recipe.id);
+          }
 
-        // Delete all recipes
-        for (const recipe of recipes) {
-          await deleteRecipe(recipe.id);
+          // Delete all pizza nights
+          for (const night of nights) {
+            await deletePizzaNight(night.id);
+          }
+
+          showToast(`✅ Reset completato: ${recipes.length} ricette e ${nights.length} serate eliminate`, 'success');
+
+          // Use unified seed endpoint
+          showToast('🌱 Ripopolamento dati base in corso...', 'info');
+          const response = await fetch('/api/seed', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            showToast(
+              `✅ Dati base ripristinati! ${result.results.categories} categorie, ${result.results.ingredients} ingredienti, ${result.results.preparations} preparazioni`,
+              'success'
+            );
+
+            // Refresh app data
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          } else {
+            throw new Error(result.error || 'Seed failed');
+          }
+        } catch (error) {
+          console.error('Reset failed:', error);
+          showToast('❌ Errore durante il reset: ' + error.message, 'error');
         }
-
-        // Delete all pizza nights
-        for (const night of nights) {
-          await deletePizzaNight(night.id);
-        }
-
-        showToast(`✅ Reset completato: ${recipes.length} ricette e ${nights.length} serate eliminate`, 'success');
-
-        // Use unified seed endpoint
-        showToast('🌱 Ripopolamento dati base in corso...', 'info');
-        const response = await fetch('/api/seed', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          showToast(
-            `✅ Dati base ripristinati! ${result.results.categories} categorie, ${result.results.ingredients} ingredienti, ${result.results.preparations} preparazioni`,
-            'success'
-          );
-
-          // Refresh app data
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
-        } else {
-          throw new Error(result.error || 'Seed failed');
-        }
-      } catch (error) {
-        console.error('Reset failed:', error);
-        showToast('❌ Errore durante il reset: ' + error.message, 'error');
-      }
-    }
+      });
   });
 
   // Reseed Database (restore base ingredients and preparations)
   document.getElementById('btnReseedDB').addEventListener('click', async () => {
-    const confirmed = confirm(
-      '🌱 RIPRISTINA DATI BASE?\n\n' +
-      'Questa azione ripopolerà il database con:\n' +
-      '• 192 ingredienti base\n' +
-      '• 64 preparazioni base\n' +
-      '• 10 categorie standard\n\n' +
-      'I tuoi dati custom e ricette NON saranno toccati.\n\n' +
-      'Vuoi continuare?'
-    );
+    // Use custom modal instead of confirm()
+    showConfirmModal(
+      '🌱 RIPRISTINA DATI BASE?',
+      'Questa azione ripopolerà il database con:<br>' +
+      '• 192 ingredienti base<br>' +
+      '• 64 preparazioni base<br>' +
+      '• 10 categorie standard<br><br>' +
+      'I tuoi dati custom e ricette NON saranno toccati.',
+      async () => {
 
-    if (!confirmed) return;
+        try {
+          showToast('🌱 Ripristino dati base in corso...', 'info');
 
-    try {
-      showToast('🌱 Ripristino dati base in corso...', 'info');
+          const response = await fetch('/api/seed', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
 
-      const response = await fetch('/api/seed', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+          const result = await response.json();
+
+          if (result.success) {
+            showToast(
+              `✅ Dati base ripristinati! ${result.results.categories} categorie, ${result.results.ingredients} ingredienti, ${result.results.preparations} preparazioni`,
+              'success'
+            );
+
+            // Refresh app
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          } else {
+            throw new Error(result.error || 'Reseed failed');
+          }
+        } catch (error) {
+          console.error('Reseed failed:', error);
+          showToast('❌ Errore durante il ripristino: ' + error.message, 'error');
+        }
       });
-
-      const result = await response.json();
-
-      if (result.success) {
-        showToast(
-          `✅ Dati base ripristinati! ${result.results.categories} categorie, ${result.results.ingredients} ingredienti, ${result.results.preparations} preparazioni`,
-          'success'
-        );
-
-        // Refresh app
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else {
-        throw new Error(result.error || 'Reseed failed');
-      }
-    } catch (error) {
-      console.error('Reseed failed:', error);
-      showToast('❌ Errore durante il ripristino: ' + error.message, 'error');
-    }
   });
 
 

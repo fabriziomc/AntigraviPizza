@@ -359,6 +359,30 @@ router.post('/seed-preparations', async (req, res) => {
     }
 });
 
+// Unified seed endpoint (seeds all: categories, ingredients, preparations)
+router.post('/seed', async (req, res) => {
+    try {
+        // Import seed function
+        const { seedAll } = await import('./seed-service.js');
+
+        // Run unified seed
+        const results = await seedAll();
+
+        res.json({
+            success: true,
+            message: 'Database seeded successfully!',
+            results
+        });
+    } catch (err) {
+        console.error('Unified seed error:', err);
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
+    }
+});
+
+
 // ============================================
 // ARCHETYPE WEIGHTS ENDPOINTS
 // ============================================

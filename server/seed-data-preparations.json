@@ -10,7 +10,7 @@
       "yield": 4,
       "prepTime": "25-35 min",
       "difficulty": "Media",
-      "ingredients": "[{\"ingredientId\":\"48191922-3fb2-41ce-9d9b-634e062cfb5e\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"},{\"name\":\"Burro\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Latticini\"},{\"ingredientId\":\"53785282-556e-4f96-a48c-410e4562c262\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"}]",
+      "ingredients": "[{\"name\":\"Ananas\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Burro\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Latticini\"},{\"name\":\"Zucchero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -82,7 +82,7 @@
       "yield": 4,
       "prepTime": "45 min",
       "difficulty": "Media",
-      "ingredients": "[{\"ingredientId\":\"b72b4fa8-0bff-4bd7-9619-b719f5ed0541\",\"quantity\":600,\"unit\":\"g\",\"perPortion\":150},{\"ingredientId\":\"53785282-556e-4f96-a48c-410e4562c262\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5},{\"name\":\"Aceto balsamico\",\"quantity\":40,\"unit\":\"ml\",\"perPortion\":10,\"category\":\"Salsa\"},{\"name\":\"Burro\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5,\"category\":\"Latticini\"}]",
+      "ingredients": "[{\"ingredientId\":\"b72b4fa8-0bff-4bd7-9619-b719f5ed0541\",\"quantity\":600,\"unit\":\"g\",\"perPortion\":150},{\"name\":\"Zucchero\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5,\"category\":\"Altro\"},{\"name\":\"Aceto balsamico\",\"quantity\":40,\"unit\":\"ml\",\"perPortion\":10,\"category\":\"Salsa\"},{\"name\":\"Burro\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5,\"category\":\"Latticini\"}]",
       "instructions": "[\"Affettare finemente le cipolle\",\"Rosolare nel burro a fuoco basso\",\"Cuocere 30 minuti mescolando spesso\",\"Aggiungere zucchero e aceto\",\"Cuocere altri 10 minuti fino a caramellatura\"]",
       "tips": "[\"Pazienza: cuocere a fuoco basso\",\"Non far bruciare\",\"Si conserva 5 giorni in frigo\"]",
       "isCustom": 0
@@ -94,7 +94,7 @@
       "yield": 4,
       "prepTime": "15-20 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"ingredientId\":\"81e6561b-61ed-49b9-b8d1-3bda306420bc\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"},{\"ingredientId\":\"53785282-556e-4f96-a48c-410e4562c262\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"}]",
+      "ingredients": "[{\"ingredientId\":\"81e6561b-61ed-49b9-b8d1-3bda306420bc\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"},{\"name\":\"Zucchero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -106,7 +106,7 @@
       "yield": 4,
       "prepTime": "25-35 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Pere\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"ingredientId\":\"53785282-556e-4f96-a48c-410e4562c262\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"},{\"name\":\"Zenzero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Erbe e Spezie\"},{\"ingredientId\":\"8c4d3384-5387-4105-99dc-cedccc2eff8b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"}]",
+      "ingredients": "[{\"name\":\"Pere\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Zucchero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Zenzero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Erbe e Spezie\"},{\"ingredientId\":\"8c4d3384-5387-4105-99dc-cedccc2eff8b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -574,7 +574,7 @@
       "yield": 4,
       "prepTime": "15-20 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"ingredientId\":\"a4be178e-1281-4ac9-b930-1541bf5b87b1\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"},{\"ingredientId\":\"53785282-556e-4f96-a48c-410e4562c262\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"},{\"ingredientId\":\"91358258-e8d6-4a63-ab31-1db225479c56\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"},{\"ingredientId\":\"f554d5e3-18ab-4cfe-adc1-75635f182e0b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"}]",
+      "ingredients": "[{\"ingredientId\":\"a4be178e-1281-4ac9-b930-1541bf5b87b1\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"},{\"name\":\"Zucchero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"ingredientId\":\"91358258-e8d6-4a63-ab31-1db225479c56\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"},{\"ingredientId\":\"f554d5e3-18ab-4cfe-adc1-75635f182e0b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\"}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
