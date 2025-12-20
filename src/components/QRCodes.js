@@ -81,7 +81,7 @@ export async function renderQRCodes(state) {
         const baseUrl = window.location.origin;
 
         for (const guest of pizzaNight.guests) {
-            const guestUrl = `${baseUrl}/#guest/${pizzaNightId}/${guest.id}`;
+            const guestUrl = `${baseUrl}/guest.html#guest/${pizzaNightId}/${guest.id}`;
 
             // Create card
             const card = document.createElement('div');
