@@ -65,6 +65,22 @@ router.delete('/recipes/:id', async (req, res) => {
 // PIZZA NIGHTS
 // ==========================================
 
+// GET single pizza night (MUST be before /pizza-nights to avoid route matching issues)
+router.get('/pizza-nights/:id', async (req, res) => {
+    try {
+        console.log('[ROUTE] GET /pizza-nights/:id called with ID:', req.params.id);
+        const pizzaNight = await dbAdapter.getPizzaNightById(req.params.id);
+        if (!pizzaNight) {
+            return res.status(404).json({ message: 'Pizza night not found' });
+        }
+        console.log('[ROUTE] Returning pizza night with guests:', pizzaNight.guests);
+        res.json(pizzaNight);
+    } catch (err) {
+        console.error('[ROUTE ERROR]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 router.get('/pizza-nights', async (req, res) => {
     try {
         const nights = await dbAdapter.getAllPizzaNights();

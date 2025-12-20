@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auguri di Natale! 🎄</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #7c2d12 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            color: white;
+        }
+
+        .snow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            color: white;
+            font-size: 1.5rem;
+            opacity: 0.8;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-emoji {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .pizza-night-title {
+            color: #7c2d12;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .guest-name {
+            color: #1e3a8a;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .christmas-image {
+            width: 100%;
+            max-width: 400px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin: 1.5rem auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .message {
+            color: #374151;
+            font-size: 1.25rem;
+            line-height: 1.8;
+            margin: 1.5rem 0;
+            font-style: italic;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 12px;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .signature {
+            color: #6b7280;
+            font-size: 1rem;
+            margin-top: 2rem;
+            font-weight: 500;
+        }
+
+        .loading {
+            color: #374151;
+            font-size: 1.5rem;
+        }
+
+        .error {
+            color: #dc2626;
+            padding: 1rem;
+            background: #fee2e2;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .decorations {
+            font-size: 2rem;
+            margin: 1rem 0;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            .guest-name {
+                font-size: 2rem;
+            }
+
+            .message {
+                font-size: 1.1rem;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Snowflakes -->
+    <div class="snow" id="snow"></div>
+
+    <div class="container" id="content">
+        <div class="loading">🎄 Caricamento...</div>
+    </div>
+
+    <script>
+        // Christmas messages pool (20+)
+        const CHRISTMAS_MESSAGES = [
+            "Che questa serata pizza sia l'inizio di un Natale pieno di gioia, amore e momenti indimenticabili! 🎄✨",
+            "Buon Natale! Che ogni fetta di pizza porti con sé un sorriso e un ricordo speciale! 🍕🎅",
+            "Auguri di cuore! Che il calore di questa serata ti accompagni per tutte le feste! ❤️🔥",
+            "Un Natale speciale merita una pizza speciale, e tu sei l'ingrediente più importante! 🌟🍕",
+            "Che la magia del Natale renda questa serata indimenticabile! Buone feste! ✨🎁",
+            "Pizza, amici e Natale: la combinazione perfetta per creare ricordi meravigliosi! 🎄💫",
+            "Auguri! Che ogni momento di questa serata sia condito con felicità e allegria! 🎉🍕",
+            "Il Natale è condividere: pizza, risate e auguri sinceri! Buone feste! 🎅❤️",
+            "Che questa pizza natalizia scaldi il cuore come il camino scalda la casa! 🔥🏠",
+            "Auguri di un Natale croccante fuori e morbido dentro, proprio come una buona pizza! 🍕😊",
+            "Sotto l'albero i regali, sul tavolo la pizza, nel cuore la gioia: Buon Natale! 🎄🎁",
+            "Che la tua festa sia condita con amore, guarnita con sorrisi e cotta alla perfezione! 🍕💝",
+            "Un pizzico di magia, una spolverata di gioia: ecco gli auguri per il tuo Natale! ✨🎄",
+            "Più il forno è caldo, più la pizza è buona. Più il cuore è caldo, più il Natale è bello! ❤️🔥",
+            "Buone feste! Che ogni fetta porti con sé un desiderio che si avvera! 🌟🍕",
+            "Il Natale è come la pizza: migliore se condiviso con le persone che ami! 👨‍👩‍👧‍👦🎄",
+            "Auguri! Che questa serata sia l'antipasto di un Natale fantastico! 🍕🎉",
+            "Dalla cucina al cuore: auguri di un Natale fatto in casa, con amore! 🏠❤️",
+            "Che la stella cometa guidi questa serata verso la felicità! Buon Natale! ⭐✨",
+            "Pizza napoletana, spirito natalizio: una combo vincente! Auguri! 🍕🎅",
+            "Che il profumo di questa pizza si mescoli con la magia del Natale! 🎄👃",
+            "Auguri! Che ogni morso sia un brindisi alla gioia delle feste! 🥂🍕",
+            "Il segreto del Natale? Condividerlo. Il segreto della pizza? Lo stesso! Buone feste! 💝🍕",
+            "Che questa serata sia la ciliegina sulla torta... ops, il basilico sulla pizza del tuo Natale! 🌿🎄"
+        ];
+
+        // Create snowflakes
+        function createSnowflakes() {
+            const snow = document.getElementById('snow');
+            const numberOfFlakes = 30;
+
+            for (let i = 0; i < numberOfFlakes; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                snowflake.innerHTML = '❄';
+                snowflake.style.left = Math.random() * 100 + '%';
+                snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                snowflake.style.animationDelay = Math.random() * 5 + 's';
+                snowflake.style.fontSize = (Math.random() * 1 + 0.5) + 'rem';
+                snow.appendChild(snowflake);
+            }
+        }
+
+        // Get random message based on guest ID (deterministic)
+        function getMessageForGuest(guestId) {
+            // Simple hash function to get consistent index
+            let hash = 0;
+            for (let i = 0; i < guestId.length; i++) {
+                hash = ((hash << 5) - hash) + guestId.charCodeAt(i);
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            const index = Math.abs(hash) % CHRISTMAS_MESSAGES.length;
+            return CHRISTMAS_MESSAGES[index];
+        }
+
+        // Load guest data
+        async function loadGuestData() {
+            try {
+                // Parse URL hash: #guest/pizzaNightId/guestId
+                const hash = window.location.hash.slice(1); // Remove #
+                const parts = hash.split('/');
+
+                if (parts.length !== 3 || parts[0] !== 'guest') {
+                    throw new Error('URL non valido');
+                }
+
+                const [, pizzaNightId, guestId] = parts;
+
+                // Fetch pizza night data
+                const response = await fetch(`/api/pizza-nights/${pizzaNightId}`);
+                if (!response.ok) {
+                    throw new Error('Serata pizza non trovata');
+                }
+
+                const pizzaNight = await response.json();
+
+                // Find guest
+                const guest = pizzaNight.guests ? pizzaNight.guests.find(g => g.id === guestId) : null;
+                if (!guest) {
+                    throw new Error('Ospite non trovato');
+                }
+
+                // Get deterministic message for this guest
+                const message = getMessageForGuest(guestId);
+
+                // Render content
+                const content = document.getElementById('content');
+                content.innerHTML = `
+                    <div class="header-emoji">🎄</div>
+                    <div class="pizza-night-title">${pizzaNight.name || 'Serata Pizza di Natale'}</div>
+                    <h1 class="guest-name">Ciao ${guest.name}! 👋</h1>
+                    
+                    <img src="/christmas_pizza_greeting.png" alt="Pizza di Natale" class="christmas-image" onerror="this.style.display='none'">
+                    
+                    <div class="decorations">🎅 🍕 ⭐ 🎁 🍕 🎄</div>
+                    
+                    <div class="message">${message}</div>
+                    
+                    <div class="signature">
+                        Con affetto,<br>
+                        <strong>Il Team AntigraviPizza</strong> 🍕❤️
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error loading guest data:', error);
+                const content = document.getElementById('content');
+                content.innerHTML = `
+                    <div class="header-emoji">😔</div>
+                    <div class="error">
+                        <strong>Ops!</strong><br>
+                        ${error.message}<br><br>
+                        Controlla il QR code o contatta l'organizzatore.
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        createSnowflakes();
+        loadGuestData();
+    </script>
+</body>
+
+</html>

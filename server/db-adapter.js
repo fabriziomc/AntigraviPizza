@@ -201,6 +201,62 @@ class DatabaseAdapter {
         }
     }
 
+    async getPizzaNightById(id) {
+        if (this.isSQLite) {
+            const stmt = this.db.prepare('SELECT * FROM PizzaNights WHERE id = ?');
+            const row = stmt.get(id);
+            if (!row) return null;
+
+            // Parse JSON fields
+            const pizzaNight = {
+                ...row,
+                selectedPizzas: JSON.parse(row.selectedPizzas || '[]'),
+                selectedGuests: JSON.parse(row.selectedGuests || '[]'),
+                availableIngredients: JSON.parse(row.availableIngredients || '[]')
+            };
+
+            // Resolve selectedGuests IDs to full guest objects
+            console.log('[DEBUG] selectedGuests IDs:', pizzaNight.selectedGuests);
+            const guestStmt = this.db.prepare('SELECT * FROM Guests WHERE id = ?');
+            pizzaNight.guests = pizzaNight.selectedGuests.map(guestId => {
+                const guest = guestStmt.get(guestId);
+                console.log(`[DEBUG] Guest ID ${guestId} resolved to:`, guest);
+                return guest || { id: guestId, name: 'Unknown' };
+            });
+            console.log('[DEBUG] Final guests array:', pizzaNight.guests);
+
+            return pizzaNight;
+        } else {
+            // Turso
+            const result = await this.db.execute({
+                sql: 'SELECT * FROM PizzaNights WHERE id = ?',
+                args: [id]
+            });
+            if (!result.rows || result.rows.length === 0) return null;
+
+            const row = result.rows[0];
+            const pizzaNight = {
+                ...row,
+                selectedPizzas: JSON.parse(row.selectedPizzas || '[]'),
+                selectedGuests: JSON.parse(row.selectedGuests || '[]'),
+                availableIngredients: JSON.parse(row.availableIngredients || '[]')
+            };
+
+            // Resolve selectedGuests IDs to full guest objects (Turso)
+            pizzaNight.guests = [];
+            for (const guestId of pizzaNight.selectedGuests) {
+                const guestResult = await this.db.execute({
+                    sql: 'SELECT * FROM Guests WHERE id = ?',
+                    args: [guestId]
+                });
+                const guest = guestResult.rows[0];
+                pizzaNight.guests.push(guest || { id: guestId, name: 'Unknown' });
+            }
+
+            return pizzaNight;
+        }
+    }
+
     async createPizzaNight(night) {
         const selectedPizzasJson = JSON.stringify(night.selectedPizzas || []);
         const selectedGuestsJson = JSON.stringify(night.selectedGuests || []);

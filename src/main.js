@@ -28,6 +28,7 @@ import { renderDoughs } from './components/Doughs.js';
 import { renderPreparations } from './components/Preparations.js';
 import { renderIngredients } from './components/Ingredients.js';
 import { renderSettings } from './components/Settings.js';
+import { renderQRCodes } from './components/QRCodes.js';
 
 console.log('✅ All imports loaded');
 
@@ -135,6 +136,28 @@ function renderNavigation() {
 }
 
 function navigateToView(viewId) {
+  // Handle special routes like qrcodes/id or guest/id/id
+  if (viewId.startsWith('qrcodes/') || viewId.startsWith('guest/')) {
+    const actualView = viewId.split('/')[0];
+    state.currentView = actualView;
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.classList.remove('active');
+    });
+
+    document.querySelectorAll('.view').forEach(view => {
+      view.classList.remove('active');
+    });
+
+    const targetView = document.getElementById(`${actualView}-view`);
+    if (targetView) {
+      targetView.classList.add('active');
+    }
+
+    renderCurrentView();
+    return;
+  }
+
   // Update state
   state.currentView = viewId;
 
@@ -190,6 +213,13 @@ async function renderCurrentView() {
       case VIEWS.SETTINGS:
         await renderSettings();
         break;
+      case 'qrcodes':
+        await renderQRCodes(state);
+        break;
+      case 'guest':
+        // Guest view is handled by guest.html
+        window.location.href = '/guest.html' + window.location.hash;
+        break;
       default:
         await renderDashboard(state);
     }
@@ -210,7 +240,9 @@ function setupEventListeners() {
     if (navLink) {
       e.preventDefault();
       const viewId = navLink.dataset.view;
-      navigateToView(viewId);
+      // Update hash to keep URL in sync with navigation
+      window.location.hash = viewId;
+      // navigateToView will be called by hashchange event
     }
   });
 
@@ -232,11 +264,17 @@ function setupEventListeners() {
     });
   }
 
-  // Handle browser back/forward
+  // Handle browser back/forward and hash changes
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash.slice(1);
     if (hash && Object.values(VIEWS).includes(hash)) {
       navigateToView(hash);
+    } else if (hash) {
+      // Handle special routes like qrcodes/id or guest/id/id
+      const viewType = hash.split('/')[0];
+      if (viewType === 'qrcodes' || viewType === 'guest') {
+        navigateToView(hash);
+      }
     }
   });
 }

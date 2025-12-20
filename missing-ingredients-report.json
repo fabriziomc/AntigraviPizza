@@ -1,0 +1,493 @@
+{
+  "excelPreparations": 44,
+  "excelIngredients": 101,
+  "dbIngredients": 193,
+  "missing": [
+    {
+      "name": "bollire le patate viola intere senza buccia",
+      "usageCount": 1,
+      "usedIn": [
+        "Coralli viola"
+      ]
+    },
+    {
+      "name": "Patate viola",
+      "usageCount": 1,
+      "usedIn": [
+        "Coralli viola"
+      ]
+    },
+    {
+      "name": "Stoccafisso ammollato",
+      "usageCount": 1,
+      "usedIn": [
+        "Baccalà mantecato"
+      ]
+    },
+    {
+      "name": "Alloro",
+      "usageCount": 1,
+      "usedIn": [
+        "Baccalà mantecato"
+      ]
+    },
+    {
+      "name": "Cipolle Tropea",
+      "usageCount": 1,
+      "usedIn": [
+        "Cipolla caramellata"
+      ]
+    },
+    {
+      "name": "Zucchero di canna",
+      "usageCount": 4,
+      "usedIn": [
+        "Cipolla caramellata",
+        "Pomodorini confit",
+        "Comp.pere e zenzero",
+        "Ananas caramellato"
+      ]
+    },
+    {
+      "name": "Pomodorini",
+      "usageCount": 1,
+      "usedIn": [
+        "Pomodorini confit"
+      ]
+    },
+    {
+      "name": "Worchester",
+      "usageCount": 1,
+      "usedIn": [
+        "Pomodorini confit"
+      ]
+    },
+    {
+      "name": "Tabasco",
+      "usageCount": 1,
+      "usedIn": [
+        "Pomodorini confit"
+      ]
+    },
+    {
+      "name": "Polpa di pomodoro",
+      "usageCount": 1,
+      "usedIn": [
+        "Pomodoro stracotto"
+      ]
+    },
+    {
+      "name": "cipolla",
+      "usageCount": 4,
+      "usedIn": [
+        "Pomodoro stracotto",
+        "Crema di patate",
+        "Crema di patate viola",
+        "Stracotto di manzo"
+      ]
+    },
+    {
+      "name": "soffriggere nell’olio il sedano",
+      "usageCount": 2,
+      "usedIn": [
+        "Crema di patate",
+        "Crema di patate viola"
+      ]
+    },
+    {
+      "name": "la carota e la cipolla",
+      "usageCount": 2,
+      "usedIn": [
+        "Crema di patate",
+        "Crema di patate viola"
+      ]
+    },
+    {
+      "name": "Carota",
+      "usageCount": 3,
+      "usedIn": [
+        "Crema di patate",
+        "Crema di patate viola",
+        "Stracotto di manzo"
+      ]
+    },
+    {
+      "name": "olio e peperoncino",
+      "usageCount": 1,
+      "usedIn": [
+        "Cavolo nero stufato"
+      ]
+    },
+    {
+      "name": "Peperoncino",
+      "usageCount": 3,
+      "usedIn": [
+        "Cavolo nero stufato",
+        "Pomodori secchi (crema)",
+        "Manzo marinato"
+      ]
+    },
+    {
+      "name": "Frullare il tutto a crudo",
+      "usageCount": 1,
+      "usedIn": [
+        "Pomodori secchi (crema)"
+      ]
+    },
+    {
+      "name": "Olio",
+      "usageCount": 3,
+      "usedIn": [
+        "Pomodori secchi (crema)",
+        "Maionese al wasabi",
+        "Salsa aioli"
+      ]
+    },
+    {
+      "name": "100 gr di farina di castagne",
+      "usageCount": 1,
+      "usedIn": [
+        "Crema di castagne"
+      ]
+    },
+    {
+      "name": "1 bicchiere di latte e 1 di acqua",
+      "usageCount": 1,
+      "usedIn": [
+        "Crema di castagne"
+      ]
+    },
+    {
+      "name": "sale",
+      "usageCount": 4,
+      "usedIn": [
+        "Crema di castagne",
+        "Salsa al mango",
+        "Uovo marinato",
+        "Salsa aioli"
+      ]
+    },
+    {
+      "name": "pepe",
+      "usageCount": 1,
+      "usedIn": [
+        "Crema di castagne"
+      ]
+    },
+    {
+      "name": "Farina di castagne",
+      "usageCount": 1,
+      "usedIn": [
+        "Crema di castagne"
+      ]
+    },
+    {
+      "name": "Ceci",
+      "usageCount": 1,
+      "usedIn": [
+        "Crema di ceci"
+      ]
+    },
+    {
+      "name": "Barbabietola",
+      "usageCount": 1,
+      "usedIn": [
+        "Crema di barbabietola"
+      ]
+    },
+    {
+      "name": "Yogurt o Latte",
+      "usageCount": 1,
+      "usedIn": [
+        "Crema di barbabietola"
+      ]
+    },
+    {
+      "name": "Avocado",
+      "usageCount": 1,
+      "usedIn": [
+        "Guacamole"
+      ]
+    },
+    {
+      "name": "Lime",
+      "usageCount": 2,
+      "usedIn": [
+        "Guacamole",
+        "Tartare di Gamberi"
+      ]
+    },
+    {
+      "name": "frullare mango con olio",
+      "usageCount": 1,
+      "usedIn": [
+        "Salsa al mango"
+      ]
+    },
+    {
+      "name": "pepe e (opzionale) senape",
+      "usageCount": 1,
+      "usedIn": [
+        "Salsa al mango"
+      ]
+    },
+    {
+      "name": "Mango",
+      "usageCount": 1,
+      "usedIn": [
+        "Salsa al mango"
+      ]
+    },
+    {
+      "name": "Arancia",
+      "usageCount": 2,
+      "usedIn": [
+        "Gel di agrumi",
+        "Anatra"
+      ]
+    },
+    {
+      "name": "Limone",
+      "usageCount": 6,
+      "usedIn": [
+        "Gel di agrumi",
+        "Comp.pere e zenzero",
+        "Tartare di Fassona",
+        "Salsa aioli",
+        "Maionese al wasabi"
+      ]
+    },
+    {
+      "name": "AgarAgar",
+      "usageCount": 1,
+      "usedIn": [
+        "Gel di agrumi"
+      ]
+    },
+    {
+      "name": "Pulire gamberi",
+      "usageCount": 1,
+      "usedIn": [
+        "Tartare di Gamberi"
+      ]
+    },
+    {
+      "name": "unire lime",
+      "usageCount": 1,
+      "usedIn": [
+        "Tartare di Gamberi"
+      ]
+    },
+    {
+      "name": "cocco",
+      "usageCount": 2,
+      "usedIn": [
+        "Tartare di Gamberi",
+        "Tartare di Gamberi"
+      ]
+    },
+    {
+      "name": "kiwi",
+      "usageCount": 2,
+      "usedIn": [
+        "Tartare di Gamberi",
+        "Tartare di Gamberi"
+      ]
+    },
+    {
+      "name": "sale e pepe",
+      "usageCount": 1,
+      "usedIn": [
+        "Tartare di Gamberi"
+      ]
+    },
+    {
+      "name": "Gamberi",
+      "usageCount": 2,
+      "usedIn": [
+        "Tartare di Gamberi",
+        "Misto Pesce paella"
+      ]
+    },
+    {
+      "name": "Parmigiano",
+      "usageCount": 4,
+      "usedIn": [
+        "Salsa di pistacchi",
+        "Tartare di Fassona",
+        "Pesto di rucola",
+        "Verza e Patate"
+      ]
+    },
+    {
+      "name": "Basilico",
+      "usageCount": 1,
+      "usedIn": [
+        "Salsa di pistacchi"
+      ]
+    },
+    {
+      "name": "cipolla o cipollotto",
+      "usageCount": 1,
+      "usedIn": [
+        "Crema di piselli"
+      ]
+    },
+    {
+      "name": "Pecorino",
+      "usageCount": 2,
+      "usedIn": [
+        "Crema di pecorino",
+        "Pesto di rucola"
+      ]
+    },
+    {
+      "name": "Farina",
+      "usageCount": 1,
+      "usedIn": [
+        "Crema di pecorino"
+      ]
+    },
+    {
+      "name": "Baccalà",
+      "usageCount": 1,
+      "usedIn": [
+        "Baccalà in vasocottura"
+      ]
+    },
+    {
+      "name": "Anatra",
+      "usageCount": 1,
+      "usedIn": [
+        "Anatra"
+      ]
+    },
+    {
+      "name": "Carne",
+      "usageCount": 1,
+      "usedIn": [
+        "Stracotto di manzo"
+      ]
+    },
+    {
+      "name": "Brodo di carne",
+      "usageCount": 1,
+      "usedIn": [
+        "Stracotto di manzo"
+      ]
+    },
+    {
+      "name": "Vino rosso",
+      "usageCount": 1,
+      "usedIn": [
+        "Stracotto di manzo"
+      ]
+    },
+    {
+      "name": "Calamari",
+      "usageCount": 1,
+      "usedIn": [
+        "Misto Pesce paella"
+      ]
+    },
+    {
+      "name": "Paprika dolce",
+      "usageCount": 1,
+      "usedIn": [
+        "Misto Pesce paella"
+      ]
+    },
+    {
+      "name": "Grigliare a fette verticali sottili",
+      "usageCount": 1,
+      "usedIn": [
+        "Melanzane grigliate"
+      ]
+    },
+    {
+      "name": "Melanzane",
+      "usageCount": 1,
+      "usedIn": [
+        "Melanzane grigliate"
+      ]
+    },
+    {
+      "name": "Finocchi",
+      "usageCount": 1,
+      "usedIn": [
+        "Finocchi grigliati"
+      ]
+    },
+    {
+      "name": "Aglio nero",
+      "usageCount": 1,
+      "usedIn": [
+        "Emulsione di aglio nero"
+      ]
+    },
+    {
+      "name": "Melone",
+      "usageCount": 1,
+      "usedIn": [
+        "Crema di Melone"
+      ]
+    },
+    {
+      "name": "Fassona (o Chianina)",
+      "usageCount": 1,
+      "usedIn": [
+        "Tartare di Fassona"
+      ]
+    },
+    {
+      "name": "Filetti di tonno",
+      "usageCount": 1,
+      "usedIn": [
+        "Tonno Tataki"
+      ]
+    },
+    {
+      "name": "Salsa di Soia",
+      "usageCount": 2,
+      "usedIn": [
+        "Tonno Tataki",
+        "Manzo marinato"
+      ]
+    },
+    {
+      "name": "marinatura: Salsa di soia",
+      "usageCount": 1,
+      "usedIn": [
+        "Manzo marinato"
+      ]
+    },
+    {
+      "name": "Carpaccio di manzo",
+      "usageCount": 1,
+      "usedIn": [
+        "Manzo marinato"
+      ]
+    },
+    {
+      "name": "Olio arachidi",
+      "usageCount": 1,
+      "usedIn": [
+        "Salsa aioli"
+      ]
+    },
+    {
+      "name": "Farina Grano saraceno",
+      "usageCount": 1,
+      "usedIn": [
+        "Chips di grano saraceno"
+      ]
+    },
+    {
+      "name": "Wasabi",
+      "usageCount": 1,
+      "usedIn": [
+        "Maionese al wasabi"
+      ]
+    }
+  ]
+}

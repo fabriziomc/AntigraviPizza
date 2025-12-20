@@ -984,6 +984,10 @@ function createPizzaNightCard(night) {
             <span>👁️</span>
             Dettagli
           </button>
+          <button class="btn btn-accent btn-sm" onclick="window.location.hash='qrcodes/${night.id}'">
+            <span>🎫</span>
+            QR Codes
+          </button>
           ${night.status === 'planned' ? `
           <button class="btn btn-secondary btn-sm btn-complete" data-night-id="${night.id}">
             <span>✓</span>

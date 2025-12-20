@@ -1,0 +1,145 @@
+.guest-view {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.guest-view.loading,
+.guest-view.error {
+    color: white;
+    text-align: center;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid white;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.christmas-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 100%;
+    padding: 40px;
+    text-align: center;
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.pizza-night-name {
+    font-size: 2rem;
+    color: #333;
+    margin: 0 0 15px 0;
+    font-weight: 700;
+}
+
+.date-info {
+    font-size: 1.1rem;
+    color: #666;
+}
+
+.guest-welcome {
+    margin: 30px 0;
+}
+
+.guest-name {
+    font-size: 1.8rem;
+    color: #667eea;
+    margin: 0;
+    font-weight: 600;
+}
+
+.christmas-message {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin: 30px 0;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.christmas-message:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.christmas-message p {
+    font-size: 1.3rem;
+    line-height: 1.6;
+    margin: 0 0 10px 0;
+}
+
+.refresh-hint {
+    display: block;
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-top: 10px;
+}
+
+.pizza-emoji {
+    font-size: 4rem;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .christmas-card {
+        padding: 30px 20px;
+    }
+    
+    .pizza-night-name {
+        font-size: 1.5rem;
+    }
+    
+    .guest-name {
+        font-size: 1.4rem;
+    }
+    
+    .christmas-message p {
+        font-size: 1.1rem;
+    }
+    
+    .pizza-emoji {
+        font-size: 3rem;
+    }
+}
