@@ -33,6 +33,13 @@ export async function seedPreparations() {
     const seedData = JSON.parse(fs.readFileSync(seedFile, 'utf8'));
     console.log(`Loading ${seedData.count} preparations from seed...\n`);
 
+    // Build ingredient name -> ID map
+    const allIngredients = db.prepare('SELECT id, name FROM Ingredients').all();
+    const ingredientMap = {}; // name -> id
+    allIngredients.forEach(ing => {
+        ingredientMap[ing.name.toLowerCase()] = ing.id;
+    });
+
     const insertStmt = db.prepare(`
         INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -41,6 +48,26 @@ export async function seedPreparations() {
     let seeded = 0;
     seedData.preparations.forEach(prep => {
         try {
+            // Convert ingredients from name+category to ingredientId
+            const ings = JSON.parse(prep.ingredients);
+            const convertedIngs = ings.map(ing => {
+                if (ing.name) {
+                    const ingredientId = ingredientMap[ing.name.toLowerCase()];
+                    if (ingredientId) {
+                        // Replace name+category with ingredientId
+                        return {
+                            ingredientId,
+                            quantity: ing.quantity,
+                            unit: ing.unit,
+                            perPortion: ing.perPortion
+                        };
+                    } else {
+                        console.warn(`⚠️  Ingredient not found: ${ing.name} in ${prep.name}`);
+                    }
+                }
+                return ing; // Keep as-is if no name
+            });
+
             insertStmt.run(
                 randomUUID(),
                 prep.name,
@@ -49,7 +76,7 @@ export async function seedPreparations() {
                 prep.yield || 4,
                 prep.prepTime || '',
                 prep.difficulty || 'Media',
-                prep.ingredients, // Already JSON string
+                JSON.stringify(convertedIngs), // Converted to ingredientId
                 prep.instructions,
                 prep.tips,
                 Date.now(),

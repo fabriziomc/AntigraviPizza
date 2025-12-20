@@ -45,10 +45,55 @@ if (DB_TYPE === 'sqlite') {
 
     // Initialize schema on first run
     initSchema();
-} else if (DB_TYPE === 'mssql') {
-    // SQL Server implementation
-    console.log('✅ SQL Server mode enabled');
-    // Connection will be handled by db-mssql.js
+} else if (DB_TYPE === 'turso') {
+    // Turso (LibSQL) implementation
+    const { createClient } = await import('@libsql/client');
+
+    const url = process.env.TURSO_DATABASE_URL;
+    const authToken = process.env.TURSO_AUTH_TOKEN;
+
+    if (!url || !authToken) {
+        throw new Error('❌ TURSO_DATABASE_URL and TURSO_AUTH_TOKEN must be set in environment variables');
+    }
+
+    db = createClient({
+        url,
+        authToken
+    });
+
+    dbType = 'turso';
+    console.log('✅ Turso database connected at:', url);
+
+    // Initialize schema (Turso uses libSQL which is SQLite-compatible)
+    async function initSchema() {
+        const path = (await import('path')).default;
+        const fs = (await import('fs')).default;
+        const { fileURLToPath } = await import('url');
+
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const schemaPath = path.join(__dirname, 'sql', 'schema.sqlite.sql');
+        const schema = fs.readFileSync(schemaPath, 'utf8');
+
+        // Split by semicolons and execute each statement
+        const statements = schema.split(';').filter(s => s.trim().length > 0);
+
+        for (const statement of statements) {
+            try {
+                await db.execute(statement);
+            } catch (error) {
+                // Ignore 'table already exists' errors
+                if (!error.message.includes('already exists')) {
+                    console.error('Schema init error:', error.message);
+                }
+            }
+        }
+
+        console.log('✅ Database schema initialized');
+    }
+
+    // Initialize schema on first run
+    await initSchema();
 }
 
 export function getDb() {

@@ -1,19 +1,18 @@
 import { randomUUID } from 'crypto';
-import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import DatabaseAdapter from './db-adapter.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Get database path
-const dbPath = process.env.NODE_ENV === 'production'
-    ? '/app/data/antigravipizza.db'
-    : path.join(__dirname, '..', 'antigravipizza.db');
-
+/**
+ * Seed all data (categories, ingredients, preparations) using DatabaseAdapter
+ * This works with both SQLite and Turso
+ */
 export async function seedAll() {
-    const db = new Database(dbPath);
+    const dbAdapter = new DatabaseAdapter();
     const results = {
         categories: 0,
         ingredients: 0,
@@ -22,7 +21,10 @@ export async function seedAll() {
     };
 
     try {
-        // Seed Categories
+        console.log('🌱 Starting seed process...');
+
+        // 1. Seed Categories
+        console.log('📦 Seeding categories...');
         const categories = [
             { name: 'Impasti', icon: '🌾', displayOrder: 1, description: 'Farine, lieviti, acqua, sale, olio per impasti' },
             { name: 'Basi e Salse', icon: '🍅', displayOrder: 2, description: 'Salse base, creme, condimenti liquidi' },
@@ -36,49 +38,139 @@ export async function seedAll() {
             { name: 'Altro', icon: '📦', displayOrder: 10, description: 'Ingredienti speciali, miele, aceti, etc.' }
         ];
 
-        const catStmt = db.prepare('INSERT OR IGNORE INTO Categories (id, name, icon, displayOrder, description, createdAt) VALUES (?, ?, ?, ?, ?, ?)');
-        categories.forEach(cat => {
-            catStmt.run(randomUUID(), cat.name, cat.icon, cat.displayOrder, cat.description, Date.now());
-            results.categories++;
-        });
+        // Get existing categories
+        const existingCategories = await dbAdapter.getAllCategories();
+        const existingCategoryNames = new Set(existingCategories.map(c => c.name));
 
-        // Seed Ingredients from JSON
+        for (const cat of categories) {
+            if (!existingCategoryNames.has(cat.name)) {
+                const categoryData = {
+                    id: randomUUID(),
+                    name: cat.name,
+                    icon: cat.icon,
+                    displayOrder: cat.displayOrder,
+                    description: cat.description,
+                    createdAt: Date.now()
+                };
+
+                if (dbAdapter.isSQLite) {
+                    const stmt = dbAdapter.db.prepare('INSERT INTO Categories (id, name, icon, displayOrder, description, createdAt) VALUES (?, ?, ?, ?, ?, ?)');
+                    stmt.run(categoryData.id, categoryData.name, categoryData.icon, categoryData.displayOrder, categoryData.description, categoryData.createdAt);
+                } else {
+                    // Turso
+                    await dbAdapter.db.execute({
+                        sql: 'INSERT INTO Categories (id, name, icon, displayOrder, description, createdAt) VALUES (?, ?, ?, ?, ?, ?)',
+                        args: [categoryData.id, categoryData.name, categoryData.icon, categoryData.displayOrder, categoryData.description, categoryData.createdAt]
+                    });
+                }
+                results.categories++;
+            }
+        }
+        console.log(`✅ Seeded ${results.categories} categories`);
+
+        // 2. Seed Ingredients from JSON
+        console.log('🥬 Seeding ingredients...');
         const ingredientsFile = path.join(__dirname, 'seed-data-ingredients.json');
         if (fs.existsSync(ingredientsFile)) {
             const seedData = JSON.parse(fs.readFileSync(ingredientsFile, 'utf8'));
+
+            // Get category map
+            const allCategories = await dbAdapter.getAllCategories();
             const categoryMap = {};
-            db.prepare('SELECT * FROM Categories').all().forEach(cat => {
+            allCategories.forEach(cat => {
                 categoryMap[cat.name] = cat.id;
             });
 
-            const ingStmt = db.prepare('INSERT OR IGNORE INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            // Get existing ingredients
+            const existingIngredients = await dbAdapter.getAllIngredients();
+            const existingIngredientNames = new Set(existingIngredients.map(i => i.name));
 
-            seedData.ingredients.forEach(ing => {
-                const categoryId = categoryMap[ing.category];
-                if (categoryId) {
-                    ingStmt.run(randomUUID(), ing.name, categoryId, ing.subcategory, ing.minWeight, ing.maxWeight, ing.defaultUnit || 'g', ing.postBake || 0, ing.phase || 'topping', ing.season, ing.allergens, ing.tags, ing.isCustom || 0, Date.now());
-                    results.ingredients++;
+            for (const ing of seedData.ingredients) {
+                if (!existingIngredientNames.has(ing.name)) {
+                    const categoryId = categoryMap[ing.category];
+                    if (categoryId) {
+                        const ingredientData = {
+                            id: randomUUID(),
+                            name: ing.name,
+                            categoryId: categoryId,
+                            subcategory: ing.subcategory || null,
+                            minWeight: ing.minWeight || null,
+                            maxWeight: ing.maxWeight || null,
+                            defaultUnit: ing.defaultUnit || 'g',
+                            postBake: ing.postBake ? 1 : 0,
+                            phase: ing.phase || 'topping',
+                            season: ing.season ? JSON.stringify(ing.season) : null,
+                            allergens: ing.allergens ? JSON.stringify(ing.allergens) : '[]',
+                            tags: ing.tags ? JSON.stringify(ing.tags) : '[]',
+                            isCustom: ing.isCustom ? 1 : 0,
+                            dateAdded: Date.now()
+                        };
+
+                        if (dbAdapter.isSQLite) {
+                            const stmt = dbAdapter.db.prepare('INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+                            stmt.run(ingredientData.id, ingredientData.name, ingredientData.categoryId, ingredientData.subcategory, ingredientData.minWeight, ingredientData.maxWeight, ingredientData.defaultUnit, ingredientData.postBake, ingredientData.phase, ingredientData.season, ingredientData.allergens, ingredientData.tags, ingredientData.isCustom, ingredientData.dateAdded);
+                        } else {
+                            // Turso
+                            await dbAdapter.db.execute({
+                                sql: 'INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                                args: [ingredientData.id, ingredientData.name, ingredientData.categoryId, ingredientData.subcategory, ingredientData.minWeight, ingredientData.maxWeight, ingredientData.defaultUnit, ingredientData.postBake, ingredientData.phase, ingredientData.season, ingredientData.allergens, ingredientData.tags, ingredientData.isCustom, ingredientData.dateAdded]
+                            });
+                        }
+                        results.ingredients++;
+                    }
                 }
-            });
+            }
         }
+        console.log(`✅ Seeded ${results.ingredients} ingredients`);
 
-        // Seed Preparations from JSON
+        // 3. Seed Preparations from JSON
+        console.log('🍽️ Seeding preparations...');
         const preparationsFile = path.join(__dirname, 'seed-data-preparations.json');
         if (fs.existsSync(preparationsFile)) {
             const seedData = JSON.parse(fs.readFileSync(preparationsFile, 'utf8'));
-            const prepStmt = db.prepare('INSERT OR IGNORE INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
 
-            seedData.preparations.forEach(prep => {
-                prepStmt.run(randomUUID(), prep.name, prep.category, prep.description || '', prep.yield || 4, prep.prepTime || '', prep.difficulty || 'Media', prep.ingredients, prep.instructions, prep.tips, Date.now(), prep.isCustom || 0);
-                results.preparations++;
-            });
+            // Get existing preparations
+            const existingPreparations = await dbAdapter.getAllPreparations();
+            const existingPreparationNames = new Set(existingPreparations.map(p => p.name));
+
+            for (const prep of seedData.preparations) {
+                if (!existingPreparationNames.has(prep.name)) {
+                    const preparationData = {
+                        id: randomUUID(),
+                        name: prep.name,
+                        category: prep.category,
+                        description: prep.description || '',
+                        yield: prep.yield || 4,
+                        prepTime: prep.prepTime || '',
+                        difficulty: prep.difficulty || 'Media',
+                        ingredients: prep.ingredients || '[]',
+                        instructions: prep.instructions || '[]',
+                        tips: prep.tips || '[]',
+                        dateAdded: Date.now(),
+                        isCustom: prep.isCustom ? 1 : 0
+                    };
+
+                    if (dbAdapter.isSQLite) {
+                        const stmt = dbAdapter.db.prepare('INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+                        stmt.run(preparationData.id, preparationData.name, preparationData.category, preparationData.description, preparationData.yield, preparationData.prepTime, preparationData.difficulty, preparationData.ingredients, preparationData.instructions, preparationData.tips, preparationData.dateAdded, preparationData.isCustom);
+                    } else {
+                        // Turso
+                        await dbAdapter.db.execute({
+                            sql: 'INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                            args: [preparationData.id, preparationData.name, preparationData.category, preparationData.description, preparationData.yield, preparationData.prepTime, preparationData.difficulty, preparationData.ingredients, preparationData.instructions, preparationData.tips, preparationData.dateAdded, preparationData.isCustom]
+                        });
+                    }
+                    results.preparations++;
+                }
+            }
         }
+        console.log(`✅ Seeded ${results.preparations} preparations`);
 
-        db.close();
+        console.log('🎉 Seed complete!');
         return results;
     } catch (error) {
+        console.error('❌ Seed error:', error);
         results.errors.push(error.message);
-        db.close();
         return results;
     }
 }

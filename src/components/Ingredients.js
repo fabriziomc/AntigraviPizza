@@ -151,7 +151,7 @@ function renderIngredientsList() {
                     <span class="detail-value">${ingredient.postBake ? 'Dopo cottura' : 'Prima cottura'}</span>
                 </div>
                 
-                ${ingredient.tags && ingredient.tags.length > 0 ? `
+                ${ingredient.tags && Array.isArray(ingredient.tags) && ingredient.tags.length > 0 ? `
                     <div class="detail-row">
                         <span class="detail-label">Tags:</span>
                         <span class="detail-value">${ingredient.tags.join(', ')}</span>
@@ -291,7 +291,7 @@ async function showIngredientForm(ingredientId = null) {
                         type="text" 
                         id="ing-tags" 
                         placeholder="Es. vegetariano, premium, locale"
-                        value="${ingredient?.tags?.join(', ') || ''}"
+                        value="${ingredient?.tags ? (Array.isArray(ingredient.tags) ? ingredient.tags.join(', ') : '') : ''}"
                     >
                     <small>Esempi: vegetariano, vegano, premium, locale, stagionale</small>
                 </div>
