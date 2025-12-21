@@ -81,6 +81,36 @@ router.get('/pizza-nights/:id', async (req, res) => {
     }
 });
 
+// GET theme for a pizza night
+router.get('/pizza-nights/:id/theme', async (req, res) => {
+    try {
+        const pizzaNight = await dbAdapter.getPizzaNightById(req.params.id);
+        if (!pizzaNight) {
+            return res.status(404).json({ message: 'Pizza night not found' });
+        }
+
+        // Import theme modules
+        const { detectTheme } = await import('./theme-detector.js');
+        const { getThemeConfig } = await import('./theme-config.js');
+        const { getThemeMessages } = await import('./theme-messages.js');
+
+        // Detect theme from pizza night title
+        const themeId = detectTheme(pizzaNight.name);
+        const config = getThemeConfig(themeId);
+        const messages = getThemeMessages(themeId);
+
+        res.json({
+            theme: themeId,
+            config,
+            messages,
+            pizzaNightName: pizzaNight.name
+        });
+    } catch (err) {
+        console.error('[THEME ERROR]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 router.get('/pizza-nights', async (req, res) => {
     try {
         const nights = await dbAdapter.getAllPizzaNights();

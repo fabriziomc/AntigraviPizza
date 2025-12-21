@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auguri di Natale! 🎄</title>
+    <title id="page-title">Benvenuto!</title>
     <style>
         * {
             margin: 0;
@@ -14,6 +14,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Background will be set dynamically */
             background: linear-gradient(135deg, #1e3a8a 0%, #7c2d12 100%);
             min-height: 100vh;
             display: flex;
@@ -23,7 +24,7 @@
             color: white;
         }
 
-        .snow {
+        .effect-container {
             position: fixed;
             top: 0;
             left: 0;
@@ -33,11 +34,8 @@
             z-index: 1;
         }
 
-        .snowflake {
+        .effect-item {
             position: absolute;
-            top: -10px;
-            color: white;
-            font-size: 1.5rem;
             opacity: 0.8;
             animation: fall linear infinite;
         }
@@ -106,7 +104,7 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .christmas-image {
+        .theme-image {
             width: 100%;
             max-width: 400px;
             height: 250px;
@@ -172,72 +170,75 @@
 </head>
 
 <body>
-    <!-- Snowflakes -->
-    <div class="snow" id="snow"></div>
+    <!-- Effect container (filled dynamically based on theme) -->
+    <div class="effect-container" id="effectContainer"></div>
 
     <div class="container" id="content">
-        <div class="loading">🎄 Caricamento...</div>
+        <div class="loading">🍕 Caricamento...</div>
     </div>
 
     <script>
-        // Christmas messages pool (20+)
-        const CHRISTMAS_MESSAGES = [
-            "Che questa serata pizza sia l'inizio di un Natale pieno di gioia, amore e momenti indimenticabili! 🎄✨",
-            "Buon Natale! Che ogni fetta di pizza porti con sé un sorriso e un ricordo speciale! 🍕🎅",
-            "Auguri di cuore! Che il calore di questa serata ti accompagni per tutte le feste! ❤️🔥",
-            "Un Natale speciale merita una pizza speciale, e tu sei l'ingrediente più importante! 🌟🍕",
-            "Che la magia del Natale renda questa serata indimenticabile! Buone feste! ✨🎁",
-            "Pizza, amici e Natale: la combinazione perfetta per creare ricordi meravigliosi! 🎄💫",
-            "Auguri! Che ogni momento di questa serata sia condito con felicità e allegria! 🎉🍕",
-            "Il Natale è condividere: pizza, risate e auguri sinceri! Buone feste! 🎅❤️",
-            "Che questa pizza natalizia scaldi il cuore come il camino scalda la casa! 🔥🏠",
-            "Auguri di un Natale croccante fuori e morbido dentro, proprio come una buona pizza! 🍕😊",
-            "Sotto l'albero i regali, sul tavolo la pizza, nel cuore la gioia: Buon Natale! 🎄🎁",
-            "Che la tua festa sia condita con amore, guarnita con sorrisi e cotta alla perfezione! 🍕💝",
-            "Un pizzico di magia, una spolverata di gioia: ecco gli auguri per il tuo Natale! ✨🎄",
-            "Più il forno è caldo, più la pizza è buona. Più il cuore è caldo, più il Natale è bello! ❤️🔥",
-            "Buone feste! Che ogni fetta porti con sé un desiderio che si avvera! 🌟🍕",
-            "Il Natale è come la pizza: migliore se condiviso con le persone che ami! 👨‍👩‍👧‍👦🎄",
-            "Auguri! Che questa serata sia l'antipasto di un Natale fantastico! 🍕🎉",
-            "Dalla cucina al cuore: auguri di un Natale fatto in casa, con amore! 🏠❤️",
-            "Che la stella cometa guidi questa serata verso la felicità! Buon Natale! ⭐✨",
-            "Pizza napoletana, spirito natalizio: una combo vincente! Auguri! 🍕🎅",
-            "Che il profumo di questa pizza si mescoli con la magia del Natale! 🎄👃",
-            "Auguri! Che ogni morso sia un brindisi alla gioia delle feste! 🥂🍕",
-            "Il segreto del Natale? Condividerlo. Il segreto della pizza? Lo stesso! Buone feste! 💝🍕",
-            "Che questa serata sia la ciliegina sulla torta... ops, il basilico sulla pizza del tuo Natale! 🌿🎄"
-        ];
+        // Create effect items (snow, fireworks, etc.)
+        function createEffect(effectType, emoji, count = 30) {
+            const container = document.getElementById('effectContainer');
+            container.innerHTML = ''; // Clear previous effects
 
-        // Create snowflakes
-        function createSnowflakes() {
-            const snow = document.getElementById('snow');
-            const numberOfFlakes = 30;
+            if (effectType === 'none') return;
 
-            for (let i = 0; i < numberOfFlakes; i++) {
-                const snowflake = document.createElement('div');
-                snowflake.classList.add('snowflake');
-                snowflake.innerHTML = '❄';
-                snowflake.style.left = Math.random() * 100 + '%';
-                snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                snowflake.style.animationDelay = Math.random() * 5 + 's';
-                snowflake.style.fontSize = (Math.random() * 1 + 0.5) + 'rem';
-                snow.appendChild(snowflake);
+            for (let i = 0; i < count; i++) {
+                const item = document.createElement('div');
+                item.classList.add('effect-item');
+                item.innerHTML = emoji;
+                item.style.left = Math.random() * 100 + '%';
+                item.style.fontSize = (Math.random() * 1 + 0.5) + 'rem';
+                item.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                item.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(item);
             }
         }
 
-        // Get random message based on guest ID (deterministic)
-        function getMessageForGuest(guestId) {
+        // Apply theme to page
+        function applyTheme(themeData) {
+            const { config } = themeData;
+
+            // Update background gradient
+            document.body.style.background = config.gradient;
+
+            // Update colors for dynamic elements
+            document.documentElement.style.setProperty('--theme-primary', config.colors.primary);
+            document.documentElement.style.setProperty('--theme-secondary', config.colors.secondary);
+            document.documentElement.style.setProperty('--theme-text', config.colors.text);
+
+            // Create effect based on theme
+            const effectEmojis = {
+                snow: '❄',
+                fireworks: '✨',
+                bats: '🦇',
+                petals: '🌸',
+                hearts: '💖',
+                confetti: '🎊',
+                waves: '🌊',
+                balloons: '🎈',
+                bubbles: '💧'
+            };
+
+            const emoji = effectEmojis[config.effect] || '✨';
+            createEffect(config.effect, emoji);
+        }
+
+        // Get message for guest (deterministic)
+        function getMessageForGuest(messages, guestId) {
             // Simple hash function to get consistent index
             let hash = 0;
             for (let i = 0; i < guestId.length; i++) {
                 hash = ((hash << 5) - hash) + guestId.charCodeAt(i);
                 hash = hash & hash; // Convert to 32bit integer
             }
-            const index = Math.abs(hash) % CHRISTMAS_MESSAGES.length;
-            return CHRISTMAS_MESSAGES[index];
+            const index = Math.abs(hash) % messages.length;
+            return messages[index];
         }
 
-        // Load guest data
+        // Load guest data with dynamic theming
         async function loadGuestData() {
             try {
                 // Parse URL hash: #guest/pizzaNightId/guestId
@@ -251,12 +252,18 @@
                 const [, pizzaNightId, guestId] = parts;
 
                 // Fetch pizza night data
-                const response = await fetch(`/api/pizza-nights/${pizzaNightId}`);
-                if (!response.ok) {
+                const pizzaNightResponse = await fetch(`/api/pizza-nights/${pizzaNightId}`);
+                if (!pizzaNightResponse.ok) {
                     throw new Error('Serata pizza non trovata');
                 }
+                const pizzaNight = await pizzaNightResponse.json();
 
-                const pizzaNight = await response.json();
+                // Fetch theme data
+                const themeResponse = await fetch(`/api/pizza-nights/${pizzaNightId}/theme`);
+                if (!themeResponse.ok) {
+                    throw new Error('Tema non trovato');
+                }
+                const themeData = await themeResponse.json();
 
                 // Find guest
                 const guest = pizzaNight.guests ? pizzaNight.guests.find(g => g.id === guestId) : null;
@@ -264,19 +271,25 @@
                     throw new Error('Ospite non trovato');
                 }
 
-                // Get deterministic message for this guest
-                const message = getMessageForGuest(guestId);
+                // Apply theme to page
+                applyTheme(themeData);
 
-                // Render content
+                // Get deterministic message for this guest
+                const message = getMessageForGuest(themeData.messages, guestId);
+
+                // Update page title
+                document.getElementById('page-title').textContent = `${guest.name} - ${pizzaNight.name}`;
+
+                // Render content with theme
                 const content = document.getElementById('content');
                 content.innerHTML = `
-                    <div class="header-emoji">🎄</div>
-                    <div class="pizza-night-title">${pizzaNight.name || 'Serata Pizza di Natale'}</div>
+                    <div class="header-emoji">${themeData.config.emoji}</div>
+                    <div class="pizza-night-title">${pizzaNight.name || 'Serata Pizza Speciale'}</div>
                     <h1 class="guest-name">Ciao ${guest.name}! 👋</h1>
                     
-                    <img src="/christmas_pizza_greeting.png" alt="Pizza di Natale" class="christmas-image" onerror="this.style.display='none'">
+                    <img src="${themeData.config.imagePath}" alt="Immagine Tema" class="theme-image" onerror="this.style.display='none'">
                     
-                    <div class="decorations">🎅 🍕 ⭐ 🎁 🍕 🎄</div>
+                    <div class="decorations">${themeData.config.decorations}</div>
                     
                     <div class="message">${message}</div>
                     
@@ -285,6 +298,10 @@
                         <strong>Il Team AntigraviPizza</strong> 🍕❤️
                     </div>
                 `;
+
+                // Apply theme colors to text elements
+                document.querySelector('.pizza-night-title').style.color = themeData.config.colors.primary;
+                document.querySelector('.guest-name').style.color = themeData.config.colors.secondary;
 
             } catch (error) {
                 console.error('Error loading guest data:', error);
@@ -301,7 +318,6 @@
         }
 
         // Initialize
-        createSnowflakes();
         loadGuestData();
     </script>
 </body>

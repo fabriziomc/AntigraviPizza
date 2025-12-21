@@ -27,6 +27,11 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // API routes MUST come before static file serving
 app.use('/api', recipeRoutes);
 
+// Serve static files from public directory (for guest.html and theme images)
+const publicPath = path.join(__dirname, '../public');
+app.use(express.static(publicPath));
+console.log('Public path:', publicPath);
+
 // Serve static files from dist directory
 const distPath = path.join(__dirname, '../dist');
 const indexPath = path.join(distPath, 'index.html');
