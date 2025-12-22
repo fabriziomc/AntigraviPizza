@@ -88,8 +88,8 @@ class DatabaseAdapter {
 
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
-                INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, preparations, instructions, imageUrl, dough, suggestedDough, archetype, createdAt, dateAdded, isFavorite, rating, tags)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, preparations, instructions, imageUrl, dough, suggestedDough, archetype, recipeSource, archetypeUsed, createdAt, dateAdded, isFavorite, rating, tags)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 recipe.id,
@@ -104,6 +104,8 @@ class DatabaseAdapter {
                 recipe.dough || '',
                 recipe.suggestedDough || '',
                 recipe.archetype || '',
+                recipe.recipeSource || null,
+                recipe.archetypeUsed || null,
                 recipe.createdAt || Date.now(),
                 recipe.dateAdded || Date.now(),
                 recipe.isFavorite ? 1 : 0,
@@ -113,8 +115,8 @@ class DatabaseAdapter {
         } else {
             // Turso
             await this.db.execute({
-                sql: `INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, preparations, instructions, imageUrl, dough, suggestedDough, archetype, createdAt, dateAdded, isFavorite, rating, tags)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                sql: `INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, preparations, instructions, imageUrl, dough, suggestedDough, archetype, recipeSource, archetypeUsed, createdAt, dateAdded, isFavorite, rating, tags)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 args: [
                     recipe.id,
                     recipe.name,
@@ -128,6 +130,8 @@ class DatabaseAdapter {
                     recipe.dough || '',
                     recipe.suggestedDough || '',
                     recipe.archetype || '',
+                    recipe.recipeSource || null,
+                    recipe.archetypeUsed || null,
                     recipe.createdAt || Date.now(),
                     recipe.dateAdded || Date.now(),
                     recipe.isFavorite ? 1 : 0,
@@ -158,7 +162,7 @@ class DatabaseAdapter {
             const stmt = this.db.prepare(`
                 UPDATE Recipes 
                 SET name=?, pizzaiolo=?, source=?, description=?, baseIngredients=?, preparations=?, instructions=?, 
-                    imageUrl=?, dough=?, suggestedDough=?, archetype=?, isFavorite=?, rating=?, tags=?
+                    imageUrl=?, dough=?, suggestedDough=?, archetype=?, recipeSource=?, archetypeUsed=?, isFavorite=?, rating=?, tags=?
                 WHERE id = ?
             `);
             stmt.run(
@@ -173,6 +177,8 @@ class DatabaseAdapter {
                 recipe.dough || '',
                 recipe.suggestedDough || '',
                 recipe.archetype || '',
+                recipe.recipeSource || null,
+                recipe.archetypeUsed || null,
                 recipe.isFavorite ? 1 : 0,
                 recipe.rating || 0,
                 tagsJson,
@@ -180,8 +186,8 @@ class DatabaseAdapter {
             );
         } else {
             await this.db.execute({
-                sql: `UPDATE Recipes SET name=?, pizzaiolo=?, source=?, description=?, baseIngredients=?, preparations=?, instructions=?, imageUrl=?, dough=?, suggestedDough=?, archetype=?, isFavorite=?, rating=?, tags=? WHERE id = ?`,
-                args: [recipe.name, recipe.pizzaiolo || 'Sconosciuto', recipe.source || '', recipe.description || '', baseIngredientsJson, preparationsJson, instructionsJson, recipe.imageUrl || '', recipe.dough || '', recipe.suggestedDough || '', recipe.archetype || '', recipe.isFavorite ? 1 : 0, recipe.rating || 0, tagsJson, id]
+                sql: `UPDATE Recipes SET name=?, pizzaiolo=?, source=?, description=?, baseIngredients=?, preparations=?, instructions=?, imageUrl=?, dough=?, suggestedDough=?, archetype=?, recipeSource=?, archetypeUsed=?, isFavorite=?, rating=?, tags=? WHERE id = ?`,
+                args: [recipe.name, recipe.pizzaiolo || 'Sconosciuto', recipe.source || '', recipe.description || '', baseIngredientsJson, preparationsJson, instructionsJson, recipe.imageUrl || '', recipe.dough || '', recipe.suggestedDough || '', recipe.archetype || '', recipe.recipeSource || null, recipe.archetypeUsed || null, recipe.isFavorite ? 1 : 0, recipe.rating || 0, tagsJson, id]
             });
         }
         return recipe;
@@ -983,6 +989,107 @@ class DatabaseAdapter {
             // Turso (LibSQL)
             const result = await this.db.execute({ sql: 'SELECT * FROM Categories WHERE id = ?', args: [id] });
             return result.rows[0];
+        }
+    }
+
+    // ==========================================
+    // ARCHETYPE WEIGHTS
+    // ==========================================
+
+    async getArchetypeWeights(userId = 'default') {
+        if (this.isSQLite) {
+            const stmt = this.db.prepare(`
+                SELECT archetype, weight, description
+                FROM ArchetypeWeights
+                WHERE userId = ?
+                ORDER BY weight DESC
+            `);
+            return stmt.all(userId);
+        } else {
+            // Turso
+            const result = await this.db.execute({
+                sql: `SELECT archetype, weight, description
+                      FROM ArchetypeWeights
+                      WHERE userId = ?
+                      ORDER BY weight DESC`,
+                args: [userId]
+            });
+            return result.rows;
+        }
+    }
+
+    async updateArchetypeWeight(userId = 'default', archetype, weight) {
+        const id = `aw-${userId}-${archetype}`;
+        const now = Date.now();
+
+        if (this.isSQLite) {
+            this.db.prepare(`
+                INSERT INTO ArchetypeWeights (id, userId, archetype, weight, dateModified)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(userId, archetype) DO UPDATE SET
+                    weight = excluded.weight,
+                    dateModified = excluded.dateModified
+            `).run(id, userId, archetype, weight, now);
+            return { success: true };
+        } else {
+            // Turso - Use INSERT OR REPLACE
+            await this.db.execute({
+                sql: `INSERT OR REPLACE INTO ArchetypeWeights (id, userId, archetype, weight, dateModified)
+                      VALUES (?, ?, ?, ?, ?)`,
+                args: [id, userId, archetype, weight, now]
+            });
+            return { success: true };
+        }
+    }
+
+    async resetArchetypeWeights(userId = 'default') {
+        const DEFAULT_WEIGHTS = [
+            { archetype: 'combinazioni_db', weight: 30, description: 'Combinazioni salvate nel database' },
+            { archetype: 'classica', weight: 28, description: 'Margherita, Marinara style' },
+            { archetype: 'tradizionale', weight: 21, description: 'Prosciutto, Funghi, Capricciosa' },
+            { archetype: 'terra_bosco', weight: 7, description: 'Funghi porcini, tartufo' },
+            { archetype: 'fresca_estiva', weight: 7, description: 'Verdure, pomodorini' },
+            { archetype: 'piccante_decisa', weight: 4, description: 'Nduja, peperoncino' },
+            { archetype: 'mare', weight: 2, description: 'Pesce, frutti di mare' },
+            { archetype: 'vegana', weight: 1, description: 'Solo vegetali' }
+        ];
+
+        const now = Date.now();
+
+        if (this.isSQLite) {
+            // Delete existing weights for user
+            this.db.prepare('DELETE FROM ArchetypeWeights WHERE userId = ?').run(userId);
+
+            // Insert defaults
+            const stmt = this.db.prepare(`
+                INSERT INTO ArchetypeWeights (id, userId, archetype, weight, description, dateModified)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `);
+
+            DEFAULT_WEIGHTS.forEach(w => {
+                const id = `aw-${userId}-${w.archetype}`;
+                stmt.run(id, userId, w.archetype, w.weight, w.description, now);
+            });
+
+            return { success: true, count: DEFAULT_WEIGHTS.length };
+        } else {
+            // Turso - Delete and insert
+            await this.db.execute({
+                sql: 'DELETE FROM ArchetypeWeights WHERE userId = ?',
+                args: [userId]
+            });
+
+            // Insert all defaults
+            for (const w of DEFAULT_WEIGHTS) {
+                const id = `aw-${userId}-${w.archetype}`;
+                await this.db.execute({
+                    sql: `INSERT INTO ArchetypeWeights (id, userId, archetype, weight, description, dateModified)
+                          VALUES (?, ?, ?, ?, ?, ?)`,
+                    args: [id, userId, w.archetype, w.weight, w.description, now]
+                });
+            }
+
+            return { success: true, count: DEFAULT_WEIGHTS.length };
         }
     }
 }
