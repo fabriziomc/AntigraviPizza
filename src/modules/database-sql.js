@@ -47,7 +47,9 @@ export async function addRecipe(recipeData) {
         tags: recipeData.tags || [],
         dateAdded: Date.now(),
         isFavorite: false,
-        archetype: recipeData.archetype || ''
+        archetype: recipeData.archetype || '',
+        recipeSource: recipeData.recipeSource || null,      // 'manual', 'archetype', 'combination'
+        archetypeUsed: recipeData.archetypeUsed || null     // Name of archetype if applicable
     };
 
     const response = await fetch(`${API_URL}/recipes`, {

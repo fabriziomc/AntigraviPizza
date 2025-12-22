@@ -29,7 +29,14 @@ export function parseRecipeInput(input) {
  */
 export async function importRecipeManually(recipeData) {
     try {
-        const recipe = await addRecipe(recipeData);
+        // Add source tracking for manual recipes
+        const enrichedData = {
+            ...recipeData,
+            recipeSource: 'manual',
+            archetypeUsed: null
+        };
+
+        const recipe = await addRecipe(enrichedData);
         showToast('Ricetta aggiunta con successo! 🍕', 'success');
         return recipe;
     } catch (error) {

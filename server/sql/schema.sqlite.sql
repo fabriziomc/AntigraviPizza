@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS Recipes (
     dough TEXT,
     suggestedDough TEXT,
     archetype TEXT,
+    recipeSource TEXT, -- 'manual', 'archetype', 'combination'
+    archetypeUsed TEXT, -- Name of archetype if generated
     createdAt INTEGER,
     dateAdded INTEGER,
     isFavorite INTEGER DEFAULT 0,

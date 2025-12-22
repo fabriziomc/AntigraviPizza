@@ -167,17 +167,43 @@ async function renderRecipes(state) {
 }
 
 function createRecipeCard(recipe) {
+  // Determine origin badge
+  let originBadge = '';
+  if (recipe.recipeSource === 'manual') {
+    originBadge = '<span class="origin-badge origin-manual" title="Ricetta inserita manualmente">🖐️ Manuale</span>';
+  } else if (recipe.recipeSource === 'archetype' && recipe.archetypeUsed) {
+    const archetypeLabels = {
+      'dolce_salato': 'Dolce/Salato',
+      'terra_bosco': 'Terra e Bosco',
+      'fresca_estiva': 'Fresca Estiva',
+      'piccante_decisa': 'Piccante',
+      'mare': 'Mare',
+      'vegana': 'Vegana',
+      'classica': 'Classica',
+      'tradizionale': 'Tradizionale',
+      'fusion': 'Fusion'
+    };
+    const archetypeName = archetypeLabels[recipe.archetypeUsed] || recipe.archetypeUsed;
+    originBadge = `<span class="origin-badge origin-archetype" title="Generata dall'archetipo ${archetypeName}">🎯 ${archetypeName}</span>`;
+  } else if (recipe.recipeSource === 'combination') {
+    originBadge = '<span class="origin-badge origin-combination" title="Creata da combinazione predefinita">🧪 Combinazione</span>';
+  } else {
+    // Legacy recipes without source tracking
+    originBadge = '<span class="origin-badge origin-unknown" title="Origine non tracciata">❓ Sconosciuta</span>';
+  }
+
   return `
     <div class="recipe-card" data-recipe-id="${recipe.id}">
       <img 
         src="${recipe.imageUrl || 'https://via.placeholder.com/400x200/667eea/ffffff?text=🍕'}" 
         alt="${recipe.name}"
         class="recipe-card-image"
-        onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%232a2f4a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2250%22>🍕</text></svg>'"
+        onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%232a2f4a%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2250%22%3E🍕%3C/text%3E%3C/svg%3E'"
       />
       <button class="recipe-card-favorite ${recipe.isFavorite ? 'active' : ''}" data-recipe-id="${recipe.id}">
         ${recipe.isFavorite ? '⭐' : '☆'}
       </button>
+      ${originBadge}
       <div class="recipe-card-body">
         <h3 class="recipe-card-title">${recipe.name}</h3>
         <div class="recipe-card-tags">

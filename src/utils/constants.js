@@ -100,6 +100,7 @@ export const VIEWS = {
     PLANNER: 'planner',
     SHOPPING: 'shopping',
     COMBINATIONS: 'combinations',
+    ARCHETYPES: 'archetypes',
     SETTINGS: 'settings'
 };
 
@@ -109,6 +110,7 @@ export const NAV_ITEMS = [
     { id: VIEWS.DISCOVERY, label: 'Genera Ricette', icon: '🔍' },
     { id: VIEWS.LIBRARY, label: 'Pizze', icon: '🍕' },
     { id: VIEWS.COMBINATIONS, label: 'Abbinamenti', icon: '🧪' },
+    { id: VIEWS.ARCHETYPES, label: 'Archetipi', icon: '🎨' },
     { id: VIEWS.DOUGHS, label: 'Impasti', icon: '🥣' },
     { id: VIEWS.PREPARATIONS, label: 'Preparazioni', icon: '🥫' },
     { id: VIEWS.INGREDIENTS, label: 'Ingredienti', icon: '🥗' },

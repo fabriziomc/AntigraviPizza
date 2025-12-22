@@ -141,7 +141,9 @@ export async function addRecipe(recipeData) {
         suggestedDough: recipeData.suggestedDough || recipeData.dough || '',
         tags: recipeData.tags || [],
         dateAdded: Date.now(),
-        isFavorite: false
+        isFavorite: false,
+        recipeSource: recipeData.recipeSource || null,      // 'manual', 'archetype', 'combination'
+        archetypeUsed: recipeData.archetypeUsed || null     // Name of archetype if applicable
     };
 
     return new Promise((resolve, reject) => {

@@ -10,6 +10,7 @@ import './styles/preparations-selector.css';
 import './styles/ingredients.css';
 import './styles/live-mode.css';
 import './styles/settings-append.css';
+import './styles/archetypes.css';
 
 import { initDB, getAllRecipes, getAllPizzaNights, initCombinations, initSeedData, seedPreparations } from './modules/database.js';
 import { NAV_ITEMS, VIEWS, FLAVOR_COMBINATIONS, PREPARATIONS } from './utils/constants.js';
@@ -29,6 +30,7 @@ import { renderPreparations } from './components/Preparations.js';
 import { renderIngredients } from './components/Ingredients.js';
 import { renderSettings } from './components/Settings.js';
 import { renderQRCodes } from './components/QRCodes.js';
+import { renderArchetypes } from './components/Archetypes.js';
 
 console.log('✅ All imports loaded');
 
@@ -210,6 +212,9 @@ async function renderCurrentView() {
       case VIEWS.INGREDIENTS:
         await renderIngredients(state);
         break;
+      case VIEWS.ARCHETYPES:
+        await renderArchetypes();
+        break;
       case VIEWS.SETTINGS:
         await renderSettings();
         break;
@@ -286,6 +291,7 @@ function setupEventListeners() {
 // Make closeModal globally accessible
 window.closeModal = closeModal;
 window.refreshData = refreshData;
+window.navigateToView = navigateToView;
 
 // ============================================
 // REFRESH DATA

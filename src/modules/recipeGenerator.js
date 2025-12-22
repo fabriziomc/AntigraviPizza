@@ -820,16 +820,23 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
         ? dbCombinations.map(c => c.ingredients)
         : FLAVOR_COMBINATIONS;
 
-    // Rest of the generation logic (same as generateRandomRecipe)
-    const usePredefinedCombo = Math.random() > 0.7;
+    // Load archetype weights for selection
+    const archetypeWeights = await loadArchetypeWeights();
+
+    // Select generation method based on weighted archetype
+    const selectedArchetype = selectWeightedArchetype(archetypeWeights);
+    const usePredefinedCombo = selectedArchetype === 'combinazioni_db';
 
     let ingredients = [];
     let mainIngredientNames = [];
     let pizzaName = '';
     let description = '';
     let doughType = null;
+    let recipeSource = null;
+    let archetypeUsed = null;
 
     if (usePredefinedCombo && combinations.length > 0) {
+        // Using predefined combination from database
         const combo = combinations[Math.floor(Math.random() * combinations.length)];
         mainIngredientNames = combo.slice(0, 2);
 
@@ -842,9 +849,15 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
         pizzaName = await generatePizzaName(mainIngredientNames, existingNames);
         description = `Una ${doughType.type.toLowerCase()} con ${mainIngredientNames.join(' e ').toLowerCase()}, creata secondo la tradizione.`;
 
+        // Mark as combination-based
+        recipeSource = 'combination';
+        archetypeUsed = 'combinazioni_db';
+
     } else {
-        const archetypes = ['dolce_salato', 'terra_bosco', 'fresca_estiva', 'piccante_decisa', 'mare', 'vegana', 'fusion'];
-        const selectedArchetype = archetypes[Math.floor(Math.random() * archetypes.length)];
+        // Using archetype-based generation
+        const archetypeName = selectedArchetype;
+        recipeSource = 'archetype';
+        archetypeUsed = archetypeName;
 
         switch (selectedArchetype) {
             case 'dolce_salato':
@@ -958,6 +971,9 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
                 break;
 
             case 'fusion':
+            case 'classica':
+            case 'tradizionale':
+            default:
                 doughType = DOUGH_TYPES.find(d => d.type === 'Contemporanea') || DOUGH_TYPES[0];
                 const fusionCheese = selectRandomIngredients(INGREDIENTS_DB.cheeses.filter(c => ['Brie', 'Caprino fresco', 'Squacquerone', 'Crescenza'].includes(c.name)), 1)[0];
                 const fusionMeat = selectRandomIngredients(INGREDIENTS_DB.meats.filter(m => ['Porchetta', 'Lardo di Colonnata', 'Finocchiona'].includes(m.name)), 1)[0];
@@ -1027,6 +1043,8 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
         instructions,
         imageUrl,
         suggestedDough,
-        tags
+        tags,
+        recipeSource,                          // NEW: Track source
+        archetypeUsed                          // NEW: Track archetype
     };
 }
