@@ -92,18 +92,24 @@ router.get('/pizza-nights/:id/theme', async (req, res) => {
         // Import theme modules
         const { detectTheme } = await import('./theme-detector.js');
         const { getThemeConfig } = await import('./theme-config.js');
-        const { getThemeMessages } = await import('./theme-messages.js');
+        const { getThemeMessages, adjustMessagesForTime } = await import('./theme-messages.js');
 
         // Detect theme from pizza night title
         const themeId = detectTheme(pizzaNight.name);
         const config = getThemeConfig(themeId);
-        const messages = getThemeMessages(themeId);
+        let messages = getThemeMessages(themeId);
+
+        // Adjust messages based on event time
+        if (pizzaNight.date) {
+            messages = adjustMessagesForTime(messages, pizzaNight.date);
+        }
 
         res.json({
             theme: themeId,
             config,
             messages,
-            pizzaNightName: pizzaNight.name
+            pizzaNightName: pizzaNight.name,
+            eventTime: pizzaNight.date
         });
     } catch (err) {
         console.error('[THEME ERROR]', err);

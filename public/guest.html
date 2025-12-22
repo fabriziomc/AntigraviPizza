@@ -363,7 +363,7 @@
     <div class="menu-modal" id="menuModal">
         <div class="menu-content">
             <div class="menu-header">
-                <h2 class="menu-title">🍕 Menù della Serata</h2>
+                <h2 class="menu-title" id="menuTitle">🍕 Menù della Serata</h2>
                 <button class="close-button" onclick="closeMenu()">✕</button>
             </div>
             <div id="pizzaList" class="pizza-list">
@@ -437,6 +437,19 @@
         async function showMenu() {
             const modal = document.getElementById('menuModal');
             const pizzaList = document.getElementById('pizzaList');
+            const menuTitle = document.getElementById('menuTitle');
+
+            // Update menu title based on event time
+            const pizzaNight = window.currentPizzaNight;
+            if (pizzaNight && pizzaNight.date) {
+                const eventDate = new Date(pizzaNight.date);
+                const eventHour = eventDate.getHours();
+                if (eventHour >= 18) {
+                    menuTitle.textContent = '🍕 Menù della Serata';
+                } else {
+                    menuTitle.textContent = "🍕 Menù dell'Evento";
+                }
+            }
 
             // Show modal
             modal.classList.add('active');

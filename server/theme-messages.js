@@ -265,8 +265,46 @@ function getThemeMessages(themeId) {
     return THEME_MESSAGES[themeId] || THEME_MESSAGES.classic;
 }
 
+/**
+ * Adjust messages based on event time
+ * Replaces "serata" with "evento" for events before 18:00
+ * @param {array} messages - Array of messages to adjust
+ * @param {number} eventTimestamp - Event timestamp in milliseconds
+ * @returns {array} - Adjusted messages
+ */
+function adjustMessagesForTime(messages, eventTimestamp) {
+    if (!eventTimestamp || !Array.isArray(messages)) {
+        return messages;
+    }
+
+    // Extract hour from timestamp
+    const eventDate = new Date(eventTimestamp);
+    const eventHour = eventDate.getHours();
+
+    // If event is at 18:00 or later, keep "serata"
+    if (eventHour >= 18) {
+        return messages;
+    }
+
+    // For events before 18:00, replace "serata" with "evento"
+    return messages.map(message => {
+        return message
+            .replace(/questa serata/g, 'questo evento')
+            .replace(/Questa serata/g, 'Questo evento')
+            .replace(/la serata/g, "l'evento")
+            .replace(/La serata/g, "L'evento")
+            .replace(/della serata/g, "dell'evento")
+            .replace(/Della serata/g, "Dell'evento")
+            .replace(/ogni serata/g, 'ogni evento')
+            .replace(/Ogni serata/g, 'Ogni evento')
+            .replace(/serata/g, 'evento')
+            .replace(/Serata/g, 'Evento');
+    });
+}
+
 export {
     THEME_MESSAGES,
     getMessageForGuest,
-    getThemeMessages
+    getThemeMessages,
+    adjustMessagesForTime
 };
