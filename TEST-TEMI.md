@@ -24,9 +24,13 @@ Dovresti vedere l'applicazione AntigraviPizza.
 ### 3. Crea una Serata con Tema
 1. Vai alla sezione "Pianifica"
 2. Clicca "Nuova Serata"
-3. Crea una serata con uno di questi nomi:
-   - "Pizza di Natale 2024"
-   - "Halloween Party"
+3. Crea una serata con uno di questi nomi:ailed to load resource: the server responded with a status of 500 (Internal Server Error)Comprendi l'errore
+guest.html:307 Error loading guest data: Error: Tema non trovato
+    at loadGuestData (guest.html:264:27)
+loadGuestData @ guest.html:307Comprendi l'erroreailed to load resource: the server responded with a status of 500 (Internal Server Error)Comprendi l'errore
+guest.html:307 Error loading guest data: Error: Tema non trovato
+    at loadGuestData (guest.html:264:27)
+loadGuestData @ guest.html:307Comprendi l'errore
    - "Serata Pizza Estate"
    - "Compleanno Marco"
 

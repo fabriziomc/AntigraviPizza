@@ -367,12 +367,12 @@ class DatabaseAdapter {
 
     async createGuest(guest) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('INSERT INTO Guests (id, name, createdAt) VALUES (?, ?, ?)');
-            stmt.run(guest.id, guest.name, guest.createdAt);
+            const stmt = this.db.prepare('INSERT INTO Guests (id, name, email, createdAt) VALUES (?, ?, ?, ?)');
+            stmt.run(guest.id, guest.name, guest.email || null, guest.createdAt);
         } else {
             await this.db.execute({
-                sql: 'INSERT INTO Guests (id, name, createdAt) VALUES (?, ?, ?)',
-                args: [guest.id, guest.name, guest.createdAt]
+                sql: 'INSERT INTO Guests (id, name, email, createdAt) VALUES (?, ?, ?, ?)',
+                args: [guest.id, guest.name, guest.email || null, guest.createdAt]
             });
         }
         return guest;

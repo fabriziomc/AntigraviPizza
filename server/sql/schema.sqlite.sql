@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS PizzaNights (
 CREATE TABLE IF NOT EXISTS Guests (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
+    email TEXT, -- Optional email for sending invite link
     createdAt INTEGER
 );
 

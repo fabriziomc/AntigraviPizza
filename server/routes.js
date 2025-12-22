@@ -138,6 +138,76 @@ router.put('/pizza-nights/:id', async (req, res) => {
     }
 });
 
+// NEW: Send email invites to all selected guests of a pizza night
+router.post('/pizza-nights/:id/send-invites', async (req, res) => {
+    try {
+        const nightId = req.params.id;
+        const night = await dbAdapter.getPizzaNightById(nightId);
+
+        if (!night) {
+            return res.status(404).json({ error: 'Pizza night not found' });
+        }
+
+        const { sendGuestInvite } = await import('./email-service.js');
+
+        let sent = 0;
+        let failed = 0;
+        const errors = [];
+
+        // Get theme data for email styling
+        let themeData = null;
+        try {
+            const { detectTheme } = await import('./theme-detector.js');
+            const { getThemeConfig } = await import('./theme-config.js');
+            const themeId = detectTheme(night.name);
+            themeData = { config: getThemeConfig(themeId) };
+        } catch (err) {
+            console.warn('Could not load theme for email:', err.message);
+        }
+
+        // Send email to each selected guest that has an email
+        if (night.selectedGuests && night.selectedGuests.length > 0) {
+            const allGuests = await dbAdapter.getAllGuests();
+
+            for (const guestId of night.selectedGuests) {
+                const guest = allGuests.find(g => g.id === guestId);
+
+                if (guest && guest.email) {
+                    try {
+                        const appUrl = process.env.APP_URL || `http://localhost:${process.env.PORT || 3000}`;
+                        const guestPageUrl = `${appUrl}/guest.html#guest/${nightId}/${guest.id}`;
+
+                        await sendGuestInvite(
+                            guest.email,
+                            guest.name,
+                            night.name,
+                            guestPageUrl,
+                            themeData
+                        );
+
+                        sent++;
+                        console.log(`✅ Email invitation sent to ${guest.email}`);
+                    } catch (emailError) {
+                        failed++;
+                        errors.push({ guest: guest.name, error: emailError.message });
+                        console.error(`❌ Failed to send email to ${guest.email}:`, emailError.message);
+                    }
+                }
+            }
+        }
+
+        res.json({
+            sent,
+            failed,
+            total: night.selectedGuests ? night.selectedGuests.length : 0,
+            errors: errors.length > 0 ? errors : undefined
+        });
+    } catch (err) {
+        console.error('Error sending invites:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 router.delete('/pizza-nights/:id', async (req, res) => {
     try {
         await dbAdapter.deletePizzaNight(req.params.id);
@@ -162,7 +232,56 @@ router.get('/guests', async (req, res) => {
 
 router.post('/guests', async (req, res) => {
     try {
-        const guest = await dbAdapter.createGuest(req.body);
+        // Generate id and createdAt if not provided
+        const guestData = {
+            id: req.body.id || `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            name: req.body.name,
+            email: req.body.email,
+            createdAt: req.body.createdAt || Date.now()
+        };
+
+        const guest = await dbAdapter.createGuest(guestData);
+
+        // Send email invitation if email is provided and pizzaNightId is available
+        if (guest.email && req.body.pizzaNightId) {
+            try {
+                const { sendGuestInvite } = await import('./email-service.js');
+                const pizzaNight = await dbAdapter.getPizzaNightById(req.body.pizzaNightId);
+
+                if (pizzaNight) {
+                    // Get theme data for email styling
+                    let themeData = null;
+                    try {
+                        const { detectTheme } = await import('./theme-detector.js');
+                        const { getThemeConfig } = await import('./theme-config.js');
+                        const themeId = detectTheme(pizzaNight.name);
+                        themeData = { config: getThemeConfig(themeId) };
+                    } catch (err) {
+                        console.warn('Could not load theme for email:', err.message);
+                    }
+
+                    // Build guest page URL
+                    const appUrl = process.env.APP_URL || `http://localhost:${process.env.PORT || 3000}`;
+                    const guestPageUrl = `${appUrl}/guest.html#guest/${req.body.pizzaNightId}/${guest.id}`;
+
+                    // Send email
+                    await sendGuestInvite(
+                        guest.email,
+                        guest.name,
+                        pizzaNight.name,
+                        guestPageUrl,
+                        themeData
+                    );
+
+                    console.log(`✅ Invitation email sent to ${guest.email}`);
+                }
+            } catch (emailError) {
+                // Log error but don't fail the guest creation
+                console.error('❌ Failed to send invitation email:', emailError.message);
+                // Note: We still return success because guest was created
+            }
+        }
+
         res.status(201).json(guest);
     } catch (err) {
         res.status(500).json({ error: err.message });

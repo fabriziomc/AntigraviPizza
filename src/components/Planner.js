@@ -114,6 +114,7 @@ async function showNewPizzaNightModal() {
 
         <div class="form-group">
           <label class="form-label">Seleziona Ospiti (Opzionale)</label>
+          <p style="font-size: 0.875rem; color: var(--color-gray-400); margin-bottom: 0.5rem;">Seleziona gli ospiti da invitare. Potrai inviare email dopo aver creato la serata.</p>
           <div id="guestSelection" style="max-height: 150px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 0.5rem; padding: 0.5rem;">
             <!-- Guests will be loaded here -->
             <p class="text-muted text-sm">Caricamento ospiti...</p>
@@ -366,6 +367,9 @@ async function showNewPizzaNightModal() {
 
   // Setup mode selection listeners
   setupModeListeners();
+
+  // Load guests after modal is rendered  
+  loadGuestsIntoModal();
 }
 
 // Setup listeners for selection mode radio buttons
@@ -396,6 +400,34 @@ function setupModeListeners() {
       }
     });
   });
+}
+
+// NEW: Load guests and display with checkboxes in pizza night modal
+async function loadGuestsIntoModal() {
+  const guestSelection = document.getElementById('guestSelection');
+  if (!guestSelection) return;
+
+  try {
+    const guests = await getAllGuests();
+
+    if (guests.length === 0) {
+      guestSelection.innerHTML = '<p class="text-muted text-sm">Nessun ospite salvato. Creane uno da "Gestisci Ospiti".</p>';
+      return;
+    }
+
+    guestSelection.innerHTML = guests.map(guest => `
+      <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; cursor: pointer; border-radius: 0.25rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+        <input type="checkbox" name="selectedGuests" value="${guest.id}" style="width: 18px; height: 18px;">
+        <div style="flex: 1;">
+          <div style="font-weight: 600;">${guest.name}</div>
+          ${guest.email ? `<div style="font-size: 0.75rem; color: var(--color-text-secondary);">📧 ${guest.email}</div>` : '<div style="font-size: 0.75rem; color: var(--color-gray-500);">Nessuna email</div>'}
+        </div>
+      </label>
+    `).join('');
+  } catch (error) {
+    console.error('Failed to load guests:', error);
+    guestSelection.innerHTML = '<p class="text-muted text-sm" style="color: var(--color-error);">Errore nel caricamento ospiti</p>';
+  }
 }
 
 // Setup listeners for mixed mode pizza selection
@@ -1025,9 +1057,13 @@ async function showManageGuestsModal() {
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label">Aggiungi Nuovo Ospite</label>
-          <div style="display: flex; gap: 0.5rem;">
-            <input type="text" id="newGuestName" class="form-input" placeholder="Nome e Cognome">
-              <button class="btn btn-primary" onclick="window.submitNewGuest()">Aggiungi</button>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <input type="text" id="newGuestName" class="form-input" placeholder="Nome e Cognome" required>
+            <input type="email" id="newGuestEmail" class="form-input" placeholder="Email (opzionale)">
+            <small style="color: var(--color-text-secondary); font-size: 0.875rem; margin-top: -0.5rem;">
+              💡 Se fornisci l'email, l'ospite riceverà automaticamente il link alla sua pagina personalizzata
+            </small>
+            <button class="btn btn-primary" onclick="window.submitNewGuest()">Aggiungi Ospite</button>
           </div>
         </div>
 
@@ -1036,7 +1072,10 @@ async function showManageGuestsModal() {
           <div id="guestsList" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
             ${guests.length > 0 ? guests.map(guest => `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
-              <span>${guest.name}</span>
+              <div style="flex: 1;">
+                <div style="font-weight: 600;">${guest.name}</div>
+                ${guest.email ? `<div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-top: 0.25rem;">📧 ${guest.email}</div>` : ''}
+              </div>
               <button class="btn btn-ghost btn-sm" onclick="window.deleteGuestAction('${guest.id}')" style="color: var(--color-error);">🗑️</button>
             </div>
           `).join('') : '<p class="text-muted">Nessun ospite salvato.</p>'}
@@ -1053,16 +1092,22 @@ async function showManageGuestsModal() {
 
 async function submitNewGuest() {
   const nameInput = document.getElementById('newGuestName');
+  const emailInput = document.getElementById('newGuestEmail');
   const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
 
-  if (!name) return;
+  if (!name) {
+    alert('Inserisci il nome dell\'ospite');
+    return;
+  }
 
   try {
-    await addGuest({ name });
+    await addGuest({ name, email: email || undefined });
     // Refresh modal content
     await showManageGuestsModal();
   } catch (error) {
     console.error('Failed to add guest:', error);
+    alert('Errore durante l\'aggiunta dell\'ospite');
   }
 }
 
@@ -1075,6 +1120,37 @@ async function deleteGuestAction(guestId) {
     await showManageGuestsModal();
   } catch (error) {
     console.error('Failed to delete guest:', error);
+  }
+}
+
+// NEW: Send email invites to selected guests of a pizza night
+async function sendGuestInvites(nightId) {
+  try {
+    const response = await fetch(`/api/pizza-nights/${nightId}/send-invites`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send invites');
+    }
+
+    const result = await response.json();
+
+    closeModal();
+
+    if (result.sent > 0) {
+      showToast(`✅ ${result.sent} ${result.sent === 1 ? 'email inviata' : 'email inviate'} con successo!`, 'success');
+    } else {
+      showToast('⚠️ Nessuna email inviata (nessun ospite con email)', 'warning');
+    }
+
+    if (result.failed > 0) {
+      showToast(`⚠️ ${result.failed} email non ${result.failed === 1 ? 'inviata' : 'inviate'}`, 'warning');
+    }
+  } catch (error) {
+    console.error('Failed to send invites:', error);
+    showToast('❌ Errore nell\'invio delle email', 'error');
   }
 }
 
@@ -1131,12 +1207,18 @@ async function viewPizzaNightDetails(nightId) {
   if (!night) return;
 
   let guestNames = [];
+  let guestsWithEmail = [];
   if (night.selectedGuests && night.selectedGuests.length > 0) {
     const allGuests = await getAllGuests();
     guestNames = night.selectedGuests.map(guestId => {
       const guest = allGuests.find(g => g.id === guestId);
       return guest ? guest.name : 'Ospite rimosso';
     });
+
+    // Get guests with email for email button
+    guestsWithEmail = night.selectedGuests
+      .map(guestId => allGuests.find(g => g.id === guestId))
+      .filter(g => g && g.email);
   }
 
   const modalContent = `
@@ -1158,6 +1240,16 @@ async function viewPizzaNightDetails(nightId) {
             <p class="text-muted text-sm" style="margin-top: 0.25rem;">
               ${guestNames.join(', ')}
             </p>
+          ` : ''}
+          ${guestsWithEmail.length > 0 ? `
+            <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 0.5rem;">
+              <div style="font-size: 0.875rem; color: var(--color-success); font-weight: 600; margin-bottom: 0.25rem;">
+                📧 ${guestsWithEmail.length} ${guestsWithEmail.length === 1 ? 'ospite ha' : 'ospiti hanno'} un'email
+              </div>
+              <div style="font-size: 0.75rem; color: var(--color-gray-400);">
+                ${guestsWithEmail.map(g => g.email).join(', ')}
+              </div>
+            </div>
           ` : ''}
           </div>
 
@@ -1197,6 +1289,12 @@ async function viewPizzaNightDetails(nightId) {
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
+        ${guestsWithEmail.length > 0 ? `
+        <button class="btn btn-success" onclick="window.sendGuestInvites('${night.id}')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+          <span>📧</span>
+          Invia Email Inviti (${guestsWithEmail.length})
+        </button>
+      ` : ''}
         ${night.selectedPizzas.length > 0 && night.status === 'planned' ? `
         <button class="btn btn-success" onclick="window.startLiveMode('${night.id}')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
           <span>🍕</span>
@@ -1909,6 +2007,7 @@ window.confirmDeletePizzaNight = confirmDeletePizzaNight;
 window.showManageGuestsModal = showManageGuestsModal;
 window.submitNewGuest = submitNewGuest;
 window.deleteGuestAction = deleteGuestAction;
+window.sendGuestInvites = sendGuestInvites;
 window.generateAutoPizzas = generateAutoPizzas;
 window.generateMixedPizzas = generateMixedPizzas;
 window.startLiveMode = startLiveMode;

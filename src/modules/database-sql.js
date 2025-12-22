@@ -196,6 +196,7 @@ export async function addGuest(guestData) {
     const guest = {
         id: generateUUID(),
         name: guestData.name,
+        email: guestData.email || null,
         createdAt: Date.now()
     };
     const response = await fetch(`${API_URL}/guests`, {
