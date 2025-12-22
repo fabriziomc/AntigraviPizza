@@ -387,6 +387,7 @@ export async function addGuest(guestData) {
         id: generateUUID(),
         name: guestData.name,
         email: guestData.email || null,
+        phone: guestData.phone || null,
         createdAt: Date.now()
     };
 
@@ -397,6 +398,36 @@ export async function addGuest(guestData) {
 
         request.onsuccess = () => resolve(guest);
         request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Update an existing guest
+ */
+export async function updateGuest(guestId, updates) {
+    return new Promise((resolve, reject) => {
+        const transaction = getDB().transaction([STORES.GUESTS], 'readwrite');
+        const store = transaction.objectStore(STORES.GUESTS);
+        const getRequest = store.get(guestId);
+
+        getRequest.onsuccess = () => {
+            const guest = getRequest.result;
+            if (!guest) {
+                reject(new Error('Guest not found'));
+                return;
+            }
+
+            // Update fields
+            if (updates.name !== undefined) guest.name = updates.name;
+            if (updates.email !== undefined) guest.email = updates.email;
+            if (updates.phone !== undefined) guest.phone = updates.phone;
+
+            const putRequest = store.put(guest);
+            putRequest.onsuccess = () => resolve(guest);
+            putRequest.onerror = () => reject(putRequest.error);
+        };
+
+        getRequest.onerror = () => reject(getRequest.error);
     });
 }
 

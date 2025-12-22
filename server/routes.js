@@ -293,6 +293,7 @@ router.post('/guests', async (req, res) => {
             id: req.body.id || `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             name: req.body.name,
             email: req.body.email,
+            phone: req.body.phone,
             createdAt: req.body.createdAt || Date.now()
         };
 
@@ -339,6 +340,20 @@ router.post('/guests', async (req, res) => {
         }
 
         res.status(201).json(guest);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.put('/guests/:id', async (req, res) => {
+    try {
+        const updates = {};
+        if (req.body.name !== undefined) updates.name = req.body.name;
+        if (req.body.email !== undefined) updates.email = req.body.email;
+        if (req.body.phone !== undefined) updates.phone = req.body.phone;
+
+        const guest = await dbAdapter.updateGuest(req.params.id, updates);
+        res.json(guest);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

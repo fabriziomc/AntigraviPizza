@@ -28,6 +28,7 @@ export const completePizzaNight = activeDB.completePizzaNight;
 export const getUpcomingPizzaNights = activeDB.getUpcomingPizzaNights;
 export const addGuest = activeDB.addGuest;
 export const getAllGuests = activeDB.getAllGuests;
+export const updateGuest = activeDB.updateGuest;
 export const deleteGuest = activeDB.deleteGuest;
 export const addCombination = activeDB.addCombination;
 export const getAllCombinations = activeDB.getAllCombinations;

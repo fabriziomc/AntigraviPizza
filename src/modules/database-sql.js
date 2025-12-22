@@ -199,6 +199,7 @@ export async function addGuest(guestData) {
         id: generateUUID(),
         name: guestData.name,
         email: guestData.email || null,
+        phone: guestData.phone || null,
         createdAt: Date.now()
     };
     const response = await fetch(`${API_URL}/guests`, {
@@ -207,6 +208,16 @@ export async function addGuest(guestData) {
         body: JSON.stringify(guest)
     });
     if (!response.ok) throw new Error('Failed to add guest');
+    return await response.json();
+}
+
+export async function updateGuest(guestId, updates) {
+    const response = await fetch(`${API_URL}/guests/${guestId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+    });
+    if (!response.ok) throw new Error('Failed to update guest');
     return await response.json();
 }
 

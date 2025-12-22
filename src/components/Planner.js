@@ -2,7 +2,7 @@
 // PLANNER COMPONENT
 // ============================================
 
-import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, getAllRecipes, getAllGuests, addGuest, deleteGuest, getRecipeById, getPizzaNightById } from '../modules/database.js';
+import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, getAllRecipes, getAllGuests, addGuest, updateGuest, deleteGuest, getRecipeById, getPizzaNightById } from '../modules/database.js';
 import { formatDate, formatDateForInput, getNextSaturdayEvening, confirm, formatQuantity, showToast } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
 import { getCookingInstructions } from '../utils/cookingCalculator.js';
@@ -1060,8 +1060,9 @@ async function showManageGuestsModal() {
           <div style="display: flex; flex-direction: column; gap: 0.75rem;">
             <input type="text" id="newGuestName" class="form-input" placeholder="Nome e Cognome" required>
             <input type="email" id="newGuestEmail" class="form-input" placeholder="Email (opzionale)">
+            <input type="tel" id="newGuestPhone" class="form-input" placeholder="Telefono (opzionale, es. 3331234567)">
             <small style="color: var(--color-text-secondary); font-size: 0.875rem; margin-top: -0.5rem;">
-              💡 Se fornisci l'email, l'ospite riceverà automaticamente il link alla sua pagina personalizzata
+              💡 Con email o telefono, puoi inviare gli inviti automaticamente
             </small>
             <button class="btn btn-primary" onclick="window.submitNewGuest()">Aggiungi Ospite</button>
           </div>
@@ -1069,14 +1070,18 @@ async function showManageGuestsModal() {
 
         <div class="form-group">
           <label class="form-label">Lista Ospiti</label>
-          <div id="guestsList" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+          <div id="guestsList" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
             ${guests.length > 0 ? guests.map(guest => `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
               <div style="flex: 1;">
                 <div style="font-weight: 600;">${guest.name}</div>
                 ${guest.email ? `<div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-top: 0.25rem;">📧 ${guest.email}</div>` : ''}
+                ${guest.phone ? `<div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-top: 0.25rem;">📱 ${guest.phone}</div>` : ''}
               </div>
-              <button class="btn btn-ghost btn-sm" onclick="window.deleteGuestAction('${guest.id}')" style="color: var(--color-error);">🗑️</button>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-ghost btn-sm" onclick="window.showEditGuestModal('${guest.id}')" title="Modifica">✏️</button>
+                <button class="btn btn-ghost btn-sm" onclick="window.deleteGuestAction('${guest.id}')" style="color: var(--color-error);" title="Elimina">🗑️</button>
+              </div>
             </div>
           `).join('') : '<p class="text-muted">Nessun ospite salvato.</p>'}
           </div>
@@ -1093,8 +1098,10 @@ async function showManageGuestsModal() {
 async function submitNewGuest() {
   const nameInput = document.getElementById('newGuestName');
   const emailInput = document.getElementById('newGuestEmail');
+  const phoneInput = document.getElementById('newGuestPhone');
   const name = nameInput.value.trim();
   const email = emailInput.value.trim();
+  const phone = phoneInput.value.trim();
 
   if (!name) {
     alert('Inserisci il nome dell\'ospite');
@@ -1102,7 +1109,7 @@ async function submitNewGuest() {
   }
 
   try {
-    await addGuest({ name, email: email || undefined });
+    await addGuest({ name, email: email || undefined, phone: phone || undefined });
     // Refresh modal content
     await showManageGuestsModal();
   } catch (error) {
@@ -1120,6 +1127,77 @@ async function deleteGuestAction(guestId) {
     await showManageGuestsModal();
   } catch (error) {
     console.error('Failed to delete guest:', error);
+  }
+}
+
+async function showEditGuestModal(guestId) {
+  const guests = await getAllGuests();
+  const guest = guests.find(g => g.id === guestId);
+
+  if (!guest) {
+    alert('Ospite non trovato');
+    return;
+  }
+
+  const modalContent = `
+      <div class="modal-header">
+        <h2 class="modal-title">Modifica Ospite</h2>
+        <button class="modal-close" onclick="window.closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Nome *</label>
+          <input type="text" id="editGuestName" class="form-input" value="${guest.name}" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="editGuestEmail" class="form-input" value="${guest.email || ''}" placeholder="email@esempio.it">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Telefono</label>
+          <input type="tel" id="editGuestPhone" class="form-input" value="${guest.phone || ''}" placeholder="3331234567">
+          <small style="color: var(--color-text-secondary); font-size: 0.875rem; margin-top: 0.5rem; display: block;">
+            💡 Inserisci il numero senza spazi (es. 3931234567)
+          </small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.showManageGuestsModal()">Annulla</button>
+        <button class="btn btn-primary" onclick="window.updateGuestAction('${guestId}')">Salva Modifiche</button>
+      </div>
+      `;
+
+  openModal(modalContent);
+}
+
+async function updateGuestAction(guestId) {
+  const nameInput = document.getElementById('editGuestName');
+  const emailInput = document.getElementById('editGuestEmail');
+  const phoneInput = document.getElementById('editGuestPhone');
+
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const phone = phoneInput.value.trim();
+
+  if (!name) {
+    alert('Il nome è obbligatorio');
+    return;
+  }
+
+  try {
+    await updateGuest(guestId, {
+      name,
+      email: email || null,
+      phone: phone || null
+    });
+    // Return to guest list
+    await showManageGuestsModal();
+    showToast('Ospite aggiornato con successo', 'success');
+  } catch (error) {
+    console.error('Failed to update guest:', error);
+    alert('Errore durante l\'aggiornamento dell\'ospite');
   }
 }
 
@@ -1171,7 +1249,103 @@ async function sendGuestInvites(nightId) {
   }
 }
 
+// NEW: Send WhatsApp invites to selected guests of a pizza night
+async function sendWhatsAppInvites(nightId) {
+  try {
+    const night = await getPizzaNightById(nightId);
+    if (!night) {
+      showToast('❌ Serata non trovata', 'error');
+      return;
+    }
 
+    const allGuests = await getAllGuests();
+    const guestsWithPhone = night.selectedGuests
+      .map(guestId => allGuests.find(g => g.id === guestId))
+      .filter(g => g && g.phone);
+
+    if (guestsWithPhone.length === 0) {
+      showToast('⚠️ Nessun ospite ha un numero di telefono', 'warning');
+      return;
+    }
+
+    // Format event time
+    const eventDate = new Date(night.date);
+    const eventDateStr = eventDate.toLocaleDateString('it-IT', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    const eventTimeStr = eventDate.toLocaleTimeString('it-IT', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    // Create modal with WhatsApp links
+    const appUrl = window.location.origin;
+    const modalContent = `
+      <div class="modal-header">
+        <h2 class="modal-title">📱 Inviti WhatsApp</h2>
+        <button class="modal-close" onclick="window.closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 1rem; color: var(--color-text-secondary);">
+          Clicca sui pulsanti per aprire WhatsApp e inviare l'invito a ciascun ospite:
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          ${guestsWithPhone.map(guest => {
+      const guestPageUrl = `${appUrl}/guest.html#guest/${nightId}/${guest.id}`;
+      const message = `Ciao ${guest.name}! 🍕
+
+Sei invitato alla *${night.name}*
+📅 ${eventDateStr}
+⏰ ${eventTimeStr}
+
+Visualizza i dettagli della tua serata personale:
+${guestPageUrl}
+
+Ci vediamo lì! 🎉`;
+
+      const whatsappUrl = `https://wa.me/${guest.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+
+      return `
+              <a href="${whatsappUrl}" target="_blank" class="btn btn-success" style="
+                background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+                display: flex;
+                align-items: center;
+                justify Content: space-between;
+                text-decoration: none;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                transition: transform 0.2s;
+              " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <span style="font-size: 1.5rem;">📱</span>
+                  <div style="text-align: left;">
+                    <div style="font-weight: 600;">${guest.name}</div>
+                    <div style="font-size: 0.875rem; opacity: 0.9;">${guest.phone}</div>
+                  </div>
+                </div>
+                <span style="font-size: 0.875rem; opacity: 0.9;">Apri WhatsApp →</span>
+              </a>
+            `;
+    }).join('')}
+        </div>
+        <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--color-text-secondary); padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
+          💡 <strong>Nota:</strong> Cliccando sui pulsanti si aprirà WhatsApp con il messaggio già pronto. Dovrai confermare l'invio manualmente.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
+      </div>
+    `;
+
+    openModal(modalContent);
+  } catch (error) {
+    console.error('Error sending WhatsApp invites:', error);
+    showToast('❌ Errore nella generazione degli inviti WhatsApp', 'error');
+  }
+}
 
 async function submitNewPizzaNight() {
   const form = document.getElementById('newPizzaNightForm');
@@ -1225,6 +1399,7 @@ async function viewPizzaNightDetails(nightId) {
 
   let guestNames = [];
   let guestsWithEmail = [];
+  let guestsWithPhone = [];
   if (night.selectedGuests && night.selectedGuests.length > 0) {
     const allGuests = await getAllGuests();
     guestNames = night.selectedGuests.map(guestId => {
@@ -1236,6 +1411,11 @@ async function viewPizzaNightDetails(nightId) {
     guestsWithEmail = night.selectedGuests
       .map(guestId => allGuests.find(g => g.id === guestId))
       .filter(g => g && g.email);
+
+    // Get guests with phone for WhatsApp button
+    guestsWithPhone = night.selectedGuests
+      .map(guestId => allGuests.find(g => g.id === guestId))
+      .filter(g => g && g.phone);
   }
 
   const modalContent = `
@@ -1265,6 +1445,16 @@ async function viewPizzaNightDetails(nightId) {
               </div>
               <div style="font-size: 0.75rem; color: var(--color-gray-400);">
                 ${guestsWithEmail.map(g => g.email).join(', ')}
+              </div>
+            </div>
+          ` : ''}
+          ${guestsWithPhone.length > 0 ? `
+            <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(37, 211, 102, 0.1); border: 1px solid rgba(37, 211, 102, 0.3); border-radius: 0.5rem;">
+              <div style="font-size: 0.875rem; color: var(--color-success); font-weight: 600; margin-bottom: 0.25rem;">
+                📱 ${guestsWithPhone.length} ${guestsWithPhone.length === 1 ? 'ospite ha' : 'ospiti hanno'} WhatsApp
+              </div>
+              <div style="font-size: 0.75rem; color: var(--color-gray-400);">
+                ${guestsWithPhone.map(g => g.phone).join(', ')}
               </div>
             </div>
           ` : ''}
@@ -1310,6 +1500,12 @@ async function viewPizzaNightDetails(nightId) {
         <button class="btn btn-success" onclick="window.sendGuestInvites('${night.id}')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
           <span>📧</span>
           Invia Email Inviti (${guestsWithEmail.length})
+        </button>
+      ` : ''}
+        ${guestsWithPhone.length > 0 ? `
+        <button class="btn btn-success" onclick="window.sendWhatsAppInvites('${night.id}')" style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);">
+          <span>📱</span>
+          Inviti WhatsApp (${guestsWithPhone.length})
         </button>
       ` : ''}
         ${night.selectedPizzas.length > 0 && night.status === 'planned' ? `
@@ -2023,8 +2219,11 @@ window.deletePizzaNightAction = deletePizzaNightAction;
 window.confirmDeletePizzaNight = confirmDeletePizzaNight;
 window.showManageGuestsModal = showManageGuestsModal;
 window.submitNewGuest = submitNewGuest;
+window.showEditGuestModal = showEditGuestModal;
+window.updateGuestAction = updateGuestAction;
 window.deleteGuestAction = deleteGuestAction;
 window.sendGuestInvites = sendGuestInvites;
+window.sendWhatsAppInvites = sendWhatsAppInvites;
 window.generateAutoPizzas = generateAutoPizzas;
 window.generateMixedPizzas = generateMixedPizzas;
 window.startLiveMode = startLiveMode;

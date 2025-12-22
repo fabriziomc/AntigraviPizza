@@ -382,15 +382,58 @@ class DatabaseAdapter {
 
     async createGuest(guest) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('INSERT INTO Guests (id, name, email, createdAt) VALUES (?, ?, ?, ?)');
-            stmt.run(guest.id, guest.name, guest.email || null, guest.createdAt);
+            const stmt = this.db.prepare('INSERT INTO Guests (id, name, email, phone, createdAt) VALUES (?, ?, ?, ?, ?)');
+            stmt.run(guest.id, guest.name, guest.email || null, guest.phone || null, guest.createdAt);
         } else {
             await this.db.execute({
-                sql: 'INSERT INTO Guests (id, name, email, createdAt) VALUES (?, ?, ?, ?)',
-                args: [guest.id, guest.name, guest.email || null, guest.createdAt]
+                sql: 'INSERT INTO Guests (id, name, email, phone, createdAt) VALUES (?, ?, ?, ?, ?)',
+                args: [guest.id, guest.name, guest.email || null, guest.phone || null, guest.createdAt]
             });
         }
         return guest;
+    }
+
+    async updateGuest(id, updates) {
+        // Build dynamic UPDATE query based on provided fields
+        const allowedFields = ['name', 'email', 'phone'];
+        const fields = [];
+        const values = [];
+
+        for (const [key, value] of Object.entries(updates)) {
+            if (allowedFields.includes(key)) {
+                fields.push(`${key} = ?`);
+                values.push(value || null);
+            }
+        }
+
+        if (fields.length === 0) {
+            throw new Error('No valid fields to update');
+        }
+
+        values.push(id); // Add id for WHERE clause
+        const sql = `UPDATE Guests SET ${fields.join(', ')} WHERE id = ?`;
+
+        if (this.isSQLite) {
+            const stmt = this.db.prepare(sql);
+            stmt.run(...values);
+        } else {
+            await this.db.execute({ sql, args: values });
+        }
+
+        return this.getGuestById(id);
+    }
+
+    async getGuestById(id) {
+        if (this.isSQLite) {
+            const stmt = this.db.prepare('SELECT * FROM Guests WHERE id = ?');
+            return stmt.get(id);
+        } else {
+            const result = await this.db.execute({
+                sql: 'SELECT * FROM Guests WHERE id = ?',
+                args: [id]
+            });
+            return result.rows[0] || null;
+        }
     }
 
     async deleteGuest(id) {
