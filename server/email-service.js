@@ -10,6 +10,8 @@ dotenv.config();
 
 // Configure SMTP transport
 const createTransporter = () => {
+    console.log('🔵 [createTransporter] Creating SMTP transporter...');
+
     const config = {
         host: process.env.SMTP_HOST || 'smtp.gmail.com',
         port: parseInt(process.env.SMTP_PORT || '587'),
@@ -17,8 +19,22 @@ const createTransporter = () => {
         auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS
-        }
+        },
+        connectionTimeout: 10000,  // 10 seconds
+        greetingTimeout: 10000,    // 10 seconds
+        socketTimeout: 30000       // 30 seconds
     };
+
+    console.log('🔵 [createTransporter] Config:', {
+        host: config.host,
+        port: config.port,
+        secure: config.secure,
+        user: config.auth.user ? '✓ Set' : '✗ Missing',
+        pass: config.auth.pass ? '✓ Set (length: ' + config.auth.pass.length + ')' : '✗ Missing',
+        connectionTimeout: config.connectionTimeout,
+        greetingTimeout: config.greetingTimeout,
+        socketTimeout: config.socketTimeout
+    });
 
     // Validate configuration
     if (!config.auth.user || !config.auth.pass) {
@@ -31,7 +47,10 @@ const createTransporter = () => {
     }
 
     console.log('✅ Email service configured with:', config.auth.user);
-    return nodemailer.createTransport(config);
+    console.log('🔵 [createTransporter] Creating nodemailer transport...');
+    const transport = nodemailer.createTransport(config);
+    console.log('🔵 [createTransporter] Transport created successfully');
+    return transport;
 };
 
 /**
@@ -144,11 +163,17 @@ Il Team AntigraviPizza 🍕❤️
  * @returns {Promise<object>} - Email send result
  */
 export async function sendGuestInvite(guestEmail, guestName, pizzaNightName, guestPageUrl, themeData = null) {
+    console.log('🔵 [sendGuestInvite] Starting email send process');
+    console.log('🔵 [sendGuestInvite] Recipient:', guestEmail);
+
     const transporter = createTransporter();
 
     if (!transporter) {
+        console.error('🔴 [sendGuestInvite] Transporter creation failed');
         throw new Error('Email service not configured. Please set SMTP credentials in .env');
     }
+
+    console.log('🔵 [sendGuestInvite] Transporter created successfully');
 
     const mailOptions = {
         from: process.env.SMTP_FROM || `"AntigraviPizza" <${process.env.SMTP_USER}>`,
@@ -158,17 +183,40 @@ export async function sendGuestInvite(guestEmail, guestName, pizzaNightName, gue
         html: generateEmailHTML(guestName, pizzaNightName, guestPageUrl, themeData)
     };
 
+    console.log('🔵 [sendGuestInvite] Mail options prepared:', {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject
+    });
+
     try {
         console.log(`📧 Sending email to ${guestEmail}...`);
-        const info = await transporter.sendMail(mailOptions);
+        console.log('🔵 [sendGuestInvite] Calling transporter.sendMail()...');
+
+        // Add timeout wrapper
+        const sendPromise = transporter.sendMail(mailOptions);
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('SMTP timeout after 30 seconds')), 30000);
+        });
+
+        console.log('🔵 [sendGuestInvite] Waiting for email response (30s timeout)...');
+        const info = await Promise.race([sendPromise, timeoutPromise]);
+
+        console.log('🔵 [sendGuestInvite] Email sent response received');
         console.log(`✅ Email sent successfully: ${info.messageId}`);
+        console.log('🔵 [sendGuestInvite] Full response:', info.response);
+
         return {
             success: true,
             messageId: info.messageId,
             recipient: guestEmail
         };
     } catch (error) {
-        console.error(`❌ Failed to send email to ${guestEmail}:`, error.message);
+        console.error(`❌ Failed to send email to ${guestEmail}`);
+        console.error('🔴 [sendGuestInvite] Error type:', error.constructor.name);
+        console.error('🔴 [sendGuestInvite] Error message:', error.message);
+        console.error('🔴 [sendGuestInvite] Error code:', error.code);
+        console.error('🔴 [sendGuestInvite] Full error:', error);
         throw error;
     }
 }
