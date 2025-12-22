@@ -139,7 +139,16 @@ class DatabaseAdapter {
         return recipe;
     }
 
-    async updateRecipe(id, recipe) {
+    async updateRecipe(id, updates) {
+        // First, fetch the current recipe to merge with updates
+        const currentRecipe = await this.getRecipeById(id);
+        if (!currentRecipe) {
+            throw new Error(`Recipe with id ${id} not found`);
+        }
+
+        // Merge updates with current recipe
+        const recipe = { ...currentRecipe, ...updates };
+
         const baseIngredientsJson = JSON.stringify(recipe.baseIngredients || []);
         const preparationsJson = JSON.stringify(recipe.preparations || []);
         const instructionsJson = JSON.stringify(recipe.instructions || []);
