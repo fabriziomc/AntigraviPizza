@@ -14,8 +14,8 @@ const createTransporter = () => {
 
     const config = {
         host: process.env.SMTP_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: false, // true for 465, false for other ports
+        port: parseInt(process.env.SMTP_PORT || '465'),
+        secure: true, // SSL/TLS for port 465
         auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS
