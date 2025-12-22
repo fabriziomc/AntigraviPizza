@@ -44,6 +44,16 @@ const ARCHETYPE_WEIGHTS = [
         archetype: 'vegana',
         weight: 1,
         description: 'Solo vegetali'
+    },
+    {
+        archetype: 'dolce_salato',
+        weight: 3,
+        description: 'Equilibrio dolce/salato'
+    },
+    {
+        archetype: 'fusion',
+        weight: 2,
+        description: 'Interpretazioni creative e contemporanee'
     }
 ];
 

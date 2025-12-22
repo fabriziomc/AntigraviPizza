@@ -40,7 +40,9 @@ const ARCHETYPE_WEIGHTS = [
     { archetype: 'fresca_estiva', weight: 7, description: 'Verdure, pomodorini' },
     { archetype: 'piccante_decisa', weight: 4, description: 'Nduja, peperoncino' },
     { archetype: 'mare', weight: 2, description: 'Pesce, frutti di mare' },
-    { archetype: 'vegana', weight: 1, description: 'Solo vegetali' }
+    { archetype: 'vegana', weight: 1, description: 'Solo vegetali' },
+    { archetype: 'dolce_salato', weight: 3, description: 'Equilibrio dolce/salato' },
+    { archetype: 'fusion', weight: 2, description: 'Interpretazioni creative e contemporanee' }
 ];
 
 console.log('🌱 Seeding archetype weights...');

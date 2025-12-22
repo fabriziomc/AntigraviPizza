@@ -422,7 +422,9 @@ const ARCHETYPE_LABELS = {
   'fresca_estiva': '🌿 Fresca Estiva',
   'piccante_decisa': '🌶️ Piccante',
   'mare': '🐟 Mare',
-  'vegana': '🌱 Vegana'
+  'vegana': '🌱 Vegana',
+  'dolce_salato': '🍯 Dolce/Salato',
+  'fusion': '🌟 Fusion'
 };
 
 const ARCHETYPE_DESCRIPTIONS = {
@@ -433,7 +435,9 @@ const ARCHETYPE_DESCRIPTIONS = {
   'fresca_estiva': 'Verdure, pomodorini',
   'piccante_decisa': 'Nduja, peperoncino',
   'mare': 'Pesce, frutti di mare',
-  'vegana': 'Solo vegetali'
+  'vegana': 'Solo vegetali',
+  'dolce_salato': 'Equilibrio dolce/salato',
+  'fusion': 'Interpretazioni creative e contemporanee'
 };
 
 async function populateArchetypeWeights() {
