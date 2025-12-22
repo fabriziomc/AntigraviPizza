@@ -548,9 +548,12 @@ function determineTags(ingredients, doughType) {
     if (doughType.type.includes('Contemporanea')) tags.push('Contemporanea');
 
     // Tag basato sugli ingredienti
-    const hasMeat = ingredients.some(i => i.category === 'Carne');
+    const hasMeat = ingredients.some(i => i.category === 'Carne' || i.category === 'Carni e Salumi');
     const hasPremium = ingredients.some(i => ['Tartufo', 'Salmone', 'Caviale', 'Foie gras'].some(p => i.name.includes(p)));
-    const hasBase = ingredients.some(i => i.category === 'Salsa' && i.name.includes('Pomodoro'));
+    const hasBase = ingredients.some(i =>
+        (i.category === 'Salsa' || i.category === 'Basi e Salse') &&
+        (i.name.includes('Pomodoro') || i.name.includes('pomodoro'))
+    );
 
     if (!hasMeat) tags.push('Vegetariana');
     if (hasPremium) tags.push('Premium', 'Gourmet');
