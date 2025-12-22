@@ -1125,31 +1125,48 @@ async function deleteGuestAction(guestId) {
 
 // NEW: Send email invites to selected guests of a pizza night
 async function sendGuestInvites(nightId) {
+  console.log('🔵 [sendGuestInvites] Function called with nightId:', nightId);
+
   try {
+    console.log('🔵 [sendGuestInvites] Attempting to send POST request to:', `/api/pizza-nights/${nightId}/send-invites`);
+
     const response = await fetch(`/api/pizza-nights/${nightId}/send-invites`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });
 
+    console.log('🔵 [sendGuestInvites] Response received:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok
+    });
+
     if (!response.ok) {
-      throw new Error('Failed to send invites');
+      const errorText = await response.text();
+      console.error('🔴 [sendGuestInvites] Server returned error:', errorText);
+      throw new Error(`Failed to send invites: ${response.status} ${response.statusText}`);
     }
 
     const result = await response.json();
+    console.log('🔵 [sendGuestInvites] Result from server:', result);
 
     closeModal();
 
     if (result.sent > 0) {
+      console.log(`✅ [sendGuestInvites] Success: ${result.sent} email(s) sent`);
       showToast(`✅ ${result.sent} ${result.sent === 1 ? 'email inviata' : 'email inviate'} con successo!`, 'success');
     } else {
+      console.log('⚠️ [sendGuestInvites] No emails sent (no guests with email)');
       showToast('⚠️ Nessuna email inviata (nessun ospite con email)', 'warning');
     }
 
     if (result.failed > 0) {
+      console.log(`⚠️ [sendGuestInvites] ${result.failed} email(s) failed`);
       showToast(`⚠️ ${result.failed} email non ${result.failed === 1 ? 'inviata' : 'inviate'}`, 'warning');
     }
   } catch (error) {
-    console.error('Failed to send invites:', error);
+    console.error('🔴 [sendGuestInvites] Error caught:', error);
+    console.error('🔴 [sendGuestInvites] Error stack:', error.stack);
     showToast('❌ Errore nell\'invio delle email', 'error');
   }
 }

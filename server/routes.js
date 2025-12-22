@@ -140,13 +140,22 @@ router.put('/pizza-nights/:id', async (req, res) => {
 
 // NEW: Send email invites to all selected guests of a pizza night
 router.post('/pizza-nights/:id/send-invites', async (req, res) => {
+    console.log('🔵 [ROUTE /send-invites] Endpoint called');
+    console.log('🔵 [ROUTE /send-invites] Request params:', req.params);
+    console.log('🔵 [ROUTE /send-invites] Request body:', req.body);
+
     try {
         const nightId = req.params.id;
+        console.log('🔵 [ROUTE /send-invites] Fetching pizza night with ID:', nightId);
+
         const night = await dbAdapter.getPizzaNightById(nightId);
 
         if (!night) {
+            console.error('🔴 [ROUTE /send-invites] Pizza night not found');
             return res.status(404).json({ error: 'Pizza night not found' });
         }
+
+        console.log('🔵 [ROUTE /send-invites] Pizza night found:', night.name);
 
         // Log environment configuration
         console.log('📧 Email Service Configuration:');
@@ -154,7 +163,9 @@ router.post('/pizza-nights/:id/send-invites', async (req, res) => {
         console.log('  - SMTP_PASS:', process.env.SMTP_PASS ? '✓ Set' : '✗ Missing');
         console.log('  - APP_URL:', process.env.APP_URL || 'Not set (using fallback)');
 
+        console.log('🔵 [ROUTE /send-invites] Importing email-service.js...');
         const { sendGuestInvite } = await import('./email-service.js');
+        console.log('🔵 [ROUTE /send-invites] email-service.js imported successfully');
 
         let sent = 0;
         let failed = 0;
@@ -182,7 +193,10 @@ router.post('/pizza-nights/:id/send-invites', async (req, res) => {
             });
         }
 
+        console.log('🔵 [ROUTE /send-invites] Fetching all guests...');
         const allGuests = await dbAdapter.getAllGuests();
+        console.log(`🔵 [ROUTE /send-invites] Total guests in database: ${allGuests.length}`);
+
         const guestsWithEmail = night.selectedGuests
             .map(guestId => allGuests.find(g => g.id === guestId))
             .filter(g => g && g.email);
@@ -223,6 +237,7 @@ router.post('/pizza-nights/:id/send-invites', async (req, res) => {
                 errors.push({ guest: guest.name, error: emailError.message });
                 console.error(`❌ Failed to send email to ${guest.email}:`, emailError.message);
                 console.error('   Error details:', emailError);
+                console.error('   Stack trace:', emailError.stack);
             }
         }
 
@@ -237,8 +252,9 @@ router.post('/pizza-nights/:id/send-invites', async (req, res) => {
         console.log('📊 Email sending summary:', result);
         res.json(result);
     } catch (err) {
-        console.error('❌ Error sending invites:', err);
-        res.status(500).json({ error: err.message });
+        console.error('❌ [ROUTE /send-invites] Error sending invites:', err);
+        console.error('❌ [ROUTE /send-invites] Error stack:', err.stack);
+        res.status(500).json({ error: err.message, stack: err.stack });
     }
 });
 
