@@ -22,10 +22,15 @@ const createTransporter = () => {
 
     // Validate configuration
     if (!config.auth.user || !config.auth.pass) {
-        console.warn('⚠️  Email service not configured. Set SMTP_USER and SMTP_PASS in .env');
+        console.error('⚠️  Email service not configured!');
+        console.error('   Missing environment variables:');
+        if (!config.auth.user) console.error('   - SMTP_USER is not set');
+        if (!config.auth.pass) console.error('   - SMTP_PASS is not set');
+        console.error('   Please configure these in your Render environment variables.');
         return null;
     }
 
+    console.log('✅ Email service configured with:', config.auth.user);
     return nodemailer.createTransport(config);
 };
 

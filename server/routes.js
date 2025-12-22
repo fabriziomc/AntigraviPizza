@@ -148,6 +148,12 @@ router.post('/pizza-nights/:id/send-invites', async (req, res) => {
             return res.status(404).json({ error: 'Pizza night not found' });
         }
 
+        // Log environment configuration
+        console.log('📧 Email Service Configuration:');
+        console.log('  - SMTP_USER:', process.env.SMTP_USER ? '✓ Set' : '✗ Missing');
+        console.log('  - SMTP_PASS:', process.env.SMTP_PASS ? '✓ Set' : '✗ Missing');
+        console.log('  - APP_URL:', process.env.APP_URL || 'Not set (using fallback)');
+
         const { sendGuestInvite } = await import('./email-service.js');
 
         let sent = 0;
@@ -165,45 +171,73 @@ router.post('/pizza-nights/:id/send-invites', async (req, res) => {
             console.warn('Could not load theme for email:', err.message);
         }
 
-        // Send email to each selected guest that has an email
-        if (night.selectedGuests && night.selectedGuests.length > 0) {
-            const allGuests = await dbAdapter.getAllGuests();
+        // Check if we have guests with emails
+        if (!night.selectedGuests || night.selectedGuests.length === 0) {
+            console.log('⚠️  No guests selected for this pizza night');
+            return res.json({
+                sent: 0,
+                failed: 0,
+                total: 0,
+                message: 'No guests selected'
+            });
+        }
 
-            for (const guestId of night.selectedGuests) {
-                const guest = allGuests.find(g => g.id === guestId);
+        const allGuests = await dbAdapter.getAllGuests();
+        const guestsWithEmail = night.selectedGuests
+            .map(guestId => allGuests.find(g => g.id === guestId))
+            .filter(g => g && g.email);
 
-                if (guest && guest.email) {
-                    try {
-                        const appUrl = process.env.APP_URL || `http://localhost:${process.env.PORT || 3000}`;
-                        const guestPageUrl = `${appUrl}/guest.html#guest/${nightId}/${guest.id}`;
+        console.log(`👥 Guests: ${night.selectedGuests.length} selected, ${guestsWithEmail.length} with email`);
 
-                        await sendGuestInvite(
-                            guest.email,
-                            guest.name,
-                            night.name,
-                            guestPageUrl,
-                            themeData
-                        );
+        if (guestsWithEmail.length === 0) {
+            console.log('⚠️  No guests have email addresses');
+            return res.json({
+                sent: 0,
+                failed: 0,
+                total: night.selectedGuests.length,
+                message: 'No guests with email addresses'
+            });
+        }
 
-                        sent++;
-                        console.log(`✅ Email invitation sent to ${guest.email}`);
-                    } catch (emailError) {
-                        failed++;
-                        errors.push({ guest: guest.name, error: emailError.message });
-                        console.error(`❌ Failed to send email to ${guest.email}:`, emailError.message);
-                    }
-                }
+        // Send email to each guest that has an email
+        for (const guest of guestsWithEmail) {
+            try {
+                const appUrl = process.env.APP_URL || `http://localhost:${process.env.PORT || 3000}`;
+                const guestPageUrl = `${appUrl}/guest.html#guest/${nightId}/${guest.id}`;
+
+                console.log(`📤 Attempting to send email to ${guest.email}...`);
+                console.log(`   Guest page URL: ${guestPageUrl}`);
+
+                await sendGuestInvite(
+                    guest.email,
+                    guest.name,
+                    night.name,
+                    guestPageUrl,
+                    themeData
+                );
+
+                sent++;
+                console.log(`✅ Email invitation sent to ${guest.email}`);
+            } catch (emailError) {
+                failed++;
+                errors.push({ guest: guest.name, error: emailError.message });
+                console.error(`❌ Failed to send email to ${guest.email}:`, emailError.message);
+                console.error('   Error details:', emailError);
             }
         }
 
-        res.json({
+        const result = {
             sent,
             failed,
-            total: night.selectedGuests ? night.selectedGuests.length : 0,
+            total: night.selectedGuests.length,
+            guestsWithEmail: guestsWithEmail.length,
             errors: errors.length > 0 ? errors : undefined
-        });
+        };
+
+        console.log('📊 Email sending summary:', result);
+        res.json(result);
     } catch (err) {
-        console.error('Error sending invites:', err);
+        console.error('❌ Error sending invites:', err);
         res.status(500).json({ error: err.message });
     }
 });
