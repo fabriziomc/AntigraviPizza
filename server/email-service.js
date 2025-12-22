@@ -1,57 +1,14 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 /**
  * Email Service for sending guest invitations
- * Uses Gmail SMTP with Nodemailer
+ * Uses Resend API (HTTP-based, works on Render without SMTP restrictions)
  */
 
-// Configure SMTP transport
-const createTransporter = () => {
-    console.log('🔵 [createTransporter] Creating SMTP transporter...');
-
-    const config = {
-        host: process.env.SMTP_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.SMTP_PORT || '465'),
-        secure: true, // SSL/TLS for port 465
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS
-        },
-        connectionTimeout: 10000,  // 10 seconds
-        greetingTimeout: 10000,    // 10 seconds
-        socketTimeout: 30000       // 30 seconds
-    };
-
-    console.log('🔵 [createTransporter] Config:', {
-        host: config.host,
-        port: config.port,
-        secure: config.secure,
-        user: config.auth.user ? '✓ Set' : '✗ Missing',
-        pass: config.auth.pass ? '✓ Set (length: ' + config.auth.pass.length + ')' : '✗ Missing',
-        connectionTimeout: config.connectionTimeout,
-        greetingTimeout: config.greetingTimeout,
-        socketTimeout: config.socketTimeout
-    });
-
-    // Validate configuration
-    if (!config.auth.user || !config.auth.pass) {
-        console.error('⚠️  Email service not configured!');
-        console.error('   Missing environment variables:');
-        if (!config.auth.user) console.error('   - SMTP_USER is not set');
-        if (!config.auth.pass) console.error('   - SMTP_PASS is not set');
-        console.error('   Please configure these in your Render environment variables.');
-        return null;
-    }
-
-    console.log('✅ Email service configured with:', config.auth.user);
-    console.log('🔵 [createTransporter] Creating nodemailer transport...');
-    const transport = nodemailer.createTransport(config);
-    console.log('🔵 [createTransporter] Transport created successfully');
-    return transport;
-};
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * Generate HTML email template for guest invitation
@@ -163,59 +120,46 @@ Il Team AntigraviPizza 🍕❤️
  * @returns {Promise<object>} - Email send result
  */
 export async function sendGuestInvite(guestEmail, guestName, pizzaNightName, guestPageUrl, themeData = null) {
-    console.log('🔵 [sendGuestInvite] Starting email send process');
+    console.log('🔵 [sendGuestInvite] Starting email send process (Resend API)');
     console.log('🔵 [sendGuestInvite] Recipient:', guestEmail);
 
-    const transporter = createTransporter();
-
-    if (!transporter) {
-        console.error('🔴 [sendGuestInvite] Transporter creation failed');
-        throw new Error('Email service not configured. Please set SMTP credentials in .env');
+    if (!process.env.RESEND_API_KEY) {
+        console.error('🔴 [sendGuestInvite] RESEND_API_KEY not configured');
+        throw new Error('Email service not configured. Please set RESEND_API_KEY in environment variables');
     }
 
-    console.log('🔵 [sendGuestInvite] Transporter created successfully');
-
-    const mailOptions = {
-        from: process.env.SMTP_FROM || `"AntigraviPizza" <${process.env.SMTP_USER}>`,
-        to: guestEmail,
-        subject: `🍕 Invito: ${pizzaNightName}`,
-        text: generateEmailText(guestName, pizzaNightName, guestPageUrl),
-        html: generateEmailHTML(guestName, pizzaNightName, guestPageUrl, themeData)
-    };
-
-    console.log('🔵 [sendGuestInvite] Mail options prepared:', {
-        from: mailOptions.from,
-        to: mailOptions.to,
-        subject: mailOptions.subject
-    });
+    const emailFrom = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+    console.log('🔵 [sendGuestInvite] Sending from:', emailFrom);
 
     try {
         console.log(`📧 Sending email to ${guestEmail}...`);
-        console.log('🔵 [sendGuestInvite] Calling transporter.sendMail()...');
+        console.log('🔵 [sendGuestInvite] Calling resend.emails.send()...');
 
-        // Add timeout wrapper
-        const sendPromise = transporter.sendMail(mailOptions);
-        const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('SMTP timeout after 30 seconds')), 30000);
+        const { data, error } = await resend.emails.send({
+            from: emailFrom,
+            to: [guestEmail],
+            subject: `🍕 Invito: ${pizzaNightName}`,
+            text: generateEmailText(guestName, pizzaNightName, guestPageUrl),
+            html: generateEmailHTML(guestName, pizzaNightName, guestPageUrl, themeData)
         });
 
-        console.log('🔵 [sendGuestInvite] Waiting for email response (30s timeout)...');
-        const info = await Promise.race([sendPromise, timeoutPromise]);
+        if (error) {
+            console.error('🔴 [sendGuestInvite] Resend API error:', error);
+            throw new Error(error.message || 'Failed to send email via Resend');
+        }
 
-        console.log('🔵 [sendGuestInvite] Email sent response received');
-        console.log(`✅ Email sent successfully: ${info.messageId}`);
-        console.log('🔵 [sendGuestInvite] Full response:', info.response);
+        console.log('🔵 [sendGuestInvite] Email sent successfully');
+        console.log(`✅ Email sent: ID ${data.id}`);
 
         return {
             success: true,
-            messageId: info.messageId,
+            messageId: data.id,
             recipient: guestEmail
         };
     } catch (error) {
         console.error(`❌ Failed to send email to ${guestEmail}`);
         console.error('🔴 [sendGuestInvite] Error type:', error.constructor.name);
         console.error('🔴 [sendGuestInvite] Error message:', error.message);
-        console.error('🔴 [sendGuestInvite] Error code:', error.code);
         console.error('🔴 [sendGuestInvite] Full error:', error);
         throw error;
     }
@@ -226,20 +170,14 @@ export async function sendGuestInvite(guestEmail, guestName, pizzaNightName, gue
  * @returns {Promise<boolean>}
  */
 export async function verifyEmailConfig() {
-    const transporter = createTransporter();
-
-    if (!transporter) {
+    if (!process.env.RESEND_API_KEY) {
+        console.error('❌ RESEND_API_KEY is not set');
         return false;
     }
 
-    try {
-        await transporter.verify();
-        console.log('✅ Email service configured correctly');
-        return true;
-    } catch (error) {
-        console.error('❌ Email service configuration error:', error.message);
-        return false;
-    }
+    console.log('✅ Email service configured with Resend');
+    console.log('   From:', process.env.EMAIL_FROM || 'onboarding@resend.dev');
+    return true;
 }
 
 export default {
