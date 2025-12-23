@@ -405,7 +405,9 @@ router.delete('/combinations/:id', async (req, res) => {
 
 router.get('/preparations', async (req, res) => {
     try {
+        console.time('🚀 getAllPreparations');
         const preparations = await dbAdapter.getAllPreparations();
+        console.timeEnd('🚀 getAllPreparations');
         res.json(preparations);
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -508,9 +508,37 @@ class DatabaseAdapter {
             preps = result.rows.map(r => this.parsePreparation(r));
         }
 
-        // Expand ingredients for each preparation
+        // 🚀 OPTIMIZATION: Collect ALL ingredient IDs from ALL preparations
+        const allIngredientIds = new Set();
         for (const prep of preps) {
-            prep.ingredients = await this.expandIngredients(prep.ingredients);
+            if (prep.ingredients && prep.ingredients.length > 0) {
+                prep.ingredients.forEach(ing => {
+                    if (ing.ingredientId && !ing.name) {
+                        allIngredientIds.add(ing.ingredientId);
+                    }
+                });
+            }
+        }
+
+        // 🚀 Single batch query for ALL ingredients
+        let ingredientsMap = new Map();
+        if (allIngredientIds.size > 0) {
+            const idsArray = Array.from(allIngredientIds);
+            const fetchedIngredients = await this.batchFetchIngredients(idsArray);
+
+            fetchedIngredients.forEach(ing => {
+                ingredientsMap.set(ing.id, {
+                    name: ing.name,
+                    category: ing.categoryName,
+                    categoryIcon: ing.categoryIcon,
+                    defaultUnit: ing.defaultUnit
+                });
+            });
+        }
+
+        // 🚀 Expand ingredients for each preparation using the pre-loaded map
+        for (const prep of preps) {
+            prep.ingredients = this.expandIngredientsFromMap(prep.ingredients, ingredientsMap);
         }
 
         return preps;
@@ -601,6 +629,55 @@ class DatabaseAdapter {
         }
 
         return expanded;
+    }
+
+    // Helper to batch fetch ingredients by IDs (used by optimized getAllPreparations)
+    async batchFetchIngredients(ids) {
+        if (ids.length === 0) return [];
+
+        if (this.isSQLite) {
+            const placeholders = ids.map(() => '?').join(',');
+            const stmt = this.db.prepare(`
+                SELECT i.*, c.name as categoryName, c.icon as categoryIcon
+                FROM Ingredients i
+                LEFT JOIN Categories c ON i.categoryId = c.id
+                WHERE i.id IN (${placeholders})
+            `);
+            return stmt.all(...ids);
+        } else {
+            const placeholders = ids.map(() => '?').join(',');
+            const result = await this.db.execute({
+                sql: `
+                    SELECT i.*, c.name as categoryName, c.icon as categoryIcon
+                    FROM Ingredients i
+                    LEFT JOIN Categories c ON i.categoryId = c.id
+                    WHERE i.id IN (${placeholders})
+                `,
+                args: ids
+            });
+            return result.rows;
+        }
+    }
+
+    // Helper to expand ingredients from a pre-loaded map (used by optimized getAllPreparations)
+    expandIngredientsFromMap(ingredients, ingredientsMap) {
+        if (!ingredients || ingredients.length === 0) return [];
+
+        return ingredients.map(ing => {
+            if (ing.name) {
+                // Already expanded
+                return ing;
+            } else if (ing.ingredientId) {
+                const ingredientData = ingredientsMap.get(ing.ingredientId);
+                if (ingredientData) {
+                    return { ...ing, ...ingredientData };
+                } else {
+                    console.warn(`Ingredient not found: ${ing.ingredientId}`);
+                    return ing;
+                }
+            }
+            return ing;
+        });
     }
 
     async getPreparationById(id) {
