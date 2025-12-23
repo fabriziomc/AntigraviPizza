@@ -446,8 +446,8 @@ export const DOUGH_RECIPES = [
 export const PREPARATION_CATEGORIES = [
     'Creme',
     'Salse',
-    'Condimenti',
-    'Basi',
+    'Trifolati/Saltati',
+    'Confit/Grigliati',
     'Altro'
 ];
 
