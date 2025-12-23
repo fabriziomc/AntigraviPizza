@@ -10,7 +10,7 @@
       "yield": 4,
       "prepTime": "25-35 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Ananas\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Burro\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Latticini\"},{\"name\":\"Zucchero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"06cfc955-2f6e-4b0e-a3ef-33434c275b1e\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"d3148992-99fe-4998-835f-0b21df6cd5a1\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"69df2cbf-1c1c-4c77-87e3-b5542aa3cdf1\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -22,7 +22,7 @@
       "yield": 4,
       "prepTime": "45-60 min",
       "difficulty": "Difficile",
-      "ingredients": "[{\"name\":\"Anatra\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Arancia\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Miele\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Burro\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Timo\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"24560e34-8057-4f77-a9dc-090a2ed4ec63\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"dd2fceca-3cd7-46e1-b9f5-0429005d5324\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"18670e50-e1c4-4e0e-b870-6c3744d345a5\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"d3148992-99fe-4998-835f-0b21df6cd5a1\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"03bc2aaa-fb49-45c4-953f-5bf43bff3066\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -34,7 +34,7 @@
       "yield": 4,
       "prepTime": "20-30 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Baccalà\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Prezzemolo\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"2a333050-5a47-420d-95e2-29112a6e5628\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"c976a63a-151e-4a52-894f-ad4e98c17c5e\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -46,7 +46,7 @@
       "yield": 4,
       "prepTime": "30-40 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Stoccafisso ammollato\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Alloro\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Prezzemolo\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"291ccbc4-3af4-4cfe-a232-340168b16fef\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"fca9c1da-5f64-4cd1-bd34-509ae7364ac4\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"c976a63a-151e-4a52-894f-ad4e98c17c5e\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -58,7 +58,7 @@
       "yield": 4,
       "prepTime": "15-20 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"olio e peperoncino\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Cavolo nero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Aglio\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Peperoncino\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"46e72b69-e5c7-4796-a058-394c0cb4f222\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"7eac9eec-5989-4d9d-8357-e447c3f4cbb4\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"38c3db2d-c5c1-4eb0-8244-9544afc779e0\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -70,7 +70,7 @@
       "yield": 4,
       "prepTime": "10-15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Farina Grano saraceno\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Farina 00\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"f78c3207-6943-4b06-941c-1165d7687d2e\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"81400bd2-08b0-4c42-b618-6ad3ffa2d7da\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -82,7 +82,7 @@
       "yield": 4,
       "prepTime": "45 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Zucchero\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5,\"category\":\"Altro\"},{\"name\":\"Aceto balsamico\",\"quantity\":40,\"unit\":\"ml\",\"perPortion\":10,\"category\":\"Basi e Salse\"},{\"name\":\"Burro\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5,\"category\":\"Latticini\"}]",
+      "ingredients": "[{\"ingredientId\":\"69df2cbf-1c1c-4c77-87e3-b5542aa3cdf1\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5},{\"ingredientId\":\"105a5da3-d980-4ff3-9648-ba4759d72452\",\"quantity\":40,\"unit\":\"ml\",\"perPortion\":10},{\"ingredientId\":\"d3148992-99fe-4998-835f-0b21df6cd5a1\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5}]",
       "instructions": "[\"Affettare finemente le cipolle\",\"Rosolare nel burro a fuoco basso\",\"Cuocere 30 minuti mescolando spesso\",\"Aggiungere zucchero e aceto\",\"Cuocere altri 10 minuti fino a caramellatura\"]",
       "tips": "[\"Pazienza: cuocere a fuoco basso\",\"Non far bruciare\",\"Si conserva 5 giorni in frigo\"]",
       "isCustom": 0
@@ -94,7 +94,7 @@
       "yield": 4,
       "prepTime": "15-20 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Zucchero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"69df2cbf-1c1c-4c77-87e3-b5542aa3cdf1\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -106,7 +106,7 @@
       "yield": 4,
       "prepTime": "25-35 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Pere\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Zucchero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Zenzero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Erbe e Spezie\"}]",
+      "ingredients": "[{\"ingredientId\":\"af8a4bba-c07b-4749-86d7-1e51575fd9ec\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"69df2cbf-1c1c-4c77-87e3-b5542aa3cdf1\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"3bde1251-a3c8-4bdd-aeea-29b3800f2097\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -118,7 +118,7 @@
       "yield": 4,
       "prepTime": "40-50 min",
       "difficulty": "Difficile",
-      "ingredients": "[{\"name\":\"bollire le patate viola intere senza buccia\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Patate viola\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"b20690d2-ec5e-4bf3-a503-e933e21ef456\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"8bdbe4e7-3f45-4ac3-8897-4f8ac8d7e903\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -130,7 +130,7 @@
       "yield": 4,
       "prepTime": "10 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Burrata\",\"quantity\":400,\"unit\":\"g\",\"perPortion\":100,\"category\":\"Formaggi\"},{\"name\":\"Panna fresca\",\"quantity\":60,\"unit\":\"ml\",\"perPortion\":15,\"category\":\"Latticini\"}]",
+      "ingredients": "[{\"ingredientId\":\"0bb83319-c559-4d37-a947-1799baeeaaca\",\"quantity\":400,\"unit\":\"g\",\"perPortion\":100},{\"ingredientId\":\"c532efc7-fef0-41d0-bc7c-91d198ccb9d0\",\"quantity\":60,\"unit\":\"ml\",\"perPortion\":15}]",
       "instructions": "[\"Aprire la burrata e raccogliere il cuore cremoso\",\"Frullare il cuore con la panna\",\"Aggiungere l'olio a filo\",\"Aggiustare di sale\",\"Frullare fino a ottenere una crema liscia\"]",
       "tips": "[\"Usa burrata freschissima\",\"Non conservare: usare subito\",\"Ottima come base per pizze bianche\"]",
       "isCustom": 0
@@ -142,7 +142,7 @@
       "yield": 4,
       "prepTime": "35 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Carciofi\",\"quantity\":400,\"unit\":\"g\",\"perPortion\":100,\"category\":\"Verdure e Ortaggi\"},{\"name\":\"Aglio\",\"quantity\":8,\"unit\":\"g\",\"perPortion\":2,\"category\":\"Erbe e Spezie\"}]",
+      "ingredients": "[{\"ingredientId\":\"77755a9a-47d2-48b5-bb92-a99893105e18\",\"quantity\":400,\"unit\":\"g\",\"perPortion\":100},{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":8,\"unit\":\"g\",\"perPortion\":2}]",
       "instructions": "[\"Pulire i carciofi e tagliarli a spicchi\",\"Rosolare l'aglio nell'olio\",\"Aggiungere i carciofi e cuocere 20 minuti\",\"Frullare con un po' di acqua di cottura\",\"Aggiungere succo di limone\"]",
       "tips": "[\"Conserva i carciofi in acqua e limone\",\"Non far scurire i carciofi\",\"Usa carciofi freschi per miglior sapore\"]",
       "isCustom": 0
@@ -154,7 +154,7 @@
       "yield": 4,
       "prepTime": "15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Panna fresca\",\"quantity\":150,\"unit\":\"ml\",\"perPortion\":37.5,\"category\":\"Latticini\"},{\"name\":\"Latte intero\",\"quantity\":50,\"unit\":\"ml\",\"perPortion\":12.5,\"category\":\"Latticini\"}]",
+      "ingredients": "[{\"ingredientId\":\"c532efc7-fef0-41d0-bc7c-91d198ccb9d0\",\"quantity\":150,\"unit\":\"ml\",\"perPortion\":37.5},{\"ingredientId\":\"9ae8af03-bdc1-4367-82d2-5e282aef41cd\",\"quantity\":50,\"unit\":\"ml\",\"perPortion\":12.5}]",
       "instructions": "[\"Tagliare il gorgonzola a pezzetti\",\"Scaldare la panna e il latte a fuoco basso\",\"Aggiungere il gorgonzola\",\"Mescolare fino a completo scioglimento\",\"Aggiungere pepe nero\",\"Frullare per una crema più liscia (facoltativo)\"]",
       "tips": "[\"Usa gorgonzola dolce, non piccante\",\"Non far bollire\",\"Usa tiepida sulla pizza\"]",
       "isCustom": 0
@@ -166,7 +166,7 @@
       "yield": 4,
       "prepTime": "20-25 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Melone\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"e7980ceb-7de7-45a6-b033-c64aa3c02e3b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -178,7 +178,7 @@
       "yield": 4,
       "prepTime": "30 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"soffriggere nell’olio il sedano\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"la carota e la cipolla\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Sedano\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Carota\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"cipolla\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Patate\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"e0eeeaa7-4da6-4f4c-aa2e-8885c41c258a\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"113d2f4a-c374-4522-8027-933f9bb6d69a\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"6104a0f8-e297-48d1-ad42-d515259c07b7\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"e5c9e940-0d27-443e-bddf-b8e6a8bfb368\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"b6a7c389-c8be-42d4-bd93-f3412cb0f7ba\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"8b7ed48c-8dd4-4ed6-94aa-bf2b63c77a9d\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": "[\"Lessare le patate in acqua salata per 20-25 minuti\",\"Scolare e passare con lo schiacciapatate\",\"Scaldare latte e burro in un pentolino\",\"Incorporare gradualmente il latte caldo alle patate\",\"Mescolare fino a ottenere una crema liscia\",\"Aggiustare di sale\"]",
       "tips": "[\"Usa patate farinose per una crema più soffice\",\"Non far raffreddare prima di usare\",\"Conserva in frigo max 2 giorni\"]",
       "isCustom": 0
@@ -190,7 +190,7 @@
       "yield": 4,
       "prepTime": "20 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Panna fresca\",\"quantity\":150,\"unit\":\"ml\",\"perPortion\":37.5,\"category\":\"Latticini\"}]",
+      "ingredients": "[{\"ingredientId\":\"c532efc7-fef0-41d0-bc7c-91d198ccb9d0\",\"quantity\":150,\"unit\":\"ml\",\"perPortion\":37.5}]",
       "instructions": "[\"Tostare leggermente i pistacchi in padella\",\"Lasciar raffreddare e tritare finemente\",\"Frullare i pistacchi con la panna\",\"Aggiungere l'olio a filo continuando a frullare\",\"Aggiustare di sale\",\"Frullare fino a ottenere una crema liscia\"]",
       "tips": "[\"I pistacchi di Bronte hanno sapore più intenso\",\"Non tostare troppo i pistacchi\",\"Si conserva 3 giorni in frigo\"]",
       "isCustom": 0
@@ -202,7 +202,7 @@
       "yield": 4,
       "prepTime": "10 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Ricotta fresca\",\"quantity\":400,\"unit\":\"g\",\"perPortion\":100,\"category\":\"Formaggi\"},{\"name\":\"Panna fresca\",\"quantity\":80,\"unit\":\"ml\",\"perPortion\":20,\"category\":\"Latticini\"}]",
+      "ingredients": "[{\"ingredientId\":\"550bbadb-a6e0-4116-ab72-c786a8bfe293\",\"quantity\":400,\"unit\":\"g\",\"perPortion\":100},{\"ingredientId\":\"c532efc7-fef0-41d0-bc7c-91d198ccb9d0\",\"quantity\":80,\"unit\":\"ml\",\"perPortion\":20}]",
       "instructions": "[\"Setacciare la ricotta\",\"Montare la panna a neve morbida\",\"Incorporare delicatamente la ricotta\",\"Aggiungere sale e pepe\",\"Mescolare con movimenti dal basso verso l'alto\"]",
       "tips": "[\"Usa ricotta di pecora per più sapore\",\"Non montare troppo la panna\",\"Usa subito per miglior consistenza\"]",
       "isCustom": 0
@@ -214,7 +214,7 @@
       "yield": 4,
       "prepTime": "40 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Panna fresca\",\"quantity\":80,\"unit\":\"ml\",\"perPortion\":20,\"category\":\"Latticini\"}]",
+      "ingredients": "[{\"ingredientId\":\"c532efc7-fef0-41d0-bc7c-91d198ccb9d0\",\"quantity\":80,\"unit\":\"ml\",\"perPortion\":20}]",
       "instructions": "[\"Tagliare la zucca a cubetti\",\"Cuocere al forno a 180°C per 30 minuti\",\"Frullare la zucca con la panna\",\"Aggiungere noce moscata e sale\",\"Frullare fino a ottenere una crema liscia\"]",
       "tips": "[\"La zucca al forno ha più sapore\",\"Regola la consistenza con più o meno panna\",\"Ottima anche fredda\"]",
       "isCustom": 0
@@ -226,7 +226,7 @@
       "yield": 4,
       "prepTime": "20-25 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Barbabietola\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Yogurt o Latte\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"2f586938-155d-4279-b912-37bc72dedfec\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"b6b15eed-6e57-43ff-82e8-de9a739656ce\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -238,7 +238,7 @@
       "yield": 4,
       "prepTime": "20-25 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"100 gr di farina di castagne\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"1 bicchiere di latte e 1 di acqua\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"sale\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"pepe\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Farina di castagne\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Latte\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"804b0852-1ef0-4a34-84cf-99abca9cf955\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"b97353ad-28b9-4aa7-af53-c7f87c289909\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"5a47c5db-54d2-434d-a8a9-e2599274079d\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"778b247e-1539-4772-ac09-768945845ff4\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"d3ad5d2f-7f6f-4a3a-a3c6-55f8aa28189e\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"9f079215-3c40-4d7b-8ec0-0994d91c178f\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -250,7 +250,7 @@
       "yield": 4,
       "prepTime": "20-25 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Ceci\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Rosmarino\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"3beb37b2-7f52-4f57-8866-b4870861bda0\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"e7d75451-c10a-4e33-af4c-05c33cf0da66\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -262,7 +262,7 @@
       "yield": 4,
       "prepTime": "20-25 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Friarielli\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"b1f6a840-420d-4037-932b-537c999b0962\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -274,7 +274,7 @@
       "yield": 4,
       "prepTime": "20-25 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Sedano\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Verdure e Ortaggi\"},{\"name\":\"Patate\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Verdure e Ortaggi\"}]",
+      "ingredients": "[{\"ingredientId\":\"6104a0f8-e297-48d1-ad42-d515259c07b7\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"8b7ed48c-8dd4-4ed6-94aa-bf2b63c77a9d\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -286,7 +286,7 @@
       "yield": 4,
       "prepTime": "20-25 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"soffriggere nell’olio il sedano\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"la carota e la cipolla\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Sedano\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Carota\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"cipolla\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Patate\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"e0eeeaa7-4da6-4f4c-aa2e-8885c41c258a\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"113d2f4a-c374-4522-8027-933f9bb6d69a\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"6104a0f8-e297-48d1-ad42-d515259c07b7\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"e5c9e940-0d27-443e-bddf-b8e6a8bfb368\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"b6a7c389-c8be-42d4-bd93-f3412cb0f7ba\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"8b7ed48c-8dd4-4ed6-94aa-bf2b63c77a9d\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -298,7 +298,7 @@
       "yield": 4,
       "prepTime": "20-25 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Pecorino\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Burro\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Latte\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Farina\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"d66d8c76-c871-44e4-9850-27d6f64f9511\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"d3148992-99fe-4998-835f-0b21df6cd5a1\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"9f079215-3c40-4d7b-8ec0-0994d91c178f\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"07fc7b5c-d616-46f1-9310-19c45a738f92\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -310,7 +310,7 @@
       "yield": 4,
       "prepTime": "20-25 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Piselli\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Panna\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"cipolla o cipollotto\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"705ee207-2d53-4972-a129-67061e0210d6\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"f189e3a1-ce11-4ab1-aee4-18af7b72b20f\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"27df6ff3-7b70-4cc6-942e-a68af3667371\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -322,7 +322,7 @@
       "yield": 4,
       "prepTime": "20-25 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Zucchine\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Porri\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Panna\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"b74e2f18-ebad-4875-aa2f-bb81095d697b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"153e119e-9aac-4069-9c69-51ea63ffc675\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"f189e3a1-ce11-4ab1-aee4-18af7b72b20f\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -334,7 +334,7 @@
       "yield": 4,
       "prepTime": "15-20 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Patate\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"8b7ed48c-8dd4-4ed6-94aa-bf2b63c77a9d\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -346,7 +346,7 @@
       "yield": 4,
       "prepTime": "10-15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Aglio nero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"6bff6c64-7955-4636-9932-9d04605c0dc7\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -358,7 +358,7 @@
       "yield": 4,
       "prepTime": "15-20 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Finocchi\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"01168176-0c0c-4918-a624-32acec53ea9b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -370,7 +370,7 @@
       "yield": 4,
       "prepTime": "20 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Funghi champignon\",\"quantity\":500,\"unit\":\"g\",\"perPortion\":125,\"category\":\"Verdure e Ortaggi\"},{\"name\":\"Aglio\",\"quantity\":12,\"unit\":\"g\",\"perPortion\":3,\"category\":\"Erbe e Spezie\"},{\"name\":\"Prezzemolo\",\"quantity\":20,\"unit\":\"g\",\"perPortion\":5,\"category\":\"Erbe e Spezie\"}]",
+      "ingredients": "[{\"ingredientId\":\"f9522841-03bd-42ec-aea6-552e7d512a72\",\"quantity\":500,\"unit\":\"g\",\"perPortion\":125},{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":12,\"unit\":\"g\",\"perPortion\":3},{\"ingredientId\":\"c976a63a-151e-4a52-894f-ad4e98c17c5e\",\"quantity\":20,\"unit\":\"g\",\"perPortion\":5}]",
       "instructions": "[\"Pulire i funghi con un panno umido\",\"Affettare i funghi\",\"Rosolare l'aglio nell'olio\",\"Aggiungere i funghi e cuocere 10 minuti\",\"Aggiungere prezzemolo tritato\"]",
       "tips": "[\"Non lavare i funghi sotto acqua\",\"Cuocere a fuoco alto\",\"Usare subito per miglior sapore\"]",
       "isCustom": 0
@@ -382,7 +382,7 @@
       "yield": 4,
       "prepTime": "10-15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Arancia\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Limone\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Zucchero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"AgarAgar\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"dd2fceca-3cd7-46e1-b9f5-0429005d5324\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"1b7e4f72-fef4-483c-a824-8d675eab40c8\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"69df2cbf-1c1c-4c77-87e3-b5542aa3cdf1\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"11dc9867-8852-4f1e-8984-ee79da5630a3\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -394,7 +394,7 @@
       "yield": 4,
       "prepTime": "10-15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Avocado\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Lime\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"9b9b4ba7-a046-48cf-accf-431ff3e26267\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"67185357-8ee3-44e0-a4a4-e802569e9288\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -418,7 +418,7 @@
       "yield": 4,
       "prepTime": "10-15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Uova\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Olio\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Wasabi\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Limone\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"9ae41c3e-08e9-4548-955d-d8b4d6f27ec4\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"3c4d5257-1165-4173-a0a7-9d1e1aecc392\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"4c79a0ef-1ea6-4f53-bd5d-53733833ee01\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"1b7e4f72-fef4-483c-a824-8d675eab40c8\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -430,7 +430,7 @@
       "yield": 4,
       "prepTime": "30-45 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"marinatura: Salsa di soia\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Aceto balsamico\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Zenzero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Peperoncino\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Carpaccio di manzo\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Salsa di Soia\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Aceto balsamico\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"7cab8d3f-ca9b-44ca-8695-7781e4bb4a99\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"105a5da3-d980-4ff3-9648-ba4759d72452\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"3bde1251-a3c8-4bdd-aeea-29b3800f2097\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"38c3db2d-c5c1-4eb0-8244-9544afc779e0\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"5cac0599-685d-491d-b491-313191a22b7e\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"3fdce8b6-c9f7-471f-ae7c-5208fbc7a211\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"105a5da3-d980-4ff3-9648-ba4759d72452\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -442,7 +442,7 @@
       "yield": 4,
       "prepTime": "40 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Aglio\",\"quantity\":12,\"unit\":\"g\",\"perPortion\":3,\"category\":\"Erbe e Spezie\"},{\"name\":\"Basilico fresco\",\"quantity\":20,\"unit\":\"g\",\"perPortion\":5,\"category\":\"Erbe e Spezie\"}]",
+      "ingredients": "[{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":12,\"unit\":\"g\",\"perPortion\":3},{\"ingredientId\":\"f6ef2c49-66ee-4678-8322-9cd5398b83fd\",\"quantity\":20,\"unit\":\"g\",\"perPortion\":5}]",
       "instructions": "[\"Tagliare le melanzane a fette di 1 cm\",\"Salare e lasciar riposare 30 minuti\",\"Sciacquare e asciugare le melanzane\",\"Grigliare su piastra calda 3 minuti per lato\",\"Marinare con olio, aglio e basilico\",\"Lasciar riposare 1 ora prima dell'uso\"]",
       "tips": "[\"Il sale elimina l'amaro\",\"Non usare troppo olio\",\"Si conservano 3 giorni in frigo\"]",
       "isCustom": 0
@@ -466,7 +466,7 @@
       "yield": 4,
       "prepTime": "15-20 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Patate\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Aglio\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Rosmarino\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"8b7ed48c-8dd4-4ed6-94aa-bf2b63c77a9d\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"e7d75451-c10a-4e33-af4c-05c33cf0da66\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -478,7 +478,7 @@
       "yield": 4,
       "prepTime": "50 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Aglio\",\"quantity\":8,\"unit\":\"g\",\"perPortion\":2,\"category\":\"Erbe e Spezie\"},{\"name\":\"Prezzemolo\",\"quantity\":15,\"unit\":\"g\",\"perPortion\":3.75,\"category\":\"Erbe e Spezie\"}]",
+      "ingredients": "[{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":8,\"unit\":\"g\",\"perPortion\":2},{\"ingredientId\":\"c976a63a-151e-4a52-894f-ad4e98c17c5e\",\"quantity\":15,\"unit\":\"g\",\"perPortion\":3.75}]",
       "instructions": "[\"Arrostire i peperoni interi a 220°C per 30 minuti\",\"Girare a metà cottura\",\"Chiudere in un sacchetto di carta per 10 minuti\",\"Pelare i peperoni e togliere semi\",\"Tagliare a listarelle\",\"Condire con olio, aglio, prezzemolo e sale\"]",
       "tips": "[\"La pelle si toglie facilmente dopo il riposo\",\"Non sciacquare: perdi sapore\",\"Si conservano 5 giorni sott'olio\"]",
       "isCustom": 0
@@ -490,7 +490,7 @@
       "yield": 4,
       "prepTime": "15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Basilico fresco\",\"quantity\":80,\"unit\":\"g\",\"perPortion\":20,\"category\":\"Erbe e Spezie\"},{\"name\":\"Pinoli\",\"quantity\":40,\"unit\":\"g\",\"perPortion\":10,\"category\":\"Altro\"},{\"name\":\"Parmigiano Reggiano\",\"quantity\":60,\"unit\":\"g\",\"perPortion\":15,\"category\":\"Formaggi\"},{\"name\":\"Aglio\",\"quantity\":4,\"unit\":\"g\",\"perPortion\":1,\"category\":\"Erbe e Spezie\"}]",
+      "ingredients": "[{\"ingredientId\":\"f6ef2c49-66ee-4678-8322-9cd5398b83fd\",\"quantity\":80,\"unit\":\"g\",\"perPortion\":20},{\"ingredientId\":\"6407abe0-9e0b-495a-8ce1-29c92435f529\",\"quantity\":40,\"unit\":\"g\",\"perPortion\":10},{\"ingredientId\":\"36f855ed-0558-4630-89bc-95f49a47774c\",\"quantity\":60,\"unit\":\"g\",\"perPortion\":15},{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":4,\"unit\":\"g\",\"perPortion\":1}]",
       "instructions": "[\"Lavare e asciugare le foglie di basilico\",\"Tostare leggermente i pinoli\",\"Frullare basilico, pinoli, aglio e parmigiano\",\"Aggiungere l'olio a filo continuando a frullare\",\"Aggiustare di sale\"]",
       "tips": "[\"Non scaldare il pesto\",\"Conserva coperto d'olio in frigo\",\"Usa basilico genovese DOP\"]",
       "isCustom": 0
@@ -502,7 +502,7 @@
       "yield": 4,
       "prepTime": "10 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Olive taggiasche\",\"quantity\":200,\"unit\":\"g\",\"perPortion\":50,\"category\":\"Altro\"},{\"name\":\"Capperi\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5,\"category\":\"Altro\"},{\"name\":\"Aglio\",\"quantity\":6,\"unit\":\"g\",\"perPortion\":1.5,\"category\":\"Erbe e Spezie\"}]",
+      "ingredients": "[{\"ingredientId\":\"36fafe79-ca8e-420e-97aa-1c927491c827\",\"quantity\":200,\"unit\":\"g\",\"perPortion\":50},{\"ingredientId\":\"859d54d5-c2bb-4cd3-806e-f10a7aad35e0\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5},{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":6,\"unit\":\"g\",\"perPortion\":1.5}]",
       "instructions": "[\"Denocciolate le olive\",\"Dissalare i capperi\",\"Frullare olive, capperi e aglio\",\"Aggiungere olio e succo di limone\",\"Frullare fino a consistenza cremosa\"]",
       "tips": "[\"Le olive taggiasche sono più dolci\",\"Regola il sale: olive e capperi sono già salati\",\"Ottimo anche per bruschette\"]",
       "isCustom": 0
@@ -514,7 +514,7 @@
       "yield": 4,
       "prepTime": "15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Pecorino Romano\",\"quantity\":50,\"unit\":\"g\",\"perPortion\":12.5,\"category\":\"Formaggi\"},{\"name\":\"Basilico fresco\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5,\"category\":\"Erbe e Spezie\"}]",
+      "ingredients": "[{\"ingredientId\":\"4ccfb43a-7b3e-4b11-a436-ebb532b28f67\",\"quantity\":50,\"unit\":\"g\",\"perPortion\":12.5},{\"ingredientId\":\"f6ef2c49-66ee-4678-8322-9cd5398b83fd\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5}]",
       "instructions": "[\"Scolare i pomodori secchi dall'olio\",\"Tostare leggermente le mandorle\",\"Frullare pomodori, mandorle, pecorino e basilico\",\"Aggiungere l'olio a filo\",\"Frullare fino a consistenza cremosa\"]",
       "tips": "[\"Usa pomodori secchi di qualità\",\"Le mandorle danno dolcezza\",\"Si conserva 1 settimana in frigo coperto d'olio\"]",
       "isCustom": 0
@@ -526,7 +526,7 @@
       "yield": 4,
       "prepTime": "10 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Rucola\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Pinoli\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Pecorino\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Parmigiano\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"31ba229b-b839-4b9b-9d94-0e898c953c61\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"6407abe0-9e0b-495a-8ce1-29c92435f529\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"d66d8c76-c871-44e4-9850-27d6f64f9511\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"628f22a0-5c1b-4e9a-a700-be054dca547c\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": "[\"Lavare e asciugare la rucola\",\"Frullare rucola, noci e pecorino\",\"Aggiungere olio a filo\",\"Frullare fino a consistenza cremosa\"]",
       "tips": "[\"La rucola deve essere freschissima\",\"Usa subito per evitare ossidazione\",\"Ottimo anche per pasta\"]",
       "isCustom": 0
@@ -538,7 +538,7 @@
       "yield": 4,
       "prepTime": "10-15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Rucola\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Verdure e Ortaggi\"},{\"name\":\"Pinoli\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"31ba229b-b839-4b9b-9d94-0e898c953c61\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"6407abe0-9e0b-495a-8ce1-29c92435f529\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -550,7 +550,7 @@
       "yield": 4,
       "prepTime": "90 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Pomodorini ciliegino\",\"quantity\":500,\"unit\":\"g\",\"perPortion\":125,\"category\":\"Verdure e Ortaggi\"},{\"name\":\"Timo\",\"quantity\":8,\"unit\":\"g\",\"perPortion\":2,\"category\":\"Erbe e Spezie\"},{\"name\":\"Aglio\",\"quantity\":12,\"unit\":\"g\",\"perPortion\":3,\"category\":\"Erbe e Spezie\"}]",
+      "ingredients": "[{\"ingredientId\":\"836333c2-267b-471e-8383-ebb9fb242422\",\"quantity\":500,\"unit\":\"g\",\"perPortion\":125},{\"ingredientId\":\"03bc2aaa-fb49-45c4-953f-5bf43bff3066\",\"quantity\":8,\"unit\":\"g\",\"perPortion\":2},{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":12,\"unit\":\"g\",\"perPortion\":3}]",
       "instructions": "[\"Tagliare i pomodorini a metà\",\"Disporre su teglia con carta forno\",\"Condire con olio, timo e aglio\",\"Cuocere a 120°C per 90 minuti\",\"Lasciare raffreddare\"]",
       "tips": "[\"Temperatura bassa è fondamentale\",\"Si conservano sott'olio 1 settimana\",\"Ottimi anche per bruschette\"]",
       "isCustom": 0
@@ -562,7 +562,7 @@
       "yield": 4,
       "prepTime": "20-25 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Frullare il tutto a crudo\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Pomodori secchi\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Olio\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Aglio\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Peperoncino\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Origano\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Timo\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Capperi\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"7c732356-744b-4ac9-bac4-2900ad5fd158\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"4314537d-2fa2-4715-bff2-d4d68ca63b34\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"3c4d5257-1165-4173-a0a7-9d1e1aecc392\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"38c3db2d-c5c1-4eb0-8244-9544afc779e0\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"dea431cb-554b-41d1-a2fb-f3d65816be0f\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"03bc2aaa-fb49-45c4-953f-5bf43bff3066\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"859d54d5-c2bb-4cd3-806e-f10a7aad35e0\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -574,7 +574,7 @@
       "yield": 4,
       "prepTime": "15-20 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Pomodorini\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Zucchero di canna\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Worchester\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Tabasco\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"e1afa260-d511-49d9-b206-b83566c87dd3\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"a4cda15b-a52e-44fd-821d-7680604fc49b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"6e1bc774-498f-4447-a544-8d6198d54471\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"c52db6e8-3a33-485e-8472-65a2c23140af\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -586,7 +586,7 @@
       "yield": 4,
       "prepTime": "1-2 ore",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Polpa di pomodoro\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"cipolla\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Carote\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Aglio\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"7758ad7f-4193-43c8-a68e-d3aff9b227c1\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"b6a7c389-c8be-42d4-bd93-f3412cb0f7ba\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"9354a479-0773-4573-a049-85c1b12a4a60\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -598,7 +598,7 @@
       "yield": 4,
       "prepTime": "2-3 ore",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Sedano\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Verdure e Ortaggi\"}]",
+      "ingredients": "[{\"ingredientId\":\"6104a0f8-e297-48d1-ad42-d515259c07b7\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -622,7 +622,7 @@
       "yield": 4,
       "prepTime": "25 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Passata di pomodoro\",\"quantity\":200,\"unit\":\"ml\",\"perPortion\":50,\"category\":\"Verdure e Ortaggi\"},{\"name\":\"Paprika affumicata\",\"quantity\":8,\"unit\":\"g\",\"perPortion\":2,\"category\":\"Erbe e Spezie\"}]",
+      "ingredients": "[{\"ingredientId\":\"8bc3a6db-aee4-4a1e-b198-a0a7e80a2d3a\",\"quantity\":200,\"unit\":\"ml\",\"perPortion\":50},{\"ingredientId\":\"6ae40fa4-c504-45b4-8481-252590a4f25d\",\"quantity\":8,\"unit\":\"g\",\"perPortion\":2}]",
       "instructions": "[\"Mescolare tutti gli ingredienti in una pentola\",\"Portare a ebollizione\",\"Abbassare il fuoco e cuocere 15 minuti\",\"Mescolare spesso\",\"Lasciare raffreddare prima dell'uso\"]",
       "tips": "[\"Più cuoce, più si addensa\",\"Regola dolcezza con miele\",\"Si conserva 1 settimana in frigo\"]",
       "isCustom": 0
@@ -634,7 +634,7 @@
       "yield": 4,
       "prepTime": "10-15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Uova\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Olio arachidi\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Aglio\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Limone\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"sale\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"9ae41c3e-08e9-4548-955d-d8b4d6f27ec4\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"57cdcc77-ec85-4190-bcb8-c6eed1356896\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"1b7e4f72-fef4-483c-a824-8d675eab40c8\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"5a47c5db-54d2-434d-a8a9-e2599274079d\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -646,7 +646,7 @@
       "yield": 4,
       "prepTime": "15 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Funghi champignon\",\"quantity\":300,\"unit\":\"g\",\"perPortion\":75,\"category\":\"Verdure e Ortaggi\"},{\"name\":\"Panna fresca\",\"quantity\":200,\"unit\":\"ml\",\"perPortion\":50,\"category\":\"Latticini\"},{\"name\":\"Burro\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5,\"category\":\"Latticini\"}]",
+      "ingredients": "[{\"ingredientId\":\"f9522841-03bd-42ec-aea6-552e7d512a72\",\"quantity\":300,\"unit\":\"g\",\"perPortion\":75},{\"ingredientId\":\"c532efc7-fef0-41d0-bc7c-91d198ccb9d0\",\"quantity\":200,\"unit\":\"ml\",\"perPortion\":50},{\"ingredientId\":\"d3148992-99fe-4998-835f-0b21df6cd5a1\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5}]",
       "instructions": "[\"Pulire e affettare i funghi\",\"Rosolare i funghi nel burro\",\"Aggiungere la panna e cuocere 5 minuti\",\"Aggiungere la pasta di tartufo\",\"Frullare fino a ottenere una crema liscia\",\"Aggiustare di sale\"]",
       "tips": "[\"Usa pasta di tartufo di qualità\",\"Non far bollire dopo aver aggiunto il tartufo\",\"Ottima anche per condire pasta\"]",
       "isCustom": 0
@@ -658,7 +658,7 @@
       "yield": 4,
       "prepTime": "10-15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"frullare mango con olio\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"sale\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Mango\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Senape\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"d0716fa6-8046-4816-8ecc-b4cfa0fcc141\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"5a47c5db-54d2-434d-a8a9-e2599274079d\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"0440272f-a0e6-4e83-95b4-95056184e746\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"1c435491-4e83-4c70-9b66-259c08c71a66\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -670,7 +670,7 @@
       "yield": 4,
       "prepTime": "15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Nduja calabrese\",\"quantity\":150,\"unit\":\"g\",\"perPortion\":37.5,\"category\":\"Carni e Salumi\"},{\"name\":\"Passata di pomodoro\",\"quantity\":200,\"unit\":\"ml\",\"perPortion\":50,\"category\":\"Verdure e Ortaggi\"},{\"name\":\"Aglio\",\"quantity\":8,\"unit\":\"g\",\"perPortion\":2,\"category\":\"Erbe e Spezie\"}]",
+      "ingredients": "[{\"ingredientId\":\"cbed9b4b-53a1-4514-ab64-857e21721818\",\"quantity\":150,\"unit\":\"g\",\"perPortion\":37.5},{\"ingredientId\":\"8bc3a6db-aee4-4a1e-b198-a0a7e80a2d3a\",\"quantity\":200,\"unit\":\"ml\",\"perPortion\":50},{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":8,\"unit\":\"g\",\"perPortion\":2}]",
       "instructions": "[\"Rosolare l'aglio nell'olio\",\"Aggiungere la nduja e farla sciogliere\",\"Aggiungere la passata di pomodoro\",\"Cuocere a fuoco basso per 10 minuti\",\"Mescolare bene fino a ottenere una salsa omogenea\"]",
       "tips": "[\"La nduja è già molto piccante\",\"Regola la quantità secondo il gusto\",\"Ottima anche fredda\"]",
       "isCustom": 0
@@ -682,7 +682,7 @@
       "yield": 4,
       "prepTime": "10-15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Pistacchi\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Parmigiano\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Basilico\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"a62d0dda-bfed-4285-ba28-a1de22ec57b0\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"628f22a0-5c1b-4e9a-a700-be054dca547c\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"330e6538-e4a1-46c0-94ae-395f6805886c\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -694,7 +694,7 @@
       "yield": 4,
       "prepTime": "2-3 ore",
       "difficulty": "Difficile",
-      "ingredients": "[{\"name\":\"Carne\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Brodo di carne\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Vino rosso\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Aglio\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"cipolla\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Carota\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Sedano\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"945a93f1-7bf1-4591-bd57-c8864405b20a\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"ac0ae32f-3991-4563-a755-45ebb9964b53\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"764fad88-45da-4aa3-bbf5-6c2a7c83ceb6\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"b6a7c389-c8be-42d4-bd93-f3412cb0f7ba\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"e5c9e940-0d27-443e-bddf-b8e6a8bfb368\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"6104a0f8-e297-48d1-ad42-d515259c07b7\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -706,7 +706,7 @@
       "yield": 4,
       "prepTime": "15-20 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Limone\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Parmigiano\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"1b7e4f72-fef4-483c-a824-8d675eab40c8\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"628f22a0-5c1b-4e9a-a700-be054dca547c\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -718,7 +718,7 @@
       "yield": 4,
       "prepTime": "20-25 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Pulire gamberi\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"unire lime\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Menta\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"cocco\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"kiwi\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"sale e pepe\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Gamberi\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Lime\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Menta\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"cocco\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"kiwi\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"d22b0878-b8c9-4805-8096-f07c94c9bee0\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"d9bf60c6-023b-49e6-87b7-b860a41be079\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"30b90a50-2849-4310-b841-22f6e156d984\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"8e82f41e-30df-4431-bd19-8c66751a722b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"82162646-fb57-4d85-9363-55c1a633ec21\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"14ddd066-6d8a-4556-8962-b1b6d99afc66\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"c8df3e0c-7b94-4b38-ba86-db33f0d0aa04\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"67185357-8ee3-44e0-a4a4-e802569e9288\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"30b90a50-2849-4310-b841-22f6e156d984\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"8e82f41e-30df-4431-bd19-8c66751a722b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"82162646-fb57-4d85-9363-55c1a633ec21\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -730,7 +730,7 @@
       "yield": 4,
       "prepTime": "15-20 min",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Filetti di tonno\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Semi di sesamo\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Salsa di Soia\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Miele\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Zenzero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"840c473f-d012-4463-917e-2d3d0c3817a7\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"3bf46ed5-fc07-41bf-8382-67aa063daba9\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"3fdce8b6-c9f7-471f-ae7c-5208fbc7a211\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"18670e50-e1c4-4e0e-b870-6c3744d345a5\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"3bde1251-a3c8-4bdd-aeea-29b3800f2097\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -742,7 +742,7 @@
       "yield": 4,
       "prepTime": "10-15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Uova\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Latte\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"9ae41c3e-08e9-4548-955d-d8b4d6f27ec4\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"9f079215-3c40-4d7b-8ec0-0994d91c178f\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -754,7 +754,7 @@
       "yield": 4,
       "prepTime": "10-15 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Uova\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"sale\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"9ae41c3e-08e9-4548-955d-d8b4d6f27ec4\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"5a47c5db-54d2-434d-a8a9-e2599274079d\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -766,7 +766,7 @@
       "yield": 4,
       "prepTime": "15-20 min",
       "difficulty": "Facile",
-      "ingredients": "[{\"name\":\"Patate\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Verza\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Burro\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Aglio\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Parmigiano\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"8b7ed48c-8dd4-4ed6-94aa-bf2b63c77a9d\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"36e1b844-a1da-4fcb-ab9a-b7cc232d0e39\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"d3148992-99fe-4998-835f-0b21df6cd5a1\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"c2fc99d4-6cc6-4551-bd29-46f72b68b11b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"628f22a0-5c1b-4e9a-a700-be054dca547c\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -778,7 +778,7 @@
       "yield": 4,
       "prepTime": "",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Pere\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Zucchero di canna\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Zenzero\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Limone\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"af8a4bba-c07b-4749-86d7-1e51575fd9ec\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"a4cda15b-a52e-44fd-821d-7680604fc49b\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"3bde1251-a3c8-4bdd-aeea-29b3800f2097\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"1b7e4f72-fef4-483c-a824-8d675eab40c8\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": "[]",
       "tips": "[]",
       "isCustom": 0
@@ -790,7 +790,7 @@
       "yield": 4,
       "prepTime": "",
       "difficulty": "Media",
-      "ingredients": "[{\"name\":\"Gamberi\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Scampi\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Calamari\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Cozze\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Zafferano\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"},{\"name\":\"Paprika dolce\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":\"25.00\",\"category\":\"Altro\"}]",
+      "ingredients": "[{\"ingredientId\":\"c8df3e0c-7b94-4b38-ba86-db33f0d0aa04\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"4278554b-33eb-4394-b3f6-2037f3570c6a\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"e641ac7a-599c-4725-99fb-f9240ae0dbdb\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"4343c2ad-5bda-45af-b677-33c2f0a72161\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"37a8a29b-3421-40a0-908b-9ca0e6f1d2ee\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"3f45490c-417a-4ee9-aa39-e74429c5ed83\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": "[]",
       "tips": "[]",
       "isCustom": 0

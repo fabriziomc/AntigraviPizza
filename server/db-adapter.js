@@ -516,60 +516,83 @@ class DatabaseAdapter {
         return preps;
     }
 
-    // Helper to expand ingredient references
+    // Helper to expand ingredient references - OPTIMIZED for batch queries
     async expandIngredients(ingredients) {
         if (!ingredients || ingredients.length === 0) return [];
 
-        const expanded = [];
+        // Collect all ingredient IDs that need to be fetched
+        const idsToFetch = [];
+        const expandedMap = new Map();
 
         for (const ing of ingredients) {
             // If it already has a name, it's already expanded
             if (ing.name) {
-                expanded.push(ing);
                 continue;
             }
+            // Collect IDs that need fetching
+            if (ing.ingredientId && !expandedMap.has(ing.ingredientId)) {
+                idsToFetch.push(ing.ingredientId);
+            }
+        }
 
-            // Otherwise, fetch from database
-            if (ing.ingredientId) {
-                try {
-                    let ingredient;
+        // Batch fetch all ingredients in a single query
+        if (idsToFetch.length > 0) {
+            try {
+                let fetchedIngredients;
 
-                    if (this.isSQLite) {
-                        const stmt = this.db.prepare(`
+                if (this.isSQLite) {
+                    const placeholders = idsToFetch.map(() => '?').join(',');
+                    const stmt = this.db.prepare(`
+                        SELECT i.*, c.name as categoryName, c.icon as categoryIcon
+                        FROM Ingredients i
+                        LEFT JOIN Categories c ON i.categoryId = c.id
+                        WHERE i.id IN (${placeholders})
+                    `);
+                    fetchedIngredients = stmt.all(...idsToFetch);
+                } else {
+                    // Turso - build IN clause with placeholders
+                    const placeholders = idsToFetch.map(() => '?').join(',');
+                    const result = await this.db.execute({
+                        sql: `
                             SELECT i.*, c.name as categoryName, c.icon as categoryIcon
                             FROM Ingredients i
                             LEFT JOIN Categories c ON i.categoryId = c.id
-                            WHERE i.id = ?
-                        `);
-                        ingredient = stmt.get(ing.ingredientId);
-                    } else {
-                        // Turso
-                        const result = await this.db.execute({
-                            sql: `
-                                SELECT i.*, c.name as categoryName, c.icon as categoryIcon
-                                FROM Ingredients i
-                                LEFT JOIN Categories c ON i.categoryId = c.id
-                                WHERE i.id = ?
-                            `,
-                            args: [ing.ingredientId]
-                        });
-                        ingredient = result.rows[0];
-                    }
+                            WHERE i.id IN (${placeholders})
+                        `,
+                        args: idsToFetch
+                    });
+                    fetchedIngredients = result.rows;
+                }
 
-                    if (ingredient) {
-                        expanded.push({
-                            ...ing,
-                            name: ingredient.name,
-                            category: ingredient.categoryName,
-                            categoryIcon: ingredient.categoryIcon,
-                            defaultUnit: ingredient.defaultUnit
-                        });
-                    } else {
-                        console.warn(`Ingredient not found: ${ing.ingredientId}`);
-                        expanded.push(ing);
-                    }
-                } catch (error) {
-                    console.error(`Error expanding ingredient ${ing.ingredientId}:`, error);
+                // Create a map of id -> ingredient data
+                for (const ingredient of fetchedIngredients) {
+                    expandedMap.set(ingredient.id, {
+                        name: ingredient.name,
+                        category: ingredient.categoryName,
+                        categoryIcon: ingredient.categoryIcon,
+                        defaultUnit: ingredient.defaultUnit
+                    });
+                }
+            } catch (error) {
+                console.error('Error batch fetching ingredients:', error);
+            }
+        }
+
+        // Now build the expanded array
+        const expanded = [];
+        for (const ing of ingredients) {
+            if (ing.name) {
+                // Already expanded
+                expanded.push(ing);
+            } else if (ing.ingredientId) {
+                const ingredientData = expandedMap.get(ing.ingredientId);
+                if (ingredientData) {
+                    expanded.push({
+                        ...ing,
+                        ...ingredientData
+                    });
+                } else {
+                    console.warn(`Ingredient not found: ${ing.ingredientId}`);
                     expanded.push(ing);
                 }
             } else {
