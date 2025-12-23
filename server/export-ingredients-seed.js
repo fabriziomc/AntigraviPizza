@@ -28,6 +28,7 @@ const seedData = {
     exportDate: new Date().toISOString(),
     count: ingredients.length,
     ingredients: ingredients.map(ing => ({
+        id: ing.id,
         name: ing.name,
         category: ing.categoryName,
         subcategory: ing.subcategory,

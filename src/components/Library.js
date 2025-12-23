@@ -383,7 +383,44 @@ async function showRecipeModal(recipeId) {
             <div class="recipe-modal-section">
                 <h4 style="color: var(--color-gray-400); font-size: 0.9rem; margin-bottom: 0.5rem;">Ingredienti</h4>
                 <ul class="ingredients-list">
-                ${toppingIngredients.map(ing => `
+                ${(() => {
+      // Combine all ingredients with timing info
+      const allIngredients = [];
+
+      // Add base ingredients
+      toppingIngredients.forEach(ing => {
+        allIngredients.push({
+          type: 'ingredient',
+          timing: ing.postBake ? 'after' : 'before',
+          data: ing
+        });
+      });
+
+      // Add preparations
+      if (recipe.preparations && recipe.preparations.length > 0) {
+        recipe.preparations.forEach(prep => {
+          const prepData = PREPARATIONS.find(p => p.id === prep.id);
+          if (prepData) {
+            allIngredients.push({
+              type: 'preparation',
+              timing: prep.timing === 'after' ? 'after' : 'before',
+              data: { prep, prepData }
+            });
+          }
+        });
+      }
+
+      // Sort by timing: 'before' first, then 'after'
+      allIngredients.sort((a, b) => {
+        if (a.timing === b.timing) return 0;
+        return a.timing === 'before' ? -1 : 1;
+      });
+
+      // Render all ingredients
+      return allIngredients.map(item => {
+        if (item.type === 'ingredient') {
+          const ing = item.data;
+          return `
                     <li class="ingredient-item" style="${ing.postBake ? 'border-left: 3px solid var(--color-accent);' : ''}">
                     <div style="display: flex; flex-direction: column; width: 100%;">
                         <div style="display: flex; justify-content: space-between; width: 100%;">
@@ -393,11 +430,10 @@ async function showRecipeModal(recipeId) {
                         ${ing.postBake ? '<span style="font-size: 0.75rem; color: var(--color-accent); margin-top: 2px;">📤 In uscita</span>' : ''}
                     </div>
                     </li>
-                `).join('')}
-                ${recipe.preparations && recipe.preparations.length > 0 ? recipe.preparations.map(prep => {
-    const prepData = PREPARATIONS.find(p => p.id === prep.id);
-    if (!prepData) return '';
-    return `
+                `;
+        } else {
+          const { prep, prepData } = item.data;
+          return `
                     <li class="ingredient-item" style="background: rgba(249, 115, 22, 0.05); border-left: 3px solid var(--color-accent);">
                     <div style="display: flex; flex-direction: column; width: 100%;">
                         <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; gap: 0.5rem;">
@@ -413,22 +449,25 @@ async function showRecipeModal(recipeId) {
                     </div>
                     </li>
                   `;
-  }).join('') : ''}
+        }
+      }).join('');
+    })()}
                 </ul>
             </div>
+
 
             <div class="recipe-modal-section">
                 <h4 style="color: var(--color-gray-400); font-size: 0.9rem; margin-bottom: 0.5rem;">📥 Distribuzione Ingredienti e Cottura</h4>
                 <ol class="instructions-list">
                     ${renderInstructions(toppingInstructions.filter(inst => {
-    const lower = inst.toLowerCase();
-    // Exclude post-bake instructions
-    if (lower.includes("all'uscita dal forno")) return false;
-    // If there are post-bake instructions, also exclude "Servire" (it will go at the end)
-    if (toppingInstructions.some(i => i.toLowerCase().includes("all'uscita dal forno")) &&
-      lower.includes("servire")) return false;
-    return true;
-  }))}
+      const lower = inst.toLowerCase();
+      // Exclude post-bake instructions
+      if (lower.includes("all'uscita dal forno")) return false;
+      // If there are post-bake instructions, also exclude "Servire" (it will go at the end)
+      if (toppingInstructions.some(i => i.toLowerCase().includes("all'uscita dal forno")) &&
+        lower.includes("servire")) return false;
+      return true;
+    }))}
                 </ol>
             </div>
 
@@ -436,17 +475,17 @@ async function showRecipeModal(recipeId) {
             <div class="recipe-modal-section" style="margin-top: 1rem;">
                 <h4 style="color: var(--color-accent); font-size: 0.9rem; margin-bottom: 0.5rem;">📤 Ingredienti Post Cottura</h4>
                 <ol class="instructions-list" start="${toppingInstructions.filter(inst => {
-    const lower = inst.toLowerCase();
-    if (lower.includes("all'uscita dal forno")) return false;
-    if (toppingInstructions.some(i => i.toLowerCase().includes("all'uscita dal forno")) &&
-      lower.includes("servire")) return false;
-    return true;
-  }).length + 1}">
+      const lower = inst.toLowerCase();
+      if (lower.includes("all'uscita dal forno")) return false;
+      if (toppingInstructions.some(i => i.toLowerCase().includes("all'uscita dal forno")) &&
+        lower.includes("servire")) return false;
+      return true;
+    }).length + 1}">
                     ${renderInstructions(toppingInstructions.filter(inst => {
-    const lower = inst.toLowerCase();
-    // Include post-bake instructions and "Servire"
-    return lower.includes("all'uscita dal forno") || lower.includes("servire");
-  }))}
+      const lower = inst.toLowerCase();
+      // Include post-bake instructions and "Servire"
+      return lower.includes("all'uscita dal forno") || lower.includes("servire");
+    }))}
                 </ol>
             </div>
             ` : ''}
