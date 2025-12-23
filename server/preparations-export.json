@@ -1,0 +1,2130 @@
+{
+  "version": "1.0",
+  "exportDate": "2025-12-23T05:11:23.971Z",
+  "totalCount": 64,
+  "missingIngredientsCount": 14,
+  "preparations": [
+    {
+      "id": "1800112f-fa60-4234-a5af-0c2f75c1c2b1",
+      "name": "Ananas caramellato",
+      "category": "Altro",
+      "description": "https://blog.giallozafferano.it/crisemaxincucina/ananas-caramellato/",
+      "yield": 4,
+      "prepTime": "25-35 min",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Ananas",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Altro"
+        },
+        {
+          "name": "Burro",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Latticini"
+        },
+        {
+          "name": "Zucchero",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Altro"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "fe4e560f-082e-46a4-a652-5447e1e293d4",
+      "name": "Anatra",
+      "category": "Altro",
+      "description": "https://www.cookaround.com/ricetta/petto-d-anatra-all-arancia.html",
+      "yield": 4,
+      "prepTime": "45-60 min",
+      "difficulty": "Difficile",
+      "ingredients": [
+        {
+          "name": "Burro",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Latticini"
+        },
+        {
+          "name": "Timo",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "fbbccf0d-0fda-4678-8211-a1e4c1227a0e",
+      "name": "Baccalà in vasocottura",
+      "category": "Altro",
+      "description": "https://blog.giallozafferano.it/neltegamesulfuoco/baccala-in-oliocottura-in-vasocottura/",
+      "yield": 4,
+      "prepTime": "20-30 min",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Prezzemolo",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "2f2ad807-95e3-4671-9fae-bdb1940b904a",
+      "name": "Baccalà mantecato",
+      "category": "Altro",
+      "description": "https://ricette.giallozafferano.it/Baccala-mantecato-alla-veneziana.html",
+      "yield": 4,
+      "prepTime": "30-40 min",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Prezzemolo",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "24254dde-d864-429c-94fe-4ba66590506b",
+      "name": "Chips di grano saraceno",
+      "category": "Altro",
+      "description": "Creare chips croccanti con farina di grano saraceno",
+      "yield": 4,
+      "prepTime": "10-15 min",
+      "difficulty": "Facile",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    },
+    {
+      "id": "88cb77a0-9990-47a7-8936-cd5242e5cbfe",
+      "name": "Composta pere e zenzero",
+      "category": "Altro",
+      "description": "https://ricette.giallozafferano.it/Confettura-pere-e-zenzero.html",
+      "yield": 4,
+      "prepTime": "25-35 min",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Pere",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Altro"
+        },
+        {
+          "name": "Zucchero",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Altro"
+        },
+        {
+          "name": "Zenzero",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "970535b3-5900-456d-a577-8c6f414e51a3",
+      "name": "Coralli viola",
+      "category": "Altro",
+      "description": "Bollire le patate viola intere senza buccia, dopodiché congelare e una volta raggiunta la temperatura ideale, grattugiare su di un foglio di carta forno e cuocere a 60/70 gradi",
+      "yield": 4,
+      "prepTime": "40-50 min",
+      "difficulty": "Difficile",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    },
+    {
+      "id": "3629ac0b-9eb0-4b90-83f3-870e1fb59c54",
+      "name": "Manzo marinato",
+      "category": "Altro",
+      "description": "Marinatura: Salsa di soia, Aceto balsamico, Zenzero, Peperoncino",
+      "yield": 4,
+      "prepTime": "30-45 min",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Aceto Balsamico",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Basi e Salse"
+        },
+        {
+          "name": "Zenzero",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "4843f4bf-9afd-465d-9a7f-76aca6d103da",
+      "name": "Stracotto di manzo",
+      "category": "Altro",
+      "description": "https://ricette.giallozafferano.it/Stracotto-di-manzo.html",
+      "yield": 4,
+      "prepTime": "2-3 ore",
+      "difficulty": "Difficile",
+      "ingredients": [
+        {
+          "name": "Aglio",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        },
+        {
+          "name": "Sedano",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Verdure e Ortaggi"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "27737ebf-50f9-41d2-ac4b-1de70dee18d0",
+      "name": "Tartare di Fassona",
+      "category": "Altro",
+      "description": "https://blog.giallozafferano.it/cucinaconsara/tartare-di-fassona-piemontese/",
+      "yield": 4,
+      "prepTime": "15-20 min",
+      "difficulty": "Media",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    },
+    {
+      "id": "97a47513-8551-4056-b11d-f31a387dac6c",
+      "name": "Tartare di Gamberi",
+      "category": "Altro",
+      "description": "Pulire gamberi, unire lime, menta, cocco, kiwi, sale e pepe",
+      "yield": 4,
+      "prepTime": "20-25 min",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Menta",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "d46cd61a-42a3-4305-94cf-1f1431093c95",
+      "name": "Tonno Tataki",
+      "category": "Altro",
+      "description": "https://blog.giallozafferano.it/cioccovaniglia/tataki-di-tonno/",
+      "yield": 4,
+      "prepTime": "15-20 min",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Semi di Sesamo",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Altro"
+        },
+        {
+          "name": "Zenzero",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "9ab369b0-0c16-4916-b121-f63681d230a1",
+      "name": "Uova strapazzate",
+      "category": "Altro",
+      "description": "Tuorlo d'uovo e latte in stessa quantità cuocere in microonde fino a rassodamento. Poi stracciare",
+      "yield": 4,
+      "prepTime": "10-15 min",
+      "difficulty": "Facile",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    },
+    {
+      "id": "7a0f2564-5f91-487b-92d7-dcec579dd984",
+      "name": "Uovo marinato",
+      "category": "Altro",
+      "description": "Marinare uova in salamoia",
+      "yield": 4,
+      "prepTime": "10-15 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Uova",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Latticini"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "486b323a-b6c7-4484-95e5-e8b8b8c593bb",
+      "name": "Verza e Patate",
+      "category": "Altro",
+      "description": "https://ricette.giallozafferano.it/Pizzoccheri-alla-valtellinese.html",
+      "yield": 4,
+      "prepTime": "15-20 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Patate",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Verdure e Ortaggi"
+        },
+        {
+          "name": "Verza",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Verdure e Ortaggi"
+        },
+        {
+          "name": "Burro",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Latticini"
+        },
+        {
+          "name": "Aglio",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "668ff2bc-00b1-4dc4-8703-0fd0a5b516f0",
+      "name": "Finocchi grigliati",
+      "category": "Confit/Grigliati",
+      "description": "https://blog.giallozafferano.it/piovonoricette/ricetta-finocchi-grigliati/",
+      "yield": 4,
+      "prepTime": "15-20 min",
+      "difficulty": "Facile",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    },
+    {
+      "id": "melanzane-grigliate",
+      "name": "Melanzane Grigliate",
+      "category": "Confit/Grigliati",
+      "description": "Melanzane grigliate marinate",
+      "yield": 4,
+      "prepTime": "40 min",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Melanzane",
+          "quantity": 600,
+          "unit": "g",
+          "perPortion": 150,
+          "category": "Verdure"
+        },
+        {
+          "name": "Olio EVO",
+          "quantity": 80,
+          "unit": "ml",
+          "perPortion": 20,
+          "category": "Oli"
+        },
+        {
+          "name": "Aglio",
+          "quantity": 12,
+          "unit": "g",
+          "perPortion": 3,
+          "category": "Verdure"
+        },
+        {
+          "name": "Basilico fresco",
+          "quantity": 20,
+          "unit": "g",
+          "perPortion": 5,
+          "category": "Erbe"
+        },
+        {
+          "name": "Sale",
+          "quantity": 5,
+          "unit": "g",
+          "perPortion": 1.25,
+          "category": "Spezie"
+        }
+      ],
+      "instructions": [
+        "Tagliare le melanzane a fette di 1 cm",
+        "Salare e lasciar riposare 30 minuti",
+        "Sciacquare e asciugare le melanzane",
+        "Grigliare su piastra calda 3 minuti per lato",
+        "Marinare con olio, aglio e basilico",
+        "Lasciar riposare 1 ora prima dell'uso"
+      ],
+      "tips": [
+        "Il sale elimina l'amaro",
+        "Non usare troppo olio",
+        "Si conservano 3 giorni in frigo"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "4de60002-134e-4ad7-846b-acc489580213",
+      "name": "Melanzane grigliate",
+      "category": "Confit/Grigliati",
+      "description": "Grigliare a fette verticali sottili",
+      "yield": 4,
+      "prepTime": "15-20 min",
+      "difficulty": "Facile",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    },
+    {
+      "id": "peperoni-arrosto",
+      "name": "Peperoni Arrosto",
+      "category": "Confit/Grigliati",
+      "description": "Peperoni arrostiti e pelati",
+      "yield": 4,
+      "prepTime": "50 min",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Peperoni rossi",
+          "quantity": 600,
+          "unit": "g",
+          "perPortion": 150,
+          "category": "Verdure"
+        },
+        {
+          "name": "Olio EVO",
+          "quantity": 60,
+          "unit": "ml",
+          "perPortion": 15,
+          "category": "Oli"
+        },
+        {
+          "name": "Aglio",
+          "quantity": 8,
+          "unit": "g",
+          "perPortion": 2,
+          "category": "Verdure"
+        },
+        {
+          "name": "Prezzemolo",
+          "quantity": 15,
+          "unit": "g",
+          "perPortion": 3.75,
+          "category": "Erbe"
+        },
+        {
+          "name": "Sale",
+          "quantity": 4,
+          "unit": "g",
+          "perPortion": 1,
+          "category": "Spezie"
+        }
+      ],
+      "instructions": [
+        "Arrostire i peperoni interi a 220°C per 30 minuti",
+        "Girare a metà cottura",
+        "Chiudere in un sacchetto di carta per 10 minuti",
+        "Pelare i peperoni e togliere semi",
+        "Tagliare a listarelle",
+        "Condire con olio, aglio, prezzemolo e sale"
+      ],
+      "tips": [
+        "La pelle si toglie facilmente dopo il riposo",
+        "Non sciacquare: perdi sapore",
+        "Si conservano 5 giorni sott'olio"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "pomodori-confit",
+      "name": "Pomodori Confit",
+      "category": "Confit/Grigliati",
+      "description": "Pomodorini confit al forno",
+      "yield": 4,
+      "prepTime": "90 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Pomodorini ciliegino",
+          "quantity": 500,
+          "unit": "g",
+          "perPortion": 125,
+          "category": "Verdure"
+        },
+        {
+          "name": "Olio EVO",
+          "quantity": 100,
+          "unit": "ml",
+          "perPortion": 25,
+          "category": "Oli"
+        },
+        {
+          "name": "Timo",
+          "quantity": 8,
+          "unit": "g",
+          "perPortion": 2,
+          "category": "Erbe"
+        },
+        {
+          "name": "Aglio",
+          "quantity": 12,
+          "unit": "g",
+          "perPortion": 3,
+          "category": "Verdure"
+        }
+      ],
+      "instructions": [
+        "Tagliare i pomodorini a metà",
+        "Disporre su teglia con carta forno",
+        "Condire con olio, timo e aglio",
+        "Cuocere a 120°C per 90 minuti",
+        "Lasciare raffreddare"
+      ],
+      "tips": [
+        "Temperatura bassa è fondamentale",
+        "Si conservano sott'olio 1 settimana",
+        "Ottimi anche per bruschette"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "6f4284d0-4e49-4968-8de7-1fa6b7facb33",
+      "name": "Pomodorini confit",
+      "category": "Confit/Grigliati",
+      "description": "https://ricette.giallozafferano.it/Pomodori-confit.html",
+      "yield": 4,
+      "prepTime": "15-20 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Zucchero",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Altro"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "crema-burrata",
+      "name": "Crema di Burrata",
+      "category": "Creme",
+      "description": "Crema delicata di burrata pugliese",
+      "yield": 4,
+      "prepTime": "10 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Burrata",
+          "quantity": 400,
+          "unit": "g",
+          "perPortion": 100,
+          "category": "Formaggi"
+        },
+        {
+          "name": "Panna fresca",
+          "quantity": 60,
+          "unit": "ml",
+          "perPortion": 15,
+          "category": "Latticini"
+        },
+        {
+          "name": "Olio EVO",
+          "quantity": 30,
+          "unit": "ml",
+          "perPortion": 7.5,
+          "category": "Oli"
+        },
+        {
+          "name": "Sale",
+          "quantity": 3,
+          "unit": "g",
+          "perPortion": 0.75,
+          "category": "Spezie"
+        }
+      ],
+      "instructions": [
+        "Aprire la burrata e raccogliere il cuore cremoso",
+        "Frullare il cuore con la panna",
+        "Aggiungere l'olio a filo",
+        "Aggiustare di sale",
+        "Frullare fino a ottenere una crema liscia"
+      ],
+      "tips": [
+        "Usa burrata freschissima",
+        "Non conservare: usare subito",
+        "Ottima come base per pizze bianche"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "crema-carciofi",
+      "name": "Crema di Carciofi",
+      "category": "Creme",
+      "description": "Crema delicata di carciofi",
+      "yield": 4,
+      "prepTime": "35 min",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Carciofi",
+          "quantity": 400,
+          "unit": "g",
+          "perPortion": 100,
+          "category": "Verdure"
+        },
+        {
+          "name": "Aglio",
+          "quantity": 8,
+          "unit": "g",
+          "perPortion": 2,
+          "category": "Verdure"
+        },
+        {
+          "name": "Olio EVO",
+          "quantity": 60,
+          "unit": "ml",
+          "perPortion": 15,
+          "category": "Oli"
+        },
+        {
+          "name": "Limone",
+          "quantity": 20,
+          "unit": "ml",
+          "perPortion": 5,
+          "category": "Altro"
+        }
+      ],
+      "instructions": [
+        "Pulire i carciofi e tagliarli a spicchi",
+        "Rosolare l'aglio nell'olio",
+        "Aggiungere i carciofi e cuocere 20 minuti",
+        "Frullare con un po' di acqua di cottura",
+        "Aggiungere succo di limone"
+      ],
+      "tips": [
+        "Conserva i carciofi in acqua e limone",
+        "Non far scurire i carciofi",
+        "Usa carciofi freschi per miglior sapore"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "crema-gorgonzola",
+      "name": "Crema di Gorgonzola",
+      "category": "Creme",
+      "description": "Crema vellutata di gorgonzola dolce",
+      "yield": 4,
+      "prepTime": "15 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Gorgonzola DOP dolce",
+          "quantity": 300,
+          "unit": "g",
+          "perPortion": 75,
+          "category": "Formaggi"
+        },
+        {
+          "name": "Panna fresca",
+          "quantity": 150,
+          "unit": "ml",
+          "perPortion": 37.5,
+          "category": "Latticini"
+        },
+        {
+          "name": "Latte intero",
+          "quantity": 50,
+          "unit": "ml",
+          "perPortion": 12.5,
+          "category": "Latticini"
+        },
+        {
+          "name": "Pepe nero",
+          "quantity": 2,
+          "unit": "g",
+          "perPortion": 0.5,
+          "category": "Spezie"
+        }
+      ],
+      "instructions": [
+        "Tagliare il gorgonzola a pezzetti",
+        "Scaldare la panna e il latte a fuoco basso",
+        "Aggiungere il gorgonzola",
+        "Mescolare fino a completo scioglimento",
+        "Aggiungere pepe nero",
+        "Frullare per una crema più liscia (facoltativo)"
+      ],
+      "tips": [
+        "Usa gorgonzola dolce, non piccante",
+        "Non far bollire",
+        "Usa tiepida sulla pizza"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "89108db3-f49b-425e-9967-8dba86aba386",
+      "name": "Crema di Melone",
+      "category": "Creme",
+      "description": "Frullare melone e aggiungere olio per emulsionare. Aggiustare di sale e pepe",
+      "yield": 4,
+      "prepTime": "20-25 min",
+      "difficulty": "Facile",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    },
+    {
+      "id": "crema-patate",
+      "name": "Crema di Patate",
+      "category": "Creme",
+      "description": "Crema vellutata di patate per pizza bianca",
+      "yield": 4,
+      "prepTime": "30 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Patate",
+          "quantity": 500,
+          "unit": "g",
+          "perPortion": 125,
+          "category": "Verdure"
+        },
+        {
+          "name": "Latte intero",
+          "quantity": 100,
+          "unit": "ml",
+          "perPortion": 25,
+          "category": "Latticini"
+        },
+        {
+          "name": "Burro",
+          "quantity": 50,
+          "unit": "g",
+          "perPortion": 12.5,
+          "category": "Latticini"
+        },
+        {
+          "name": "Sale",
+          "quantity": 5,
+          "unit": "g",
+          "perPortion": 1.25,
+          "category": "Spezie"
+        }
+      ],
+      "instructions": [
+        "Lessare le patate in acqua salata per 20-25 minuti",
+        "Scolare e passare con lo schiacciapatate",
+        "Scaldare latte e burro in un pentolino",
+        "Incorporare gradualmente il latte caldo alle patate",
+        "Mescolare fino a ottenere una crema liscia",
+        "Aggiustare di sale"
+      ],
+      "tips": [
+        "Usa patate farinose per una crema più soffice",
+        "Non far raffreddare prima di usare",
+        "Conserva in frigo max 2 giorni"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "crema-pistacchio",
+      "name": "Crema di Pistacchio",
+      "category": "Creme",
+      "description": "Crema vellutata di pistacchi di Bronte",
+      "yield": 4,
+      "prepTime": "20 min",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Pistacchi di Bronte",
+          "quantity": 200,
+          "unit": "g",
+          "perPortion": 50,
+          "category": "Frutta Secca"
+        },
+        {
+          "name": "Panna fresca",
+          "quantity": 150,
+          "unit": "ml",
+          "perPortion": 37.5,
+          "category": "Latticini"
+        },
+        {
+          "name": "Olio EVO",
+          "quantity": 40,
+          "unit": "ml",
+          "perPortion": 10,
+          "category": "Oli"
+        },
+        {
+          "name": "Sale",
+          "quantity": 3,
+          "unit": "g",
+          "perPortion": 0.75,
+          "category": "Spezie"
+        }
+      ],
+      "instructions": [
+        "Tostare leggermente i pistacchi in padella",
+        "Lasciar raffreddare e tritare finemente",
+        "Frullare i pistacchi con la panna",
+        "Aggiungere l'olio a filo continuando a frullare",
+        "Aggiustare di sale",
+        "Frullare fino a ottenere una crema liscia"
+      ],
+      "tips": [
+        "I pistacchi di Bronte hanno sapore più intenso",
+        "Non tostare troppo i pistacchi",
+        "Si conserva 3 giorni in frigo"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "crema-ricotta",
+      "name": "Crema di Ricotta",
+      "category": "Creme",
+      "description": "Crema di ricotta montata",
+      "yield": 4,
+      "prepTime": "10 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Ricotta fresca",
+          "quantity": 400,
+          "unit": "g",
+          "perPortion": 100,
+          "category": "Formaggi"
+        },
+        {
+          "name": "Panna fresca",
+          "quantity": 80,
+          "unit": "ml",
+          "perPortion": 20,
+          "category": "Latticini"
+        },
+        {
+          "name": "Sale",
+          "quantity": 4,
+          "unit": "g",
+          "perPortion": 1,
+          "category": "Spezie"
+        },
+        {
+          "name": "Pepe nero",
+          "quantity": 2,
+          "unit": "g",
+          "perPortion": 0.5,
+          "category": "Spezie"
+        }
+      ],
+      "instructions": [
+        "Setacciare la ricotta",
+        "Montare la panna a neve morbida",
+        "Incorporare delicatamente la ricotta",
+        "Aggiungere sale e pepe",
+        "Mescolare con movimenti dal basso verso l'alto"
+      ],
+      "tips": [
+        "Usa ricotta di pecora per più sapore",
+        "Non montare troppo la panna",
+        "Usa subito per miglior consistenza"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "crema-zucca",
+      "name": "Crema di Zucca",
+      "category": "Creme",
+      "description": "Crema dolce e vellutata di zucca",
+      "yield": 4,
+      "prepTime": "40 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Zucca",
+          "quantity": 600,
+          "unit": "g",
+          "perPortion": 150,
+          "category": "Verdure"
+        },
+        {
+          "name": "Panna fresca",
+          "quantity": 80,
+          "unit": "ml",
+          "perPortion": 20,
+          "category": "Latticini"
+        },
+        {
+          "name": "Noce moscata",
+          "quantity": 2,
+          "unit": "g",
+          "perPortion": 0.5,
+          "category": "Spezie"
+        },
+        {
+          "name": "Sale",
+          "quantity": 4,
+          "unit": "g",
+          "perPortion": 1,
+          "category": "Spezie"
+        }
+      ],
+      "instructions": [
+        "Tagliare la zucca a cubetti",
+        "Cuocere al forno a 180°C per 30 minuti",
+        "Frullare la zucca con la panna",
+        "Aggiungere noce moscata e sale",
+        "Frullare fino a ottenere una crema liscia"
+      ],
+      "tips": [
+        "La zucca al forno ha più sapore",
+        "Regola la consistenza con più o meno panna",
+        "Ottima anche fredda"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "917939c5-0151-4cf3-839b-b1ba513f0517",
+      "name": "Crema di barbabietola",
+      "category": "Creme",
+      "description": "https://www.misya.info/ricetta/crema-alle-barbabietole.htm",
+      "yield": 4,
+      "prepTime": "20-25 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Yogurt",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Latticini"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "7b0c6c29-b3e7-4909-91ca-ef32afcf37a1",
+      "name": "Crema di castagne",
+      "category": "Creme",
+      "description": "100 gr di farina di castagne, 1 bicchiere di latte e 1 di acqua, sale, pepe, olio. Mettere sul fuoco molto basso fino a che si forma una crema morbida",
+      "yield": 4,
+      "prepTime": "20-25 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Latte",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Latticini"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "b3b7d6c8-6823-4f56-941f-b0a98afa343f",
+      "name": "Crema di ceci",
+      "category": "Creme",
+      "description": "https://blog.giallozafferano.it/cucinanonnalina/crema-di-ceci-ricetta-veloce-e-economica/",
+      "yield": 4,
+      "prepTime": "20-25 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Rosmarino",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "4f03dd69-130b-4328-849e-bb5e36ec2b1d",
+      "name": "Crema di friarielli",
+      "category": "Creme",
+      "description": "https://blog.giallozafferano.it/pasticcidigiu/ricetta-penne-con-crema-di-friarielli-e-salsiccia/",
+      "yield": 4,
+      "prepTime": "20-25 min",
+      "difficulty": "Facile",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    },
+    {
+      "id": "30e00e11-749f-4864-8f9c-951a09bcf7b7",
+      "name": "Crema di patate",
+      "category": "Creme",
+      "description": "Soffriggere nell'olio il sedano, la carota e la cipolla, unire le patate a pasta gialla e cuocere fino a quando diventano tenere",
+      "yield": 4,
+      "prepTime": "20-25 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Sedano",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Verdure e Ortaggi"
+        },
+        {
+          "name": "Patate",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Verdure e Ortaggi"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "6fc44770-6785-4780-8b87-9625b1b021c6",
+      "name": "Crema di patate viola",
+      "category": "Creme",
+      "description": "Soffriggere nell'olio il sedano, la carota e la cipolla, unire le patate viola e cuocere fino a quando diventano tenere",
+      "yield": 4,
+      "prepTime": "20-25 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Sedano",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Verdure e Ortaggi"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "0136d007-6296-4065-b8af-8df470ce9931",
+      "name": "Crema di pecorino",
+      "category": "Creme",
+      "description": "https://blog.giallozafferano.it/melogranierose/crema-di-pecorino-per-condire-o-spalmare/",
+      "yield": 4,
+      "prepTime": "20-25 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Burro",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Latticini"
+        },
+        {
+          "name": "Latte",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Latticini"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "926e966d-de9f-4d3f-95f1-616fec6cd161",
+      "name": "Crema di piselli",
+      "category": "Creme",
+      "description": "https://www.lacucinaitaliana.it/article/vellutata-di-piselli-ricetta-facile-cremosa-leggera/",
+      "yield": 4,
+      "prepTime": "20-25 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Piselli",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Verdure e Ortaggi"
+        },
+        {
+          "name": "Panna",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Latticini"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "510c0caa-2890-454a-bc56-75d76e1be1b0",
+      "name": "Crema di zucchine",
+      "category": "Creme",
+      "description": "https://ricette.giallozafferano.it/Vellutata-di-zucchine.html",
+      "yield": 4,
+      "prepTime": "20-25 min",
+      "difficulty": "Facile",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    },
+    {
+      "id": "ef2f0c06-2897-43c5-8298-bff9e95cd332",
+      "name": "Pomodori secchi (crema)",
+      "category": "Creme",
+      "description": "Frullare il tutto a crudo",
+      "yield": 4,
+      "prepTime": "20-25 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Pomodori secchi",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Verdure e Ortaggi"
+        },
+        {
+          "name": "Aglio",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        },
+        {
+          "name": "Origano",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        },
+        {
+          "name": "Timo",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        },
+        {
+          "name": "Capperi",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Altro"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "71e17a39-9cd0-447e-ad2f-427767f907e4",
+      "name": "Emulsione di aglio nero",
+      "category": "Salse",
+      "description": "https://www.nonnapaperina.it/2015/09/emulsione-allaglio-nero-salsa/",
+      "yield": 4,
+      "prepTime": "10-15 min",
+      "difficulty": "Facile",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    },
+    {
+      "id": "52d3c779-d77a-4fd9-a1fe-a3fa3876fa5f",
+      "name": "Gel di agrumi",
+      "category": "Salse",
+      "description": "https://www.youtube.com/watch?v=guCAaGCH_Mc",
+      "yield": 4,
+      "prepTime": "10-15 min",
+      "difficulty": "Facile",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    },
+    {
+      "id": "b94efff5-3528-4398-b5aa-3e9a53d999c9",
+      "name": "Guacamole",
+      "category": "Salse",
+      "description": "https://ricette.giallozafferano.it/Guacamole.html",
+      "yield": 4,
+      "prepTime": "10-15 min",
+      "difficulty": "Facile",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    },
+    {
+      "id": "c89be026-2421-4568-aeb9-e6f8f8251dc5",
+      "name": "Maionese al wasabi",
+      "category": "Salse",
+      "description": "https://blog.giallozafferano.it/cucinoperpassione/maionese-al-wasabi/",
+      "yield": 4,
+      "prepTime": "10-15 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Uova",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Latticini"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "pesto-basilico",
+      "name": "Pesto di Basilico",
+      "category": "Salse",
+      "description": "Classico pesto genovese",
+      "yield": 4,
+      "prepTime": "15 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Basilico fresco",
+          "quantity": 80,
+          "unit": "g",
+          "perPortion": 20,
+          "category": "Erbe"
+        },
+        {
+          "name": "Pinoli",
+          "quantity": 40,
+          "unit": "g",
+          "perPortion": 10,
+          "category": "Frutta Secca"
+        },
+        {
+          "name": "Parmigiano Reggiano",
+          "quantity": 60,
+          "unit": "g",
+          "perPortion": 15,
+          "category": "Formaggi"
+        },
+        {
+          "name": "Aglio",
+          "quantity": 4,
+          "unit": "g",
+          "perPortion": 1,
+          "category": "Verdure"
+        },
+        {
+          "name": "Olio EVO",
+          "quantity": 120,
+          "unit": "ml",
+          "perPortion": 30,
+          "category": "Oli"
+        }
+      ],
+      "instructions": [
+        "Lavare e asciugare le foglie di basilico",
+        "Tostare leggermente i pinoli",
+        "Frullare basilico, pinoli, aglio e parmigiano",
+        "Aggiungere l'olio a filo continuando a frullare",
+        "Aggiustare di sale"
+      ],
+      "tips": [
+        "Non scaldare il pesto",
+        "Conserva coperto d'olio in frigo",
+        "Usa basilico genovese DOP"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "pesto-olive",
+      "name": "Pesto di Olive Taggiasche",
+      "category": "Salse",
+      "description": "Pesto intenso di olive liguri",
+      "yield": 4,
+      "prepTime": "10 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Olive taggiasche",
+          "quantity": 200,
+          "unit": "g",
+          "perPortion": 50,
+          "category": "Altro"
+        },
+        {
+          "name": "Capperi",
+          "quantity": 30,
+          "unit": "g",
+          "perPortion": 7.5,
+          "category": "Altro"
+        },
+        {
+          "name": "Aglio",
+          "quantity": 6,
+          "unit": "g",
+          "perPortion": 1.5,
+          "category": "Verdure"
+        },
+        {
+          "name": "Olio EVO",
+          "quantity": 100,
+          "unit": "ml",
+          "perPortion": 25,
+          "category": "Oli"
+        },
+        {
+          "name": "Limone",
+          "quantity": 15,
+          "unit": "ml",
+          "perPortion": 3.75,
+          "category": "Altro"
+        }
+      ],
+      "instructions": [
+        "Denocciolate le olive",
+        "Dissalare i capperi",
+        "Frullare olive, capperi e aglio",
+        "Aggiungere olio e succo di limone",
+        "Frullare fino a consistenza cremosa"
+      ],
+      "tips": [
+        "Le olive taggiasche sono più dolci",
+        "Regola il sale: olive e capperi sono già salati",
+        "Ottimo anche per bruschette"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "pesto-pomodori-secchi",
+      "name": "Pesto di Pomodori Secchi",
+      "category": "Salse",
+      "description": "Pesto intenso di pomodori secchi",
+      "yield": 4,
+      "prepTime": "15 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Pomodori secchi sott'olio",
+          "quantity": 150,
+          "unit": "g",
+          "perPortion": 37.5,
+          "category": "Verdure"
+        },
+        {
+          "name": "Mandorle",
+          "quantity": 50,
+          "unit": "g",
+          "perPortion": 12.5,
+          "category": "Frutta Secca"
+        },
+        {
+          "name": "Pecorino Romano",
+          "quantity": 50,
+          "unit": "g",
+          "perPortion": 12.5,
+          "category": "Formaggi"
+        },
+        {
+          "name": "Basilico fresco",
+          "quantity": 30,
+          "unit": "g",
+          "perPortion": 7.5,
+          "category": "Erbe"
+        },
+        {
+          "name": "Olio EVO",
+          "quantity": 100,
+          "unit": "ml",
+          "perPortion": 25,
+          "category": "Oli"
+        }
+      ],
+      "instructions": [
+        "Scolare i pomodori secchi dall'olio",
+        "Tostare leggermente le mandorle",
+        "Frullare pomodori, mandorle, pecorino e basilico",
+        "Aggiungere l'olio a filo",
+        "Frullare fino a consistenza cremosa"
+      ],
+      "tips": [
+        "Usa pomodori secchi di qualità",
+        "Le mandorle danno dolcezza",
+        "Si conserva 1 settimana in frigo coperto d'olio"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "pesto-rucola",
+      "name": "Pesto di Rucola",
+      "category": "Salse",
+      "description": "Pesto piccante di rucola",
+      "yield": 4,
+      "prepTime": "10 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Rucola",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": 25,
+          "category": "Verdure"
+        },
+        {
+          "name": "Noci",
+          "quantity": 50,
+          "unit": "g",
+          "perPortion": 12.5,
+          "category": "Frutta Secca"
+        },
+        {
+          "name": "Pecorino Romano",
+          "quantity": 60,
+          "unit": "g",
+          "perPortion": 15,
+          "category": "Formaggi"
+        },
+        {
+          "name": "Olio EVO",
+          "quantity": 100,
+          "unit": "ml",
+          "perPortion": 25,
+          "category": "Oli"
+        }
+      ],
+      "instructions": [
+        "Lavare e asciugare la rucola",
+        "Frullare rucola, noci e pecorino",
+        "Aggiungere olio a filo",
+        "Frullare fino a consistenza cremosa"
+      ],
+      "tips": [
+        "La rucola deve essere freschissima",
+        "Usa subito per evitare ossidazione",
+        "Ottimo anche per pasta"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "635a728f-5256-421a-8e54-16c9f9e0fbab",
+      "name": "Pesto di rucola",
+      "category": "Salse",
+      "description": "https://ricette.giallozafferano.it/Pesto-di-rucola.html",
+      "yield": 4,
+      "prepTime": "10-15 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Rucola",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Verdure e Ortaggi"
+        },
+        {
+          "name": "Pinoli",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Altro"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "f97831ac-2530-44f9-aaf1-fbd34281dd83",
+      "name": "Pomodoro stracotto",
+      "category": "Salse",
+      "description": "https://www.youtube.com/watch?v=WUBtcW7L540",
+      "yield": 4,
+      "prepTime": "1-2 ore",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Carote",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Verdure e Ortaggi"
+        },
+        {
+          "name": "Aglio",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "d4dae7c0-2c75-441e-8b8c-fd0f4c713203",
+      "name": "Ragù napoletano",
+      "category": "Salse",
+      "description": "Ragù tradizionale napoletano con carne mista",
+      "yield": 4,
+      "prepTime": "2-3 ore",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Sedano",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Verdure e Ortaggi"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "salsa-aceto-balsamico",
+      "name": "Riduzione di Aceto Balsamico",
+      "category": "Salse",
+      "description": "Glassa dolce di aceto balsamico",
+      "yield": 4,
+      "prepTime": "25 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Aceto balsamico di Modena",
+          "quantity": 200,
+          "unit": "ml",
+          "perPortion": 50,
+          "category": "Altro"
+        },
+        {
+          "name": "Miele",
+          "quantity": 30,
+          "unit": "g",
+          "perPortion": 7.5,
+          "category": "Altro"
+        }
+      ],
+      "instructions": [
+        "Versare l'aceto in un pentolino",
+        "Aggiungere il miele",
+        "Portare a ebollizione",
+        "Abbassare il fuoco e cuocere 15-20 minuti",
+        "Deve ridursi della metà e diventare denso",
+        "Lasciar raffreddare prima dell'uso"
+      ],
+      "tips": [
+        "Più cuoce, più diventa denso",
+        "Si conserva 1 mese in frigo",
+        "Ottima su pizze con gorgonzola e pere"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "salsa-bbq",
+      "name": "Salsa BBQ",
+      "category": "Salse",
+      "description": "Salsa BBQ dolce e affumicata",
+      "yield": 4,
+      "prepTime": "25 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Passata di pomodoro",
+          "quantity": 200,
+          "unit": "ml",
+          "perPortion": 50,
+          "category": "Salsa"
+        },
+        {
+          "name": "Miele",
+          "quantity": 40,
+          "unit": "g",
+          "perPortion": 10,
+          "category": "Altro"
+        },
+        {
+          "name": "Aceto di mele",
+          "quantity": 30,
+          "unit": "ml",
+          "perPortion": 7.5,
+          "category": "Altro"
+        },
+        {
+          "name": "Paprika affumicata",
+          "quantity": 8,
+          "unit": "g",
+          "perPortion": 2,
+          "category": "Spezie"
+        },
+        {
+          "name": "Aglio in polvere",
+          "quantity": 4,
+          "unit": "g",
+          "perPortion": 1,
+          "category": "Spezie"
+        }
+      ],
+      "instructions": [
+        "Mescolare tutti gli ingredienti in una pentola",
+        "Portare a ebollizione",
+        "Abbassare il fuoco e cuocere 15 minuti",
+        "Mescolare spesso",
+        "Lasciare raffreddare prima dell'uso"
+      ],
+      "tips": [
+        "Più cuoce, più si addensa",
+        "Regola dolcezza con miele",
+        "Si conserva 1 settimana in frigo"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "0a2213af-5cca-4cb6-a43f-6fd482172605",
+      "name": "Salsa aioli",
+      "category": "Salse",
+      "description": "https://ricette.giallozafferano.it/Aioli.html",
+      "yield": 4,
+      "prepTime": "10-15 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Uova",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Latticini"
+        },
+        {
+          "name": "Aglio",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "salsa-tartufo",
+      "name": "Salsa al Tartufo",
+      "category": "Salse",
+      "description": "Salsa cremosa al tartufo nero",
+      "yield": 4,
+      "prepTime": "15 min",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Funghi champignon",
+          "quantity": 300,
+          "unit": "g",
+          "perPortion": 75,
+          "category": "Verdure"
+        },
+        {
+          "name": "Panna fresca",
+          "quantity": 200,
+          "unit": "ml",
+          "perPortion": 50,
+          "category": "Latticini"
+        },
+        {
+          "name": "Pasta di tartufo nero",
+          "quantity": 40,
+          "unit": "g",
+          "perPortion": 10,
+          "category": "Altro"
+        },
+        {
+          "name": "Burro",
+          "quantity": 30,
+          "unit": "g",
+          "perPortion": 7.5,
+          "category": "Latticini"
+        },
+        {
+          "name": "Sale",
+          "quantity": 4,
+          "unit": "g",
+          "perPortion": 1,
+          "category": "Spezie"
+        }
+      ],
+      "instructions": [
+        "Pulire e affettare i funghi",
+        "Rosolare i funghi nel burro",
+        "Aggiungere la panna e cuocere 5 minuti",
+        "Aggiungere la pasta di tartufo",
+        "Frullare fino a ottenere una crema liscia",
+        "Aggiustare di sale"
+      ],
+      "tips": [
+        "Usa pasta di tartufo di qualità",
+        "Non far bollire dopo aver aggiunto il tartufo",
+        "Ottima anche per condire pasta"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "19160597-4f38-4b28-b947-4df7f9a89214",
+      "name": "Salsa al mango",
+      "category": "Salse",
+      "description": "Frullare mango con olio, sale, pepe e (opzionale) senape",
+      "yield": 4,
+      "prepTime": "10-15 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Senape",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "salsa-nduja",
+      "name": "Salsa di Nduja",
+      "category": "Salse",
+      "description": "Salsa piccante calabrese",
+      "yield": 4,
+      "prepTime": "15 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Nduja calabrese",
+          "quantity": 150,
+          "unit": "g",
+          "perPortion": 37.5,
+          "category": "Carne"
+        },
+        {
+          "name": "Passata di pomodoro",
+          "quantity": 200,
+          "unit": "ml",
+          "perPortion": 50,
+          "category": "Salsa"
+        },
+        {
+          "name": "Olio EVO",
+          "quantity": 30,
+          "unit": "ml",
+          "perPortion": 7.5,
+          "category": "Oli"
+        },
+        {
+          "name": "Aglio",
+          "quantity": 8,
+          "unit": "g",
+          "perPortion": 2,
+          "category": "Verdure"
+        }
+      ],
+      "instructions": [
+        "Rosolare l'aglio nell'olio",
+        "Aggiungere la nduja e farla sciogliere",
+        "Aggiungere la passata di pomodoro",
+        "Cuocere a fuoco basso per 10 minuti",
+        "Mescolare bene fino a ottenere una salsa omogenea"
+      ],
+      "tips": [
+        "La nduja è già molto piccante",
+        "Regola la quantità secondo il gusto",
+        "Ottima anche fredda"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "64ab05ea-5655-41de-8a3e-7262dde974d7",
+      "name": "Salsa di pistacchi",
+      "category": "Salse",
+      "description": "https://www.tavolartegusto.it/ricetta/pesto-di-pistacchio-ricetta/",
+      "yield": 4,
+      "prepTime": "10-15 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Pistacchi",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Altro"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "0db9c9d3-2fed-4b38-bdd3-0738b4788400",
+      "name": "Cavolo nero stufato",
+      "category": "Trifolati/Saltati",
+      "description": "Bollire il cavolo nero dopo averlo privato della costa centrale. Poi ripassare in padella con aglio, olio e peperoncino",
+      "yield": 4,
+      "prepTime": "15-20 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Cavolo nero",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Verdure e Ortaggi"
+        },
+        {
+          "name": "Aglio",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Erbe e Spezie"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "cipolla-caramellata",
+      "name": "Cipolla Caramellata",
+      "category": "Trifolati/Saltati",
+      "description": "Cipolle dolci e caramellate",
+      "yield": 4,
+      "prepTime": "45 min",
+      "difficulty": "Media",
+      "ingredients": [
+        {
+          "name": "Cipolle rosse",
+          "quantity": 600,
+          "unit": "g",
+          "perPortion": 150,
+          "category": "Verdure"
+        },
+        {
+          "name": "Zucchero di canna",
+          "quantity": 30,
+          "unit": "g",
+          "perPortion": 7.5,
+          "category": "Altro"
+        },
+        {
+          "name": "Aceto balsamico",
+          "quantity": 40,
+          "unit": "ml",
+          "perPortion": 10,
+          "category": "Altro"
+        },
+        {
+          "name": "Burro",
+          "quantity": 30,
+          "unit": "g",
+          "perPortion": 7.5,
+          "category": "Latticini"
+        }
+      ],
+      "instructions": [
+        "Affettare finemente le cipolle",
+        "Rosolare nel burro a fuoco basso",
+        "Cuocere 30 minuti mescolando spesso",
+        "Aggiungere zucchero e aceto",
+        "Cuocere altri 10 minuti fino a caramellatura"
+      ],
+      "tips": [
+        "Pazienza: cuocere a fuoco basso",
+        "Non far bruciare",
+        "Si conserva 5 giorni in frigo"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "f0e1c749-8522-49a0-84f0-5871dc52d2fd",
+      "name": "Cipolla caramellata",
+      "category": "Trifolati/Saltati",
+      "description": "https://www.google.com/amp/s/www.cucchiaio.it/ricetta/cipolle-rosse-caramellate.amp.html",
+      "yield": 4,
+      "prepTime": "15-20 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Zucchero",
+          "quantity": 100,
+          "unit": "g",
+          "perPortion": "25.00",
+          "category": "Altro"
+        }
+      ],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "2cc9b07b-8c71-49b7-81c4-342876f85bbb",
+      "name": "Dadolata di patate",
+      "category": "Trifolati/Saltati",
+      "description": "Friggere le patate a pasta gialla tagliate a piccoli cubetti (anche friggitrice ad aria)",
+      "yield": 4,
+      "prepTime": "15-20 min",
+      "difficulty": "Facile",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    },
+    {
+      "id": "funghi-trifolati",
+      "name": "Funghi Trifolati",
+      "category": "Trifolati/Saltati",
+      "description": "Funghi saltati con aglio e prezzemolo",
+      "yield": 4,
+      "prepTime": "20 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Funghi champignon",
+          "quantity": 500,
+          "unit": "g",
+          "perPortion": 125,
+          "category": "Verdure"
+        },
+        {
+          "name": "Aglio",
+          "quantity": 12,
+          "unit": "g",
+          "perPortion": 3,
+          "category": "Verdure"
+        },
+        {
+          "name": "Prezzemolo",
+          "quantity": 20,
+          "unit": "g",
+          "perPortion": 5,
+          "category": "Erbe"
+        },
+        {
+          "name": "Olio EVO",
+          "quantity": 60,
+          "unit": "ml",
+          "perPortion": 15,
+          "category": "Oli"
+        }
+      ],
+      "instructions": [
+        "Pulire i funghi con un panno umido",
+        "Affettare i funghi",
+        "Rosolare l'aglio nell'olio",
+        "Aggiungere i funghi e cuocere 10 minuti",
+        "Aggiungere prezzemolo tritato"
+      ],
+      "tips": [
+        "Non lavare i funghi sotto acqua",
+        "Cuocere a fuoco alto",
+        "Usare subito per miglior sapore"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "guanciale-croccante",
+      "name": "Guanciale Croccante",
+      "category": "Trifolati/Saltati",
+      "description": "Guanciale croccante per topping",
+      "yield": 4,
+      "prepTime": "20 min",
+      "difficulty": "Facile",
+      "ingredients": [
+        {
+          "name": "Guanciale",
+          "quantity": 200,
+          "unit": "g",
+          "perPortion": 50,
+          "category": "Carne"
+        }
+      ],
+      "instructions": [
+        "Tagliare il guanciale a cubetti di 1 cm",
+        "Rosolare in padella antiaderente senza olio",
+        "Cuocere a fuoco medio per 15 minuti",
+        "Girare spesso per doratura uniforme",
+        "Scolare su carta assorbente",
+        "Usare tiepido o freddo"
+      ],
+      "tips": [
+        "Non serve olio: il guanciale rilascia grasso",
+        "Deve essere croccante fuori e morbido dentro",
+        "Si conserva 2 giorni in frigo"
+      ],
+      "_hasIngredients": true,
+      "_needsIngredients": false
+    },
+    {
+      "id": "78c877b9-1ef2-4905-8fe0-48adcf57c003",
+      "name": "Patate in crosta",
+      "category": "Trifolati/Saltati",
+      "description": "https://blog.giallozafferano.it/allacciateilgrembiule/patate-a-fette-in-padella/",
+      "yield": 4,
+      "prepTime": "15-20 min",
+      "difficulty": "Facile",
+      "ingredients": [],
+      "instructions": [],
+      "tips": [],
+      "_hasIngredients": false,
+      "_needsIngredients": true
+    }
+  ]
+}

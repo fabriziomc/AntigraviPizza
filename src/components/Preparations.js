@@ -2,7 +2,7 @@
 // PREPARATIONS COMPONENT
 // ============================================
 
-import { getAllPreparations, createPreparation, updatePreparation, deletePreparation, getAllIngredients } from '../modules/database.js';
+import { getAllPreparations, createPreparation, updatePreparation, deletePreparation, getAllIngredients, getAllRecipes } from '../modules/database.js';
 import { PREPARATION_CATEGORIES } from '../utils/constants.js';
 import { showToast } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
@@ -550,11 +550,82 @@ async function deletePreparationAction(prepId) {
 }
 
 /**
+ * Get pizzas that use a specific preparation
+ */
+async function getPizzasUsingPreparation(prepId) {
+  const allRecipes = await getAllRecipes();
+
+  const pizzasUsing = allRecipes.filter(recipe => {
+    if (!recipe.preparations || recipe.preparations.length === 0) return false;
+    return recipe.preparations.some(p => p.id === prepId);
+  });
+
+  return pizzasUsing;
+}
+
+/**
+ * Show modal with pizzas using this preparation
+ */
+async function showPizzasUsingPreparation(prepId, prepName) {
+  const pizzas = await getPizzasUsingPreparation(prepId);
+
+  const modalContent = `
+    <div class="modal-header">
+      <h2 class="modal-title">🍕 Pizze con "${prepName}"</h2>
+      <button class="modal-close" onclick="window.closeModal()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      ${pizzas.length > 0 ? `
+        <p style="margin-bottom: 1.5rem; color: var(--color-text-secondary);">
+          Questa preparazione è usata in <strong>${pizzas.length}</strong> ${pizzas.length === 1 ? 'pizza' : 'pizze'}:
+        </p>
+        <div style="display: grid; gap: 1rem;">
+          ${pizzas.map(pizza => `
+            <div style="padding: 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                <h3 style="margin: 0; color: var(--color-white);">${pizza.name}</h3>
+                ${pizza.tags ? `<div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
+                  ${pizza.tags.slice(0, 2).map(tag => `<span class="badge" style="font-size: 0.75rem;">${tag}</span>`).join('')}
+                </div>` : ''}
+              </div>
+              ${pizza.baseIngredients ? `
+                <p style="margin: 0; font-size: 0.875rem; color: var(--color-gray-400);">
+                  ${pizza.baseIngredients.slice(0, 3).map(ing => ing.name).join(', ')}${pizza.baseIngredients.length > 3 ? '...' : ''}
+                </p>
+              ` : ''}
+            </div>
+          `).join('')}
+        </div>
+      ` : `
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <h3 class="empty-title">Nessuna pizza trovata</h3>
+          <p class="empty-description">Questa preparazione non è ancora stata usata in nessuna pizza.</p>
+        </div>
+      `}
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="window.closeModal()">
+        Chiudi
+      </button>
+    </div>
+  `;
+
+  openModal(modalContent);
+}
+
+/**
  * Show preparation modal (read-only view)
  */
-function showPreparationModal(prepId) {
+async function showPreparationModal(prepId) {
   const prep = currentPreparations.find(p => p.id === prepId);
   if (!prep) return;
+
+  // Count pizzas using this preparation
+  const pizzasUsing = await getPizzasUsingPreparation(prepId);
+  const pizzaCount = pizzasUsing.length;
 
   const modalContent = `
     <div class="modal-header">
@@ -627,6 +698,11 @@ function showPreparationModal(prepId) {
       <button class="btn btn-secondary" onclick="window.closeModal()">
         Chiudi
       </button>
+      <button class="btn ${pizzaCount > 0 ? 'btn-accent' : 'btn-ghost'}" onclick="window.closeModal(); window.showPizzasUsingPreparationGlobal('${prep.id}', '${prep.name.replace(/'/g, "\\'")}')" style="position: relative;">
+        <span>🍕</span>
+        Usata in ${pizzaCount} ${pizzaCount === 1 ? 'pizza' : 'pizze'}
+        ${pizzaCount > 0 ? `<span style="position: absolute; top: -4px; right: -4px; background: var(--color-accent); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">${pizzaCount}</span>` : ''}
+      </button>
       ${prep.isCustom ? `
         <button class="btn btn-primary" onclick="window.closeModal(); window.showPreparationFormGlobal('${prep.id}')">
           <span>✏️</span>
@@ -646,3 +722,4 @@ window.addIngredientRow = addIngredientRow;
 window.addInstructionRow = addInstructionRow;
 window.addTipRow = addTipRow;
 window.renumberInstructions = renumberInstructions;
+window.showPizzasUsingPreparationGlobal = showPizzasUsingPreparation;
