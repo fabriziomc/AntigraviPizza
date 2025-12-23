@@ -2,7 +2,7 @@
 // INGREDIENTS COMPONENT
 // ============================================
 
-import { getAllIngredients, getAllCategories, getIngredientsByCategory, searchIngredients, addIngredient, updateIngredient, deleteIngredient } from '../modules/database.js';
+import { getAllIngredients, getAllCategories, getIngredientsByCategory, searchIngredients, addIngredient, updateIngredient, deleteIngredient, getAllRecipes, getAllPreparations } from '../modules/database.js';
 import { openModal, closeModal } from '../modules/ui.js';
 
 const UNITS = ['g', 'ml', 'pz', 'cucchiaio', 'cucchiaino'];
@@ -160,6 +160,9 @@ function renderIngredientsList() {
             </div>
             
             <div class="ingredient-actions">
+                <button class="btn btn-sm btn-accent" onclick="window.showIngredientUsage('${ingredient.id}', '${ingredient.name.replace(/'/g, "\'")}')">
+                    <span>📊</span> Vedi Utilizzo
+                </button>
                 <button class="btn btn-sm btn-secondary" onclick="window.editIngredient('${ingredient.id}')">
                     <span>✏️</span> Modifica
                 </button>
@@ -401,6 +404,118 @@ async function deleteIngredientConfirmed(id) {
 }
 
 // ============================================
+// INGREDIENT USAGE TRACKING
+// ============================================
+
+/**
+ * Get pizzas and preparations that use a specific ingredient
+ */
+async function getIngredientUsage(ingredientName) {
+    const allRecipes = await getAllRecipes();
+    const allPreparations = await getAllPreparations();
+
+    // Find pizzas using this ingredient
+    const pizzasUsing = allRecipes.filter(recipe => {
+        if (!recipe.baseIngredients || recipe.baseIngredients.length === 0) return false;
+        return recipe.baseIngredients.some(ing => ing.name === ingredientName);
+    });
+
+    // Find preparations using this ingredient
+    const preparationsUsing = allPreparations.filter(prep => {
+        if (!prep.ingredients || prep.ingredients.length === 0) return false;
+        return prep.ingredients.some(ing => ing.name === ingredientName);
+    });
+
+    return {
+        pizzas: pizzasUsing,
+        preparations: preparationsUsing
+    };
+}
+
+/**
+ * Show modal with ingredient usage in pizzas and preparations
+ */
+async function showIngredientUsage(ingredientId, ingredientName) {
+    const usage = await getIngredientUsage(ingredientName);
+    const pizzaCount = usage.pizzas.length;
+    const prepCount = usage.preparations.length;
+
+    const modalContent = `
+        <div class="modal-header">
+            <h2 class="modal-title">📊 Utilizzo "${ingredientName}"</h2>
+            <button class="modal-close" onclick="window.closeModal()">×</button>
+        </div>
+        
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+            <!-- Pizzas Section -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                    <span>🍕</span>
+                    <span>Pizze (${pizzaCount})</span>
+                </h3>
+                ${pizzaCount > 0 ? `
+                    <div style="display: grid; gap: 0.75rem;">
+                        ${usage.pizzas.map(pizza => `
+                            <div style="padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <h4 style="margin: 0; color: var(--color-white); font-size: 0.95rem;">${pizza.name}</h4>
+                                    ${pizza.tags ? `<div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
+                                        ${pizza.tags.slice(0, 2).map(tag => `<span class="badge" style="font-size: 0.7rem;">${tag}</span>`).join('')}
+                                    </div>` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : `
+                    <p style="color: var(--color-gray-400); font-style: italic;">Questo ingrediente non è ancora stato usato in nessuna pizza.</p>
+                `}
+            </div>
+            
+            <!-- Preparations Section -->
+            <div>
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                    <span>🥫</span>
+                    <span>Preparazioni (${prepCount})</span>
+                </h3>
+                ${prepCount > 0 ? `
+                    <div style="display: grid; gap: 0.75rem;">
+                        ${usage.preparations.map(prep => `
+                            <div style="padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <h4 style="margin: 0 0 0.25rem 0; color: var(--color-white); font-size: 0.95rem;">${prep.name}</h4>
+                                        <span class="badge" style="font-size: 0.7rem;">${prep.category}</span>
+                                    </div>
+                                    <span style="color: var(--color-gray-400); font-size: 0.8rem;">⏱️ ${prep.prepTime}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : `
+                    <p style="color: var(--color-gray-400); font-style: italic;">Questo ingrediente non è ancora stato usato in nessuna preparazione.</p>
+                `}
+            </div>
+            
+            ${pizzaCount === 0 && prepCount === 0 ? `
+                <div class="empty-state" style="margin-top: 2rem;">
+                    <div class="empty-icon">🔍</div>
+                    <h3 class="empty-title">Ingrediente non utilizzato</h3>
+                    <p class="empty-description">Questo ingrediente non è ancora stato usato in nessuna pizza o preparazione.</p>
+                </div>
+            ` : ''}
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="window.closeModal()">
+                Chiudi
+            </button>
+        </div>
+    `;
+
+    openModal(modalContent);
+}
+
+// ============================================
 // FILTER FUNCTIONS
 // ============================================
 
@@ -425,3 +540,4 @@ window.editIngredient = (id) => showIngredientForm(id);
 window.confirmDeleteIngredient = confirmDeleteIngredient;
 window.deleteIngredientConfirmed = deleteIngredientConfirmed;
 window.filterIngredients = filterIngredients;
+window.showIngredientUsage = showIngredientUsage;
