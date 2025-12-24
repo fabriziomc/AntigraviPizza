@@ -584,7 +584,7 @@ async function handleRegenerateImage(recipe) {
     btn.innerHTML = '⏳ Generazione...';
 
     // Extract main ingredients for the prompt
-    const toppingIngredients = recipe.ingredients.filter(i => i.phase === 'topping' || i.category !== 'Impasto');
+    const toppingIngredients = (recipe.baseIngredients || []).filter(i => i.phase === 'topping' || i.category !== 'Impasto');
     const mainIngredients = toppingIngredients.slice(0, 3).map(i => i.name);
 
     // Generate new image URL with timestamp to avoid caching

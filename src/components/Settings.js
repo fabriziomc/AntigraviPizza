@@ -338,11 +338,16 @@ function setupEventListeners() {
       const recipes = await response.json();
 
       // Filter recipes without images or with broken/default images
-      const recipesWithoutImages = recipes.filter(r =>
-        !r.imageUrl ||
-        r.imageUrl === '' ||
-        r.imageUrl.includes('placeholder')
-      );
+      const recipesWithoutImages = recipes.filter(r => {
+        // Check for various "no image" conditions
+        if (!r.imageUrl) return true; // null or undefined
+        if (r.imageUrl.trim() === '') return true; // empty string
+        if (r.imageUrl.includes('placeholder')) return true; // placeholder image
+        if (r.imageUrl.includes('default')) return true; // default image
+        return false;
+      });
+
+      console.log(`Found ${recipesWithoutImages.length} recipes without images out of ${recipes.length} total`);
 
       if (recipesWithoutImages.length === 0) {
         showToast('✅ Tutte le pizze hanno già un\'immagine!', 'success');
