@@ -25,6 +25,70 @@ export const RECIPE_TAGS = [
     'Rossa'
 ];
 
+// Archetype definitions with labels, icons, descriptions and unique colors
+export const ARCHETYPES = {
+    'combinazioni_db': {
+        icon: '📚',
+        label: 'Combinazioni Salvate',
+        description: 'Pizze create da combinazioni di ingredienti salvate nel database',
+        color: '#f59e0b' // Amber 500
+    },
+    'classica': {
+        icon: '🍕',
+        label: 'Classica',
+        description: 'Pizza in stile Margherita e Marinara, i grandi classici napoletani',
+        color: '#ef4444' // Red 500
+    },
+    'tradizionale': {
+        icon: '👨‍🍳',
+        label: 'Tradizionale',
+        description: 'Pizze tradizionali come Prosciutto, Funghi, Capricciosa',
+        color: '#f97316' // Orange 500
+    },
+    'terra_bosco': {
+        icon: '🍄',
+        label: 'Terra e Bosco',
+        description: 'Sapori rustici con funghi porcini, tartufo e ingredienti del sottobosco',
+        color: '#84cc16' // Lime 500
+    },
+    'fresca_estiva': {
+        icon: '🌿',
+        label: 'Fresca Estiva',
+        description: 'Ingredienti freschi e leggeri, perfetti per l\'estate',
+        color: '#06b6d4' // Cyan 500
+    },
+    'piccante_decisa': {
+        icon: '🌶️',
+        label: 'Piccante',
+        description: 'Gusti decisi con nduja, peperoncino e sapori intensi',
+        color: '#b91c1c' // Red 700 
+    },
+    'mare': {
+        icon: '🐟',
+        label: 'Mare',
+        description: 'Frutti di mare e pesce fresco per gli amanti del mare',
+        color: '#3b82f6' // Blue 500
+    },
+    'vegana': {
+        icon: '🌱',
+        label: 'Vegana',
+        description: 'Completamente vegetale, ricca di verdure e sapori naturali',
+        color: '#10b981' // Emerald 500
+    },
+    'dolce_salato': {
+        icon: '🍯',
+        label: 'Dolce/Salato',
+        description: 'Equilibrio perfetto tra ingredienti dolci e salati',
+        color: '#ec4899' // Pink 500
+    },
+    'fusion': {
+        icon: '🌟',
+        label: 'Fusion',
+        description: 'Interpretazioni contemporanee e creative',
+        color: '#8b5cf6' // Violet 500
+    }
+};
+
 // Famous pizzaiolos
 export const FAMOUS_PIZZAIOLOS = [
     'Gabriele Bonci',

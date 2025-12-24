@@ -3,7 +3,7 @@
 // ============================================
 
 import { getAllRecipes, getRecipeById, toggleFavorite, deleteRecipe, updateRecipe } from '../modules/database.js';
-import { RECIPE_TAGS, DOUGH_TYPES, PREPARATIONS } from '../utils/constants.js';
+import { RECIPE_TAGS, DOUGH_TYPES, PREPARATIONS, ARCHETYPES } from '../utils/constants.js';
 import { getRecipeDoughType } from '../utils/doughHelper.js';
 import { debounce, showToast } from '../utils/helpers.js';
 import { state } from '../store.js';
@@ -172,19 +172,10 @@ function createRecipeCard(recipe) {
   if (recipe.recipeSource === 'manual') {
     originBadge = '<span class="origin-badge origin-manual" title="Ricetta inserita manualmente">🖐️ Manuale</span>';
   } else if (recipe.recipeSource === 'archetype' && recipe.archetypeUsed) {
-    const archetypeLabels = {
-      'dolce_salato': 'Dolce/Salato',
-      'terra_bosco': 'Terra e Bosco',
-      'fresca_estiva': 'Fresca Estiva',
-      'piccante_decisa': 'Piccante',
-      'mare': 'Mare',
-      'vegana': 'Vegana',
-      'classica': 'Classica',
-      'tradizionale': 'Tradizionale',
-      'fusion': 'Fusion'
-    };
-    const archetypeName = archetypeLabels[recipe.archetypeUsed] || recipe.archetypeUsed;
-    originBadge = `<span class="origin-badge origin-archetype" title="Generata dall'archetipo ${archetypeName}">🎯 ${archetypeName}</span>`;
+    const archetype = ARCHETYPES[recipe.archetypeUsed];
+    const archetypeName = archetype ? archetype.label : recipe.archetypeUsed;
+    const archetypeColor = archetype ? archetype.color : 'var(--color-primary)';
+    originBadge = `<span class="origin-badge origin-archetype" style="background-color: ${archetypeColor}" title="Generata dall'archetipo ${archetypeName}">🎯 ${archetypeName}</span>`;
   } else if (recipe.recipeSource === 'combination') {
     originBadge = '<span class="origin-badge origin-combination" title="Creata da combinazione predefinita">🧪 Combinazione</span>';
   } else {

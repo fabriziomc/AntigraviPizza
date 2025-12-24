@@ -3,70 +3,8 @@
 // ============================================
 
 import { getAllRecipes } from '../modules/database.js';
+import { ARCHETYPES } from '../utils/constants.js';
 
-// Archetype definitions with labels and descriptions
-const ARCHETYPES = {
-    'combinazioni_db': {
-        icon: '📚',
-        label: 'Combinazioni Salvate',
-        description: 'Pizze create da combinazioni di ingredienti salvate nel database',
-        color: '#f59e0b'
-    },
-    'classica': {
-        icon: '🍕',
-        label: 'Classica',
-        description: 'Pizza in stile Margherita e Marinara, i grandi classici napoletani',
-        color: '#ef4444'
-    },
-    'tradizionale': {
-        icon: '👨‍🍳',
-        label: 'Tradizionale',
-        description: 'Pizze tradizionali come Prosciutto, Funghi, Capricciosa',
-        color: '#f97316'
-    },
-    'terra_bosco': {
-        icon: '🍄',
-        label: 'Terra e Bosco',
-        description: 'Sapori rustici con funghi porcini, tartufo e ingredienti del sottobosco',
-        color: '#84cc16'
-    },
-    'fresca_estiva': {
-        icon: '🌿',
-        label: 'Fresca Estiva',
-        description: 'Ingredienti freschi e leggeri, perfetti per l\'estate',
-        color: '#10b981'
-    },
-    'piccante_decisa': {
-        icon: '🌶️',
-        label: 'Piccante',
-        description: 'Gusti decisi con nduja, peperoncino e sapori intensi',
-        color: '#dc2626'
-    },
-    'mare': {
-        icon: '🐟',
-        label: 'Mare',
-        description: 'Frutti di mare e pesce fresco per gli amanti del mare',
-        color: '#3b82f6'
-    },
-    'vegana': {
-        icon: '🌱',
-        label: 'Vegana',
-        description: 'Completamente vegetale, ricca di verdure e sapori naturali',
-        color: '#22c55e'
-    },
-    'dolce_salato': {
-        icon: '🍯',
-        label: 'Dolce/Salato',
-        description: 'Equilibrio perfetto tra ingredienti dolci e salati',
-        color: '#a855f7'
-    },
-    'fusion': {
-        icon: '🌟',
-        label: 'Fusion',
-        description: 'Interpretazioni contemporanee e creative',
-        color: '#8b5cf6'
-    }
-};
 
 // Criteri di selezione ingredienti per archetipo
 const ARCHETYPE_TAG_CRITERIA = {
