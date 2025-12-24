@@ -68,6 +68,101 @@ const ARCHETYPES = {
     }
 };
 
+// Criteri di selezione ingredienti per archetipo
+const ARCHETYPE_TAG_CRITERIA = {
+    'combinazioni_db': {
+        intro: 'Utilizza combinazioni predefinite salvate nel database',
+        criteria: [
+            '📚 Abbinamenti testati e approvati dal team',
+            '🎯 Ingredienti scelti da combinazioni fisse',
+            '✨ Varianti create combinando ricette esistenti'
+        ]
+    },
+    'classica': {
+        intro: 'I grandi classici della tradizione napoletana con ingredienti semplici e autentici',
+        criteria: [
+            '🍅 Salse: pomodoro San Marzano o passata classica',
+            '🧀 Formaggi: mozzarella di bufala o fior di latte',
+            '🌿 Finishing: basilico fresco e olio EVO'
+        ]
+    },
+    'tradizionale': {
+        intro: 'Pizze della tradizione italiana con ingredienti classici e ricette consolidate',
+        criteria: [
+            '🍅 Base: pomodoro classico o bianca',
+            '🧀 Formaggi: mozzarella tradizionale',
+            '🥩 Carni: prosciutto cotto/crudo, salame classico',
+            '🍄 Verdure: funghi, carciofi, olive tradizionali'
+        ]
+    },
+    'terra_bosco': {
+        intro: 'Sapori rustici del sottobosco con ingredienti autunnali e invernali',
+        criteria: [
+            '🍄 Funghi: porcini, champignon o funghi misti',
+            '🥓 Carni: intense e saporite come guanciale, pancetta o salsiccia',
+            '🌰 Premium: tartufo nero/bianco o creme vegetali',
+            '🧀 Formaggi: provola affumicata o formaggi stagionati'
+        ]
+    },
+    'fresca_estiva': {
+        intro: 'Ingredienti leggeri e freschi, perfetti per la stagione calda',
+        criteria: [
+            '🧀 Formaggi: freschi come burrata, stracciatella o ricotta',
+            '🥬 Verdure: a foglia come rucola, spinaci o lattuga',
+            '🥩 Carni: delicate come prosciutto crudo, bresaola',
+            '🐟 Pesce: alici, salmone affumicato (a crudo)',
+            '🌿 Finishing: erbe fresche, limone, olio aromatizzato'
+        ]
+    },
+    'piccante_decisa': {
+        intro: 'Gusti decisi e carattere forte con un equilibrio tra piccante e dolce',
+        criteria: [
+            '🌶️ Carni: piccanti come nduja, salame piccante, ventricina',
+            '🧅 Verdure: cipolle caramellate, peperoni grigliati',
+            '🍯 Contrasti: miele, fichi o altre note dolci per equilibrare',
+            '🧀 Formaggi: freschi per bilanciare il piccante'
+        ]
+    },
+    'mare': {
+        intro: 'Sapori del mare con pesce fresco e frutti di mare di qualità',
+        criteria: [
+            '🦐 Frutti di mare: gamberi, scampi, cozze, vongole, polpo',
+            '🐟 Pesce: tonno fresco, salmone, alici di Cetara',
+            '🧀 Formaggi: delicati o assenti per non coprire il sapore',
+            '💧 Base: olio EVO, aglio, prezzemolo',
+            '🌿 Finishing: erbe aromatiche, limone grattugiato'
+        ]
+    },
+    'vegana': {
+        intro: 'Completamente vegetale con verdure sostanziose e creme vegetali',
+        criteria: [
+            '🥬 Verdure: sostanziose come melanzane, zucchine, peperoni',
+            '🌿 A foglia: spinaci, rucola, cavolo nero',
+            '🍄 Funghi: per corpo e sapore umami',
+            '🥜 Creme: vegetali come hummus, crema di ceci, pesto',
+            '🌰 Finishing: frutta secca, semi, olio aromatizzato'
+        ]
+    },
+    'dolce_salato': {
+        intro: 'Equilibrio perfetto tra sapori contrastanti dolci e salati',
+        criteria: [
+            '🧀 Formaggi: sapidi come gorgonzola, taleggio o formaggi stagionati',
+            '🍐 Frutta: dolce come pere, fichi, mele o miele',
+            '🥜 Croccantezza: noci, pistacchi, mandorle o nocciole',
+            '✨ Base: spesso bianca per esaltare i contrasti'
+        ]
+    },
+    'fusion': {
+        intro: 'Interpretazioni contemporanee che mescolano tradizioni diverse',
+        criteria: [
+            '🌍 Ingredienti: da diverse tradizioni culinarie',
+            '🎨 Creatività: abbinamenti innovativi e inaspettati',
+            '⚡ Tecniche: preparazioni moderne e sperimentali',
+            '🌟 Presentazione: estetica contemporanea'
+        ]
+    }
+};
+
 /**
  * Get statistics for each archetype
  */
@@ -211,6 +306,19 @@ window.viewArchetypeRecipes = async function (archetypeKey) {
                 </div>
                 <div class="modal-body">
                     <p class="mb-6">${archetype.description}</p>
+                    
+                    ${ARCHETYPE_TAG_CRITERIA[archetypeKey] ? `
+                        <div class="archetype-criteria-section mb-8">
+                            <h3 class="criteria-title">🎯 Criteri di Selezione Ingredienti</h3>
+                            <p class="criteria-intro">${ARCHETYPE_TAG_CRITERIA[archetypeKey].intro}</p>
+                            <ul class="criteria-list">
+                                ${ARCHETYPE_TAG_CRITERIA[archetypeKey].criteria.map(criterion => `
+                                    <li>${criterion}</li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                    
                     <h3 class="mb-4">Pizze Generate (${archetypeRecipes.length})</h3>
                     <div class="archetype-recipes-grid">
                         ${archetypeRecipes.map(recipe => `
