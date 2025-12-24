@@ -463,12 +463,21 @@ function selectRandomIngredients(category, count = 1) {
 /**
  * Seleziona ingredienti con fallback se la ricerca per tag fallisce
  */
-function selectIngredientWithFallback(tags, categoryName, INGREDIENTS_DB, count = 1) {
+/**
+ * Seleziona ingredienti con fallback opzionale
+ * @param {string[]} tags - Tag richiesti
+ * @param {string} categoryName - Categoria di fallback
+ * @param {Object} INGREDIENTS_DB - DB ingredienti
+ * @param {number} count - Numero di ingredienti
+ * @param {boolean} strict - Se true, non usa fallbacks se i tag non matchano
+ * @returns {Array} Ingredienti selezionati
+ */
+function selectIngredientWithFallback(tags, categoryName, INGREDIENTS_DB, count = 1, strict = false) {
     // 1. Prova con i tag
     let results = getAllIngredientsByTags(tags, INGREDIENTS_DB);
 
-    // 2. Se non ci sono risultati, fallback alla categoria intera
-    if (results.length === 0) {
+    // 2. Se non ci sono risultati e non siamo in strict mode, fallback alla categoria
+    if (results.length === 0 && !strict) {
         console.warn(`Fallback: nessun ingrediente trovato per i tag [${tags.join(', ')}]. Uso categoria: ${categoryName}`);
         const categoryMap = {
             'Basi e Salse': INGREDIENTS_DB.bases,
@@ -485,8 +494,8 @@ function selectIngredientWithFallback(tags, categoryName, INGREDIENTS_DB, count 
 
     const selected = selectRandomIngredients(results, count);
 
-    // 3. Fallback estremo: se non c'è nulla in categoria, prendi un ingrediente a caso dal DB
-    if (selected.length === 0) {
+    // 3. Fallback estremo solo se NON siamo in strict mode
+    if (selected.length === 0 && !strict) {
         const allIngredients = [
             ...INGREDIENTS_DB.bases,
             ...INGREDIENTS_DB.cheeses,
@@ -566,8 +575,8 @@ function getPreparationsByTags(tags, preparations, matchAll = false) {
 /**
  * Genera una ricetta casuale intelligente basata su archetipi
  */
-export async function generateRandomRecipe() {
-    return await generateRandomRecipeWithNames([]);
+export async function generateRandomRecipe_legacy() {
+    return await generateRandomRecipe([]);
 }
 
 function findIngredientByName(name, INGREDIENTS_DB) {
@@ -895,7 +904,7 @@ export async function generateMultipleRecipes(count = 3) {
 
     for (let i = 0; i < count; i++) {
         // Pass previously generated names to avoid duplicates in this batch
-        const recipe = await generateRandomRecipeWithNames(generatedNames);
+        const recipe = await generateRandomRecipe(generatedNames);
         recipes.push(recipe);
         generatedNames.push(recipe.name);
     }
@@ -904,9 +913,9 @@ export async function generateMultipleRecipes(count = 3) {
 }
 
 /**
- * Internal function that accepts additional names to avoid
+ * Genera una ricetta casuale (usata pubblicamente)
  */
-async function generateRandomRecipeWithNames(additionalNames = []) {
+export async function generateRandomRecipe(additionalNames = []) {
     // Load ingredients from database
     const INGREDIENTS_DB = await loadIngredientsFromDB();
 
@@ -928,10 +937,22 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
 
     // Select generation method based on weighted archetype
     const selectedArchetype = selectWeightedArchetype(archetypeWeights);
+
+    return await generateRecipe(selectedArchetype, combinations, INGREDIENTS_DB, existingNames);
+}
+
+/**
+ * Funzione core di generazione (esportata per test e uso diretto)
+ */
+export async function generateRecipe(selectedArchetype, combinations = [], INGREDIENTS_DB = null, existingNames = []) {
+    // If no DB provided, load it
+    if (!INGREDIENTS_DB) INGREDIENTS_DB = await loadIngredientsFromDB();
+
     const usePredefinedCombo = selectedArchetype === 'combinazioni_db';
 
     let ingredients = [];
     let mainIngredientNames = [];
+    let missingSlots = [];
     let pizzaName = '';
     let description = '';
     let doughType = null;
@@ -966,75 +987,103 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
             case 'dolce_salato':
                 doughType = DOUGH_TYPES.find(d => d.type === 'Contemporanea') || DOUGH_TYPES[0];
                 // Tag-based selection: formaggi sapidi, frutta dolce, frutta secca
-                const cheeseArr = selectIngredientWithFallback(['cheese_blue', 'cheese_soft', 'cheese_aged'], 'Formaggi', INGREDIENTS_DB, 1);
-                const fruitArr = selectIngredientWithFallback(['fruit_sweet', 'finish_sweet'], 'Frutta e Frutta Secca', INGREDIENTS_DB, 1);
-                const crunchArr = selectIngredientWithFallback(['nut_creamy', 'nut_crunchy'], 'Frutta e Frutta Secca', INGREDIENTS_DB, 1);
+                const cheeseArr = selectIngredientWithFallback(['cheese_blue', 'cheese_soft', 'cheese_aged'], 'Formaggi', INGREDIENTS_DB, 1, true);
+                const fruitArr = selectIngredientWithFallback(['fruit_sweet', 'finish_sweet'], 'Frutta e Frutta Secca', INGREDIENTS_DB, 1, true);
+                const crunchArr = selectIngredientWithFallback(['nut_creamy', 'nut_crunchy'], 'Frutta e Frutta Secca', INGREDIENTS_DB, 1, true);
 
                 const cheese = cheeseArr[0];
                 const fruit = fruitArr[0];
                 const crunch = crunchArr[0];
 
-                if (cheese) ingredients.push({ ...cheese, quantity: 80, category: 'Formaggi', phase: 'topping' });
-                if (fruit) ingredients.push({ ...fruit, quantity: 60, category: 'Frutta e Frutta Secca', phase: 'topping', postBake: fruit.name !== 'Pere' });
-                if (crunch) ingredients.push({ ...crunch, quantity: 30, category: 'Frutta e Frutta Secca', phase: 'topping', postBake: true });
+                if (cheese) {
+                    ingredients.push({ ...cheese, quantity: 80, category: 'Formaggi', phase: 'topping' });
+                    mainIngredientNames.push(cheese.name);
+                } else missingSlots.push('Formaggio sapido');
+
+                if (fruit) {
+                    ingredients.push({ ...fruit, quantity: 60, category: 'Frutta e Frutta Secca', phase: 'topping', postBake: fruit.name !== 'Pere' });
+                    mainIngredientNames.push(fruit.name);
+                } else missingSlots.push('Frutta dolce');
+
+                if (crunch) {
+                    ingredients.push({ ...crunch, quantity: 30, category: 'Frutta e Frutta Secca', phase: 'topping', postBake: true });
+                    mainIngredientNames.push(crunch.name);
+                } else missingSlots.push('Elemento croccante');
+
                 ingredients.unshift({ name: 'Fior di latte', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
 
-                mainIngredientNames = [
-                    cheese?.name || 'Formaggio',
-                    fruit?.name || 'Frutta',
-                    crunch?.name || 'Granella'
-                ];
-                description = `Un perfetto equilibrio tra la sapidità del ${mainIngredientNames[0].toLowerCase()} e la dolcezza di ${mainIngredientNames[1].toLowerCase()}, completata dalla croccantezza di ${mainIngredientNames[2].toLowerCase()}.`;
+                description = `Un perfetto equilibrio tra la sapidità del ${(cheese?.name || 'Formaggio').toLowerCase()} e la dolcezza di ${(fruit?.name || 'Frutta').toLowerCase()}, completata dalla croccantezza di ${(crunch?.name || 'Granella').toLowerCase()}.`;
                 break;
 
             case 'terra_bosco':
                 doughType = DOUGH_TYPES.find(d => d.type === 'Integrale') || DOUGH_TYPES[0];
                 // Tag-based selection: funghi, carni intense/cotte/grasse, tartufo
-                const mushroomArr = selectIngredientWithFallback(['vegetable_mushrooms'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1);
-                const meatArr = selectIngredientWithFallback(['meat_cured_intense', 'meat_cooked', 'meat_fatty'], 'Carni e Salumi', INGREDIENTS_DB, 1);
-                const creamArr = selectIngredientWithFallback(['premium_truffle', 'base_cream_vegetable'], 'Basi e Salse', INGREDIENTS_DB, 1);
+                const mushroomArr = selectIngredientWithFallback(['vegetable_mushrooms'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1, true);
+                const meatArr = selectIngredientWithFallback(['meat_cured_intense', 'meat_cooked', 'meat_fatty'], 'Carni e Salumi', INGREDIENTS_DB, 1, true);
+                const creamArr = selectIngredientWithFallback(['premium_truffle', 'base_cream_vegetable'], 'Basi e Salse', INGREDIENTS_DB, 1, true);
 
                 const mushroom = mushroomArr[0];
                 const meat = meatArr[0];
                 const cream = creamArr[0];
 
-                if (cream) ingredients.push({ ...cream, quantity: (cream.category === 'Salsa' || cream.category === 'Basi e Salse') ? 80 : 15, category: 'Basi e Salse', phase: 'topping', postBake: cream.postBake });
-                if (mushroom) ingredients.push({ ...mushroom, quantity: 100, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
-                if (meat) ingredients.push({ ...meat, quantity: 80, category: 'Carni e Salumi', phase: 'topping', postBake: meat.postBake });
+                if (cream) {
+                    ingredients.push({ ...cream, quantity: (cream.category === 'Salsa' || cream.category === 'Basi e Salse') ? 80 : 15, category: 'Basi e Salse', phase: 'topping', postBake: cream.postBake });
+                    mainIngredientNames.push(cream.name);
+                } else missingSlots.push('Crema/Tartufo');
+
+                if (mushroom) {
+                    ingredients.push({ ...mushroom, quantity: 100, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
+                    mainIngredientNames.push(mushroom.name);
+                } else missingSlots.push('Funghi');
+
+                if (meat) {
+                    ingredients.push({ ...meat, quantity: 80, category: 'Carni e Salumi', phase: 'topping', postBake: meat.postBake });
+                    mainIngredientNames.push(meat.name);
+                } else missingSlots.push('Carne intensa');
+
                 ingredients.unshift({ name: 'Provola affumicata', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
 
-                mainIngredientNames = [mushroom?.name || 'Funghi', meat?.name || 'Carne'];
-                description = `I profumi del bosco con ${mainIngredientNames[0].toLowerCase()} e ${mainIngredientNames[1].toLowerCase()}, su una base rustica.`;
+                description = `I profumi del bosco con ${(mushroom?.name || 'Funghi').toLowerCase()} e ${(meat?.name || 'Carne').toLowerCase()}, su una base rustica.`;
                 break;
 
             case 'fresca_estiva':
                 doughType = DOUGH_TYPES.find(d => d.type === 'Alta Idratazione') || DOUGH_TYPES[0];
                 // Tag-based selection: formaggi freschi, carni delicate, verdure a foglia
-                const freshBaseArr = selectIngredientWithFallback(['vegetable_tomato_fresh', 'base_oil'], 'Basi e Salse', INGREDIENTS_DB, 1);
-                const freshCheeseArr = selectIngredientWithFallback(['cheese_fresh'], 'Formaggi', INGREDIENTS_DB, 1);
-                const freshMeatArr = selectIngredientWithFallback(['meat_cured_delicate', 'seafood_preserved'], 'Carni e Salumi', INGREDIENTS_DB, 1);
-                const freshVegArr = selectIngredientWithFallback(['vegetable_leafy', 'vegetable_tomato_fresh'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1);
+                const freshBaseArr = selectIngredientWithFallback(['vegetable_tomato_fresh', 'base_oil'], 'Basi e Salse', INGREDIENTS_DB, 1, true);
+                const freshCheeseArr = selectIngredientWithFallback(['cheese_fresh'], 'Formaggi', INGREDIENTS_DB, 1, true);
+                const freshMeatArr = selectIngredientWithFallback(['meat_cured_delicate', 'seafood_preserved'], 'Carni e Salumi', INGREDIENTS_DB, 1, true);
+                const freshVegArr = selectIngredientWithFallback(['vegetable_leafy', 'vegetable_tomato_fresh'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1, true);
 
                 const freshBase = freshBaseArr[0];
                 const freshCheese = freshCheeseArr[0];
                 const freshMeat = freshMeatArr[0];
                 const freshVeg = freshVegArr[0];
 
-                if (freshBase) ingredients.push({ ...freshBase });
-                if (freshCheese) ingredients.push({ ...freshCheese, quantity: 120, category: 'Formaggi', phase: 'topping', postBake: true });
-                if (freshMeat) ingredients.push({ ...freshMeat, quantity: 70, category: 'Carni e Salumi', phase: 'topping', postBake: true });
-                if (freshVeg) ingredients.push({ ...freshVeg, quantity: 50, category: 'Verdure e Ortaggi', phase: 'topping', postBake: true });
+                if (freshBase) {
+                    ingredients.push({ ...freshBase });
+                    mainIngredientNames.push(freshBase.name);
+                } else missingSlots.push('Base fresca');
+
+                if (freshCheese) {
+                    ingredients.push({ ...freshCheese, quantity: 120, category: 'Formaggi', phase: 'topping', postBake: true });
+                    mainIngredientNames.push(freshCheese.name);
+                } else missingSlots.push('Formaggio fresco');
+
+                if (freshMeat) {
+                    ingredients.push({ ...freshMeat, quantity: 70, category: 'Carni e Salumi', phase: 'topping', postBake: true });
+                    mainIngredientNames.push(freshMeat.name);
+                } else missingSlots.push('Salume/Pesce');
+
+                if (freshVeg) {
+                    ingredients.push({ ...freshVeg, quantity: 50, category: 'Verdure e Ortaggi', phase: 'topping', postBake: true });
+                    mainIngredientNames.push(freshVeg.name);
+                } else missingSlots.push('Verdura fresca');
 
                 if (freshMeat?.name && (freshMeat.name.includes('Alici') || freshMeat.name.includes('Salmone'))) {
                     ingredients.push({ name: 'Limone grattugiato', quantity: 5, unit: 'g', category: 'Erbe e Spezie', phase: 'topping', postBake: true });
                 }
 
-                mainIngredientNames = [
-                    freshCheese?.name || 'Formaggio',
-                    freshMeat?.name || 'Salume',
-                    freshVeg?.name || 'Verdura'
-                ];
-                description = `Freschezza assoluta con ${mainIngredientNames[0].toLowerCase()} e ${mainIngredientNames[1].toLowerCase()} aggiunti a crudo.`;
+                description = `Freschezza assoluta con ${(freshCheese?.name || 'Formaggio').toLowerCase()} e ${(freshMeat?.name || 'Salume').toLowerCase()} aggiunti a crudo.`;
                 break;
 
             case 'piccante_decisa':
@@ -1043,33 +1092,39 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
                 ingredients.push({ name: 'Fior di latte', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
 
                 // Tag-based selection: carni piccanti, verdure + contrasto dolce
-                const spicyArr = selectIngredientWithFallback(['meat_spicy'], 'Carni e Salumi', INGREDIENTS_DB, 1);
-                const vegetableArr = selectIngredientWithFallback(['vegetable_onions', 'finish_savory', 'vegetable_grilled'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1);
-                const finishArr = selectIngredientWithFallback(['finish_sweet', 'cheese_fresh'], 'Basi e Salse', INGREDIENTS_DB, 1);
+                const spicyArr = selectIngredientWithFallback(['meat_spicy'], 'Carni e Salumi', INGREDIENTS_DB, 1, true);
+                const vegetableArr = selectIngredientWithFallback(['vegetable_onions', 'finish_savory', 'vegetable_grilled'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1, true);
+                const finishArr = selectIngredientWithFallback(['finish_sweet', 'cheese_fresh'], 'Basi e Salse', INGREDIENTS_DB, 1, true);
 
                 const spicy = spicyArr[0];
                 const vegetable = vegetableArr[0];
                 const finish = finishArr[0];
 
-                if (spicy) ingredients.push({ ...spicy, quantity: 60, category: 'Carni e Salumi', phase: 'topping', postBake: false });
-                if (vegetable) ingredients.push({ ...vegetable, quantity: 50, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
-                if (finish) ingredients.push({ ...finish });
+                if (spicy) {
+                    ingredients.push({ ...spicy, quantity: 60, category: 'Carni e Salumi', phase: 'topping', postBake: false });
+                    mainIngredientNames.push(spicy.name);
+                } else missingSlots.push('Salume piccante');
 
-                mainIngredientNames = [
-                    spicy?.name || 'Salume piccante',
-                    vegetable?.name || 'Verdura',
-                    finish?.name || 'Tocco finale'
-                ];
-                description = `Il carattere deciso della ${mainIngredientNames[0].toLowerCase()} bilanciato dalla dolcezza di ${mainIngredientNames[2].toLowerCase()}.`;
+                if (vegetable) {
+                    ingredients.push({ ...vegetable, quantity: 50, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
+                    mainIngredientNames.push(vegetable.name);
+                } else missingSlots.push('Verdura');
+
+                if (finish) {
+                    ingredients.push({ ...finish });
+                    mainIngredientNames.push(finish.name);
+                } else missingSlots.push('Tocco finale');
+
+                description = `Il carattere deciso della ${(spicy?.name || 'Salume piccante').toLowerCase()} bilanciato dalla dolcezza di ${(finish?.name || 'Tocco finale').toLowerCase()}.`;
                 break;
 
             case 'mare':
                 doughType = DOUGH_TYPES.find(d => d.type === 'Alta Idratazione') || DOUGH_TYPES[0];
                 // Tag-based selection: pesce, verdure marine, agrumi ed erbe
-                const seafoodArr = selectIngredientWithFallback(['seafood_crustaceans', 'seafood_mollusks', 'seafood_fish'], 'Pesce e Frutti di Mare', INGREDIENTS_DB, 1);
-                const seaVegArr = selectIngredientWithFallback(['vegetable_grilled', 'vegetable_tomato_fresh', 'vegetable_leafy', 'vegetable_asparagus'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1);
-                const citrusArr = selectIngredientWithFallback(['herb_citrus'], 'Erbe e Spezie', INGREDIENTS_DB, 1);
-                const herbArr = selectIngredientWithFallback(['herb_fresh_delicate', 'herb_citrus'], 'Erbe e Spezie', INGREDIENTS_DB, 1);
+                const seafoodArr = selectIngredientWithFallback(['seafood_crustaceans', 'seafood_mollusks', 'seafood_fish'], 'Pesce e Frutti di Mare', INGREDIENTS_DB, 1, true);
+                const seaVegArr = selectIngredientWithFallback(['vegetable_grilled', 'vegetable_tomato_fresh', 'vegetable_leafy', 'vegetable_asparagus'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1, true);
+                const citrusArr = selectIngredientWithFallback(['herb_citrus'], 'Erbe e Spezie', INGREDIENTS_DB, 1, true);
+                const herbArr = selectIngredientWithFallback(['herb_fresh_delicate', 'herb_citrus'], 'Erbe e Spezie', INGREDIENTS_DB, 1, true);
 
                 const seafood = seafoodArr[0];
                 const seaVeg = seaVegArr[0];
@@ -1080,36 +1135,59 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
                     ingredients.push({ name: 'Pomodorini datterini', quantity: 100, unit: 'g', category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
                 }
                 ingredients.push({ name: 'Fior di latte', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
-                if (seafood) ingredients.push({ ...seafood, quantity: 100, category: 'Pesce e Frutti di Mare', phase: 'topping', postBake: false });
-                if (seaVeg) ingredients.push({ ...seaVeg, quantity: 80, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
+
+                if (seafood) {
+                    ingredients.push({ ...seafood, quantity: 100, category: 'Pesce e Frutti di Mare', phase: 'topping', postBake: false });
+                    mainIngredientNames.push(seafood.name);
+                } else missingSlots.push('Pesce/Crostacei');
+
+                if (seaVeg) {
+                    ingredients.push({ ...seaVeg, quantity: 80, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
+                    mainIngredientNames.push(seaVeg.name);
+                } else missingSlots.push('Vegana di mare');
+
                 if (citrus) ingredients.push({ ...citrus, quantity: 5, category: 'Erbe e Spezie', phase: 'topping', postBake: true });
                 if (herb) ingredients.push({ ...herb, quantity: 10, category: 'Erbe e Spezie', phase: 'topping', postBake: true });
 
-                mainIngredientNames = [seafood?.name || 'Pesce', seaVeg?.name || 'Verdura'];
-                description = `I sapori del mare con ${mainIngredientNames[0].toLowerCase()} e ${mainIngredientNames[1].toLowerCase()}, esaltati da agrumi e erbe fresche.`;
+                description = `I sapori del mare con ${(seafood?.name || 'Pesce').toLowerCase()} e ${(seaVeg?.name || 'Verdura').toLowerCase()}, esaltati da agrumi e erbe fresche.`;
                 break;
 
             case 'vegana':
                 doughType = DOUGH_TYPES.find(d => d.type === 'Integrale') || DOUGH_TYPES[0];
                 // Tag-based selection: creme vegetali, verdure, frutta secca
-                const veganBaseArr = selectIngredientWithFallback(['base_cream_vegetable', 'base_pesto'], 'Basi e Salse', INGREDIENTS_DB, 1);
-                const veganVeg1Arr = selectIngredientWithFallback(['vegetable_grilled', 'vegetable_leafy', 'vegetable_cruciferous', 'vegetable_mushrooms'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1);
-                const veganVeg2Arr = selectIngredientWithFallback(['vegetable_tomato_fresh', 'vegetable_leafy', 'vegetable_bitter', 'finish_savory'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1);
-                const seedsArr = selectIngredientWithFallback(['nut_crunchy', 'nut_creamy'], 'Frutta e Frutta Secca', INGREDIENTS_DB, 1);
+                const veganBaseArr = selectIngredientWithFallback(['base_cream_vegetable', 'base_pesto'], 'Basi e Salse', INGREDIENTS_DB, 1, true);
+                const veganVeg1Arr = selectIngredientWithFallback(['vegetable_grilled', 'vegetable_leafy', 'vegetable_cruciferous', 'vegetable_mushrooms'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1, true);
+                const veganVeg2Arr = selectIngredientWithFallback(['vegetable_tomato_fresh', 'vegetable_leafy', 'vegetable_bitter', 'finish_savory'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1, true);
+                const seedsArr = selectIngredientWithFallback(['nut_crunchy', 'nut_creamy'], 'Frutta e Frutta Secca', INGREDIENTS_DB, 1, true);
 
                 const veganBase = veganBaseArr[0];
                 const veganVeg1 = veganVeg1Arr[0];
                 const veganVeg2 = veganVeg2Arr[0];
                 const seeds = seedsArr[0];
 
-                if (veganBase) ingredients.push({ ...veganBase, quantity: 80, category: 'Basi e Salse', phase: 'topping', postBake: false });
-                if (veganVeg1) ingredients.push({ ...veganVeg1, quantity: 100, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
-                if (veganVeg2) ingredients.push({ ...veganVeg2, quantity: 60, category: 'Verdure e Ortaggi', phase: 'topping', postBake: true });
-                if (seeds) ingredients.push({ ...seeds, quantity: 20, category: 'Frutta e Frutta Secca', phase: 'topping', postBake: true });
+                if (veganBase) {
+                    ingredients.push({ ...veganBase, quantity: 80, category: 'Basi e Salse', phase: 'topping', postBake: false });
+                    mainIngredientNames.push(veganBase.name);
+                } else missingSlots.push('Base vegetale');
+
+                if (veganVeg1) {
+                    ingredients.push({ ...veganVeg1, quantity: 100, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
+                    mainIngredientNames.push(veganVeg1.name);
+                } else missingSlots.push('Verdura 1');
+
+                if (veganVeg2) {
+                    ingredients.push({ ...veganVeg2, quantity: 60, category: 'Verdure e Ortaggi', phase: 'topping', postBake: true });
+                    mainIngredientNames.push(veganVeg2.name);
+                } else missingSlots.push('Verdura 2');
+
+                if (seeds) {
+                    ingredients.push({ ...seeds, quantity: 20, category: 'Frutta e Frutta Secca', phase: 'topping', postBake: true });
+                    mainIngredientNames.push(seeds.name);
+                } else missingSlots.push('Semi/Granella');
+
                 ingredients.push({ name: 'Basilico fresco', quantity: 10, unit: 'g', category: 'Erbe e Spezie', phase: 'topping', postBake: true });
 
-                mainIngredientNames = [veganVeg1?.name || 'Verdura 1', veganVeg2?.name || 'Verdura 2'];
-                description = `Una pizza completamente vegetale con ${mainIngredientNames[0].toLowerCase()} e ${mainIngredientNames[1].toLowerCase()}, ricca di sapori naturali.`;
+                description = `Una pizza completamente vegetale con ${(veganVeg1?.name || 'Verdura 1').toLowerCase()} e ${(veganVeg2?.name || 'Verdura 2').toLowerCase()}, ricca di sapori naturali.`;
                 break;
 
             case 'fusion':
@@ -1118,27 +1196,37 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
             default:
                 doughType = DOUGH_TYPES.find(d => d.type === 'Contemporanea') || DOUGH_TYPES[0];
                 // Tag-based selection: mix creativo di categorie per pizza fusion/contemporanea
-                const fusionCheeseArr = selectIngredientWithFallback(['cheese_soft', 'cheese_creamy'], 'Formaggi', INGREDIENTS_DB, 1);
-                const fusionMeatArr = selectIngredientWithFallback(['meat_cured_delicate', 'meat_cured_intense', 'meat_mild_salumi'], 'Carni e Salumi', INGREDIENTS_DB, 1);
-                const fusionVegArr = selectIngredientWithFallback(['vegetable_root', 'vegetable_cruciferous', 'vegetable_leafy'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1);
-                const fusionFinishArr = selectIngredientWithFallback(['finish_sweet', 'finish_tangy', 'nut_creamy'], 'Altro', INGREDIENTS_DB, 1);
+                const fusionCheeseArr = selectIngredientWithFallback(['cheese_soft', 'cheese_creamy'], 'Formaggi', INGREDIENTS_DB, 1, true);
+                const fusionMeatArr = selectIngredientWithFallback(['meat_cured_delicate', 'meat_cured_intense', 'meat_mild_salumi'], 'Carni e Salumi', INGREDIENTS_DB, 1, true);
+                const fusionVegArr = selectIngredientWithFallback(['vegetable_root', 'vegetable_cruciferous', 'vegetable_leafy'], 'Verdure e Ortaggi', INGREDIENTS_DB, 1, true);
+                const fusionFinishArr = selectIngredientWithFallback(['finish_sweet', 'finish_tangy', 'nut_creamy'], 'Altro', INGREDIENTS_DB, 1, true);
 
                 const fusionCheese = fusionCheeseArr[0];
                 const fusionMeat = fusionMeatArr[0];
                 const fusionVeg = fusionVegArr[0];
                 const fusionFinish = fusionFinishArr[0];
 
-                if (fusionCheese) ingredients.push({ ...fusionCheese, quantity: 100, category: 'Formaggi', phase: 'topping', postBake: false });
-                if (fusionMeat) ingredients.push({ ...fusionMeat, quantity: 70, category: 'Carni e Salumi', phase: 'topping', postBake: true });
-                if (fusionVeg) ingredients.push({ ...fusionVeg, quantity: 80, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
-                if (fusionFinish) ingredients.push({ ...fusionFinish, quantity: 20, category: 'Altro', phase: 'topping', postBake: true });
+                if (fusionCheese) {
+                    ingredients.push({ ...fusionCheese, quantity: 100, category: 'Formaggi', phase: 'topping', postBake: false });
+                    mainIngredientNames.push(fusionCheese.name);
+                } else missingSlots.push('Formaggio fusion');
 
-                mainIngredientNames = [
-                    fusionCheese?.name || 'Formaggio',
-                    fusionMeat?.name || 'Salume',
-                    fusionVeg?.name || 'Verdura'
-                ];
-                description = `Un'interpretazione contemporanea con ${mainIngredientNames[0].toLowerCase()}, ${mainIngredientNames[1].toLowerCase()} e ${mainIngredientNames[2].toLowerCase()}.`;
+                if (fusionMeat) {
+                    ingredients.push({ ...fusionMeat, quantity: 70, category: 'Carni e Salumi', phase: 'topping', postBake: true });
+                    mainIngredientNames.push(fusionMeat.name);
+                } else missingSlots.push('Salume fusion');
+
+                if (fusionVeg) {
+                    ingredients.push({ ...fusionVeg, quantity: 80, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
+                    mainIngredientNames.push(fusionVeg.name);
+                } else missingSlots.push('Verdura fusion');
+
+                if (fusionFinish) {
+                    ingredients.push({ ...fusionFinish, quantity: 20, category: 'Altro', phase: 'topping', postBake: true });
+                    mainIngredientNames.push(fusionFinish.name);
+                } else missingSlots.push('Tocco fusion');
+
+                description = `Un'interpretazione contemporanea con ${(fusionCheese?.name || 'Formaggio').toLowerCase()}, ${(fusionMeat?.name || 'Salume').toLowerCase()} e ${(fusionVeg?.name || 'Verdura').toLowerCase()}.`;
                 break;
         }
     }
@@ -1146,6 +1234,19 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
     // Select suggested dough type (no longer generating dough ingredients)
     if (!doughType) doughType = DOUGH_TYPES[Math.floor(Math.random() * DOUGH_TYPES.length)];
     const suggestedDough = doughType.type;
+
+    // Check if pizza is incomplete (missing mandatory ingredients and NOT combinations-based)
+    let isIncomplete = false;
+    let missingInfo = '';
+
+    if (!usePredefinedCombo) {
+        if (missingSlots.length > 0) {
+            isIncomplete = true;
+            missingInfo = ` (Mancano: ${missingSlots.join(', ')})`;
+            pizzaName = `Pizza Incompleta${missingInfo}`;
+            description = `Questa ricetta non ha potuto essere generata completamente perché non sono stati trovati nel database ingredienti corrispondenti ai criteri richiesti: ${missingSlots.join(', ')}.`;
+        }
+    }
 
     ingredients = ingredients.map(ing => ({
         ...ing,
@@ -1197,6 +1298,7 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
         suggestedDough,
         tags,
         recipeSource,                          // NEW: Track source
-        archetypeUsed                          // NEW: Track archetype
+        archetypeUsed,                         // NEW: Track archetype
+        isIncomplete                           // NEW: Flag for incomplete pizza
     };
 }
