@@ -634,10 +634,20 @@ async function handleRegenerateImage(recipe) {
       currentImg.style.opacity = '1';
     }
 
-    // Update recipe in database BEFORE showing success
-    console.log('Updating recipe in database...');
-    await updateRecipe(recipe.id, { imageUrl: newImageUrl });
-    console.log('Recipe updated successfully');
+    // Update recipe in database via API
+    console.log('Updating recipe in database via API...');
+    const response = await fetch(`/api/recipes/${recipe.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageUrl: newImageUrl })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to update recipe');
+    }
+
+    console.log('Recipe updated successfully via API');
 
     // Update button state
     btn.innerHTML = '✅ Rigenerata!';

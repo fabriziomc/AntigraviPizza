@@ -113,6 +113,30 @@ export async function renderSettings() {
           </div>
         </section>
 
+        <!-- Image Management Section -->
+        <section class="settings-card">
+          <div class="card-header">
+            <span class="card-icon">🖼️</span>
+            <h2>Gestione Immagini Pizze</h2>
+          </div>
+          <div class="card-body">
+            <p class="card-description">
+              Genera automaticamente immagini per tutte le pizze che ne sono sprovviste.
+            </p>
+            
+            <div class="action-group">
+              <button id="btnRegenerateAllImages" class="btn btn-primary">
+                <span class="icon">🔄</span>
+                Rigenera Immagini Mancanti
+              </button>
+              <p class="action-help">
+                Trova tutte le pizze senza immagine e genera automaticamente immagini di alta qualità.
+                <span id="missingImagesCount" style="display:none; color: var(--color-warning); font-weight: bold;"></span>
+              </p>
+            </div>
+          </div>
+        </section>
+
         <!-- Archetype Weights Section -->
         <section class="settings-card">
           <div class="card-header">
@@ -300,6 +324,115 @@ function setupEventListeners() {
     // Reset input
     fileInputDB.value = '';
   });
+
+  // Bulk Regenerate Images
+  document.getElementById('btnRegenerateAllImages').addEventListener('click', async () => {
+    try {
+      const btn = document.getElementById('btnRegenerateAllImages');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="icon">⏳</span> Caricamento...';
+
+      // Fetch all recipes
+      const response = await fetch('/api/recipes');
+      if (!response.ok) throw new Error('Failed to fetch recipes');
+      const recipes = await response.json();
+
+      // Filter recipes without images or with broken/default images
+      const recipesWithoutImages = recipes.filter(r =>
+        !r.imageUrl ||
+        r.imageUrl === '' ||
+        r.imageUrl.includes('placeholder')
+      );
+
+      if (recipesWithoutImages.length === 0) {
+        showToast('✅ Tutte le pizze hanno già un\'immagine!', 'success');
+        btn.disabled = false;
+        btn.innerHTML = '<span class="icon">🔄</span> Rigenera Immagini Mancanti';
+        return;
+      }
+
+      // Confirm action
+      const confirmed = confirm(
+        `🖼️ Trovate ${recipesWithoutImages.length} pizze senza immagine.\n\n` +
+        `Vuoi generare le immagini per tutte?\n` +
+        `(Questa operazione potrebbe richiedere alcuni minuti)`
+      );
+
+      if (!confirmed) {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="icon">🔄</span> Rigenera Immagini Mancanti';
+        return;
+      }
+
+      // Generate images sequentially
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 0; i < recipesWithoutImages.length; i++) {
+        const recipe = recipesWithoutImages[i];
+        const progress = i + 1;
+
+        // Update button with progress
+        btn.innerHTML = `<span class="icon">⏳</span> Generando ${progress}/${recipesWithoutImages.length}...`;
+
+        try {
+          // Generate image similar to how it's done in Library.js
+          const toppingIngredients = recipe.baseIngredients?.filter(ing =>
+            ing.phase === 'topping' || ing.category !== 'Impasto'
+          ) || [];
+          const mainIngredients = toppingIngredients.slice(0, 3).map(i => i.name || 'condimento');
+
+          const imagePrompt = `gourmet pizza ${recipe.name}, toppings: ${mainIngredients.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
+          const timestamp = Date.now() + i; // Unique seed for each
+          const newImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?seed=${timestamp}`;
+
+          // Update recipe via API
+          const updateResponse = await fetch(`/api/recipes/${recipe.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageUrl: newImageUrl })
+          });
+
+          if (!updateResponse.ok) throw new Error('API update failed');
+
+          successCount++;
+          console.log(`✅ Generated image for: ${recipe.name}`);
+
+          // Small delay to avoid overwhelming the image service
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+        } catch (error) {
+          console.error(`❌ Failed to generate image for ${recipe.name}:`, error);
+          errorCount++;
+        }
+      }
+
+      // Final feedback
+      btn.disabled = false;
+      btn.innerHTML = '<span class="icon">🔄</span> Rigenera Immagini Mancanti';
+
+      if (successCount > 0) {
+        showToast(
+          `✅ Generazione completata! ${successCount} immagini create` +
+          (errorCount > 0 ? `, ${errorCount} errori` : ''),
+          errorCount > 0 ? 'warning' : 'success'
+        );
+      } else {
+        showToast('❌ Nessuna immagine generata', 'error');
+      }
+
+    } catch (error) {
+      console.error('Bulk regeneration failed:', error);
+      showToast('❌ Errore durante la rigenerazione: ' + error.message, 'error');
+
+      const btn = document.getElementById('btnRegenerateAllImages');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="icon">🔄</span> Rigenera Immagini Mancanti';
+      }
+    }
+  });
+
 
 
 

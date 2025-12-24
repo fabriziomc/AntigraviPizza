@@ -56,6 +56,20 @@ router.put('/recipes/:id', async (req, res) => {
     }
 });
 
+// PATCH recipe (partial update)
+router.patch('/recipes/:id', async (req, res) => {
+    try {
+        console.log(`📝 [PATCH /recipes/${req.params.id}] Partial update:`, req.body);
+        const recipe = await dbAdapter.updateRecipe(req.params.id, req.body);
+        console.log(`✅ [PATCH /recipes/${req.params.id}] Updated successfully`);
+        res.json(recipe);
+    } catch (err) {
+        console.error(`❌ [PATCH /recipes/${req.params.id}] Error:`, err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
 // DELETE recipe
 router.delete('/recipes/:id', async (req, res) => {
     try {
