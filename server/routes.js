@@ -34,9 +34,14 @@ router.get('/recipes/:id', async (req, res) => {
 // CREATE recipe
 router.post('/recipes', async (req, res) => {
     try {
+        console.log('📥 [POST /recipes] Received recipe data:', JSON.stringify(req.body, null, 2));
         const recipe = await dbAdapter.createRecipe(req.body);
+        console.log('✅ [POST /recipes] Recipe created successfully:', recipe.id);
         res.status(201).json(recipe);
     } catch (err) {
+        console.error('❌ [POST /recipes] Error creating recipe:', err);
+        console.error('❌ [POST /recipes] Error message:', err.message);
+        console.error('❌ [POST /recipes] Error stack:', err.stack);
         res.status(500).json({ error: err.message });
     }
 });

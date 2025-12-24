@@ -401,9 +401,17 @@ async function showRecipeModal(recipeId) {
         recipe.preparations.forEach(prep => {
           const prepData = PREPARATIONS.find(p => p.id === prep.id);
           if (prepData) {
+            // Determine timing: use prep.timing if set, otherwise fall back to prepData.postCooking
+            let timing = 'before'; // default
+            if (prep.timing !== undefined) {
+              timing = prep.timing === 'after' ? 'after' : 'before';
+            } else if (prepData.postCooking) {
+              timing = 'after';
+            }
+
             allIngredients.push({
               type: 'preparation',
-              timing: prep.timing === 'after' ? 'after' : 'before',
+              timing: timing,
               data: { prep, prepData }
             });
           }
