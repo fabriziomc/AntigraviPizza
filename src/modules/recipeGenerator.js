@@ -459,6 +459,67 @@ function selectRandomIngredients(category, count = 1) {
     return shuffled.slice(0, count);
 }
 
+/**
+ * Seleziona ingredienti o preparazioni in base ai tag
+ * @param {string[]} tags - Array di tag da cercare
+ * @param {Object} INGREDIENTS_DB - Database ingredienti organizzato per categoria
+ * @param {boolean} matchAll - Se true, richiede TUTTI i tag. Se false, almeno uno.
+ * @returns {Array} Ingredienti/preparazioni che matchano i tag
+ */
+function getAllIngredientsByTags(tags, INGREDIENTS_DB, matchAll = false) {
+    // Combina tutti gli ingredienti da tutte le categorie
+    const allItems = [
+        ...(INGREDIENTS_DB.bases || []),
+        ...(INGREDIENTS_DB.cheeses || []),
+        ...(INGREDIENTS_DB.meats || []),
+        ...(INGREDIENTS_DB.vegetables || []),
+        ...(INGREDIENTS_DB.premium || []),
+        ...(INGREDIENTS_DB.finishes || [])
+    ];
+
+    return allItems.filter(item => {
+        // Skip se non ha tag (backward compatibility)
+        if (!item.tags || item.tags.length === 0) {
+            return false;
+        }
+
+        // Converti tags a array se è una stringa JSON
+        const itemTags = typeof item.tags === 'string' ? JSON.parse(item.tags) : item.tags;
+
+        if (matchAll) {
+            // Richiede TUTTI i tag
+            return tags.every(tag => itemTags.includes(tag));
+        } else {
+            // Richiede ALMENO UN tag
+            return tags.some(tag => itemTags.includes(tag));
+        }
+    });
+}
+
+/**
+ * Seleziona preparazioni in base ai tag
+ * @param {string[]} tags - Array di tag da cercare
+ * @param {Array} preparations - Array di tutte le preparazioni
+ * @param {boolean} matchAll - Se true, richiede TUTTI i tag. Se false, almeno uno.
+ * @returns {Array} Preparazioni che matchano i tag
+ */
+function getPreparationsByTags(tags, preparations, matchAll = false) {
+    return preparations.filter(prep => {
+        if (!prep.tags || prep.tags.length === 0) {
+            return false;
+        }
+
+        const prepTags = typeof prep.tags === 'string' ? JSON.parse(prep.tags) : prep.tags;
+
+        if (matchAll) {
+            return tags.every(tag => prepTags.includes(tag));
+        } else {
+            return tags.some(tag => prepTags.includes(tag));
+        }
+    });
+}
+
+
 
 /**
  * Genera una ricetta casuale intelligente basata su archetipi
@@ -862,9 +923,10 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
         switch (selectedArchetype) {
             case 'dolce_salato':
                 doughType = DOUGH_TYPES.find(d => d.type === 'Contemporanea') || DOUGH_TYPES[0];
-                const cheese = selectRandomIngredients(INGREDIENTS_DB.cheeses.filter(c => ['Gorgonzola DOP', 'Taleggio', 'Pecorino Romano'].includes(c.name)), 1)[0];
-                const fruit = selectRandomIngredients(INGREDIENTS_DB.finishes.filter(f => ['Pere', 'Fichi', 'Miele di acacia'].includes(f.name)), 1)[0];
-                const crunch = selectRandomIngredients(INGREDIENTS_DB.finishes.filter(f => ['Noci', 'Pistacchi'].includes(f.name)), 1)[0];
+                // Tag-based selection: formaggi sapidi, frutta dolce, frutta secca
+                const cheese = selectRandomIngredients(getAllIngredientsByTags(['cheese_blue', 'cheese_soft', 'cheese_aged'], INGREDIENTS_DB), 1)[0];
+                const fruit = selectRandomIngredients(getAllIngredientsByTags(['fruit_sweet', 'finish_sweet'], INGREDIENTS_DB), 1)[0];
+                const crunch = selectRandomIngredients(getAllIngredientsByTags(['nut_creamy', 'nut_crunchy'], INGREDIENTS_DB), 1)[0];
 
                 ingredients.push({ ...cheese, quantity: 80, category: 'Formaggi', phase: 'topping' });
                 ingredients.push({ ...fruit, quantity: 60, category: 'Frutta e Frutta Secca', phase: 'topping', postBake: fruit.name !== 'Pere' });
@@ -877,10 +939,10 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
 
             case 'terra_bosco':
                 doughType = DOUGH_TYPES.find(d => d.type === 'Integrale') || DOUGH_TYPES[0];
-                const mushroom = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => v.name.includes('Funghi')), 1)[0];
-                const meat = selectRandomIngredients(INGREDIENTS_DB.meats.filter(m => ['Speck Alto Adige', 'Salsiccia fresca', 'Guanciale croccante'].includes(m.name)), 1)[0];
-                const cream = selectRandomIngredients(INGREDIENTS_DB.bases.filter(b => b.name.includes('Crema') || b.name.includes('Tartufo')), 1)[0] ||
-                    selectRandomIngredients(INGREDIENTS_DB.premium.filter(p => p.name.includes('Tartufo')), 1)[0];
+                // Tag-based selection: funghi, carni intense/cotte/grasse, tartufo
+                const mushroom = selectRandomIngredients(getAllIngredientsByTags(['vegetable_mushrooms'], INGREDIENTS_DB), 1)[0];
+                const meat = selectRandomIngredients(getAllIngredientsByTags(['meat_cured_intense', 'meat_cooked', 'meat_fatty'], INGREDIENTS_DB), 1)[0];
+                const cream = selectRandomIngredients(getAllIngredientsByTags(['premium_truffle', 'base_cream_vegetable'], INGREDIENTS_DB), 1)[0];
 
                 if (cream) ingredients.push({ ...cream, quantity: cream.category === 'Salsa' ? 80 : 15, category: 'Basi e Salse', phase: 'topping', postBake: cream.postBake });
                 ingredients.push({ ...mushroom, quantity: 100, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
@@ -893,13 +955,14 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
 
             case 'fresca_estiva':
                 doughType = DOUGH_TYPES.find(d => d.type === 'Alta Idratazione') || DOUGH_TYPES[0];
-                const freshBase = Math.random() > 0.5
-                    ? { name: 'Pomodorini datterini', quantity: 150, unit: 'g', category: 'Verdure e Ortaggi', phase: 'topping', postBake: false }
-                    : { name: 'Olio EVO aromatizzato', quantity: 20, unit: 'ml', category: 'Altro', phase: 'topping', postBake: true };
+                // Tag-based selection: formaggi freschi, carni delicate, verdure a foglia
+                const freshBaseOptions = getAllIngredientsByTags(['vegetable_tomato_fresh', 'base_oil'], INGREDIENTS_DB);
+                const freshBase = freshBaseOptions.length > 0 ? selectRandomIngredients(freshBaseOptions, 1)[0] :
+                    { name: 'Olio EVO aromatizzato', quantity: 20, unit: 'ml', category: 'Altro', phase: 'topping', postBake: true };
 
-                const freshCheese = selectRandomIngredients(INGREDIENTS_DB.cheeses.filter(c => ['Burrata', 'Stracciatella', 'Mozzarella di bufala'].includes(c.name)), 1)[0];
-                const freshMeat = selectRandomIngredients(INGREDIENTS_DB.meats.filter(m => ['Prosciutto crudo di Parma', 'Bresaola', 'Alici di Cetara'].includes(m.name)), 1)[0];
-                const freshVeg = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => ['Rucola', 'Pomodorini ciliegino'].includes(v.name)), 1)[0];
+                const freshCheese = selectRandomIngredients(getAllIngredientsByTags(['cheese_fresh'], INGREDIENTS_DB), 1)[0];
+                const freshMeat = selectRandomIngredients(getAllIngredientsByTags(['meat_cured_delicate', 'seafood_preserved'], INGREDIENTS_DB), 1)[0];
+                const freshVeg = selectRandomIngredients(getAllIngredientsByTags(['vegetable_leafy', 'vegetable_tomato_fresh'], INGREDIENTS_DB), 1)[0];
 
                 ingredients.push({ ...freshBase });
                 ingredients.push({ ...freshCheese, quantity: 120, category: 'Formaggi', phase: 'topping', postBake: true });
@@ -919,11 +982,12 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
                 ingredients.push({ name: 'Pomodoro San Marzano', quantity: 80, unit: 'g', category: 'Basi e Salse', phase: 'topping', postBake: false });
                 ingredients.push({ name: 'Fior di latte', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
 
-                const spicy = selectRandomIngredients(INGREDIENTS_DB.meats.filter(m => ['Nduja calabrese', 'Salame piccante'].includes(m.name)), 1)[0];
-                const vegetable = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => ['Cipolla caramellata', 'Olive taggiasche', 'Peperoni'].includes(v.name)), 1)[0];
-                const finish = Math.random() > 0.5
-                    ? { name: 'Miele di acacia', quantity: 15, unit: 'g', category: 'Basi e Salse', phase: 'topping', postBake: true }
-                    : { name: 'Ricotta fresca', quantity: 50, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: true };
+                // Tag-based selection: carni piccanti, verdure + contrasto dolce
+                const spicy = selectRandomIngredients(getAllIngredientsByTags(['meat_spicy'], INGREDIENTS_DB), 1)[0];
+                const vegetable = selectRandomIngredients(getAllIngredientsByTags(['vegetable_onions', 'finish_savory', 'vegetable_grilled'], INGREDIENTS_DB), 1)[0];
+                const finishOptions = getAllIngredientsByTags(['finish_sweet', 'cheese_fresh'], INGREDIENTS_DB);
+                const finish = finishOptions.length > 0 ? selectRandomIngredients(finishOptions, 1)[0] :
+                    { name: 'Miele di acacia', quantity: 15, unit: 'g', category: 'Basi e Salse', phase: 'topping', postBake: true };
 
                 ingredients.push({ ...spicy, quantity: 60, category: 'Carni e Salumi', phase: 'topping', postBake: false });
                 ingredients.push({ ...vegetable, quantity: 50, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
@@ -935,10 +999,11 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
 
             case 'mare':
                 doughType = DOUGH_TYPES.find(d => d.type === 'Alta Idratazione') || DOUGH_TYPES[0];
-                const seafood = selectRandomIngredients(INGREDIENTS_DB.premium.filter(p => ['Gamberi rossi', 'Scampi', 'Polpo', 'Vongole', 'Capesante', 'Tonno fresco'].includes(p.name)), 1)[0];
-                const seaVeg = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => ['Zucchine', 'Pomodorini ciliegino', 'Rucola', 'Asparagi'].includes(v.name)), 1)[0];
-                const citrus = selectRandomIngredients(INGREDIENTS_DB.finishes.filter(f => f.name === 'Limone grattugiato'), 1)[0];
-                const herb = selectRandomIngredients(INGREDIENTS_DB.finishes.filter(f => ['Prezzemolo', 'Aneto', 'Basilico fresco'].includes(f.name)), 1)[0];
+                // Tag-based selection: pesce, verdure marine, agrumi ed erbe
+                const seafood = selectRandomIngredients(getAllIngredientsByTags(['seafood_crustaceans', 'seafood_mollusks', 'seafood_fish'], INGREDIENTS_DB), 1)[0];
+                const seaVeg = selectRandomIngredients(getAllIngredientsByTags(['vegetable_grilled', 'vegetable_tomato_fresh', 'vegetable_leafy', 'vegetable_asparagus'], INGREDIENTS_DB), 1)[0];
+                const citrus = selectRandomIngredients(getAllIngredientsByTags(['herb_citrus'], INGREDIENTS_DB), 1)[0];
+                const herb = selectRandomIngredients(getAllIngredientsByTags(['herb_fresh_delicate', 'herb_citrus'], INGREDIENTS_DB), 1)[0];
 
                 if (Math.random() > 0.5) {
                     ingredients.push({ name: 'Pomodorini datterini', quantity: 100, unit: 'g', category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
@@ -955,10 +1020,11 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
 
             case 'vegana':
                 doughType = DOUGH_TYPES.find(d => d.type === 'Integrale') || DOUGH_TYPES[0];
-                const veganBase = selectRandomIngredients(INGREDIENTS_DB.bases.filter(b => ['Crema di ceci', 'Crema di melanzane', 'Crema di zucca', 'Pesto di rucola'].includes(b.name)), 1)[0];
-                const veganVeg1 = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => ['Melanzane grigliate', 'Zucchine', 'Spinaci', 'Funghi champignon', 'Broccoli'].includes(v.name)), 1)[0];
-                const veganVeg2 = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => ['Pomodorini ciliegino', 'Rucola', 'Radicchio', 'Olive taggiasche'].includes(v.name)), 1)[0];
-                const seeds = selectRandomIngredients(INGREDIENTS_DB.finishes.filter(f => ['Semi di sesamo', 'Pinoli', 'Noci'].includes(f.name)), 1)[0];
+                // Tag-based selection: creme vegetali, verdure, frutta secca
+                const veganBase = selectRandomIngredients(getAllIngredientsByTags(['base_cream_vegetable', 'base_pesto'], INGREDIENTS_DB), 1)[0];
+                const veganVeg1 = selectRandomIngredients(getAllIngredientsByTags(['vegetable_grilled', 'vegetable_leafy', 'vegetable_cruciferous', 'vegetable_mushrooms'], INGREDIENTS_DB), 1)[0];
+                const veganVeg2 = selectRandomIngredients(getAllIngredientsByTags(['vegetable_tomato_fresh', 'vegetable_leafy', 'vegetable_bitter', 'finish_savory'], INGREDIENTS_DB), 1)[0];
+                const seeds = selectRandomIngredients(getAllIngredientsByTags(['nut_crunchy', 'nut_creamy'], INGREDIENTS_DB), 1)[0];
 
                 if (veganBase) ingredients.push({ ...veganBase, quantity: 80, category: 'Basi e Salse', phase: 'topping', postBake: false });
                 ingredients.push({ ...veganVeg1, quantity: 100, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
@@ -975,10 +1041,11 @@ async function generateRandomRecipeWithNames(additionalNames = []) {
             case 'tradizionale':
             default:
                 doughType = DOUGH_TYPES.find(d => d.type === 'Contemporanea') || DOUGH_TYPES[0];
-                const fusionCheese = selectRandomIngredients(INGREDIENTS_DB.cheeses.filter(c => ['Brie', 'Caprino fresco', 'Squacquerone', 'Crescenza'].includes(c.name)), 1)[0];
-                const fusionMeat = selectRandomIngredients(INGREDIENTS_DB.meats.filter(m => ['Porchetta', 'Lardo di Colonnata', 'Finocchiona'].includes(m.name)), 1)[0];
-                const fusionVeg = selectRandomIngredients(INGREDIENTS_DB.vegetables.filter(v => ['Barbabietole', 'Patate dolci', 'Cavolo nero'].includes(v.name)), 1)[0];
-                const fusionFinish = selectRandomIngredients(INGREDIENTS_DB.finishes.filter(f => ['Miele di castagno', 'Aceto balsamico', 'Granella di mandorle'].includes(f.name)), 1)[0];
+                // Tag-based selection: mix creativo di categorie per pizza fusion/contemporanea
+                const fusionCheese = selectRandomIngredients(getAllIngredientsByTags(['cheese_soft', 'cheese_creamy'], INGREDIENTS_DB), 1)[0];
+                const fusionMeat = selectRandomIngredients(getAllIngredientsByTags(['meat_cured_delicate', 'meat_cured_intense', 'meat_mild_salumi'], INGREDIENTS_DB), 1)[0];
+                const fusionVeg = selectRandomIngredients(getAllIngredientsByTags(['vegetable_root', 'vegetable_cruciferous', 'vegetable_leafy'], INGREDIENTS_DB), 1)[0];
+                const fusionFinish = selectRandomIngredients(getAllIngredientsByTags(['finish_sweet', 'finish_tangy', 'nut_creamy'], INGREDIENTS_DB), 1)[0];
 
                 ingredients.push({ ...fusionCheese, quantity: 100, category: 'Formaggi', phase: 'topping', postBake: false });
                 ingredients.push({ ...fusionMeat, quantity: 70, category: 'Carni e Salumi', phase: 'topping', postBake: true });

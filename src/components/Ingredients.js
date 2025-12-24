@@ -7,6 +7,24 @@ import { openModal, closeModal } from '../modules/ui.js';
 
 const UNITS = ['g', 'ml', 'pz', 'cucchiaio', 'cucchiaino'];
 
+const SEASONS = [
+    { value: 'primavera', label: 'Primavera', icon: '🌸' },
+    { value: 'estate', label: 'Estate', icon: '☀️' },
+    { value: 'autunno', label: 'Autunno', icon: '🍂' },
+    { value: 'inverno', label: 'Inverno', icon: '❄️' }
+];
+
+const ALLERGENS = [
+    { value: 'lattosio', label: 'Lattosio', icon: '🥛' },
+    { value: 'glutine', label: 'Glutine', icon: '🌾' },
+    { value: 'frutta_secca', label: 'Frutta Secca', icon: '🥜' },
+    { value: 'pesce', label: 'Pesce', icon: '🐟' },
+    { value: 'crostacei', label: 'Crostacei', icon: '🦐' },
+    { value: 'uova', label: 'Uova', icon: '🥚' },
+    { value: 'sedano', label: 'Sedano', icon: '🌿' },
+    { value: 'soia', label: 'Soia', icon: '🫘' }
+];
+
 let currentFilter = 'all';
 let currentSearch = '';
 let allIngredients = [];
@@ -154,7 +172,33 @@ function renderIngredientsList() {
                 ${ingredient.tags && Array.isArray(ingredient.tags) && ingredient.tags.length > 0 ? `
                     <div class="detail-row">
                         <span class="detail-label">Tags:</span>
-                        <span class="detail-value">${ingredient.tags.join(', ')}</span>
+                        <span class="detail-value" style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
+                            ${ingredient.tags.map(tag => `<span class="badge" style="font-size: 0.75rem; padding: 0.15rem 0.4rem;">${tag}</span>`).join('')}
+                        </span>
+                    </div>
+                ` : ''}
+                
+                ${ingredient.season && Array.isArray(ingredient.season) && ingredient.season.length > 0 ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Stagione:</span>
+                        <span class="detail-value">
+                            ${ingredient.season.map(s => {
+        const seasonObj = SEASONS.find(season => season.value === s);
+        return seasonObj ? `${seasonObj.icon} ${seasonObj.label}` : s;
+    }).join(', ')}
+                        </span>
+                    </div>
+                ` : ''}
+                
+                ${ingredient.allergens && Array.isArray(ingredient.allergens) && ingredient.allergens.length > 0 ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Allergeni:</span>
+                        <span class="detail-value">
+                            ${ingredient.allergens.map(a => {
+        const allergenObj = ALLERGENS.find(allergen => allergen.value === a);
+        return allergenObj ? `${allergenObj.icon} ${allergenObj.label}` : a;
+    }).join(', ')}
+                        </span>
                     </div>
                 ` : ''}
             </div>
@@ -220,9 +264,9 @@ async function showIngredientForm(ingredientId = null) {
                         <label for="ing-category">Categoria *</label>
                         <select id="ing-category" required>
                             <option value="">Seleziona...</option>
-                            ${CATEGORIES.map(cat => `
-                                <option value="${cat}" ${ingredient?.category === cat ? 'selected' : ''}>
-                                    ${cat}
+                            ${categories.map(cat => `
+                                <option value="${cat.name}" ${ingredient?.category === cat.name ? 'selected' : ''}>
+                                    ${cat.icon} ${cat.name}
                                 </option>
                             `).join('')}
                         </select>
@@ -298,6 +342,40 @@ async function showIngredientForm(ingredientId = null) {
                     >
                     <small>Esempi: vegetariano, vegano, premium, locale, stagionale</small>
                 </div>
+
+                <div class="form-group">
+                    <label>Stagionalità</label>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+                        ${SEASONS.map(season => `
+                            <label class="checkbox-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input 
+                                    type="checkbox" 
+                                    class="season-checkbox"
+                                    value="${season.value}"
+                                    ${ingredient?.season && Array.isArray(ingredient.season) && ingredient.season.includes(season.value) ? 'checked' : ''}
+                                >
+                                <span>${season.icon} ${season.label}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Allergeni</label>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+                        ${ALLERGENS.map(allergen => `
+                            <label class="checkbox-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input 
+                                    type="checkbox" 
+                                    class="allergen-checkbox"
+                                    value="${allergen.value}"
+                                    ${ingredient?.allergens && Array.isArray(ingredient.allergens) && ingredient.allergens.includes(allergen.value) ? 'checked' : ''}
+                                >
+                                <span>${allergen.icon} ${allergen.label}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
             </form>
         </div>
 
@@ -331,6 +409,14 @@ async function submitIngredientForm(ingredientId) {
     const tagsInput = document.getElementById('ing-tags').value.trim();
     const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
 
+    // Get selected seasons
+    const seasonCheckboxes = document.querySelectorAll('.season-checkbox:checked');
+    const season = Array.from(seasonCheckboxes).map(cb => cb.value);
+
+    // Get selected allergens
+    const allergenCheckboxes = document.querySelectorAll('.allergen-checkbox:checked');
+    const allergens = Array.from(allergenCheckboxes).map(cb => cb.value);
+
     const ingredientData = {
         name,
         category,
@@ -340,6 +426,8 @@ async function submitIngredientForm(ingredientId) {
         defaultUnit,
         postBake,
         tags,
+        season: season.length > 0 ? season : null,
+        allergens: allergens.length > 0 ? allergens : null,
         phase: 'topping'
     };
 

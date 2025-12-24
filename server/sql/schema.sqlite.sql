@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS Preparations (
     ingredients TEXT, -- JSON
     instructions TEXT, -- JSON
     tips TEXT, -- JSON
+    tags TEXT, -- JSON: 4-layer tags (base, elaboration, function, flavor)
     dateAdded INTEGER,
     isCustom INTEGER DEFAULT 1
 );
