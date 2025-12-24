@@ -1716,7 +1716,7 @@
     {
       "id": "27df6ff3-7b70-4cc6-942e-a68af3667371",
       "name": "cipolla o cipollotto",
-      "category": "Carni e Salumi",
+      "category": "Verdure e Ortaggi",
       "subcategory": null,
       "minWeight": null,
       "maxWeight": null,
@@ -1881,7 +1881,7 @@
     {
       "id": "a65c96b3-d2f9-4424-82e2-4b87af558a6c",
       "name": "Foie gras",
-      "category": "Pesce e Frutti di Mare",
+      "category": "Carni e Salumi",
       "subcategory": null,
       "minWeight": 30,
       "maxWeight": 50,
@@ -2001,7 +2001,7 @@
     {
       "id": "57a3b71e-d829-4259-9764-74a056d04956",
       "name": "Tartufo bianco",
-      "category": "Pesce e Frutti di Mare",
+      "category": "Verdure e Ortaggi",
       "subcategory": null,
       "minWeight": 5,
       "maxWeight": 15,
@@ -2016,7 +2016,7 @@
     {
       "id": "0a767307-a537-44e4-9b1d-6f3129b4a8ac",
       "name": "Tartufo nero",
-      "category": "Pesce e Frutti di Mare",
+      "category": "Verdure e Ortaggi",
       "subcategory": null,
       "minWeight": 10,
       "maxWeight": 20,
