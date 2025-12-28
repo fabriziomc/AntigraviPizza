@@ -9,6 +9,7 @@ import { openModal, closeModal } from '../modules/ui.js';
 
 let currentPreparations = [];
 let cachedIngredients = [];
+let currentSearch = '';
 
 /**
  * Render Preparations view
@@ -29,7 +30,16 @@ export async function renderPreparations() {
         </button>
       </div>
 
-      <!-- Filters -->
+      <!-- Search and Filters -->
+      <div class="search-box" style="margin-bottom: 1rem;">
+        <input 
+          type="text" 
+          id="preparation-search" 
+          placeholder="🔍 Cerca preparazione..."
+          value="${currentSearch}"
+        >
+      </div>
+      
       <div class="filters-bar" style="margin-bottom: 2rem;">
         <select id="categoryFilter" class="filter-select">
           <option value="">Tutte le categorie</option>
@@ -64,6 +74,12 @@ async function renderPreparationsGrid(filters = {}) {
   // Fetch from database
   currentPreparations = await getAllPreparations();
   let filtered = [...currentPreparations];
+
+  // Apply search filter
+  if (currentSearch) {
+    const search = currentSearch.toLowerCase();
+    filtered = filtered.filter(p => p.name.toLowerCase().includes(search));
+  }
 
   // Apply filters
   if (filters.category) {
@@ -144,10 +160,22 @@ function createPreparationCard(prep) {
  * Setup event listeners
  */
 function setupEventListeners() {
+  const searchInput = document.getElementById('preparation-search');
   const categoryFilter = document.getElementById('categoryFilter');
   const difficultyFilter = document.getElementById('difficultyFilter');
   const grid = document.getElementById('preparationsGrid');
   const newBtn = document.getElementById('newPreparationBtn');
+
+  // Search listener
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      currentSearch = e.target.value;
+      renderPreparationsGrid({
+        category: categoryFilter?.value,
+        difficulty: difficultyFilter?.value
+      });
+    });
+  }
 
   if (categoryFilter) {
     categoryFilter.addEventListener('change', () => {

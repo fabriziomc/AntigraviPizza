@@ -651,7 +651,7 @@ function generateCookingInstructions(ingredients) {
 /**
  * Determina i tags appropriati per la pizza
  */
-function determineTags(ingredients, doughType) {
+function determineTags(ingredients, doughType, archetypeUsed = null) {
     const tags = [];
 
     // Tag basato sul tipo di impasto
@@ -661,13 +661,28 @@ function determineTags(ingredients, doughType) {
 
     // Tag basato sugli ingredienti
     const hasMeat = ingredients.some(i => i.category === 'Carne' || i.category === 'Carni e Salumi');
+    const hasDairy = ingredients.some(i => i.category === 'Formaggi' || i.category === 'Latticini');
     const hasPremium = ingredients.some(i => ['Tartufo', 'Salmone', 'Caviale', 'Foie gras'].some(p => i.name.includes(p)));
     const hasBase = ingredients.some(i =>
         (i.category === 'Salsa' || i.category === 'Basi e Salse') &&
         (i.name.includes('Pomodoro') || i.name.includes('pomodoro'))
     );
 
-    if (!hasMeat) tags.push('Vegetariana');
+    // Tag dieta: Vegana vs Vegetariana
+    if (!hasMeat && !hasDairy) {
+        tags.push('Vegana');
+    } else if (!hasMeat) {
+        tags.push('Vegetariana');
+    }
+
+    // Sincronizza tag con archetipo (precauzione per consistency)
+    if (archetypeUsed === 'vegana' && !tags.includes('Vegana')) {
+        tags.push('Vegana');
+        // Rimuovi Vegetariana se presente, dato che Vegana è più specifico
+        const vegIndex = tags.indexOf('Vegetariana');
+        if (vegIndex > -1) tags.splice(vegIndex, 1);
+    }
+
     if (hasPremium) tags.push('Premium', 'Gourmet');
     if (!hasBase) tags.push('Bianca');
     else tags.push('Rossa');
@@ -1267,7 +1282,7 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
         ]
     };
 
-    const tags = determineTags(ingredients, doughType);
+    const tags = determineTags(ingredients, doughType, archetypeUsed);
 
     // Seleziona preparazioni intelligenti e rimuovi ingredienti base sostituiti
     const { preparations, cleanedIngredients } = await selectPreparationsForPizza(ingredients, tags);
