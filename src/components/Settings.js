@@ -389,7 +389,8 @@ function setupEventListeners() {
 
           const imagePrompt = `gourmet pizza ${recipe.name}, toppings: ${mainIngredients.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
           const timestamp = Date.now() + i; // Unique seed for each
-          const newImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?seed=${timestamp}`;
+          // Use turbo model since default flux model is down
+          const newImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?model=turbo&width=800&height=600&nologo=true&seed=${timestamp}`;
 
           // Update recipe via API
           const updateResponse = await fetch(`/api/recipes/${recipe.id}`, {
