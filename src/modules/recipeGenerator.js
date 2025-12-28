@@ -634,7 +634,13 @@ function generateCookingInstructions(ingredients) {
         instructions.push(`Aggiungere ${cookableCheeses.map(c => c.name.toLowerCase()).join(', ')} a pezzetti`);
     }
 
-    const cookableToppings = ingredients.filter(i => ['Carne', 'Verdure', 'Altro'].includes(i.category) && !i.postBake);
+    const cookableToppings = ingredients.filter(i =>
+        i.category !== 'Formaggi' &&
+        i.category !== 'Latticini' &&
+        i.category !== 'Salsa' &&
+        i.category !== 'Basi e Salse' &&
+        !i.postBake
+    );
     if (cookableToppings.length > 0) {
         instructions.push(`Distribuire ${cookableToppings.map(t => t.name.toLowerCase()).join(', ')}`);
     }
@@ -1299,7 +1305,8 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
         : 'pizza bianca, white pizza with NO tomato sauce, white base with olive oil';
 
     const imagePrompt = `gourmet ${pizzaStyle}, ${pizzaName}, toppings: ${mainIngredientNames.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}`;
+    // Use turbo model since default flux model is currently down
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?model=turbo&width=800&height=600&nologo=true`;
 
     return {
         name: pizzaName,
