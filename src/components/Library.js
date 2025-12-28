@@ -595,47 +595,7 @@ async function handleRegenerateImage(recipe) {
 
     console.log('Generating new image:', newImageUrl);
 
-    // Show loading state on image
-    img.style.opacity = '0.5';
-
-    // Remove old event listeners
-    const newImg = img.cloneNode(true);
-    img.parentNode.replaceChild(newImg, img);
-
-    // Create a new image element to preload
-    const preloadImg = new Image();
-
-    // Wait for image to load with longer timeout
-    await new Promise((resolve, reject) => {
-      const timeoutId = setTimeout(() => {
-        console.error('Image load timeout after 30 seconds');
-        reject(new Error('Image load timeout'));
-      }, 30000); // 30 seconds timeout
-
-      preloadImg.onload = () => {
-        clearTimeout(timeoutId);
-        console.log('Image loaded successfully');
-        resolve();
-      };
-
-      preloadImg.onerror = (error) => {
-        clearTimeout(timeoutId);
-        console.error('Image load error:', error);
-        reject(new Error('Failed to load image'));
-      };
-
-      // Start loading
-      preloadImg.src = newImageUrl;
-    });
-
-    // Update the visible image
-    const currentImg = document.getElementById('recipeModalImage');
-    if (currentImg) {
-      currentImg.src = newImageUrl;
-      currentImg.style.opacity = '1';
-    }
-
-    // Update recipe in database via API
+    // Update recipe in database FIRST (don't wait for image to load)
     console.log('Updating recipe in database via API...');
     const response = await fetch(`/api/recipes/${recipe.id}`, {
       method: 'PATCH',
@@ -649,6 +609,18 @@ async function handleRegenerateImage(recipe) {
     }
 
     console.log('Recipe updated successfully via API');
+
+    // Update the visible image (browser will load it in background)
+    const currentImg = document.getElementById('recipeModalImage');
+    if (currentImg) {
+      currentImg.src = newImageUrl;
+      currentImg.style.opacity = '0.7'; // Show loading state
+
+      // Add load handler to restore opacity when loaded
+      currentImg.onload = () => {
+        currentImg.style.opacity = '1';
+      };
+    }
 
     // Update button state
     btn.innerHTML = '✅ Rigenerata!';
