@@ -337,13 +337,19 @@ function setupEventListeners() {
       if (!response.ok) throw new Error('Failed to fetch recipes');
       const recipes = await response.json();
 
-      // Filter recipes without images or with broken/default images
+      // Filter recipes without images or with broken/old images
       const recipesWithoutImages = recipes.filter(r => {
         // Check for various "no image" conditions
         if (!r.imageUrl) return true; // null or undefined
         if (r.imageUrl.trim() === '') return true; // empty string
         if (r.imageUrl.includes('placeholder')) return true; // placeholder image
         if (r.imageUrl.includes('default')) return true; // default image
+
+        // NEW: Regenerate old pollinations URLs without turbo model (broken because flux is down)
+        if (r.imageUrl.includes('pollinations.ai') && !r.imageUrl.includes('model=turbo')) {
+          return true; // Old URL without turbo model
+        }
+
         return false;
       });
 
