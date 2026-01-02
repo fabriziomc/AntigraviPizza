@@ -1,0 +1,1118 @@
+====================================================================================================
+TUTTI GLI INGREDIENTI IN TURSO (Ordinati alfabeticamente)
+====================================================================================================
+
+Totale: 278 ingredienti
+
+  1. Acciughe
+     ID: 12ff592b-8af3-49e7-bf89-3c94a8bd30e9
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+  2. Aceto balsamico
+     ID: 105a5da3-d980-4ff3-9648-ba4759d72452
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+  3. Aceto di mele
+     ID: 096d0e79-009d-498e-b8a1-96ecd8c8f055
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+  4. Acqua
+     ID: 64de220b-0fab-476a-b80f-40edbeeb44c5
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+  5. AgarAgar
+     ID: 11dc9867-8852-4f1e-8984-ee79da5630a3
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+  6. Aglio
+     ID: c2fc99d4-6cc6-4551-bd29-46f72b68b11b
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+  7. Aglio nero
+     ID: 6bff6c64-7955-4636-9932-9d04605c0dc7
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+  8. Agretti
+     ID: e41423bd-47e3-4404-807e-4f524793d25e
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+  9. Alici di Cetara
+     ID: 0d16c749-00ae-47c7-818d-6b77b4a53dab
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+ 10. Alloro
+     ID: fca9c1da-5f64-4cd1-bd34-509ae7364ac4
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+ 11. Ananas
+     ID: 06cfc955-2f6e-4b0e-a3ef-33434c275b1e
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+ 12. Anatra
+     ID: 24560e34-8057-4f77-a9dc-090a2ed4ec63
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+ 13. Aneto
+     ID: 26cef627-8761-4369-8968-4e7767927a32
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+ 14. Arancia
+     ID: dd2fceca-3cd7-46e1-b9f5-0429005d5324
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+ 15. Asiago
+     ID: 59124688-d13f-4ea6-b785-8da7f1bf6a7c
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+ 16. Asparagi
+     ID: 6bcbbc97-bffd-4d04-a213-0177c50e5f33
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 17. Avocado
+     ID: 9b9b4ba7-a046-48cf-accf-431ff3e26267
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+ 18. Baccalà
+     ID: 2a333050-5a47-420d-95e2-29112a6e5628
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+ 19. Baccalà dissalato
+     ID: 28996f24-e3bb-43d0-a533-48f6af56aa9e
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+ 20. Barbabietola
+     ID: 2f586938-155d-4279-b912-37bc72dedfec
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+ 21. Barbabietole
+     ID: a7bb84e6-448d-461e-ac56-e247d85203b1
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 22. Barbabietole cotte
+     ID: dd5dea3a-562d-4626-b1de-69cd883fce07
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 23. Basilico
+     ID: 330e6538-e4a1-46c0-94ae-395f6805886c
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+ 24. Basilico fresco
+     ID: f6ef2c49-66ee-4678-8322-9cd5398b83fd
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+ 25. Bietole
+     ID: 10af912e-5bea-45eb-91a3-73edd161b0a4
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 26. Bitto
+     ID: 000392de-83ca-473c-89f2-586ad5b48896
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+ 27. Bottarga
+     ID: 9cb1c56d-32e4-446e-8921-3f206d81e7b5
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+ 28. Bresaola
+     ID: 101d18c2-d0a6-48c4-b892-6e48d7f9c068
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+ 29. Brie
+     ID: ec89de3f-44fe-4cbb-a247-bda45bae83e7
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+ 30. Broccoli
+     ID: 915e07c8-9448-4e92-8ae3-1331d52ece6c
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 31. Brodo
+     ID: b0f16d02-f600-49d4-ab7e-134872952e2d
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+ 32. Brodo di carne
+     ID: ac0ae32f-3991-4563-a755-45ebb9964b53
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+ 33. Brodo vegetale
+     ID: 32584faa-50d8-4529-837f-2d8699193a2c
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+ 34. Burrata
+     ID: 0bb83319-c559-4d37-a947-1799baeeaaca
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+ 35. Burro
+     ID: d3148992-99fe-4998-835f-0b21df6cd5a1
+     Categoria: 80a97e5f-8907-47bc-9d9f-848d38ebb5db
+
+ 36. Caciocavallo
+     ID: 3f3f8246-047c-4fe8-8ac4-ece523d2e747
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+ 37. Calamari
+     ID: e641ac7a-599c-4725-99fb-f9240ae0dbdb
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+ 38. Capesante
+     ID: abf356bf-e6eb-4267-92c3-8ac307370c66
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+ 39. Capocollo
+     ID: 4dfb98cf-0636-4a33-a69c-faaaa6200d2f
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+ 40. Capperi
+     ID: 859d54d5-c2bb-4cd3-806e-f10a7aad35e0
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 41. Caprino fresco
+     ID: f00d2081-6b9d-4924-81d6-5c047e6ae542
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+ 42. Carciofi
+     ID: 77755a9a-47d2-48b5-bb92-a99893105e18
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 43. Carciofini
+     ID: 07d69394-e9fd-4fea-b99e-f6578738ceff
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 44. Carne
+     ID: 945a93f1-7bf1-4591-bd57-c8864405b20a
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+ 45. Carota
+     ID: e5c9e940-0d27-443e-bddf-b8e6a8bfb368
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 46. Carote
+     ID: 9354a479-0773-4573-a049-85c1b12a4a60
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 47. Carpaccio di manzo
+     ID: 5cac0599-685d-491d-b491-313191a22b7e
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+ 48. Carpaccio di tonno
+     ID: da47e333-247d-4906-adb2-a454477481b0
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+ 49. Casera
+     ID: cdb53918-d3d8-4c62-9c0d-8e4e56d85c26
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+ 50. Castagne cotte
+     ID: 96475c65-12c7-48a4-aa58-0188cfba8bae
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+ 51. Castelmagno
+     ID: a9618872-c31c-47d2-ac88-597bc7ff87a6
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+ 52. Catalogna
+     ID: 9a436f01-74b3-47bf-8ac4-8e2a33a32acd
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 53. Caviale
+     ID: 7a006506-a276-4556-bcab-be0bf742028b
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+ 54. Cavolfiore
+     ID: 6c3a548f-0a2f-4336-a6ff-ec0752713907
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 55. Cavolo cappuccio viola
+     ID: ec2d6ef7-5452-402a-8b13-923dd282ffdf
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 56. Cavolo nero
+     ID: 7eac9eec-5989-4d9d-8357-e447c3f4cbb4
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 57. Ceci
+     ID: 3beb37b2-7f52-4f57-8866-b4870861bda0
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+ 58. Ceci lessati
+     ID: dfffe4d5-abf2-4670-a4af-22db90b5b541
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 59. Cheddar
+     ID: c459dbe3-fac0-4572-a732-0d20ba8c3a24
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+ 60. Cicoria
+     ID: 2e2631fd-2ecf-4b2f-b3ab-2f82a1537b96
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 61. Cipolla
+     ID: 7bda9487-5084-4714-b636-5f985359d98b
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 62. Cipolla caramellata
+     ID: d4a8e65b-0db2-41b6-9686-682e0d83f53e
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 63. Cipolla rossa
+     ID: f308ad53-8281-4cf1-b93d-47304b315c02
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 64. Cipolle Tropea
+     ID: 3a954ab8-7856-49a0-917f-c9986c82ebbd
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+ 65. Confettura di fichi
+     ID: 6d48becf-f667-4418-b0fb-4e81b819c192
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+ 66. Confettura di pere
+     ID: eb13cea6-27f0-492c-b9dc-67f2d2311748
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+ 67. Coppa di Parma
+     ID: 6262ccda-4248-42c1-b8ac-0f0067bb34f9
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+ 68. Cotechino
+     ID: 321a404c-365d-4b5e-8149-5278005f5e12
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+ 69. Cozze
+     ID: 4343c2ad-5bda-45af-b677-33c2f0a72161
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+ 70. Crema di burrata
+     ID: b51007e5-7d3f-491c-8884-3c1c5fc75a2e
+     Categoria: 80a97e5f-8907-47bc-9d9f-848d38ebb5db
+
+ 71. Crema di ceci
+     ID: 18efea22-a915-42fb-9576-d7d778c31283
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+ 72. Crema di melanzane
+     ID: 6edcb1e5-c798-473b-a55d-cbf369847f13
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+ 73. Crema di noci
+     ID: 1668644a-c4b0-464d-aca0-0ca0f669ed92
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+ 74. Crema di peperoni
+     ID: ed8d74fd-24a0-4ed9-a27e-3ee317da7e6f
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+ 75. Crema di pistacchio
+     ID: 903e1205-b101-4db4-aaad-0325d954d123
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+ 76. Crema di zucca
+     ID: c36a87f2-d835-483a-b35c-b77f71f8e265
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+ 77. Crescenza
+     ID: e7f55b69-7e25-41d7-b8af-7be1547430d8
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+ 78. Culatello di Zibello
+     ID: a7bbeb69-4ea5-481c-bd6d-607e8a5112c1
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+ 79. Erba cipollina
+     ID: c536bf03-ae94-4510-bcaa-5b6a91f28040
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+ 80. Farina
+     ID: 07fc7b5c-d616-46f1-9310-19c45a738f92
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+ 81. Farina 00
+     ID: 81400bd2-08b0-4c42-b618-6ad3ffa2d7da
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+ 82. Farina Grano saraceno
+     ID: f78c3207-6943-4b06-941c-1165d7687d2e
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+ 83. Farina Manitoba
+     ID: e2e93bc1-af2b-4ca4-bb26-dbb129387c47
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+ 84. Farina di castagne
+     ID: d3ad5d2f-7f6f-4a3a-a3c6-55f8aa28189e
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+ 85. Farina di grano saraceno
+     ID: c1b0716e-5c5a-4714-9753-c89283840284
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+ 86. Farina integrale
+     ID: 12980297-3eaf-4dcc-ae3d-ba0b53b6f5d4
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+ 87. Farina tipo 1
+     ID: 9c8abc7b-1f65-4fe5-b1bb-ca4741c4d2f8
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+ 88. Farina tipo 2
+     ID: 525a07b4-f1be-49a3-b37f-a7ae8cad4877
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+ 89. Fave
+     ID: b60a8efc-91fd-4e5c-8e37-d0847b1b5f70
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 90. Feta
+     ID: 3608f818-f002-420b-9a1b-d4449e7b3dac
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+ 91. Fichi
+     ID: 5e514fd7-4cae-4f95-8d72-6d69e9edcf58
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+ 92. Filetti di tonno
+     ID: 840c473f-d012-4463-917e-2d3d0c3817a7
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+ 93. Finocchi
+     ID: 01168176-0c0c-4918-a624-32acec53ea9b
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 94. Finocchiona
+     ID: d3b10251-9841-4734-829b-a6ca0353dc52
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+ 95. Fior di latte
+     ID: 11bf901e-7648-40b1-8490-feccf5622455
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+ 96. Fiori di cappero
+     ID: df611f65-bec6-48f1-b364-f2e6641bd7a8
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 97. Fiori di zucca
+     ID: 9af9a57f-8e54-488c-a6f7-4c065ff343dc
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+ 98. Foie gras
+     ID: a65c96b3-d2f9-4424-82e2-4b87af558a6c
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+ 99. Fontina Val d'Aosta
+     ID: 96d913a0-989d-4bf2-ac1d-ead10b8dd3f5
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+100. Fragole
+     ID: 7fe1f44a-ef3a-43f3-bbd1-93984d6ed979
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+101. Friarielli
+     ID: b1f6a840-420d-4037-932b-537c999b0962
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+102. Funghi champignon
+     ID: f9522841-03bd-42ec-aea6-552e7d512a72
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+103. Funghi porcini
+     ID: c71b3ddf-8a2b-4bdd-8cf5-e2b40ba54179
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+104. Gamberetti
+     ID: ab5e888b-42b1-4da1-a4c7-60f702be7935
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+105. Gamberi
+     ID: c8df3e0c-7b94-4b38-ba86-db33f0d0aa04
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+106. Gamberi rossi
+     ID: f35e16c9-1d94-4278-8b46-d448bb7a7c35
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+107. Gorgonzola DOP
+     ID: 3803f0e6-53a5-4161-91d3-63bdf9df75e4
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+108. Gorgonzola DOP dolce
+     ID: fa1620b1-d605-45b2-a7ab-6d9560f4f6fc
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+109. Grana Padano
+     ID: f1f665f7-1886-424a-86eb-e5ee2da0e040
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+110. Granella di mandorle
+     ID: a9462432-4f3c-4bad-a890-470ba227bb11
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+111. Granella di pistacchi
+     ID: 644931c7-3c1f-4467-a5e5-06ebb885444c
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+112. Grigliare a fette verticali sottili
+     ID: e5992c5a-c94b-4410-954f-19d68c46667c
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+113. Guanciale croccante
+     ID: 144fd770-8f21-43be-a281-cdadaa094b8d
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+114. Ketchup
+     ID: 6c29ae5f-30e0-4427-9a2f-8108fe97cb46
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+115. Lardo di Colonnata
+     ID: f8efa8e3-a097-4d94-9f9f-b057dfc4a85f
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+116. Latte
+     ID: 9f079215-3c40-4d7b-8ec0-0994d91c178f
+     Categoria: 80a97e5f-8907-47bc-9d9f-848d38ebb5db
+
+117. Latte intero
+     ID: 9ae8af03-bdc1-4367-82d2-5e282aef41cd
+     Categoria: 80a97e5f-8907-47bc-9d9f-848d38ebb5db
+
+118. Lievito di birra fresco
+     ID: d781df4a-2536-429b-8024-2350b0015790
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+119. Lievito di birra secco
+     ID: 7706569f-4206-4b73-bf09-995c997d7132
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+120. Lievito madre
+     ID: fdeac62b-f45d-4631-9948-8081684144dd
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+121. Lime
+     ID: 67185357-8ee3-44e0-a4a4-e802569e9288
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+122. Limone
+     ID: 1b7e4f72-fef4-483c-a824-8d675eab40c8
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+123. Limone grattugiato
+     ID: 55bd31d1-fdf2-4abf-8acd-ea53cd792fe9
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+124. Liquirizia in polvere
+     ID: 3bb43731-d39e-4750-aaa1-ae5ff723a7d1
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+125. Lonza
+     ID: e1083500-f49d-4b9e-9234-99a5393734dd
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+126. Maggiorana
+     ID: 5aeb17cc-7980-499a-be4f-a48acfaad9f6
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+127. Manzo
+     ID: 214e02c9-37a6-45de-b9d4-448b19c58b30
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+128. Manzo Fassona
+     ID: 04718c84-68b3-4fc6-b9b6-33cb148aa893
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+129. Melanzane
+     ID: 9082e716-2811-46ed-b65b-dde2ac58914b
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+130. Melanzane grigliate
+     ID: 1d131dba-7921-4671-9b30-ed7e11c3dc08
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+131. Melone
+     ID: e7980ceb-7de7-45a6-b033-c64aa3c02e3b
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+132. Menta
+     ID: 30b90a50-2849-4310-b841-22f6e156d984
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+133. Miele
+     ID: 18670e50-e1c4-4e0e-b870-6c3744d345a5
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+134. Miele di acacia
+     ID: d8edb3f4-da6c-4072-9f81-59c10897dd36
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+135. Miele di castagno
+     ID: d70a8009-9ae5-4d8b-b5a5-9f7ee3ea2949
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+136. Mirin
+     ID: ee7d3c97-6b12-4e76-8d7b-35b3159e150a
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+137. Misto pesce paella
+     ID: cecea9d9-10b9-4623-baf0-d21e0972018d
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+138. Mortadella
+     ID: 48345575-5eb5-4b7f-9525-e508532bb1a8
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+139. Mozzarella di bufala
+     ID: a701dc08-2570-4d29-935a-54fcf202cea8
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+140. Nduja calabrese
+     ID: cbed9b4b-53a1-4514-ab64-857e21721818
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+141. Nocciole
+     ID: 52ea0997-3be3-4930-81fa-1db0a0220d56
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+142. Noce moscata
+     ID: 280a5ee7-d861-4f8b-a20d-0572c689425c
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+143. Noci
+     ID: 0eaeb195-0131-48c2-a442-0a4275358237
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+144. Olio
+     ID: 3c4d5257-1165-4173-a0a7-9d1e1aecc392
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+145. Olio EVO
+     ID: 1516f5ea-b897-40a8-a517-0f73c5665895
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+146. Olio EVO aromatizzato
+     ID: 630605a4-c843-4df0-bbe2-7dbfb66b95e0
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+147. Olio al tartufo
+     ID: 4df5cfc1-3545-43d7-94c6-6b703e27c93c
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+148. Olio arachidi
+     ID: 57cdcc77-ec85-4190-bcb8-c6eed1356896
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+149. Olio di semi
+     ID: c6d2f6de-ded6-450d-aeda-43b9fd709a70
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+150. Olio extravergine di oliva
+     ID: 875dc1a9-ff74-43d3-955e-64ad7f37595c
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+151. Olive nere
+     ID: 3f6bebf9-4b6b-4c10-b9a7-ef6b267cc187
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+152. Olive taggiasche
+     ID: 36fafe79-ca8e-420e-97aa-1c927491c827
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+153. Olive verdi
+     ID: 9dc37ad2-cfd0-4d73-a7fb-0f87f6aa7796
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+154. Origano
+     ID: dea431cb-554b-41d1-a2fb-f3d65816be0f
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+155. Pancetta
+     ID: 2a348e71-2f71-4e05-927f-f58f4798544f
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+156. Panna
+     ID: f189e3a1-ce11-4ab1-aee4-18af7b72b20f
+     Categoria: 80a97e5f-8907-47bc-9d9f-848d38ebb5db
+
+157. Panna fresca
+     ID: c532efc7-fef0-41d0-bc7c-91d198ccb9d0
+     Categoria: 80a97e5f-8907-47bc-9d9f-848d38ebb5db
+
+158. Pappacelle
+     ID: c5f7a12b-0ea2-4804-acda-2df62a1aabdb
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+159. Paprika affumicata
+     ID: 6ae40fa4-c504-45b4-8481-252590a4f25d
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+160. Paprika dolce
+     ID: 3f45490c-417a-4ee9-aa39-e74429c5ed83
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+161. Parmigiano
+     ID: 628f22a0-5c1b-4e9a-a700-be054dca547c
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+162. Parmigiano Reggiano
+     ID: 36f855ed-0558-4630-89bc-95f49a47774c
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+163. Passata di pomodoro
+     ID: 8bc3a6db-aee4-4a1e-b198-a0a7e80a2d3a
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+164. Patate
+     ID: 8b7ed48c-8dd4-4ed6-94aa-bf2b63c77a9d
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+165. Patate dolci
+     ID: 5902fc03-b51c-4bf9-9ffb-d85e70ff454a
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+166. Patate viola
+     ID: 8bdbe4e7-3f45-4ac3-8897-4f8ac8d7e903
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+167. Pecorino
+     ID: d66d8c76-c871-44e4-9850-27d6f64f9511
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+168. Pecorino Romano
+     ID: 4ccfb43a-7b3e-4b11-a436-ebb532b28f67
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+169. Pepe bianco
+     ID: 9a951a74-6bf2-42f9-96c6-76bd99b4bfe9
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+170. Pepe nero
+     ID: cc5fcc30-70f1-44b8-8703-7e60d1277567
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+171. Peperoncino
+     ID: 38c3db2d-c5c1-4eb0-8244-9544afc779e0
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+172. Peperoncino fresco
+     ID: c24908fa-f811-4bf0-b626-9dff47365a5c
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+173. Peperoni
+     ID: 9ddce954-a111-44a5-8c9f-3b452fc77109
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+174. Peperoni rossi
+     ID: f2deec0b-875f-4c1c-92c4-a7611a527f15
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+175. Pere
+     ID: af8a4bba-c07b-4749-86d7-1e51575fd9ec
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+176. Pesto di basilico
+     ID: a3463fd6-d4b8-4ca1-9d07-675824ac10fa
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+177. Pesto di rucola
+     ID: 6d00e8f2-eb84-4d34-ae76-bed65aca3e86
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+178. Pesto rosso
+     ID: 7c24e487-ef40-4f3c-81ab-c64a7fd72d80
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+179. Pinoli
+     ID: 6407abe0-9e0b-495a-8ce1-29c92435f529
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+180. Piselli
+     ID: 705ee207-2d53-4972-a129-67061e0210d6
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+181. Pistacchi
+     ID: a62d0dda-bfed-4285-ba28-a1de22ec57b0
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+182. Pistacchi di Bronte
+     ID: 0bc8f364-3ec7-4782-8782-6c752fb20227
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+183. Polpa di pomodoro
+     ID: 7758ad7f-4193-43c8-a68e-d3aff9b227c1
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+184. Polpo
+     ID: 532920ad-b63b-4933-b295-34c212ef8517
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+185. Pomodori ciliegino
+     ID: 83b8508a-943a-417c-bc71-9f0c099ab7dd
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+186. Pomodori secchi
+     ID: 4314537d-2fa2-4715-bff2-d4d68ca63b34
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+187. Pomodorini
+     ID: e1afa260-d511-49d9-b206-b83566c87dd3
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+188. Pomodorini Pachino
+     ID: 76f05c17-52d3-4e74-8a21-48a14ec7db5b
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+189. Pomodorini ciliegino
+     ID: 836333c2-267b-471e-8383-ebb9fb242422
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+190. Pomodorini datterini
+     ID: 7b5d0aa1-3b7c-4abd-906d-d9a7159649ab
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+191. Pomodorini gialli
+     ID: 9506d962-0a2a-4db3-af41-61229ec275aa
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+192. Pomodoro San Marzano
+     ID: d7e7f863-b041-45f7-89c8-2f501ef6aebc
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+193. Pomodoro giallo
+     ID: ed6a92eb-cbed-4b82-9372-e5710548ed35
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+194. Porchetta
+     ID: 959644c4-ba9f-4b5e-94c9-53463fc0d433
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+195. Porri
+     ID: 153e119e-9aac-4069-9c69-51ea63ffc675
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+196. Prezzemolo
+     ID: c976a63a-151e-4a52-894f-ad4e98c17c5e
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+197. Prosciutto cotto
+     ID: 76b4216a-7cd3-4278-a6b8-67b49606f054
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+198. Prosciutto crudo di Parma
+     ID: 7e38851d-5599-4ce2-a7df-b1f915be97cb
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+199. Prosciutto di San Daniele
+     ID: 448292ad-e588-40bf-8e6e-e521346e76bc
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+200. Provola affumicata
+     ID: 961f951f-c3bb-4c0e-8bcc-8908bef47dff
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+201. Pulire gamberi
+     ID: d22b0878-b8c9-4805-8096-f07c94c9bee0
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+202. Puntarelle
+     ID: defddbdd-7345-42d0-a50e-8c632b0e3b5f
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+203. Radicchio
+     ID: e47ca73f-9c9f-43ba-a3b4-c7f225850463
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+204. Rafano
+     ID: 62d9c316-5363-4020-8e6d-f0323b57069a
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+205. Ricotta fresca
+     ID: 550bbadb-a6e0-4116-ab72-c786a8bfe293
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+206. Riduzione di balsamico
+     ID: 51a34847-d060-4ec6-bfad-46e0647112f0
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+207. Robiola
+     ID: 5cbe299c-07f0-4273-b329-6aac247dc0c5
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+208. Rosmarino
+     ID: e7d75451-c10a-4e33-af4c-05c33cf0da66
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+209. Rucola
+     ID: 31ba229b-b839-4b9b-9d94-0e898c953c61
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+210. Salame piccante
+     ID: e12b6ad2-1772-47ee-9a8c-67e421830c23
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+211. Salamino piccante
+     ID: ec1b3bff-34bd-4d1c-88da-3d305f0a7482
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+212. Sale
+     ID: e27fb1e0-8647-4470-a3e2-7c73125e4390
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+213. Sale Maldon
+     ID: efef0e4a-836c-4205-beca-9ba4bafd9f66
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+214. Sale fino
+     ID: 63af4f1a-9799-4b1f-aec8-e14e659815bf
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+215. Sale grosso
+     ID: 19559a99-81ac-4fab-94f2-501b72a2f766
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+216. Salmone affumicato
+     ID: a1079486-65dd-427f-beb8-380dbd264b3d
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+217. Salsa BBQ
+     ID: f1bfa2e7-3a19-4a2c-a0c4-0a5af2406476
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+218. Salsa al pesto di olive
+     ID: 303ccccf-940a-4cd1-91a3-28d717595717
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+219. Salsa al tartufo
+     ID: 719c198e-a5bd-49f4-86f8-471642d0012f
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+220. Salsa di Soia
+     ID: eec77178-46c6-4ee9-9f6d-e000ff262fe5
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+221. Salsa di soia
+     ID: 3fdce8b6-c9f7-471f-ae7c-5208fbc7a211
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+222. Salsa verde
+     ID: c8466391-a280-4a38-8c3e-701a985d5742
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+223. Salsiccia fresca
+     ID: 95182e9c-20df-485b-b294-0a559d940fe4
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+224. Salvia
+     ID: 8f4259c7-80f0-4c1f-b0bc-9ea2037c0e0f
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+225. Scaglie di cioccolato
+     ID: 6487438a-18c0-4c0b-acee-58196c850919
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+226. Scamorza
+     ID: 85be028d-90df-49d3-945d-4761742bb1ec
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+227. Scampi
+     ID: 4278554b-33eb-4394-b3f6-2037f3570c6a
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+228. Scarola
+     ID: eb45c2d1-c106-49b0-834f-c7986c27d81f
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+229. Scorza di limone
+     ID: 85be976b-7e89-4618-b00c-9def8d911dbc
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+230. Scorzette di arancia
+     ID: 16bb5781-9b29-4950-9c78-6b5b91485cda
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+231. Sedano
+     ID: 6104a0f8-e297-48d1-ad42-d515259c07b7
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+232. Semi di sesamo
+     ID: 3bf46ed5-fc07-41bf-8382-67aa063daba9
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+233. Semi di sesamo tostati
+     ID: 83868fa4-55f9-4fad-ab6d-6e9dd8ae5c52
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+234. Semola rimacinata
+     ID: f72b9b51-2d62-45a3-bfbe-b13600629ce9
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+235. Senape
+     ID: 1c435491-4e83-4c70-9b66-259c08c71a66
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+236. Soppressata
+     ID: 3c5e5f49-b966-44a3-a455-8852a60fe15d
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+237. Speck Alto Adige
+     ID: 57f42e1b-6ce8-4bf2-adf7-34e482537863
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+238. Spinaci
+     ID: 15f6564d-6a48-4a87-88e0-06de93e854d3
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+239. Squacquerone
+     ID: f050b731-f66c-44f5-a6fb-4ac94d3ed782
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+240. Stoccafisso ammollato
+     ID: 291ccbc4-3af4-4cfe-a232-340168b16fef
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+241. Stracchino
+     ID: 7ac8ef23-90db-4e26-b99a-7582a8a61a0e
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+242. Stracciatella
+     ID: a0b8c87d-aae6-44a9-af4b-cfdcc3610714
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+243. Tabasco
+     ID: c52db6e8-3a33-485e-8472-65a2c23140af
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+244. Taleggio
+     ID: 63a11795-e554-421a-928d-0126eefa0986
+     Categoria: 3dbbfdeb-b431-426b-8651-4420c3516631
+
+245. Tartufo bianco
+     ID: 57a3b71e-d829-4259-9764-74a056d04956
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+246. Tartufo nero
+     ID: 0a767307-a537-44e4-9b1d-6f3129b4a8ac
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+247. Timo
+     ID: 03bc2aaa-fb49-45c4-953f-5bf43bff3066
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+248. Tonno
+     ID: 5b6b5c8e-83fd-488c-9c93-5ac50e371d7a
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+249. Tonno fresco
+     ID: 8990bd6f-a04f-4784-b063-56359daa226e
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+250. Tuorlo
+     ID: 883fde63-d353-4199-8db5-51c43252e9c5
+     Categoria: 80a97e5f-8907-47bc-9d9f-848d38ebb5db
+
+251. Uova
+     ID: 9ae41c3e-08e9-4548-955d-d8b4d6f27ec4
+     Categoria: 80a97e5f-8907-47bc-9d9f-848d38ebb5db
+
+252. Ventricina
+     ID: 8b535780-59f1-4c59-8ec3-736f3f5e371d
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+253. Verza
+     ID: 36e1b844-a1da-4fcb-ab9a-b7cc232d0e39
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+254. Vino rosso
+     ID: 764fad88-45da-4aa3-bbf5-6c2a7c83ceb6
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+255. Vongole
+     ID: fa61d05b-1638-49cd-84a4-1c8a2e8f1481
+     Categoria: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+256. Wasabi
+     ID: 4c79a0ef-1ea6-4f53-bd5d-53733833ee01
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+257. Worchester
+     ID: 6e1bc774-498f-4447-a544-8d6198d54471
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+258. Wurstel
+     ID: 605ffbea-b4a1-4246-b6bf-91fafed7ccd1
+     Categoria: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+259. Yogurt
+     ID: 9024d4ca-2c7d-4997-b746-e181bbbb713d
+     Categoria: 80a97e5f-8907-47bc-9d9f-848d38ebb5db
+
+260. Yogurt o Latte
+     ID: b6b15eed-6e57-43ff-82e8-de9a739656ce
+     Categoria: 80a97e5f-8907-47bc-9d9f-848d38ebb5db
+
+261. Zafferano
+     ID: 37a8a29b-3421-40a0-908b-9ca0e6f1d2ee
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+262. Zenzero
+     ID: 3bde1251-a3c8-4bdd-aeea-29b3800f2097
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+263. Zucca
+     ID: 8904e139-1725-43b0-a584-2c27397c035d
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+264. Zucchero
+     ID: 69df2cbf-1c1c-4c77-87e3-b5542aa3cdf1
+     Categoria: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+265. Zucchero di canna
+     ID: a4cda15b-a52e-44fd-821d-7680604fc49b
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+266. Zucchine
+     ID: b74e2f18-ebad-4875-aa2f-bb81095d697b
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+267. bollire le patate viola intere senza buccia
+     ID: b20690d2-ec5e-4bf3-a503-e933e21ef456
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+268. cipolla
+     ID: b6a7c389-c8be-42d4-bd93-f3412cb0f7ba
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+269. cipolla o cipollotto
+     ID: 27df6ff3-7b70-4cc6-942e-a68af3667371
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+270. cocco
+     ID: 8e82f41e-30df-4431-bd19-8c66751a722b
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+271. kiwi
+     ID: 82162646-fb57-4d85-9363-55c1a633ec21
+     Categoria: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+272. la carota e la cipolla
+     ID: 113d2f4a-c374-4522-8027-933f9bb6d69a
+     Categoria: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+273. marinatura: Salsa di soia
+     ID: 7cab8d3f-ca9b-44ca-8695-7781e4bb4a99
+     Categoria: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+
+274. olio e peperoncino
+     ID: 46e72b69-e5c7-4796-a058-394c0cb4f222
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+275. pepe
+     ID: 778b247e-1539-4772-ac09-768945845ff4
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+276. sale
+     ID: 5a47c5db-54d2-434d-a8a9-e2599274079d
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+277. sale e pepe
+     ID: 14ddd066-6d8a-4556-8962-b1b6d99afc66
+     Categoria: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+278. unire lime
+     ID: d9bf60c6-023b-49e6-87b7-b860a41be079
+     Categoria: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+

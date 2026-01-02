@@ -1,0 +1,39 @@
+================================================================================
+REPORT: PIZZE POTENZIALMENTE VEGANE
+================================================================================
+
+Trovate 2 pizze potenzialmente vegane
+
+--------------------------------------------------------------------------------
+
+1. Cipolla e Peperoni
+   ID: af0dcd47-261f-4892-a650-ffdbc76282c4
+   Tags attuali: [Vegetariana, Bianca, Classica]
+   Descrizione: Una alta idratazione con peperoni e cipolla caramellata, creata secondo la tradizione.
+
+   Ingredienti (4):
+     - Peperoni (84 g) - Categoria: Verdure e Ortaggi
+     - Cipolla caramellata (70 g) - Categoria: Verdure e Ortaggi
+     - Olive taggiasche (42 g) - Categoria: Verdure e Ortaggi
+     - Basilico fresco (16 g) - Categoria: Erbe e Spezie
+
+--------------------------------------------------------------------------------
+
+2. Ceci Premium
+   ID: 68c594a0-22bd-41a4-974c-6bef3d3fd076
+   Tags attuali: [Vegetariana, Bianca, Classica]
+   Descrizione: Una pizza completamente vegetale con ceci lessati e olive taggiasche, ricca di sapori naturali.
+
+   Ingredienti (5):
+     - Salsa al pesto di olive (80 g) - Categoria: Basi e Salse
+     - Ceci lessati (100 g) - Categoria: Verdure e Ortaggi
+     - Olive taggiasche (60 g) - Categoria: Verdure e Ortaggi
+     - Pinoli (20 g) - Categoria: Frutta e Frutta Secca
+     - Basilico fresco (10 g) - Categoria: Erbe e Spezie
+
+================================================================================
+
+VERIFICA:
+Tutti gli ingredienti di queste pizze sono 100% vegetali?
+Se sì, possiamo aggiungere il tag "Vegana"
+

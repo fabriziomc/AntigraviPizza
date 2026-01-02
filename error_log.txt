@@ -1,0 +1,8 @@
+
+Error: [Microsoft][Driver Manager ODBC] Nome origine dati non trovato e driver predefinito non specificato.
+Code: undefined
+Stack: ConnectionError: [Microsoft][Driver Manager ODBC] Nome origine dati non trovato e driver predefinito non specificato.
+    at PrivateConnection.callback2 (C:\Users\FABRIZIO\.gemini\antigravity\ManagerAgente\AntigraviPizza\node_modules\mssql\lib\msnodesqlv8\connection-pool.js:46:17)
+    at Immediate.<anonymous> (C:\Users\FABRIZIO\.gemini\antigravity\ManagerAgente\AntigraviPizza\node_modules\msnodesqlv8\lib\connection.js:47:14)
+    at process.processImmediate (node:internal/timers:504:21)
+        

@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: antigravipizza
+    env: node
+    region: frankfurt
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: node server/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_TYPE
+        value: sqlite
+    disk:
+      name: antigravipizza-data
+      mountPath: /app/data
+      sizeGB: 1

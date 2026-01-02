@@ -1,0 +1,2349 @@
+// ============================================
+// PLANNER COMPONENT
+// ============================================
+
+import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, getAllRecipes, getAllGuests, addGuest, updateGuest, deleteGuest, getRecipeById, getPizzaNightById } from '../modules/database.js';
+import { formatDate, formatDateForInput, getNextSaturdayEvening, confirm, formatQuantity, showToast } from '../utils/helpers.js';
+import { openModal, closeModal } from '../modules/ui.js';
+import { getCookingInstructions } from '../utils/cookingCalculator.js';
+import { DOUGH_TYPES, DOUGH_RECIPES, PREPARATIONS, RECIPE_TAGS } from '../utils/constants.js';
+import { getRecipeDoughType } from '../utils/doughHelper.js';
+import { state } from '../store.js';
+import { generateShoppingList, downloadShoppingList } from '../modules/shopping.js';
+import { DEFAULT_GUEST_COUNT } from '../utils/constants.js';
+
+export async function renderPlanner(appState) {
+  await renderPizzaNights();
+  setupPlannerListeners();
+
+  // Inject live mode HTML structure if not already present
+  if (!document.getElementById('liveModeContainer')) {
+    const liveModeHTML = `
+  <div id="liveModeContainer" style="display: none;">
+        <!-- Header -->
+        <div class="live-header">
+          <div class="progress-indicator">Pizza 1 di 1</div>
+          <button class="btn-exit" onclick="window.exitLiveMode()">✕ Esci</button>
+        </div>
+
+        <!-- Current Pizza Display -->
+        <div class="live-pizza-card">
+          <h2 class="pizza-name">Caricamento...</h2>
+          
+          <!-- Before Cooking Section -->
+          <div class="cooking-phase-section">
+            <h3 style="color: var(--color-primary-light); font-size: 1.25rem; margin-bottom: 1rem;">🔥 Prima cottura</h3>
+            <div id="beforeCookingContent">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Cooking Instructions -->
+          <div class="cooking-section">
+            <h3>🔥 Cottura</h3>
+            <p id="liveCookingInstructions">Forno a 250°C per 8-10 minuti</p>
+          </div>
+          
+          <!-- After Cooking Section -->
+          <div class="cooking-phase-section">
+            <h3 style="color: var(--color-accent-light); font-size: 1.25rem; margin-bottom: 1rem;">✨ Dopo cottura</h3>
+            <div id="afterCookingContent">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+  <div class="live-footer">
+    <button class="btn btn-secondary" onclick="window.previousPizza()" id="btnPrev" style="display: none;">
+      ← Precedente
+    </button>
+    <button class="btn btn-primary" onclick="window.nextPizza()" id="btnNext">
+      Prossima →
+    </button>
+    <button class="btn btn-success" onclick="window.completePizzaNightLive()" id="btnComplete" style="display: none;">
+      ✓ Completa Serata
+    </button>
+  </div>
+      </div >
+  `;
+
+    document.body.insertAdjacentHTML('beforeend', liveModeHTML);
+  }
+}
+
+// ============================================
+// PLANNER FILTER STATE
+// ============================================
+
+const plannerFilterState = {
+  selectedTag: null,
+  selectedIngredient: 'all',
+  sortBy: 'az'
+};
+
+// Track suggested ingredients for auto/mixed mode
+let plannerSuggestedIngredients = [];
+
+// ============================================
+// NEW PIZZA NIGHT MODAL
+// ============================================
+
+async function showNewPizzaNightModal() {
+  const recipes = await getAllRecipes(); // Store all recipes
+
+  const modalContent = `
+    <div class="modal-header">
+      <h2 class="modal-title">Nuova Serata Pizza</h2>
+      <button class="modal-close" onclick="window.closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="newPizzaNightForm">
+        <!-- ... existing fields ... -->
+        <div class="form-group">
+          <label class="form-label">Nome Serata *</label>
+          <input type="text" class="form-input" name="name" required placeholder="es. Pizza con gli amici">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Data e Ora *</label>
+          <input type="datetime-local" class="form-input" name="date" required value="${formatDateForInput(getNextSaturdayEvening())}">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Numero Ospiti *</label>
+          <input type="number" class="form-input" name="guestCount" required value="${DEFAULT_GUEST_COUNT}" min="1">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Seleziona Ospiti (Opzionale)</label>
+          <p style="font-size: 0.875rem; color: var(--color-gray-400); margin-bottom: 0.5rem;">Seleziona gli ospiti da invitare. Potrai inviare email dopo aver creato la serata.</p>
+          <div id="guestSelection" style="max-height: 150px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 0.5rem; padding: 0.5rem;">
+            <!-- Guests will be loaded here -->
+            <p class="text-muted text-sm">Caricamento ospiti...</p>
+          </div>
+        </div>
+        
+        <div class="form-group" style="background: rgba(102, 126, 234, 0.1); border: 2px solid rgba(102, 126, 234, 0.3); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem;">
+          <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; margin-bottom: 1rem;">
+            <span>🥣</span>
+            <span>Tipo di Impasto per la Serata *</span>
+          </label>
+          <p style="color: var(--color-gray-300); font-size: 0.875rem; margin-bottom: 1rem;">
+            Scegli quale impasto preparare. Tutte le pizze della serata useranno questo impasto.
+          </p>
+          <select id="selectedDoughType" name="selectedDough" class="form-input" required style="font-size: 1rem; padding: 0.75rem;">
+            <option value="" style="color: #000; background: #fff;">Seleziona un impasto...</option>
+            ${DOUGH_RECIPES.map(d => `
+              <option value="${d.type}" style="color: #000; background: #fff;">
+                ${d.type} - ${d.hydration}% idratazione (${d.difficulty})
+              </option>
+            `).join('')}
+          </select>
+          <div id="doughInfo" style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; display: none;">
+            <!-- Dough info will be shown here -->
+          </div>
+        </div>
+        
+        <div class="form-group" style="background: rgba(99, 102, 241, 0.1); border: 2px solid rgba(99, 102, 241, 0.3); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem;">
+          <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; margin-bottom: 1rem;">
+            <span>🎯</span>
+            <span>Modalità Selezione Pizze</span>
+          </label>
+          <p style="color: var(--color-gray-300); font-size: 0.875rem; margin-bottom: 1rem;">
+            Scegli come selezionare le pizze per la serata
+          </p>
+          
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 0.5rem; cursor: pointer; transition: all 0.2s;">
+              <input type="radio" name="selectionMode" value="manual" checked style="width: 18px; height: 18px;">
+              <div>
+                <div style="font-weight: 600; margin-bottom: 0.25rem;">✋ Manuale</div>
+                <div style="font-size: 0.875rem; color: var(--color-gray-400);">Scegli tu tutte le pizze dalla lista</div>
+              </div>
+            </label>
+            
+            <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 0.5rem; cursor: pointer; transition: all 0.2s;">
+              <input type="radio" name="selectionMode" value="auto" style="width: 18px; height: 18px;">
+              <div>
+                <div style="font-weight: 600; margin-bottom: 0.25rem;">🤖 Automatica</div>
+                <div style="font-size: 0.875rem; color: var(--color-gray-400);">L'AI sceglie tutto ottimizzando ingredienti</div>
+              </div>
+            </label>
+            
+            <label style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 0.5rem; cursor: pointer; transition: all 0.2s;">
+              <input type="radio" name="selectionMode" value="mixed" style="width: 18px; height: 18px;">
+              <div>
+                <div style="font-weight: 600; margin-bottom: 0.25rem;">⭐ Mista (Consigliata)</div>
+                <div style="font-size: 0.875rem; color: var(--color-gray-400);">Tu scegli alcune, l'AI completa ottimizzando</div>
+              </div>
+            </label>
+          </div>
+        </div>
+        
+        <!-- Ingredients Suggestions (for Auto/Mixed mode) -->
+        <div id="plannerSuggestionsUI" class="form-group" style="display: none; background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1.5rem;">
+          <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; color: var(--color-primary-light);">
+            <span>💡</span>
+            <span>Suggerimenti Ingredienti</span>
+          </label>
+          <p style="color: var(--color-gray-400); font-size: 0.8125rem; margin-bottom: 1rem;">
+            Pizze che contengono questi ingredienti saranno favorite.
+          </p>
+          
+          <div id="plannerIngredientsSelector" style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem;">
+            <!-- Populated via JS -->
+          </div>
+          <div id="plannerSelectedIngredients" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+            <!-- Selected chips -->
+          </div>
+        </div>
+        
+        <!-- Auto Mode UI -->
+        <div id="autoModeUI" class="form-group" style="display: none; background: rgba(34, 197, 94, 0.1); border: 2px solid rgba(34, 197, 94, 0.3); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem;">
+          <label class="form-label">Numero di pizze da generare</label>
+          <input type="number" id="autoNumPizzas" class="form-input" value="5" min="2" max="20" style="margin-bottom: 1rem;">
+          <button type="button" class="btn btn-primary" onclick="window.generateAutoPizzas()" style="width: 100%;">
+            🎲 Genera Proposte Ottimizzate
+          </button>
+          <div id="autoResults" style="margin-top: 1rem; display: none;"></div>
+        </div>
+        
+        <!-- Mixed Mode UI -->
+        <div id="mixedModeUI" class="form-group" style="display: none; background: rgba(251, 146, 60, 0.1); border: 2px solid rgba(251, 146, 60, 0.3); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem;">
+          <div style="margin-bottom: 1rem;">
+            <label class="form-label">📌 Pizze Fisse (scelte da te)</label>
+            <div id="fixedPizzasList" style="margin-top: 0.5rem; min-height: 40px; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 0.5rem;">
+              <p class="text-muted text-sm">Seleziona pizze dalla lista sotto...</p>
+            </div>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label class="form-label">🤖 Pizze da generare automaticamente</label>
+            <input type="number" id="mixedNumToGenerate" class="form-input" value="3" min="1" max="15">
+          </div>
+          <button type="button" class="btn btn-primary" onclick="window.generateMixedPizzas()" style="width: 100%;" disabled id="mixedGenerateBtn">
+            🎲 Completa Selezione
+          </button>
+          <div id="mixedResults" style="margin-top: 1rem; display: none;"></div>
+        </div>
+        
+        <!-- Metrics Display -->
+        <div id="metricsDisplay" style="display: none; background: rgba(99, 102, 241, 0.1); border: 2px solid rgba(99, 102, 241, 0.3); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem;">
+          <h4 style="margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;">
+            <span>📊</span>
+            <span>Metriche Ottimizzazione</span>
+          </h4>
+          <div id="metricsContent"></div>
+        </div>
+        
+        <div class="form-group" id="manualPizzaSelection">
+          <label class="form-label">Seleziona Pizze</label>
+          
+          <!-- Filter UI -->
+          <div style="margin-bottom: 1rem;">
+            <!-- Tag filters -->
+            <div id="plannerTagFilters" class="filter-chips" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;"></div>
+            
+            <!-- Dropdowns -->
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <select id="plannerIngredientFilter" class="sort-select" style="min-width: 160px;">
+                <option value="all">🥘 Tutti gli ingredienti</option>
+              </select>
+              
+              <select id="plannerRecipeSort" class="sort-select">
+                <option value="az">🔤 A-Z</option>
+                <option value="za">🔤 Z-A</option>
+                <option value="rating">⭐ Rating</option>
+                <option value="newest">📅 Più recenti</option>
+                <option value="oldest">📅 Meno recenti</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="pizzaSelection" style="max-height: 300px; overflow-y: auto;">
+             <!-- Pizza list populated via JS -->
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Note</label>
+          <textarea class="form-textarea" name="notes" placeholder="Note aggiuntive..."></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="window.closeModal()">Annulla</button>
+      <button class="btn btn-accent" onclick="window.submitNewPizzaNight()">
+        <span>➕</span>
+        Crea Serata
+      </button>
+    </div>
+`;
+
+  openModal(modalContent);
+
+  // Reset filter state
+  plannerFilterState.selectedTag = null;
+  plannerFilterState.selectedIngredient = 'all';
+  plannerFilterState.sortBy = 'az';
+
+  // Setup filters
+  populatePlannerIngredientFilter(recipes);
+  renderPlannerTagFilters();
+
+  // Initial render with filters
+  const filtered = filterAndSortPlannerRecipes(recipes);
+  renderPizzaSelectionList(filtered);
+
+  // Setup filter event listeners
+  const tagFiltersContainer = document.getElementById('plannerTagFilters');
+  if (tagFiltersContainer) {
+    tagFiltersContainer.addEventListener('click', (e) => {
+      if (e.target.classList.contains('filter-chip')) {
+        const tag = e.target.dataset.tag;
+        plannerFilterState.selectedTag =
+          plannerFilterState.selectedTag === tag ? null : tag;
+        renderPlannerTagFilters();
+        const filtered = filterAndSortPlannerRecipes(recipes);
+        renderPizzaSelectionList(filtered);
+      }
+    });
+  }
+
+  const ingredientFilter = document.getElementById('plannerIngredientFilter');
+  if (ingredientFilter) {
+    ingredientFilter.addEventListener('change', (e) => {
+      plannerFilterState.selectedIngredient = e.target.value;
+      const filtered = filterAndSortPlannerRecipes(recipes);
+      renderPizzaSelectionList(filtered);
+    });
+  }
+
+  const sortSelect = document.getElementById('plannerRecipeSort');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      plannerFilterState.sortBy = e.target.value;
+      const filtered = filterAndSortPlannerRecipes(recipes);
+      renderPizzaSelectionList(filtered);
+    });
+  }
+
+  // Load guests into the selection area
+  // ... existing guest loading logic ...
+  const guests = await getAllGuests();
+  const guestSelection = document.getElementById('guestSelection');
+  if (guestSelection) {
+    if (guests.length > 0) {
+      guestSelection.innerHTML = guests.map(guest => `
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+    <input type="checkbox" name="selectedGuests" value="${guest.id}" id="guest_${guest.id}">
+      <label for="guest_${guest.id}" style="cursor: pointer;">${guest.name}</label>
+    </div>
+`).join('');
+    } else {
+      guestSelection.innerHTML = '<p class="text-muted text-sm">Nessun ospite salvato. <a href="#" onclick="window.closeModal(); window.showManageGuestsModal(); return false;">Gestisci ospiti</a></p>';
+    }
+  }
+
+  // Setup dough selection listener to show info
+  const doughSelect = document.getElementById('selectedDoughType');
+  if (doughSelect) {
+    doughSelect.addEventListener('change', (e) => {
+      const selectedDoughType = e.target.value;
+      const doughInfoDiv = document.getElementById('doughInfo');
+
+      if (selectedDoughType && doughInfoDiv) {
+        const dough = DOUGH_RECIPES.find(d => d.type === selectedDoughType);
+        if (dough) {
+          doughInfoDiv.style.display = 'block';
+          doughInfoDiv.innerHTML = `
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; margin-bottom: 0.75rem;">
+              <div style="text-align: center;">
+                <div style="font-size: 0.75rem; color: var(--color-gray-400);">Idratazione</div>
+                <div style="font-weight: 700; color: var(--color-primary-light);">${dough.hydration}%</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 0.75rem; color: var(--color-gray-400);">Lievitazione</div>
+                <div style="font-weight: 600; font-size: 0.875rem;">${dough.fermentation}</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 0.75rem; color: var(--color-gray-400);">Resa</div>
+                <div style="font-weight: 700; color: var(--color-accent-light);">${dough.yield} pizze</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 0.75rem; color: var(--color-gray-400);">Difficoltà</div>
+                <div style="font-weight: 600;">${dough.difficulty}</div>
+              </div>
+            </div >
+  <p style="font-size: 0.875rem; color: var(--color-gray-300); margin: 0;">
+    ${dough.description}
+  </p>
+`;
+        }
+      } else if (doughInfoDiv) {
+        doughInfoDiv.style.display = 'none';
+      }
+    });
+  }
+
+  // Setup mode selection listeners
+  setupModeListeners();
+
+  // Populate suggested ingredients selector
+  populatePlannerIngredientsSelector(recipes);
+
+  // Load guests after modal is rendered  
+  loadGuestsIntoModal();
+}
+
+// Setup listeners for selection mode radio buttons
+function setupModeListeners() {
+  const modeRadios = document.querySelectorAll('input[name="selectionMode"]');
+  const manualSection = document.getElementById('manualPizzaSelection');
+  const autoUI = document.getElementById('autoModeUI');
+  const mixedUI = document.getElementById('mixedModeUI');
+
+  modeRadios.forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      const mode = e.target.value;
+
+      // Hide all mode-specific UIs
+      if (manualSection) manualSection.style.display = 'none';
+      if (autoUI) autoUI.style.display = 'none';
+      if (mixedUI) mixedUI.style.display = 'none';
+
+      const suggestionsUI = document.getElementById('plannerSuggestionsUI');
+      if (suggestionsUI) {
+        suggestionsUI.style.display = (mode === 'auto' || mode === 'mixed') ? 'block' : 'none';
+      }
+
+      // Show selected mode UI
+      if (mode === 'manual' && manualSection) {
+        manualSection.style.display = 'block';
+      } else if (mode === 'auto' && autoUI) {
+        autoUI.style.display = 'block';
+      } else if (mode === 'mixed' && mixedUI) {
+        mixedUI.style.display = 'block';
+        manualSection.style.display = 'block'; // Show pizza list for selection
+        setupMixedModeListeners();
+      }
+    });
+  });
+}
+
+// NEW: Load guests and display with checkboxes in pizza night modal
+async function loadGuestsIntoModal() {
+  const guestSelection = document.getElementById('guestSelection');
+  if (!guestSelection) return;
+
+  try {
+    const guests = await getAllGuests();
+
+    if (guests.length === 0) {
+      guestSelection.innerHTML = '<p class="text-muted text-sm">Nessun ospite salvato. Creane uno da "Gestisci Ospiti".</p>';
+      return;
+    }
+
+    guestSelection.innerHTML = guests.map(guest => `
+      <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; cursor: pointer; border-radius: 0.25rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+        <input type="checkbox" name="selectedGuests" value="${guest.id}" style="width: 18px; height: 18px;">
+        <div style="flex: 1;">
+          <div style="font-weight: 600;">${guest.name}</div>
+          ${guest.email ? `<div style="font-size: 0.75rem; color: var(--color-text-secondary);">📧 ${guest.email}</div>` : '<div style="font-size: 0.75rem; color: var(--color-gray-500);">Nessuna email</div>'}
+        </div>
+      </label>
+    `).join('');
+  } catch (error) {
+    console.error('Failed to load guests:', error);
+    guestSelection.innerHTML = '<p class="text-muted text-sm" style="color: var(--color-error);">Errore nel caricamento ospiti</p>';
+  }
+}
+
+// Setup listeners for mixed mode pizza selection
+function setupMixedModeListeners() {
+  const pizzaCheckboxes = document.querySelectorAll('#pizzaSelection input[type="checkbox"]');
+  const fixedList = document.getElementById('fixedPizzasList');
+  const generateBtn = document.getElementById('mixedGenerateBtn');
+
+  pizzaCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      updateFixedPizzasList();
+    });
+  });
+}
+
+// Update fixed pizzas list in mixed mode
+function updateFixedPizzasList() {
+  const checkedBoxes = document.querySelectorAll('#pizzaSelection input[type="checkbox"]:checked');
+  const fixedList = document.getElementById('fixedPizzasList');
+  const generateBtn = document.getElementById('mixedGenerateBtn');
+
+  if (checkedBoxes.length > 0) {
+    const pizzaNames = Array.from(checkedBoxes).map(cb => {
+      // Find the pizza name - it's in a div with font-weight: 600
+      const parentDiv = cb.closest('div');
+      const nameDiv = parentDiv.querySelector('div[style*="font-weight"]');
+      return nameDiv ? nameDiv.textContent.trim() : 'Pizza';
+    });
+
+    fixedList.innerHTML = `
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+    ${pizzaNames.map(name => `
+          <span style="padding: 0.25rem 0.75rem; background: rgba(99, 102, 241, 0.3); border-radius: 1rem; font-size: 0.875rem;">
+            📌 ${name}
+          </span>
+        `).join('')
+      }
+      </div >
+  `;
+
+    if (generateBtn) generateBtn.disabled = false;
+  } else {
+    fixedList.innerHTML = '<p class="text-muted text-sm">Seleziona pizze dalla lista sotto...</p>';
+    if (generateBtn) generateBtn.disabled = true;
+  }
+}
+
+// Generate auto pizzas
+async function generateAutoPizzas() {
+  const numPizzas = parseInt(document.getElementById('autoNumPizzas').value);
+  const resultsDiv = document.getElementById('autoResults');
+  const metricsDiv = document.getElementById('metricsDisplay');
+
+  if (!numPizzas || numPizzas < 2 || numPizzas > 20) {
+    alert('Inserisci un numero valido di pizze (2-20)');
+    return;
+  }
+
+  resultsDiv.innerHTML = '<p class="text-muted">🔄 Generazione in corso...</p>';
+  resultsDiv.style.display = 'block';
+
+  try {
+    const response = await fetch('/api/pizza-optimizer/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        numPizzas,
+        suggestedIngredients: plannerSuggestedIngredients.map(i => i.name)
+      })
+    });
+
+    if (!response.ok) throw new Error('Errore nella generazione');
+
+    const data = await response.json();
+
+    // Display results
+    displayGeneratedPizzas(data.pizzas, resultsDiv);
+    displayMetrics(data.metrics, metricsDiv);
+
+    // Auto-select these pizzas
+    selectGeneratedPizzas(data.pizzas);
+
+  } catch (error) {
+    console.error('Error generating auto pizzas:', error);
+    resultsDiv.innerHTML = '<p style="color: var(--color-error);">❌ Errore nella generazione</p>';
+  }
+}
+
+// Generate mixed pizzas
+let manuallySelectedPizzaIds = []; // Track manually selected pizzas
+
+async function generateMixedPizzas() {
+  const allCheckedBoxes = document.querySelectorAll('#pizzaSelection input[type="checkbox"]:checked');
+  const numToGenerate = parseInt(document.getElementById('mixedNumToGenerate').value);
+  const resultsDiv = document.getElementById('mixedResults');
+  const metricsDiv = document.getElementById('metricsDisplay');
+
+  // On first call or when user changes selection, update manually selected IDs
+  // We need to identify which pizzas were manually selected vs auto-generated
+  if (manuallySelectedPizzaIds.length === 0 || resultsDiv.style.display === 'none') {
+    // First time or after reset - all checked boxes are manual selections
+    manuallySelectedPizzaIds = Array.from(allCheckedBoxes).map(cb => cb.value);
+  }
+
+  if (manuallySelectedPizzaIds.length === 0) {
+    alert('Seleziona almeno una pizza fissa');
+    return;
+  }
+
+  if (!numToGenerate || numToGenerate < 1 || numToGenerate > 15) {
+    alert('Inserisci un numero valido di pizze da generare (1-15)');
+    return;
+  }
+
+  console.log('🔍 Mixed mode - Fixed pizza IDs:', manuallySelectedPizzaIds);
+  console.log('🔍 Mixed mode - Num to generate:', numToGenerate);
+
+  resultsDiv.innerHTML = '<p class="text-muted">🔄 Generazione in corso...</p>';
+  resultsDiv.style.display = 'block';
+
+  try {
+    const response = await fetch('/api/pizza-optimizer/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fixedPizzaIds: manuallySelectedPizzaIds,
+        numToGenerate,
+        suggestedIngredients: plannerSuggestedIngredients.map(i => i.name)
+      })
+    });
+
+    console.log('🔍 API Response status:', response.status);
+
+    const data = await response.json();
+    console.log('🔍 API Response data:', data);
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Errore nella generazione');
+    }
+
+    if (!data.suggestions || data.suggestions.length === 0) {
+      resultsDiv.innerHTML = '<p style="color: var(--color-warning);">⚠️ Nessuna pizza suggerita. Prova con parametri diversi.</p>';
+      console.warn('No suggestions returned from API');
+      return;
+    }
+
+
+    // Clear previous auto-selections FIRST (uncheck previously generated pizzas)
+    document.querySelectorAll('#pizzaSelection input[type="checkbox"]:checked').forEach(checkbox => {
+      // Only uncheck if it's not a manually selected pizza
+      const recipeId = checkbox.value;
+      if (!manuallySelectedPizzaIds.includes(recipeId)) {
+        checkbox.checked = false;
+      }
+    });
+
+    // Display suggestions (this replaces the HTML content)
+    displayGeneratedPizzas(data.suggestions, resultsDiv, 'Pizze Suggerite');
+    displayMetrics(data.metrics, metricsDiv);
+
+    // Auto-select suggested pizzas (replaces previous suggestions)
+    selectGeneratedPizzas(data.suggestions);
+
+  } catch (error) {
+    console.error('Error generating mixed pizzas:', error);
+    resultsDiv.innerHTML = `< p style = "color: var(--color-error);" >❌ Errore: ${error.message}</p > `;
+  }
+}
+
+// Display generated pizzas
+function displayGeneratedPizzas(pizzas, container, title = 'Pizze Generate') {
+  container.innerHTML = `
+    <h5 style="margin: 0 0 0.75rem 0;">${title} (${pizzas.length})</h5>
+    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+      ${pizzas.map(pizza => `
+        <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
+          <div style="flex: 1;">
+            <div style="font-weight: 600;">🍕 ${pizza.name}</div>
+            <div style="font-size: 0.875rem; color: var(--color-gray-400);">
+              ${pizza.baseIngredients.map(i => i.name || i).join(', ')}
+            </div>
+          </div>
+          <button 
+            class="btn-preview-generated" 
+            data-recipe-id="${pizza.id}"
+            style="padding: 0.5rem 0.75rem; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--color-primary); border-radius: 0.375rem; color: var(--color-primary); cursor: pointer; font-size: 0.875rem; white-space: nowrap;"
+            title="Vedi ingredienti"
+          >
+            👁️ Vedi
+          </button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  container.style.display = 'block';
+
+  // Attach preview button listeners
+  container.querySelectorAll('.btn-preview-generated').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const recipeId = btn.dataset.recipeId;
+      showPizzaPreviewInPlanner(recipeId);
+    });
+  });
+}
+
+// Display metrics
+function displayMetrics(metrics, container) {
+  const metricsContent = document.getElementById('metricsContent');
+  if (!metricsContent) return;
+
+  metricsContent.innerHTML = `
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+      <div style="text-align: center;">
+        <div style="font-size: 2rem; font-weight: 700; color: var(--color-primary);">${metrics.totalScore}</div>
+        <div style="font-size: 0.875rem; color: var(--color-gray-400);">Score Totale</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 2rem; font-weight: 700; color: var(--color-success);">${metrics.ingredientReusePercent}%</div>
+        <div style="font-size: 0.875rem; color: var(--color-gray-400);">Riuso Ingredienti</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 2rem; font-weight: 700; color: var(--color-accent);">${metrics.totalIngredients}</div>
+        <div style="font-size: 0.875rem; color: var(--color-gray-400);">Ingredienti Totali</div>
+      </div>
+    </div >
+  <div style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 0.5rem;">
+    <div style="font-weight: 600; margin-bottom: 0.5rem;">📦 Ingredienti:</div>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+      ${metrics.ingredientList.slice(0, 10).map(ing => `
+          <span style="padding: 0.25rem 0.75rem; background: ${ing.shared ? 'rgba(34, 197, 94, 0.2)' : 'rgba(251, 146, 60, 0.2)'}; border-radius: 1rem; font-size: 0.875rem;">
+            ${ing.shared ? '✓' : ''} ${ing.name}
+          </span>
+        `).join('')}
+      ${metrics.ingredientList.length > 10 ? `<span style="color: var(--color-gray-400); font-size: 0.875rem;">+${metrics.ingredientList.length - 10} altri</span>` : ''}
+    </div>
+  </div>
+`;
+
+  container.style.display = 'block';
+}
+
+// Auto-select generated pizzas in the list
+function selectGeneratedPizzas(pizzas) {
+  // DON'T clear current selections - keep manually selected pizzas!
+  // Just add the generated ones
+
+  // Select generated pizzas
+  pizzas.forEach(pizza => {
+    const checkbox = document.querySelector(`#pizzaSelection input[value = "${pizza.id}"]`);
+    if (checkbox) checkbox.checked = true;
+  });
+}
+
+// ============================================
+// PLANNER FILTER FUNCTIONS
+// ============================================
+
+function filterAndSortPlannerRecipes(recipes) {
+  let filtered = [...recipes];
+
+  // Tag filter
+  if (plannerFilterState.selectedTag) {
+    filtered = filtered.filter(r =>
+      r.tags && r.tags.includes(plannerFilterState.selectedTag)
+    );
+  }
+
+  // Ingredient filter
+  if (plannerFilterState.selectedIngredient !== 'all') {
+    filtered = filtered.filter(recipe => {
+      const baseIngs = recipe.baseIngredients || [];
+      const preps = recipe.preparations || [];
+
+      const hasInBase = baseIngs.some(ing =>
+        (ing.name || ing) === plannerFilterState.selectedIngredient
+      );
+
+      const hasInPrep = preps.some(prep => {
+        if (!prep.ingredients) return false;
+        return prep.ingredients.some(ing =>
+          (ing.name || ing) === plannerFilterState.selectedIngredient
+        );
+      });
+
+      return hasInBase || hasInPrep;
+    });
+  }
+
+  // Sort
+  switch (plannerFilterState.sortBy) {
+    case 'rating':
+      filtered.sort((a, b) => {
+        const ratingDiff = (b.rating || 0) - (a.rating || 0);
+        return ratingDiff !== 0 ? ratingDiff : b.dateAdded - a.dateAdded;
+      });
+      break;
+    case 'az':
+      filtered.sort((a, b) => a.name.localeCompare(b.name));
+      break;
+    case 'za':
+      filtered.sort((a, b) => b.name.localeCompare(a.name));
+      break;
+    case 'newest':
+      filtered.sort((a, b) => b.dateAdded - a.dateAdded);
+      break;
+    case 'oldest':
+      filtered.sort((a, b) => a.dateAdded - b.dateAdded);
+      break;
+  }
+
+  return filtered;
+}
+
+function populatePlannerIngredientFilter(recipes) {
+  const ingredients = new Set();
+
+  recipes.forEach(recipe => {
+    (recipe.baseIngredients || []).forEach(ing => {
+      ingredients.add(ing.name || ing);
+    });
+
+    (recipe.preparations || []).forEach(prep => {
+      if (prep.ingredients) {
+        prep.ingredients.forEach(ing => {
+          ingredients.add(ing.name || ing);
+        });
+      }
+    });
+  });
+
+  const sorted = Array.from(ingredients).sort();
+  const select = document.getElementById('plannerIngredientFilter');
+  if (!select) return;
+
+  // Clear existing options except first
+  select.innerHTML = '<option value="all">🥘 Tutti gli ingredienti</option>';
+
+  sorted.forEach(ing => {
+    const option = document.createElement('option');
+    option.value = ing;
+    option.textContent = ing;
+    select.appendChild(option);
+  });
+}
+
+function renderPlannerTagFilters() {
+  const container = document.getElementById('plannerTagFilters');
+  if (!container) return;
+
+  container.innerHTML = RECIPE_TAGS.map(tag => `
+    <div class="filter-chip ${plannerFilterState.selectedTag === tag ? 'active' : ''}"
+         data-tag="${tag}"
+         style="cursor: pointer;">
+      ${tag}
+    </div>
+  `).join('');
+}
+
+function renderPizzaSelectionList(recipes) {
+  const listContainer = document.getElementById('pizzaSelection');
+  if (!listContainer) return;
+
+  if (recipes.length > 0) {
+    listContainer.innerHTML = recipes.map(recipe => `
+            <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; margin-bottom: 0.5rem;">
+    <input type="checkbox" name="selectedPizzas" value="${recipe.id}" style="width: 20px; height: 20px;">
+      <div style="flex: 1;">
+        <div style="font-weight: 600;">${recipe.name}</div>
+      </div>
+      <button 
+        class="btn-preview-pizza" 
+        data-recipe-id="${recipe.id}"
+        style="padding: 0.5rem 0.75rem; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--color-primary); border-radius: 0.375rem; color: var(--color-primary); cursor: pointer; font-size: 0.875rem; white-space: nowrap;"
+        title="Vedi ingredienti"
+      >
+        👁️ Vedi
+      </button>
+      <input type="number" name="quantity_${recipe.id}" value="1" min="1" max="10" style="width: 60px; padding: 0.25rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 0.25rem; color: white; text-align: center;">
+      </div>
+      `).join('');
+
+    // Attach preview button listeners
+    document.querySelectorAll('.btn-preview-pizza').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const recipeId = btn.dataset.recipeId;
+        showPizzaPreviewInPlanner(recipeId);
+      });
+    });
+  } else {
+    listContainer.innerHTML = '<p class="text-muted" style="padding: 1rem; text-align: center;">Nessuna ricetta trovata con questo filtro.</p>';
+  }
+}
+
+// ============================================
+// SUGGESTED INGREDIENTS (Planner)
+// ============================================
+
+/**
+ * Populate planner ingredients selector
+ */
+function populatePlannerIngredientsSelector(recipes) {
+  const selector = document.getElementById('plannerIngredientsSelector');
+  if (!selector) return;
+
+  // Extract all ingredients from recipes
+  const ingredients = new Set();
+  recipes.forEach(recipe => {
+    (recipe.baseIngredients || []).forEach(ing => ingredients.add(ing.name || ing));
+    (recipe.preparations || []).forEach(prep => {
+      if (prep.ingredients) {
+        prep.ingredients.forEach(ing => ingredients.add(ing.name || ing));
+      }
+    });
+  });
+
+  const sorted = Array.from(ingredients).sort();
+  plannerSuggestedIngredients = [];
+
+  selector.innerHTML = `
+    <select id="plannerIngredientSelect" class="form-select" style="flex: 1;">
+      <option value="">Aggiungi ingrediente desiderato...</option>
+      ${sorted.map(ing => `<option value="${ing}">${ing}</option>`).join('')}
+    </select>
+    <button type="button" class="btn btn-sm btn-primary" onclick="window.addPlannerSuggestedIngredient()" style="min-width: 44px; font-size: 1.25rem; font-weight: bold;">
+      +
+    </button>
+  `;
+
+  // Clear chips
+  const chipsContainer = document.getElementById('plannerSelectedIngredients');
+  if (chipsContainer) chipsContainer.innerHTML = '';
+}
+
+/**
+ * Add suggested ingredient in planner
+ */
+window.addPlannerSuggestedIngredient = function () {
+  const select = document.getElementById('plannerIngredientSelect');
+  if (!select || !select.value) return;
+
+  const value = select.value;
+  if (plannerSuggestedIngredients.find(i => i.name === value)) return;
+
+  plannerSuggestedIngredients.push({ name: value });
+  renderPlannerSuggestedChips();
+  select.value = '';
+};
+
+/**
+ * Remove suggested ingredient in planner
+ */
+window.removePlannerSuggestedIngredient = function (name) {
+  plannerSuggestedIngredients = plannerSuggestedIngredients.filter(i => i.name !== name);
+  renderPlannerSuggestedChips();
+};
+
+/**
+ * Render chips in planner
+ */
+function renderPlannerSuggestedChips() {
+  const container = document.getElementById('plannerSelectedIngredients');
+  if (!container) return;
+
+  container.innerHTML = plannerSuggestedIngredients.map(ing => `
+    <div class="ingredient-chip" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem; background: var(--color-primary); color: white; border-radius: 1rem; font-size: 0.8125rem;">
+      ${ing.name}
+      <span onclick="window.removePlannerSuggestedIngredient('${ing.name}')" style="cursor: pointer; font-weight: bold; margin-left: 0.25rem;">✕</span>
+    </div>
+  `).join('');
+}
+
+async function showPizzaPreviewInPlanner(recipeId) {
+  const recipe = await getRecipeById(recipeId);
+  if (!recipe) return;
+
+  const baseIngredients = recipe.baseIngredients || [];
+  const preparations = recipe.preparations || [];
+
+  const modalContent = `
+    <div class="modal-header">
+      <h2 class="modal-title">👁️ ${recipe.name}</h2>
+      <button class="modal-close" onclick="window.closePreviewModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 1rem;">
+        <div style="font-size: 0.875rem; color: var(--color-gray-400);">👨‍🍳 ${recipe.pizzaiolo}</div>
+      </div>
+
+      ${recipe.description ? `<p style="margin-bottom: 1.5rem; color: var(--color-gray-300);">${recipe.description}</p>` : ''}
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div>
+          <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--color-primary);">🥗 Ingredienti Base</h3>
+          ${baseIngredients.length > 0 ? `
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              ${baseIngredients.map(ing => `
+                <li style="padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 0.25rem; margin-bottom: 0.25rem; font-size: 0.875rem;">
+                  <span style="font-weight: 600;">${ing.name}</span>
+                  ${ing.quantity && ing.unit ? `<span style="color: var(--color-gray-400); float: right;">${ing.quantity} ${ing.unit}</span>` : ''}
+                </li>
+              `).join('')}
+            </ul>
+          ` : '<p style="color: var(--color-gray-500); font-size: 0.875rem;">Nessun ingrediente</p>'}
+        </div>
+
+        <div>
+          <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--color-accent);">🥫 Preparazioni</h3>
+          ${preparations.length > 0 ? `
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              ${preparations.map(prep => {
+    const prepData = PREPARATIONS.find(p => p.id === prep.id);
+    return prepData ? `
+                  <li style="padding: 0.5rem; background: rgba(249, 115, 22, 0.1); border-radius: 0.25rem; margin-bottom: 0.25rem; font-size: 0.875rem; border-left: 3px solid var(--color-accent);">
+                    <span style="font-weight: 600;">${prepData.name}</span>
+                    <div style="font-size: 0.75rem; color: var(--color-gray-400); margin-top: 0.25rem;">
+                      ${prepData.category} • ${prepData.prepTime}
+                    </div>
+                  </li>
+                ` : '';
+  }).join('')}
+            </ul>
+          ` : '<p style="color: var(--color-gray-500); font-size: 0.875rem;">Nessuna preparazione</p>'}
+        </div>
+      </div>
+
+      ${recipe.tags && recipe.tags.length > 0 ? `
+        <div style="margin-top: 1.5rem;">
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="window.closePreviewModal()">Chiudi</button>
+    </div>
+  `;
+
+  // Use secondary modal for preview
+  const previewBackdrop = document.getElementById('previewModalBackdrop');
+  const previewContent = document.getElementById('previewModalContent');
+
+  if (previewContent && previewBackdrop) {
+    previewContent.innerHTML = modalContent;
+    previewBackdrop.classList.add('active');
+  }
+}
+
+// Helper function to close preview modal (secondary modal)
+window.closePreviewModal = function () {
+  const previewBackdrop = document.getElementById('previewModalBackdrop');
+  if (previewBackdrop) {
+    previewBackdrop.classList.remove('active');
+  }
+};
+
+async function renderPizzaNights() {
+  const grid = document.getElementById('pizzaNightsGrid');
+  const pizzaNights = await getAllPizzaNights();
+
+  // Sort by date, most recent first
+  const sorted = pizzaNights.sort((a, b) => b.date - a.date);
+
+  if (sorted.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1;">
+        <div class="empty-icon">🎉</div>
+        <h3 class="empty-title">Nessuna serata pianificata</h3>
+        <p class="empty-description">Crea la tua prima serata pizza!</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = sorted.map(night => createPizzaNightCard(night)).join('');
+
+  // Attach event listeners to card actions
+  attachCardListeners(grid);
+}
+
+function attachCardListeners(container) {
+  // Details buttons
+  container.querySelectorAll('.btn-details').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const nightId = btn.dataset.nightId;
+      viewPizzaNightDetails(nightId);
+    });
+  });
+
+  // Complete buttons
+  container.querySelectorAll('.btn-complete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const nightId = btn.dataset.nightId;
+      completePizzaNightAction(nightId);
+    });
+  });
+
+  // Delete buttons
+  container.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      console.log('Delete button clicked');
+      const nightId = btn.dataset.nightId;
+      console.log('Night ID:', nightId);
+      deletePizzaNightAction(nightId);
+    });
+  });
+}
+
+function createPizzaNightCard(night) {
+  return `
+      <div class="planner-card">
+        <div class="planner-card-header">
+          <div>
+            <h3 class="planner-card-title">${night.name}</h3>
+            <div class="planner-card-date">
+              <span>📅</span>
+              <span>${formatDate(night.date)}</span>
+            </div>
+          </div>
+          <span class="planner-card-status ${night.status}">${night.status === 'planned' ? 'Pianificata' : 'Completata'}</span>
+        </div>
+
+        <div class="planner-card-info">
+          <div class="planner-info-item">
+            <span class="planner-info-icon">👥</span>
+            <div>
+              <div class="planner-info-label">Ospiti</div>
+              <div class="planner-info-value">${night.guestCount}</div>
+            </div>
+          </div>
+          <div class="planner-info-item">
+            <span class="planner-info-icon">🍕</span>
+            <div>
+              <div class="planner-info-label">Pizze</div>
+              <div class="planner-info-value">${night.selectedPizzas.length}</div>
+            </div>
+          </div>
+          ${night.selectedDough ? `
+          <div class="planner-info-item">
+            <span class="planner-info-icon">🥣</span>
+            <div>
+              <div class="planner-info-label">Impasto</div>
+              <div class="planner-info-value" style="font-size: 0.875rem;">${night.selectedDough}</div>
+            </div>
+          </div>
+        ` : ''}
+        </div>
+
+        ${night.selectedPizzas.length > 0 ? `
+        <ul class="planner-pizzas-list">
+          ${night.selectedPizzas.slice(0, 3).map(pizza => `
+            <li class="planner-pizza-item">
+              <span class="planner-pizza-name">${pizza.recipeName || 'Pizza'}</span>
+              <span class="planner-pizza-quantity">×${pizza.quantity}</span>
+            </li>
+          `).join('')}
+          ${night.selectedPizzas.length > 3 ? `
+            <li class="planner-pizza-item text-muted">
+              +${night.selectedPizzas.length - 3} altre...
+            </li>
+          ` : ''}
+        </ul>
+      ` : ''}
+
+        ${night.notes ? `<p class="text-muted" style="font-size: 0.875rem; margin-top: 1rem;">${night.notes}</p>` : ''}
+
+        <div class="planner-card-actions">
+          <button class="btn btn-primary btn-sm btn-details" data-night-id="${night.id}">
+            <span>👁️</span>
+            Dettagli
+          </button>
+          <button class="btn btn-accent btn-sm" onclick="window.location.hash='qrcodes/${night.id}'">
+            <span>🎫</span>
+            QR Codes
+          </button>
+          ${night.status === 'planned' ? `
+          <button class="btn btn-secondary btn-sm btn-complete" data-night-id="${night.id}">
+            <span>✓</span>
+            Completa
+          </button>
+        ` : ''}
+          <button class="btn btn-ghost btn-sm btn-delete" data-night-id="${night.id}">
+            <span>🗑️</span>
+          </button>
+        </div>
+      </div>
+      `;
+}
+
+function setupPlannerListeners() {
+  const newBtn = document.getElementById('newPizzaNightBtn');
+  newBtn.removeEventListener('click', showNewPizzaNightModal);
+  newBtn.addEventListener('click', showNewPizzaNightModal);
+
+  const manageGuestsBtn = document.getElementById('manageGuestsBtn');
+  if (manageGuestsBtn) {
+    manageGuestsBtn.removeEventListener('click', showManageGuestsModal);
+    manageGuestsBtn.addEventListener('click', showManageGuestsModal);
+  }
+}
+
+async function showManageGuestsModal() {
+  const guests = await getAllGuests();
+
+  const modalContent = `
+      <div class="modal-header">
+        <h2 class="modal-title">Gestisci Ospiti</h2>
+        <button class="modal-close" onclick="window.closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Aggiungi Nuovo Ospite</label>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <input type="text" id="newGuestName" class="form-input" placeholder="Nome e Cognome" required>
+            <input type="email" id="newGuestEmail" class="form-input" placeholder="Email (opzionale)">
+            <input type="tel" id="newGuestPhone" class="form-input" placeholder="Telefono (opzionale, es. 3331234567)">
+            <small style="color: var(--color-text-secondary); font-size: 0.875rem; margin-top: -0.5rem;">
+              💡 Con email o telefono, puoi inviare gli inviti automaticamente
+            </small>
+            <button class="btn btn-primary" onclick="window.submitNewGuest()">Aggiungi Ospite</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Lista Ospiti</label>
+          <div id="guestsList" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+            ${guests.length > 0 ? guests.map(guest => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
+              <div style="flex: 1;">
+                <div style="font-weight: 600;">${guest.name}</div>
+                ${guest.email ? `<div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-top: 0.25rem;">📧 ${guest.email}</div>` : ''}
+                ${guest.phone ? `<div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-top: 0.25rem;">📱 ${guest.phone}</div>` : ''}
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-ghost btn-sm" onclick="window.showEditGuestModal('${guest.id}')" title="Modifica">✏️</button>
+                <button class="btn btn-ghost btn-sm" onclick="window.deleteGuestAction('${guest.id}')" style="color: var(--color-error);" title="Elimina">🗑️</button>
+              </div>
+            </div>
+          `).join('') : '<p class="text-muted">Nessun ospite salvato.</p>'}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
+      </div>
+      `;
+
+  openModal(modalContent);
+}
+
+async function submitNewGuest() {
+  const nameInput = document.getElementById('newGuestName');
+  const emailInput = document.getElementById('newGuestEmail');
+  const phoneInput = document.getElementById('newGuestPhone');
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const phone = phoneInput.value.trim();
+
+  if (!name) {
+    alert('Inserisci il nome dell\'ospite');
+    return;
+  }
+
+  try {
+    await addGuest({ name, email: email || undefined, phone: phone || undefined });
+    // Refresh modal content
+    await showManageGuestsModal();
+  } catch (error) {
+    console.error('Failed to add guest:', error);
+    alert('Errore durante l\'aggiunta dell\'ospite');
+  }
+}
+
+async function deleteGuestAction(guestId) {
+  if (!confirm('Sei sicuro di voler eliminare questo ospite?')) return;
+
+  try {
+    await deleteGuest(guestId);
+    // Refresh modal content
+    await showManageGuestsModal();
+  } catch (error) {
+    console.error('Failed to delete guest:', error);
+  }
+}
+
+async function showEditGuestModal(guestId) {
+  const guests = await getAllGuests();
+  const guest = guests.find(g => g.id === guestId);
+
+  if (!guest) {
+    alert('Ospite non trovato');
+    return;
+  }
+
+  const modalContent = `
+      <div class="modal-header">
+        <h2 class="modal-title">Modifica Ospite</h2>
+        <button class="modal-close" onclick="window.closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Nome *</label>
+          <input type="text" id="editGuestName" class="form-input" value="${guest.name}" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="editGuestEmail" class="form-input" value="${guest.email || ''}" placeholder="email@esempio.it">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Telefono</label>
+          <input type="tel" id="editGuestPhone" class="form-input" value="${guest.phone || ''}" placeholder="3331234567">
+          <small style="color: var(--color-text-secondary); font-size: 0.875rem; margin-top: 0.5rem; display: block;">
+            💡 Inserisci il numero senza spazi (es. 3931234567)
+          </small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.showManageGuestsModal()">Annulla</button>
+        <button class="btn btn-primary" onclick="window.updateGuestAction('${guestId}')">Salva Modifiche</button>
+      </div>
+      `;
+
+  openModal(modalContent);
+}
+
+async function updateGuestAction(guestId) {
+  const nameInput = document.getElementById('editGuestName');
+  const emailInput = document.getElementById('editGuestEmail');
+  const phoneInput = document.getElementById('editGuestPhone');
+
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const phone = phoneInput.value.trim();
+
+  if (!name) {
+    alert('Il nome è obbligatorio');
+    return;
+  }
+
+  try {
+    await updateGuest(guestId, {
+      name,
+      email: email || null,
+      phone: phone || null
+    });
+    // Return to guest list
+    await showManageGuestsModal();
+    showToast('Ospite aggiornato con successo', 'success');
+  } catch (error) {
+    console.error('Failed to update guest:', error);
+    alert('Errore durante l\'aggiornamento dell\'ospite');
+  }
+}
+
+// NEW: Send email invites to selected guests of a pizza night
+async function sendGuestInvites(nightId) {
+  console.log('🔵 [sendGuestInvites] Function called with nightId:', nightId);
+
+  try {
+    console.log('🔵 [sendGuestInvites] Attempting to send POST request to:', `/api/pizza-nights/${nightId}/send-invites`);
+
+    const response = await fetch(`/api/pizza-nights/${nightId}/send-invites`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    console.log('🔵 [sendGuestInvites] Response received:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('🔴 [sendGuestInvites] Server returned error:', errorText);
+      throw new Error(`Failed to send invites: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log('🔵 [sendGuestInvites] Result from server:', result);
+
+    closeModal();
+
+    if (result.sent > 0) {
+      console.log(`✅ [sendGuestInvites] Success: ${result.sent} email(s) sent`);
+      showToast(`✅ ${result.sent} ${result.sent === 1 ? 'email inviata' : 'email inviate'} con successo!`, 'success');
+    } else {
+      console.log('⚠️ [sendGuestInvites] No emails sent (no guests with email)');
+      showToast('⚠️ Nessuna email inviata (nessun ospite con email)', 'warning');
+    }
+
+    if (result.failed > 0) {
+      console.log(`⚠️ [sendGuestInvites] ${result.failed} email(s) failed`);
+      showToast(`⚠️ ${result.failed} email non ${result.failed === 1 ? 'inviata' : 'inviate'}`, 'warning');
+    }
+  } catch (error) {
+    console.error('🔴 [sendGuestInvites] Error caught:', error);
+    console.error('🔴 [sendGuestInvites] Error stack:', error.stack);
+    showToast('❌ Errore nell\'invio delle email', 'error');
+  }
+}
+
+// NEW: Send WhatsApp invites to selected guests of a pizza night
+async function sendWhatsAppInvites(nightId) {
+  try {
+    const night = await getPizzaNightById(nightId);
+    if (!night) {
+      showToast('❌ Serata non trovata', 'error');
+      return;
+    }
+
+    const allGuests = await getAllGuests();
+    const guestsWithPhone = night.selectedGuests
+      .map(guestId => allGuests.find(g => g.id === guestId))
+      .filter(g => g && g.phone);
+
+    if (guestsWithPhone.length === 0) {
+      showToast('⚠️ Nessun ospite ha un numero di telefono', 'warning');
+      return;
+    }
+
+    // Format event time
+    const eventDate = new Date(night.date);
+    const eventDateStr = eventDate.toLocaleDateString('it-IT', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    const eventTimeStr = eventDate.toLocaleTimeString('it-IT', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    // Create modal with WhatsApp links
+    const appUrl = window.location.origin;
+    const modalContent = `
+      <div class="modal-header">
+        <h2 class="modal-title">📱 Inviti WhatsApp</h2>
+        <button class="modal-close" onclick="window.closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 1rem; color: var(--color-text-secondary);">
+          Clicca sui pulsanti per aprire WhatsApp e inviare l'invito a ciascun ospite:
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          ${guestsWithPhone.map(guest => {
+      const guestPageUrl = `${appUrl}/guest.html#guest/${nightId}/${guest.id}`;
+      const message = `Ciao ${guest.name}! 🍕
+
+Sei invitato alla *${night.name}*
+📅 ${eventDateStr}
+⏰ ${eventTimeStr}
+
+Visualizza i dettagli della tua serata personale:
+${guestPageUrl}
+
+Ci vediamo lì! 🎉`;
+
+      const whatsappUrl = `https://wa.me/${guest.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+
+      return `
+              <a href="${whatsappUrl}" target="_blank" class="btn btn-success" style="
+                background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+                display: flex;
+                align-items: center;
+                justify Content: space-between;
+                text-decoration: none;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                transition: transform 0.2s;
+              " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <span style="font-size: 1.5rem;">📱</span>
+                  <div style="text-align: left;">
+                    <div style="font-weight: 600;">${guest.name}</div>
+                    <div style="font-size: 0.875rem; opacity: 0.9;">${guest.phone}</div>
+                  </div>
+                </div>
+                <span style="font-size: 0.875rem; opacity: 0.9;">Apri WhatsApp →</span>
+              </a>
+            `;
+    }).join('')}
+        </div>
+        <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--color-text-secondary); padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
+          💡 <strong>Nota:</strong> Cliccando sui pulsanti si aprirà WhatsApp con il messaggio già pronto. Dovrai confermare l'invio manualmente.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
+      </div>
+    `;
+
+    openModal(modalContent);
+  } catch (error) {
+    console.error('Error sending WhatsApp invites:', error);
+    showToast('❌ Errore nella generazione degli inviti WhatsApp', 'error');
+  }
+}
+
+async function submitNewPizzaNight() {
+  const form = document.getElementById('newPizzaNightForm');
+  const formData = new FormData(form);
+
+  const selectedPizzas = [];
+  const checkboxes = form.querySelectorAll('input[name="selectedPizzas"]:checked');
+
+  for (const checkbox of checkboxes) {
+    const recipeId = checkbox.value;
+    const quantity = parseInt(formData.get(`quantity_${recipeId}`)) || 1;
+    const recipe = await import('../modules/database.js').then(m => m.getRecipeById(recipeId));
+
+    selectedPizzas.push({
+      recipeId,
+      recipeName: recipe.name,
+      quantity
+    });
+  }
+
+  const selectedGuests = [];
+  form.querySelectorAll('input[name="selectedGuests"]:checked').forEach(cb => {
+    selectedGuests.push(cb.value);
+  });
+
+  const nightData = {
+    name: formData.get('name'),
+    date: new Date(formData.get('date')).getTime(),
+    guestCount: parseInt(formData.get('guestCount')),
+    selectedDough: formData.get('selectedDough'), // NUOVO: impasto scelto per la serata
+    selectedPizzas,
+    selectedGuests,
+    notes: formData.get('notes') || ''
+  };
+
+  console.log('💾 Saving pizza night with data:', nightData);
+  console.log('  - selectedDough value:', nightData.selectedDough);
+
+  try {
+    await createPizzaNight(nightData);
+    closeModal();
+    await refreshData();
+  } catch (error) {
+    console.error('Failed to create pizza night:', error);
+  }
+}
+
+async function viewPizzaNightDetails(nightId) {
+  const night = await import('../modules/database.js').then(m => m.getPizzaNightById(nightId));
+  if (!night) return;
+
+  let guestNames = [];
+  let guestsWithEmail = [];
+  let guestsWithPhone = [];
+  if (night.selectedGuests && night.selectedGuests.length > 0) {
+    const allGuests = await getAllGuests();
+    guestNames = night.selectedGuests.map(guestId => {
+      const guest = allGuests.find(g => g.id === guestId);
+      return guest ? guest.name : 'Ospite rimosso';
+    });
+
+    // Get guests with email for email button
+    guestsWithEmail = night.selectedGuests
+      .map(guestId => allGuests.find(g => g.id === guestId))
+      .filter(g => g && g.email);
+
+    // Get guests with phone for WhatsApp button
+    guestsWithPhone = night.selectedGuests
+      .map(guestId => allGuests.find(g => g.id === guestId))
+      .filter(g => g && g.phone);
+  }
+
+  const modalContent = `
+      <div class="modal-header">
+        <h2 class="modal-title">${night.name}</h2>
+        <button class="modal-close" onclick="window.closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: grid; gap: 1.5rem;">
+          <div>
+            <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">📅 Data</h4>
+            <p>${formatDate(night.date)}</p>
+          </div>
+
+          <div>
+            <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">👥 Ospiti</h4>
+            <p>${night.guestCount} persone</p>
+            ${guestNames.length > 0 ? `
+            <p class="text-muted text-sm" style="margin-top: 0.25rem;">
+              ${guestNames.join(', ')}
+            </p>
+          ` : ''}
+          ${guestsWithEmail.length > 0 ? `
+            <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 0.5rem;">
+              <div style="font-size: 0.875rem; color: var(--color-success); font-weight: 600; margin-bottom: 0.25rem;">
+                📧 ${guestsWithEmail.length} ${guestsWithEmail.length === 1 ? 'ospite ha' : 'ospiti hanno'} un'email
+              </div>
+              <div style="font-size: 0.75rem; color: var(--color-gray-400);">
+                ${guestsWithEmail.map(g => g.email).join(', ')}
+              </div>
+            </div>
+          ` : ''}
+          ${guestsWithPhone.length > 0 ? `
+            <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(37, 211, 102, 0.1); border: 1px solid rgba(37, 211, 102, 0.3); border-radius: 0.5rem;">
+              <div style="font-size: 0.875rem; color: var(--color-success); font-weight: 600; margin-bottom: 0.25rem;">
+                📱 ${guestsWithPhone.length} ${guestsWithPhone.length === 1 ? 'ospite ha' : 'ospiti hanno'} WhatsApp
+              </div>
+              <div style="font-size: 0.75rem; color: var(--color-gray-400);">
+                ${guestsWithPhone.map(g => g.phone).join(', ')}
+              </div>
+            </div>
+          ` : ''}
+          </div>
+
+          ${night.selectedDough ? `
+          <div>
+            <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">🥣 Impasto</h4>
+            <p>${night.selectedDough}</p>
+          </div>
+        ` : ''}
+
+          <div>
+            <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">🍕 Pizze Selezionate</h4>
+            ${night.selectedPizzas.length > 0 ? `
+            <ul style="list-style: none; padding: 0;">
+              ${night.selectedPizzas.map(pizza => `
+                <li style="padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+                  <span>${pizza.recipeName}</span>
+                  <span style="color: var(--color-accent-light); font-weight: 700;">×${pizza.quantity}</span>
+                </li>
+              `).join('')}
+            </ul>
+          ` : '<p class="text-muted">Nessuna pizza selezionata</p>'}
+          </div>
+
+          ${night.notes ? `
+          <div>
+            <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">📝 Note</h4>
+            <p>${night.notes}</p>
+          </div>
+        ` : ''}
+
+          <div>
+            <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">📊 Stato</h4>
+            <span class="planner-card-status ${night.status}">${night.status === 'planned' ? 'Pianificata' : 'Completata'}</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
+        ${guestsWithEmail.length > 0 ? `
+        <button class="btn btn-success" onclick="window.sendGuestInvites('${night.id}')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+          <span>📧</span>
+          Invia Email Inviti (${guestsWithEmail.length})
+        </button>
+      ` : ''}
+        ${guestsWithPhone.length > 0 ? `
+        <button class="btn btn-success" onclick="window.sendWhatsAppInvites('${night.id}')" style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);">
+          <span>📱</span>
+          Inviti WhatsApp (${guestsWithPhone.length})
+        </button>
+      ` : ''}
+        ${night.selectedPizzas.length > 0 && night.status === 'planned' ? `
+        <button class="btn btn-success" onclick="window.startLiveMode('${night.id}')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+          <span>🍕</span>
+          Avvia Serata
+        </button>
+      ` : ''}
+        ${night.selectedPizzas.length > 0 ? `
+        <button class="btn btn-secondary" onclick="window.closeModal(); setTimeout(() => window.manageAvailableIngredients('${night.id}'), 100);">
+          <span>✓</span>
+          Ingredienti Disponibili
+        </button>
+        <button class="btn btn-primary" onclick="window.closeModal(); setTimeout(() => window.viewShoppingListForNight('${night.id}'), 100);">
+          <span>🛒</span>
+          Lista Spesa
+        </button>
+      ` : ''}
+      </div>
+      `;
+
+  openModal(modalContent);
+}
+
+// ============================================
+// MANAGE AVAILABLE INGREDIENTS
+// ============================================
+
+async function manageAvailableIngredients(nightId) {
+  closeModal();
+
+  // Get pizza night data
+  const night = await getPizzaNightById(nightId);
+  if (!night) return;
+
+  // Generate FULL ingredient list (without filtering)
+  const fullList = await generateShoppingList(night.selectedPizzas, night.selectedDough, []);
+
+  // Get currently available ingredients
+  const availableIngredients = night.availableIngredients || [];
+
+  // Helper to get category icon (aligned with new hierarchical structure)
+  const getCategoryIcon = (category) => {
+    const icons = {
+      'Impasti': '🌾',
+      'Basi e Salse': '🍅',
+      'Formaggi': '�',
+      'Latticini': '🥛',
+      'Carni e Salumi': '🥓',
+      'Pesce e Frutti di Mare': '🐟',
+      'Verdure e Ortaggi': '�',
+      'Erbe e Spezie': '🌿',
+      'Frutta e Frutta Secca': '🥜',
+      'Altro': '📦'
+    };
+    return icons[category] || '📦';
+  };
+
+  // Build items HTML with checkboxes
+  let itemsHTML = '';
+  for (const [category, items] of Object.entries(fullList)) {
+    const icon = getCategoryIcon(category);
+    itemsHTML += `
+      <div class="shopping-category" data-category="${category}">
+        <h3 class="category-title">${icon} ${category}</h3>
+        <div class="shopping-items">
+          ${items.map(item => {
+      const isChecked = availableIngredients.some(avail =>
+        avail.toLowerCase() === item.name.toLowerCase()
+      );
+      return `
+            <div class="shopping-item ${isChecked ? 'checked' : ''}">
+              <div class="shopping-item-checkbox ${isChecked ? 'checked' : ''}" 
+                   onclick="this.classList.toggle('checked'); this.closest('.shopping-item').classList.toggle('checked');">
+              </div>
+              <div class="shopping-item-content">
+                <span class="item-name" data-ingredient-name="${item.name}">${item.name}</span>
+                <span class="item-quantity">${formatQuantity(item.quantity, item.unit)}</span>
+              </div>
+            </div>
+          `;
+    }).join('')}
+        </div>
+      </div>
+      `;
+  }
+
+  // Create and show modal
+  const modalContent = `
+      <div class="modal-header">
+        <h2>✓ Ingredienti Disponibili - ${night.name}</h2>
+        <button class="modal-close" onclick="window.closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--color-gray-300); margin-bottom: 1.5rem;">
+          Seleziona gli ingredienti che hai già in casa. La lista spesa mostrerà solo quelli da acquistare.
+        </p>
+        
+        <!-- Quick Select Buttons -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="window.quickSelectDough()">
+            <span>🌾</span> Tutto l'impasto
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="window.quickSelectSpices()">
+            <span>🌿</span> Spezie base
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="window.quickSelectAll()">
+            <span>✓</span> Seleziona tutto
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="window.quickSelectNone()">
+            <span>✗</span> Azzera tutto
+          </button>
+        </div>
+        
+        <div class="shopping-list-container">
+          ${itemsHTML}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.closeModal()">
+          Annulla
+        </button>
+        <button class="btn btn-primary" onclick="window.saveAvailableIngredients('${nightId}')">
+          💾 Salva
+        </button>
+      </div>
+      `;
+
+  openModal(modalContent);
+}
+
+// Save available ingredients selection
+async function saveAvailableIngredients(nightId) {
+  // Get all checked ingredients
+  const checkedItems = document.querySelectorAll('.shopping-item.checked .item-name');
+  const availableIngredients = Array.from(checkedItems).map(el => el.dataset.ingredientName);
+
+  try {
+    // Get the full night object
+    const night = await getPizzaNightById(nightId);
+    if (!night) throw new Error('Pizza night not found');
+
+    // Update availableIngredients
+    night.availableIngredients = availableIngredients;
+
+    // Send the complete updated night object
+    const response = await fetch(`/api/pizza-nights/${nightId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(night)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Server error:', errorData);
+      throw new Error('Failed to update available ingredients');
+    }
+
+    closeModal();
+    showToast(`✅ ${availableIngredients.length} ingredienti salvati come disponibili`, 'success');
+
+    // Refresh the view
+    await refreshData();
+  } catch (error) {
+    console.error('Error saving available ingredients:', error);
+    showToast('❌ Errore nel salvare gli ingredienti', 'error');
+  }
+}
+
+// Quick select functions
+function quickSelectDough() {
+  // Select all items in "Impasto" category
+  const doughCategory = document.querySelector('.shopping-category[data-category="Impasto"]');
+  if (doughCategory) {
+    const items = doughCategory.querySelectorAll('.shopping-item');
+    items.forEach(item => {
+      item.classList.add('checked');
+      const checkbox = item.querySelector('.shopping-item-checkbox');
+      if (checkbox) checkbox.classList.add('checked');
+    });
+  }
+}
+
+function quickSelectSpices() {
+  // Select all items in "Erbe e Spezie" category
+  const spiceCategory = document.querySelector('.shopping-category[data-category="Erbe e Spezie"]');
+  if (spiceCategory) {
+    const items = spiceCategory.querySelectorAll('.shopping-item');
+    items.forEach(item => {
+      item.classList.add('checked');
+      const checkbox = item.querySelector('.shopping-item-checkbox');
+      if (checkbox) checkbox.classList.add('checked');
+    });
+  }
+}
+
+function quickSelectAll() {
+  // Select all items
+  const allItems = document.querySelectorAll('.shopping-item');
+  allItems.forEach(item => {
+    item.classList.add('checked');
+    const checkbox = item.querySelector('.shopping-item-checkbox');
+    if (checkbox) checkbox.classList.add('checked');
+  });
+}
+
+function quickSelectNone() {
+  // Deselect all items
+  const allItems = document.querySelectorAll('.shopping-item');
+  allItems.forEach(item => {
+    item.classList.remove('checked');
+    const checkbox = item.querySelector('.shopping-item-checkbox');
+    if (checkbox) checkbox.classList.remove('checked');
+  });
+}
+
+async function viewShoppingListForNight(nightId) {
+  closeModal();
+
+  // Get pizza night data
+  const night = await getPizzaNightById(nightId);
+  if (!night) return;
+
+  // Generate shopping list (filtered by available ingredients)
+  const groupedList = await generateShoppingList(night.selectedPizzas, night.selectedDough, night.availableIngredients || []);
+
+  // Helper to get category icon
+  const getCategoryIcon = (category) => {
+    const icons = {
+      'Impasto': '🌾',
+      'Salsa': '🍅',
+      'Formaggi': '🧀',
+      'Carne': '🥓',
+      'Verdure': '🥬',
+      'Pesce': '🐟',
+      'Latticini': '🥛',
+      'Erbe e Spezie': '🌿',
+      'Altro': '📦'
+    };
+    return icons[category] || '📦';
+  };
+
+  // Build items HTML
+  let itemsHTML = '';
+  for (const [category, items] of Object.entries(groupedList)) {
+    const icon = getCategoryIcon(category);
+    itemsHTML += `
+      <div class="shopping-category">
+        <h3 class="category-title">${icon} ${category}</h3>
+        <div class="shopping-items">
+          ${items.map(item => `
+            <div class="shopping-item">
+              <div class="shopping-item-checkbox" onclick="this.classList.toggle('checked'); this.closest('.shopping-item').classList.toggle('checked');"></div>
+              <div class="shopping-item-content">
+                <span class="item-name">${item.name}</span>
+                <span class="item-quantity">${formatQuantity(item.quantity, item.unit)}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      `;
+  }
+
+  // Create and show modal
+  const modalContent = `
+      <div class="modal-header">
+        <h2>🛒 Lista Spesa - ${night.name}</h2>
+        <button class="modal-close" onclick="window.closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="shopping-list-container">
+          ${itemsHTML}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.closeModal()">
+          Chiudi
+        </button>
+        <button class="btn btn-primary" onclick="window.downloadShoppingListForNight('${nightId}', '${night.name}')">
+          📥 Scarica PDF
+        </button>
+      </div>
+      `;
+
+  openModal(modalContent);
+}
+
+// Helper function for downloading shopping list from modal
+async function downloadShoppingListForNight(nightId, nightName) {
+  const night = await getPizzaNightById(nightId);
+  const groupedList = await generateShoppingList(night.selectedPizzas, night.selectedDough, night.availableIngredients || []);
+  downloadShoppingList(groupedList, nightName);
+}
+
+// Local action functions
+async function completePizzaNightAction(nightId) {
+  try {
+    await completePizzaNight(nightId);
+    await refreshData();
+  } catch (error) {
+    console.error('Failed to complete pizza night:', error);
+  }
+}
+
+async function deletePizzaNightAction(nightId) {
+  const modalContent = `
+      <div class="modal-header">
+        <h2 class="modal-title">Elimina Serata</h2>
+        <button class="modal-close" onclick="window.closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Sei sicuro di voler eliminare questa serata? L'azione non può essere annullata.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.closeModal()">Annulla</button>
+        <button class="btn btn-primary" style="background-color: var(--color-error, #ef4444);" onclick="window.confirmDeletePizzaNight('${nightId}')">
+          <span>🗑️</span> Elimina
+        </button>
+      </div>
+      `;
+  openModal(modalContent);
+}
+
+async function confirmDeletePizzaNight(nightId) {
+  try {
+    await deletePizzaNight(nightId);
+    closeModal();
+    await refreshData();
+    // Show success toast?
+  } catch (error) {
+    console.error('Failed to delete pizza night:', error);
+  }
+}
+
+// ============================================
+// LIVE MODE FUNCTIONS
+// ============================================
+
+let liveModeState = {
+  nightId: null,
+  pizzas: [],
+  currentIndex: 0,
+  checkedIngredients: {},
+  checkedPreparations: {}
+};
+
+async function startLiveMode(nightId) {
+  try {
+    // Fetch pizza night data
+    const night = await getPizzaNightById(nightId);
+
+    console.log('🔍 Night data:', night);
+    console.log('🔍 selectedDough from DB:', night.selectedDough);
+    console.log('🔍 Full night object:', JSON.stringify(night, null, 2));
+
+    if (!night || !night.selectedPizzas || night.selectedPizzas.length === 0) {
+      alert('Nessuna pizza trovata per questa serata!');
+      return;
+    }
+
+    // Load full recipe data for each selected pizza
+    const pizzas = [];
+    for (const selectedPizza of night.selectedPizzas) {
+      const recipeId = selectedPizza.recipeId || selectedPizza.id;
+      const recipe = await getRecipeById(recipeId);
+
+
+      if (recipe) {
+        // Add quantity info to recipe
+        recipe.quantity = selectedPizza.quantity || 1;
+
+        // Load full preparation data if preparations exist
+        if (recipe.preparations && recipe.preparations.length > 0) {
+          const fullPreparations = [];
+          for (const prep of recipe.preparations) {
+            if (typeof prep === 'object' && prep.id) {
+              // Load full preparation data from database
+              const { getPreparationById } = await import('../modules/database.js');
+              const fullPrep = await getPreparationById(prep.id);
+              if (fullPrep) {
+                // Merge quantity/timing info with full preparation data
+                fullPreparations.push({
+                  ...fullPrep,
+                  quantity: prep.quantity,
+                  unit: prep.unit,
+                  timing: prep.timing
+                });
+              } else {
+                // Fallback if preparation not found
+                fullPreparations.push({ name: prep.id, ...prep });
+              }
+            } else {
+              // Already a string or full object
+              fullPreparations.push(prep);
+            }
+          }
+          recipe.preparations = fullPreparations;
+        }
+
+        pizzas.push(recipe);
+      }
+    }
+
+    if (pizzas.length === 0) {
+      alert('Impossibile caricare i dati delle pizze!');
+      return;
+    }
+
+    // Calculate cooking instructions based on oven temp and dough type
+    const maxOvenTemp = parseInt(localStorage.getItem('maxOvenTemp') || '250');
+    const doughType = night.selectedDough || 'default';
+
+    console.log('🔥 Cooking calculation:');
+    console.log('  - maxOvenTemp from localStorage:', maxOvenTemp);
+    console.log('  - doughType from night:', doughType);
+    console.log('  - night.selectedDough:', night.selectedDough);
+
+    const cookingInfo = getCookingInstructions(doughType, maxOvenTemp);
+
+    console.log('  - cookingInfo result:', cookingInfo);
+
+    // Initialize state
+    liveModeState.nightId = nightId;
+    liveModeState.pizzas = pizzas;
+    liveModeState.currentIndex = 0;
+    liveModeState.checkedIngredients = {};
+    liveModeState.checkedPreparations = {};
+    liveModeState.cookingInstructions = cookingInfo.formatted;
+
+    // Show live mode UI
+    const container = document.getElementById('liveModeContainer');
+    if (container) {
+      container.style.display = 'flex';
+      document.body.style.overflow = 'hidden'; // Prevent scroll
+
+      // Close modal first
+      closeModal();
+
+      // Setup swipe gestures for mobile
+      setupSwipeGestures(container);
+
+      // Render first pizza after DOM is ready
+      setTimeout(() => {
+        renderLivePizza();
+      }, 0);
+    }
+  } catch (error) {
+    console.error('Failed to start live mode:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error message:', error.message);
+    alert('Errore nell\'avvio della serata: ' + error.message);
+  }
+}
+
+// Setup swipe gestures for mobile navigation
+function setupSwipeGestures(container) {
+  let touchStartX = 0;
+  let touchEndX = 0;
+  let touchStartY = 0;
+  let touchEndY = 0;
+  let isSwiping = false;
+
+  const minSwipeDistance = 50; // Minimum distance for a swipe
+  const maxVerticalDistance = 100; // Maximum vertical movement to still count as horizontal swipe
+
+  container.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+    isSwiping = false;
+  }, { passive: true });
+
+  container.addEventListener('touchmove', (e) => {
+    // Detect if this is a horizontal swipe
+    const currentX = e.changedTouches[0].screenX;
+    const currentY = e.changedTouches[0].screenY;
+    const diffX = Math.abs(currentX - touchStartX);
+    const diffY = Math.abs(currentY - touchStartY);
+
+    // If horizontal movement is greater than vertical, it's a swipe
+    if (diffX > diffY && diffX > 10) {
+      isSwiping = true;
+      // Prevent browser back/forward gesture
+      e.preventDefault();
+    }
+  }, { passive: false }); // Must be non-passive to use preventDefault
+
+  container.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;
+    handleGesture();
+  }, { passive: true });
+
+  function handleGesture() {
+    const horizontalDistance = touchEndX - touchStartX;
+    const verticalDistance = Math.abs(touchEndY - touchStartY);
+
+    // Only trigger swipe if horizontal movement is significant
+    // and vertical movement is minimal (to avoid interfering with scrolling)
+    if (Math.abs(horizontalDistance) > minSwipeDistance && verticalDistance < maxVerticalDistance) {
+      if (horizontalDistance < 0) {
+        // Swipe left - next pizza
+        nextPizza();
+      } else {
+        // Swipe right - previous pizza
+        previousPizza();
+      }
+    }
+  }
+}
+
+function renderLivePizza() {
+  const pizza = liveModeState.pizzas[liveModeState.currentIndex];
+  const total = liveModeState.pizzas.length;
+  const current = liveModeState.currentIndex + 1;
+
+  // Update progress
+  document.querySelector('.progress-indicator').textContent =
+    `Pizza ${current} di ${total}`;
+
+  // Update pizza name
+  document.querySelector('.pizza-name').textContent = pizza.name || 'Pizza';
+
+  // Separate ingredients and preparations by phase
+  const ingredients = pizza.baseIngredients || [];
+  const preparations = pizza.preparations || [];
+
+  console.log('🔍 Live Mode Debug:');
+  console.log('  - Pizza:', pizza.name);
+  console.log('  - baseIngredients:', ingredients);
+  console.log('  - preparations:', preparations);
+
+  const beforeIngredients = ingredients.filter(ing => !ing.postBake);
+  const afterIngredients = ingredients.filter(ing => ing.postBake === true);
+
+  console.log('  - beforeIngredients:', beforeIngredients);
+  console.log('  - afterIngredients:', afterIngredients);
+
+  const beforePreparations = preparations.filter(prep => !prep.timing || prep.timing === 'before');
+  const afterPreparations = preparations.filter(prep => prep.timing === 'after');
+
+  // Render BEFORE cooking content
+  renderCookingPhaseContent('beforeCookingContent', beforeIngredients, beforePreparations, 'before');
+
+  // Render AFTER cooking content
+  renderCookingPhaseContent('afterCookingContent', afterIngredients, afterPreparations, 'after');
+
+  // Update cooking instructions
+  const cookingInstructionsEl = document.getElementById('liveCookingInstructions');
+  if (cookingInstructionsEl && liveModeState.cookingInstructions) {
+    cookingInstructionsEl.textContent = liveModeState.cookingInstructions;
+  }
+
+  // Update navigation buttons
+  updateLiveNavigation();
+}
+
+function renderCookingPhaseContent(containerId, ingredients, preparations, phase) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  let html = '';
+
+  // Check if there's any content for this phase
+  if (ingredients.length === 0 && preparations.length === 0) {
+    html = `<p class="text-muted" style="text-align: center; padding: 2rem;">Nessun ingrediente o preparazione per questa fase</p>`;
+    container.innerHTML = html;
+    return;
+  }
+
+  // Render ingredients for this phase
+  if (ingredients.length > 0) {
+    html += '<div style="margin-bottom: 1.5rem;">';
+    html += '<div class="ingredient-grid">';
+
+    html += ingredients.map((ing, i) => {
+      const ingName = ing.name || ing;
+      const quantity = ing.quantity || '';
+      const unit = ing.unit || '';
+
+      return `
+        <div class="ingredient-item">
+          <span>${ingName}${quantity ? ` - ${quantity}${unit}` : ''}</span>
+        </div>
+        `;
+    }).join('');
+
+    html += '</div></div>';
+  }
+
+  // Render preparations for this phase
+  if (preparations.length > 0) {
+    html += '<div><h4 style="color: var(--color-primary-light); margin-bottom: 1rem;">👨‍🍳 Preparazioni</h4>';
+    html += '<div class="preparation-steps">';
+
+    html += preparations.map((prep, i) => {
+      let prepName = '';
+      if (typeof prep === 'string') {
+        prepName = prep;
+      } else if (prep && typeof prep === 'object') {
+        prepName = prep.name || prep.preparationName || prep.id || 'Preparazione';
+      } else {
+        prepName = 'Preparazione';
+      }
+
+      return `
+        <div class="step">
+          <span>${prepName}</span>
+        </div>
+      `;
+    }).join('');
+
+    html += '</div></div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function saveIngredientCheck(index, checked) {
+  const checkKey = `${liveModeState.currentIndex}-ing-${index}`;
+  liveModeState.checkedIngredients[checkKey] = checked;
+}
+
+function savePrepCheck(index, checked) {
+  const checkKey = `${liveModeState.currentIndex}-prep-${index}`;
+  liveModeState.checkedPreparations[checkKey] = checked;
+}
+
+function updateLiveNavigation() {
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  const btnComplete = document.getElementById('btnComplete');
+
+  if (!btnPrev || !btnNext || !btnComplete) return;
+
+  // Show/hide previous button
+  btnPrev.style.display = liveModeState.currentIndex > 0 ? 'block' : 'none';
+
+  // Show next or complete button
+  const isLast = liveModeState.currentIndex === liveModeState.pizzas.length - 1;
+  btnNext.style.display = isLast ? 'none' : 'block';
+  btnComplete.style.display = isLast ? 'block' : 'none';
+}
+
+function previousPizza() {
+  if (liveModeState.currentIndex > 0) {
+    liveModeState.currentIndex--;
+    renderLivePizza();
+
+    // Scroll to top
+    const container = document.getElementById('liveModeContainer');
+    if (container) container.scrollTop = 0;
+  }
+}
+
+function nextPizza() {
+  if (liveModeState.currentIndex < liveModeState.pizzas.length - 1) {
+    liveModeState.currentIndex++;
+    renderLivePizza();
+
+    // Scroll to top
+    const container = document.getElementById('liveModeContainer');
+    if (container) container.scrollTop = 0;
+  }
+}
+
+async function completePizzaNightLive() {
+  if (confirm('Segnare la serata come completata?')) {
+    try {
+      await completePizzaNight(liveModeState.nightId);
+      exitLiveMode();
+      await renderPizzaNights(); // Refresh list
+      alert('🎉 Serata completata! Buon appetito!');
+    } catch (error) {
+      console.error('Failed to complete pizza night:', error);
+      alert('Errore nel completare la serata: ' + error.message);
+    }
+  }
+}
+
+function exitLiveMode() {
+  const container = document.getElementById('liveModeContainer');
+  if (container) {
+    container.style.display = 'none';
+  }
+  document.body.style.overflow = 'auto';
+
+  // Reset state
+  liveModeState = {
+    nightId: null,
+    pizzas: [],
+    currentIndex: 0,
+    checkedIngredients: {},
+    checkedPreparations: {}
+  };
+}
+
+// Global functions for modals (still needed for inline onclick in modals)
+window.viewPizzaNightDetails = viewPizzaNightDetails;
+window.submitNewPizzaNight = submitNewPizzaNight;
+window.manageAvailableIngredients = manageAvailableIngredients;
+window.saveAvailableIngredients = saveAvailableIngredients;
+window.quickSelectDough = quickSelectDough;
+window.quickSelectSpices = quickSelectSpices;
+window.quickSelectAll = quickSelectAll;
+window.quickSelectNone = quickSelectNone;
+window.viewShoppingListForNight = viewShoppingListForNight;
+window.downloadShoppingListForNight = downloadShoppingListForNight;
+window.completePizzaNightAction = completePizzaNightAction;
+window.deletePizzaNightAction = deletePizzaNightAction;
+window.confirmDeletePizzaNight = confirmDeletePizzaNight;
+window.showManageGuestsModal = showManageGuestsModal;
+window.submitNewGuest = submitNewGuest;
+window.showEditGuestModal = showEditGuestModal;
+window.updateGuestAction = updateGuestAction;
+window.deleteGuestAction = deleteGuestAction;
+window.sendGuestInvites = sendGuestInvites;
+window.sendWhatsAppInvites = sendWhatsAppInvites;
+window.generateAutoPizzas = generateAutoPizzas;
+window.generateMixedPizzas = generateMixedPizzas;
+window.startLiveMode = startLiveMode;
+window.exitLiveMode = exitLiveMode;
+window.previousPizza = previousPizza;
+window.nextPizza = nextPizza;
+window.completePizzaNightLive = completePizzaNightLive;
+window.saveIngredientCheck = saveIngredientCheck;
+window.savePrepCheck = savePrepCheck;

@@ -1,0 +1,245 @@
+/* ============================================
+   PIZZA NIGHT LIVE MODE - Full Screen Cooking Interface
+   ============================================ */
+
+#liveModeContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    z-index: 9999;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    /* Prevent browser back/forward gestures but allow vertical scroll */
+    touch-action: pan-y;
+}
+
+/* Header */
+.live-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 2px solid rgba(99, 102, 241, 0.3);
+    flex-shrink: 0;
+}
+
+.progress-indicator {
+    font-size: 1.25rem;
+    color: var(--color-gray-300);
+    font-weight: 600;
+}
+
+.btn-exit {
+    background: rgba(239, 68, 68, 0.2);
+    border: 2px solid var(--color-error);
+    color: var(--color-error);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-size: 1.25rem;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+
+.btn-exit:hover {
+    background: var(--color-error);
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Pizza Card */
+.live-pizza-card {
+    flex: 1;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    width: 100%;
+}
+
+.pizza-name {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--color-accent);
+    text-shadow: 0 2px 10px rgba(251, 146, 60, 0.3);
+    font-weight: 700;
+}
+
+/* Sections */
+.ingredients-section,
+.preparations-section,
+.cooking-section {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(99, 102, 241, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.cooking-phase-section {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(99, 102, 241, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+.ingredients-section h3,
+.preparations-section h3,
+.cooking-section h3 {
+    font-size: 1.5rem;
+    margin: 0 0 1.5rem 0;
+    color: var(--color-primary-light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Ingredient Grid */
+.ingredient-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.ingredient-item,
+.step {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    color: var(--color-gray-200);
+    font-size: 1.125rem;
+}
+
+.ingredient-item:hover,
+.step:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Preparation Steps */
+.preparation-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Cooking Section */
+.cooking-section p {
+    font-size: 1.125rem;
+    color: var(--color-accent-light);
+    margin: 0;
+    padding: 0.75rem;
+    background: rgba(251, 146, 60, 0.1);
+    border-radius: var(--radius-md);
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Footer Navigation */
+.live-footer {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 2px solid rgba(99, 102, 241, 0.3);
+    flex-shrink: 0;
+}
+
+.live-footer .btn {
+    padding: 1rem 2rem;
+    font-size: 1.25rem;
+    min-width: 200px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.live-footer .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .live-header {
+        padding: 0.75rem;
+    }
+
+    .progress-indicator {
+        font-size: 1rem;
+    }
+
+    .pizza-name {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .live-pizza-card {
+        margin: 0.5rem auto;
+        padding: 0.75rem;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .ingredient-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .ingredients-section,
+    .preparations-section,
+    .cooking-section,
+    .cooking-phase-section {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .ingredients-section h3,
+    .preparations-section h3,
+    .cooking-section h3,
+    .cooking-phase-section h3 {
+        font-size: 1rem;
+        text-align: left;
+        margin-bottom: 0.5rem;
+    }
+
+    .ingredient-item,
+    .step {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.3;
+    }
+
+    .cooking-section p {
+        font-size: 0.95rem;
+        padding: 0.6rem;
+    }
+
+    .live-footer {
+        flex-direction: column;
+        padding: 0.75rem;
+        gap: 0.5rem;
+    }
+
+    .live-footer .btn {
+        width: 100%;
+        min-width: auto;
+        padding: 0.6rem 1rem;
+        font-size: 0.95rem;
+    }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .ingredient-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

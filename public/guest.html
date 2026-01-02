@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Benvenuto!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Background will be set dynamically */
+            background: linear-gradient(135deg, #1e3a8a 0%, #7c2d12 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            color: white;
+        }
+
+        .effect-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .effect-item {
+            position: absolute;
+            opacity: 0.8;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-emoji {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .pizza-night-title {
+            color: #7c2d12;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .guest-name {
+            color: #1e3a8a;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-image {
+            width: 100%;
+            max-width: 400px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin: 1.5rem auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .message {
+            color: #374151;
+            font-size: 1.25rem;
+            line-height: 1.8;
+            margin: 1.5rem 0;
+            font-style: italic;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 12px;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .signature {
+            color: #6b7280;
+            font-size: 1rem;
+            margin-top: 2rem;
+            font-weight: 500;
+        }
+
+        .loading {
+            color: #374151;
+            font-size: 1.5rem;
+        }
+
+        .error {
+            color: #dc2626;
+            padding: 1rem;
+            background: #fee2e2;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .decorations {
+            font-size: 2rem;
+            margin: 1rem 0;
+            opacity: 0.7;
+        }
+
+        /* Menu Button */
+        .menu-button {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(245, 158, 11, 0.6);
+        }
+
+        .menu-button:active {
+            transform: translateY(0);
+        }
+
+        /* Modal Overlay */
+        .menu-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .menu-modal.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 2rem;
+        }
+
+        .menu-content {
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 800px;
+            width: 100%;
+            margin: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.4s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 3px solid #f59e0b;
+            padding-bottom: 1rem;
+        }
+
+        .menu-title {
+            color: #7c2d12;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .close-button {
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-button:hover {
+            background: #b91c1c;
+            transform: rotate(90deg);
+        }
+
+        .pizza-list {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .pizza-item {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border-left: 5px solid #f59e0b;
+            transition: all 0.3s ease;
+        }
+
+        .pizza-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .pizza-name {
+            color: #7c2d12;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 0 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pizza-image {
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .pizza-ingredients {
+            color: #374151;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .ingredients-title {
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.5rem;
+            color: #6b7280;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            .guest-name {
+                font-size: 2rem;
+            }
+
+            .message {
+                font-size: 1.1rem;
+                padding: 1rem;
+            }
+
+            .menu-button {
+                padding: 0.875rem 2rem;
+                font-size: 1rem;
+            }
+
+            .menu-content {
+                padding: 1.5rem;
+            }
+
+            .menu-title {
+                font-size: 1.5rem;
+            }
+
+            .pizza-name {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Effect container (filled dynamically based on theme) -->
+    <div class="effect-container" id="effectContainer"></div>
+
+    <div class="container" id="content">
+        <div class="loading">🍕 Caricamento...</div>
+    </div>
+
+    <!-- Menu Modal -->
+    <div class="menu-modal" id="menuModal">
+        <div class="menu-content">
+            <div class="menu-header">
+                <h2 class="menu-title" id="menuTitle">🍕 Menù della Serata</h2>
+                <button class="close-button" onclick="closeMenu()">✕</button>
+            </div>
+            <div id="pizzaList" class="pizza-list">
+                <div class="loading-spinner">🍕 Caricamento...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create effect items (snow, fireworks, etc.)
+        function createEffect(effectType, emoji, count = 30) {
+            const container = document.getElementById('effectContainer');
+            container.innerHTML = ''; // Clear previous effects
+
+            if (effectType === 'none') return;
+
+            for (let i = 0; i < count; i++) {
+                const item = document.createElement('div');
+                item.classList.add('effect-item');
+                item.innerHTML = emoji;
+                item.style.left = Math.random() * 100 + '%';
+                item.style.fontSize = (Math.random() * 1 + 0.5) + 'rem';
+                item.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                item.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(item);
+            }
+        }
+
+        // Apply theme to page
+        function applyTheme(themeData) {
+            const { config } = themeData;
+
+            // Update background gradient
+            document.body.style.background = config.gradient;
+
+            // Update colors for dynamic elements
+            document.documentElement.style.setProperty('--theme-primary', config.colors.primary);
+            document.documentElement.style.setProperty('--theme-secondary', config.colors.secondary);
+            document.documentElement.style.setProperty('--theme-text', config.colors.text);
+
+            // Create effect based on theme
+            const effectEmojis = {
+                snow: '❄',
+                fireworks: '✨',
+                bats: '🦇',
+                petals: '🌸',
+                hearts: '💖',
+                confetti: '🎊',
+                waves: '🌊',
+                balloons: '🎈',
+                bubbles: '💧'
+            };
+
+            const emoji = effectEmojis[config.effect] || '✨';
+            createEffect(config.effect, emoji);
+        }
+
+        // Get message for guest (deterministic)
+        function getMessageForGuest(messages, guestId) {
+            // Simple hash function to get consistent index
+            let hash = 0;
+            for (let i = 0; i < guestId.length; i++) {
+                hash = ((hash << 5) - hash) + guestId.charCodeAt(i);
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            const index = Math.abs(hash) % messages.length;
+            return messages[index];
+        }
+
+        // Show menu modal with pizzas
+        async function showMenu() {
+            const modal = document.getElementById('menuModal');
+            const pizzaList = document.getElementById('pizzaList');
+            const menuTitle = document.getElementById('menuTitle');
+
+            // Update menu title based on event time
+            const pizzaNight = window.currentPizzaNight;
+            if (pizzaNight && pizzaNight.date) {
+                const eventDate = new Date(pizzaNight.date);
+                const eventHour = eventDate.getHours();
+                if (eventHour >= 18) {
+                    menuTitle.textContent = '🍕 Menù della Serata';
+                } else {
+                    menuTitle.textContent = "🍕 Menù dell'Evento";
+                }
+            }
+
+            // Show modal
+            modal.classList.add('active');
+
+            // Show loading
+            pizzaList.innerHTML = '<div class="loading-spinner">🍕 Caricamento menu...</div>';
+
+            try {
+                const pizzaNight = window.currentPizzaNight;
+                if (!pizzaNight || !pizzaNight.selectedPizzas || pizzaNight.selectedPizzas.length === 0) {
+                    throw new Error('Nessuna pizza disponibile');
+                }
+
+                // Fetch all pizza details
+                const pizzaPromises = pizzaNight.selectedPizzas.map(pizza => {
+                    // Handle both string IDs and objects with recipeId property
+                    const id = typeof pizza === 'string' ? pizza : pizza.recipeId;
+                    return fetch(`/api/recipes/${id}`).then(res => res.json());
+                });
+
+
+                const pizzas = await Promise.all(pizzaPromises);
+
+                // Render pizzas
+                pizzaList.innerHTML = pizzas.map(pizza => {
+                    const ingredientsList = pizza.baseIngredients && pizza.baseIngredients.length > 0
+                        ? pizza.baseIngredients.map(ing => ing.name || ing).join(', ')
+                        : 'Ingredienti non disponibili';
+
+                    const imageTag = pizza.image
+                        ? `<img src="${pizza.image}" alt="${pizza.name}" class="pizza-image" onerror="this.style.display='none'">`
+                        : '';
+
+                    return `
+                        <div class="pizza-item">
+                            <h3 class="pizza-name">🍕 ${pizza.name}</h3>
+                            ${imageTag}
+                            <div class="pizza-ingredients">
+                                <div class="ingredients-title">Ingredienti:</div>
+                                ${ingredientsList}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('Error loading menu:', error);
+                pizzaList.innerHTML = `
+                    <div class="error">
+                        <strong>Errore</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Close menu modal
+        function closeMenu() {
+            const modal = document.getElementById('menuModal');
+            modal.classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function (event) {
+            const modal = document.getElementById('menuModal');
+            if (event.target === modal) {
+                closeMenu();
+            }
+        });
+
+        // Load guest data with dynamic theming
+        async function loadGuestData() {
+            try {
+                // Parse URL hash: #guest/pizzaNightId/guestId
+                const hash = window.location.hash.slice(1); // Remove #
+                const parts = hash.split('/');
+
+                if (parts.length !== 3 || parts[0] !== 'guest') {
+                    throw new Error('URL non valido');
+                }
+
+                const [, pizzaNightId, guestId] = parts;
+
+                // Fetch pizza night data
+                const pizzaNightResponse = await fetch(`/api/pizza-nights/${pizzaNightId}`);
+                if (!pizzaNightResponse.ok) {
+                    throw new Error('Serata pizza non trovata');
+                }
+                const pizzaNight = await pizzaNightResponse.json();
+
+                // Fetch theme data
+                const themeResponse = await fetch(`/api/pizza-nights/${pizzaNightId}/theme`);
+                if (!themeResponse.ok) {
+                    throw new Error('Tema non trovato');
+                }
+                const themeData = await themeResponse.json();
+
+                // Find guest
+                const guest = pizzaNight.guests ? pizzaNight.guests.find(g => g.id === guestId) : null;
+                if (!guest) {
+                    throw new Error('Ospite non trovato');
+                }
+
+                // Apply theme to page
+                applyTheme(themeData);
+
+                // Get deterministic message for this guest
+                const message = getMessageForGuest(themeData.messages, guestId);
+
+                // Update page title
+                document.getElementById('page-title').textContent = `${guest.name} - ${pizzaNight.name}`;
+
+                // Render content with theme
+                const content = document.getElementById('content');
+                const menuButton = pizzaNight.selectedPizzas && pizzaNight.selectedPizzas.length > 0
+                    ? `<button class="menu-button" onclick="showMenu()">🍕 Menù</button>`
+                    : '';
+
+                content.innerHTML = `
+                    <div class="header-emoji">${themeData.config.emoji}</div>
+                    <div class="pizza-night-title">${pizzaNight.name || 'Serata Pizza Speciale'}</div>
+                    <h1 class="guest-name">Ciao ${guest.name}! 👋</h1>
+                    
+                    <img src="${themeData.config.imagePath}" alt="Immagine Tema" class="theme-image" onerror="this.style.display='none'">
+                    
+                    <div class="decorations">${themeData.config.decorations}</div>
+                    
+                    <div class="message">${message}</div>
+                    
+                    <div class="signature">
+                        Con affetto,<br>
+                        <strong>Il Team AntigraviPizza</strong> 🍕❤️
+                    </div>
+                    
+                    ${menuButton}
+                `;
+
+                // Apply theme colors to text elements
+                document.querySelector('.pizza-night-title').style.color = themeData.config.colors.primary;
+                document.querySelector('.guest-name').style.color = themeData.config.colors.secondary;
+
+                // Store pizza night data for menu function
+                window.currentPizzaNight = pizzaNight;
+
+            } catch (error) {
+                console.error('Error loading guest data:', error);
+                const content = document.getElementById('content');
+                content.innerHTML = `
+                    <div class="header-emoji">😔</div>
+                    <div class="error">
+                        <strong>Ops!</strong><br>
+                        ${error.message}<br><br>
+                        Controlla il QR code o contatta l'organizzatore.
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        loadGuestData();
+    </script>
+</body>
+
+</html>

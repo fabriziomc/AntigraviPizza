@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Database - AntigraviPizza</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #0a0e27;
+      color: white;
+    }
+    .container {
+      background: rgba(26, 31, 58, 0.8);
+      padding: 30px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .success {
+      color: #10b981;
+      margin-top: 20px;
+    }
+    .error {
+      color: #ef4444;
+      margin-top: 20px;
+    }
+    .info {
+      background: rgba(99, 102, 241, 0.2);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #6366f1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔧 Reset Database</h1>
+    <div class="info">
+      <p><strong>Perché serve?</strong></p>
+      <p>Il database IndexedDB è stato creato con una versione vecchia che non include l'object store "combinations". Questo script elimina il database vecchio così che venga ricreato con la struttura corretta.</p>
+    </div>
+    
+    <button onclick="resetDatabase()">🗑️ Elimina Database</button>
+    <button onclick="window.location.href='/'">🏠 Torna all'App</button>
+    
+    <div id="message"></div>
+  </div>
+
+  <script>
+    async function resetDatabase() {
+      const messageDiv = document.getElementById('message');
+      messageDiv.innerHTML = '<p>⏳ Eliminazione database in corso...</p>';
+      
+      try {
+        // Delete the database
+        const deleteRequest = indexedDB.deleteDatabase('AntigraviPizzaDB');
+        
+        deleteRequest.onsuccess = function() {
+          messageDiv.innerHTML = '<p class="success">✅ Database eliminato con successo!</p><p>Ora puoi tornare all\'app e ricaricare la pagina (Ctrl+Shift+R).</p>';
+        };
+        
+        deleteRequest.onerror = function() {
+          messageDiv.innerHTML = '<p class="error">❌ Errore durante l\'eliminazione del database.</p>';
+        };
+        
+        deleteRequest.onblocked = function() {
+          messageDiv.innerHTML = '<p class="error">⚠️ Database bloccato. Chiudi tutte le altre schede dell\'app e riprova.</p>';
+        };
+      } catch (error) {
+        messageDiv.innerHTML = `<p class="error">❌ Errore: ${error.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+.qr-codes-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.qr-codes-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.qr-codes-header h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.qr-codes-subtitle {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.qr-codes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.qr-code-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    page-break-inside: avoid;
+}
+
+.qr-code-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.qr-code-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.qr-code-info {
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.guest-name {
+    font-size: 1.3rem;
+    color: #667eea;
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+}
+
+.qr-code-url {
+    font-size: 0.75rem;
+    color: #999;
+    word-break: break-all;
+    margin: 0;
+}
+
+.qr-codes-footer {
+    background: #f0f4ff;
+    border-left: 4px solid #667eea;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+}
+
+.qr-codes-footer p {
+    margin: 0;
+    color: #444;
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .qr-codes-container {
+        padding: 0;
+    }
+
+    .qr-codes-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .qr-code-card {
+        border: 2px solid #000;
+        box-shadow: none;
+        page-break-inside: avoid;
+    }
+
+    .qr-code-url {
+        font-size: 0.6rem;
+    }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .qr-codes-grid {
+        grid-template-columns: 1fr;
+    }
+}

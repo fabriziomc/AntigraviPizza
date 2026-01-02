@@ -1,0 +1,631 @@
+// ============================================
+// INGREDIENTS COMPONENT
+// ============================================
+
+import { getAllIngredients, getAllCategories, getIngredientsByCategory, searchIngredients, addIngredient, updateIngredient, deleteIngredient, getAllRecipes, getAllPreparations } from '../modules/database.js';
+import { openModal, closeModal } from '../modules/ui.js';
+
+const UNITS = ['g', 'ml', 'pz', 'cucchiaio', 'cucchiaino'];
+
+const SEASONS = [
+    { value: 'primavera', label: 'Primavera', icon: '🌸' },
+    { value: 'estate', label: 'Estate', icon: '☀️' },
+    { value: 'autunno', label: 'Autunno', icon: '🍂' },
+    { value: 'inverno', label: 'Inverno', icon: '❄️' }
+];
+
+const ALLERGENS = [
+    { value: 'lattosio', label: 'Lattosio', icon: '🥛' },
+    { value: 'glutine', label: 'Glutine', icon: '🌾' },
+    { value: 'frutta_secca', label: 'Frutta Secca', icon: '🥜' },
+    { value: 'pesce', label: 'Pesce', icon: '🐟' },
+    { value: 'crostacei', label: 'Crostacei', icon: '🦐' },
+    { value: 'uova', label: 'Uova', icon: '🥚' },
+    { value: 'sedano', label: 'Sedano', icon: '🌿' },
+    { value: 'soia', label: 'Soia', icon: '🫘' }
+];
+
+let currentFilter = 'all';
+let currentSearch = '';
+let allIngredients = [];
+let categories = []; // Will be loaded from database
+
+// ============================================
+// MAIN RENDER
+// ============================================
+
+export async function renderIngredients(appState) {
+    const container = document.getElementById('ingredients-view');
+    if (!container) return;
+
+    try {
+        // Load categories and ingredients
+        categories = await getAllCategories();
+        allIngredients = await getAllIngredients();
+
+        container.innerHTML = `
+            <div class="ingredients-container">
+                <div class="page-header">
+                    <h1>🥗 Gestione Ingredienti</h1>
+                    <button class="btn btn-primary" onclick="window.showIngredientForm()">
+                        <span>➕</span> Nuovo Ingrediente
+                    </button>
+                </div>
+
+                <div class="ingredients-toolbar">
+                    <div class="search-box">
+                        <input 
+                            type="text" 
+                            id="ingredient-search" 
+                            placeholder="🔍 Cerca ingrediente..."
+                            value="${currentSearch}"
+                        >
+                    </div>
+                    
+                    <div class="filter-buttons">
+                        <button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" onclick="window.filterIngredients('all')">
+                            Tutti (${allIngredients.length})
+                        </button>
+                        ${categories.map(cat => {
+            const count = allIngredients.filter(i => i.category === cat.name).length;
+            return `
+                                <button class="filter-btn ${currentFilter === cat.name ? 'active' : ''}" onclick="window.filterIngredients('${cat.name}')">
+                                    ${cat.icon} ${cat.name} (${count})
+                                </button>
+                            `;
+        }).join('')}
+                        <button class="filter-btn ${currentFilter === 'custom' ? 'active' : ''}" onclick="window.filterIngredients('custom')">
+                            Custom (${allIngredients.filter(i => i.isCustom).length})
+                        </button>
+                    </div>
+                </div>
+
+                <div id="ingredients-list" class="ingredients-list">
+                    ${renderIngredientsList()}
+                </div>
+            </div>
+        `;
+
+        // Add search listener
+        document.getElementById('ingredient-search').addEventListener('input', (e) => {
+            currentSearch = e.target.value;
+            updateIngredientsList();
+        });
+
+    } catch (error) {
+        console.error('Error rendering ingredients:', error);
+        container.innerHTML = `
+            <div class="error-state">
+                <h2>⚠️ Errore</h2>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// ============================================
+// RENDER HELPERS
+// ============================================
+
+function renderIngredientsList() {
+    let filtered = allIngredients;
+
+    // Apply category filter
+    if (currentFilter !== 'all') {
+        if (currentFilter === 'custom') {
+            filtered = filtered.filter(i => i.isCustom);
+        } else {
+            filtered = filtered.filter(i => i.category === currentFilter);
+        }
+    }
+
+    // Apply search filter
+    if (currentSearch) {
+        const search = currentSearch.toLowerCase();
+        filtered = filtered.filter(i => i.name.toLowerCase().includes(search));
+    }
+
+    if (filtered.length === 0) {
+        return `
+            <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <h3 class="empty-title">Nessun ingrediente trovato</h3>
+                <p class="empty-description">
+                    ${currentSearch ? 'Prova con un altro termine di ricerca' : 'Aggiungi il tuo primo ingrediente personalizzato'}
+                </p>
+            </div>
+        `;
+    }
+
+    return filtered.map(ingredient => `
+        <div class="ingredient-card ${ingredient.isCustom ? 'custom' : ''}">
+            <div class="ingredient-header">
+                <h3 class="ingredient-name">${ingredient.name}</h3>
+                ${ingredient.isCustom ? '<span class="badge badge-custom">Custom</span>' : ''}
+            </div>
+            
+            <div class="ingredient-details">
+                <div class="detail-row">
+                    <span class="detail-label">Categoria:</span>
+                    <span class="detail-value">${ingredient.category}</span>
+                </div>
+                
+                ${ingredient.subcategory ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Sottocategoria:</span>
+                        <span class="detail-value">${ingredient.subcategory}</span>
+                    </div>
+                ` : ''}
+                
+                ${ingredient.minWeight && ingredient.maxWeight ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Quantità:</span>
+                        <span class="detail-value">${ingredient.minWeight}-${ingredient.maxWeight} ${ingredient.defaultUnit}</span>
+                    </div>
+                ` : ''}
+                
+                <div class="detail-row">
+                    <span class="detail-label">Aggiunta:</span>
+                    <span class="detail-value">${ingredient.postBake ? 'Dopo cottura' : 'Prima cottura'}</span>
+                </div>
+                
+                ${ingredient.tags && Array.isArray(ingredient.tags) && ingredient.tags.length > 0 ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Tags:</span>
+                        <span class="detail-value" style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
+                            ${ingredient.tags.map(tag => `<span class="badge" style="font-size: 0.75rem; padding: 0.15rem 0.4rem;">${tag}</span>`).join('')}
+                        </span>
+                    </div>
+                ` : ''}
+                
+                ${ingredient.season && Array.isArray(ingredient.season) && ingredient.season.length > 0 ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Stagione:</span>
+                        <span class="detail-value">
+                            ${ingredient.season.map(s => {
+        const seasonObj = SEASONS.find(season => season.value === s);
+        return seasonObj ? `${seasonObj.icon} ${seasonObj.label}` : s;
+    }).join(', ')}
+                        </span>
+                    </div>
+                ` : ''}
+                
+                ${ingredient.allergens && Array.isArray(ingredient.allergens) && ingredient.allergens.length > 0 ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Allergeni:</span>
+                        <span class="detail-value">
+                            ${ingredient.allergens.map(a => {
+        const allergenObj = ALLERGENS.find(allergen => allergen.value === a);
+        return allergenObj ? `${allergenObj.icon} ${allergenObj.label}` : a;
+    }).join(', ')}
+                        </span>
+                    </div>
+                ` : ''}
+            </div>
+            
+            <div class="ingredient-actions">
+                <button class="btn btn-sm btn-accent" onclick="window.showIngredientUsage('${ingredient.id}', '${ingredient.name.replace(/'/g, "\'")}')">
+                    <span>📊</span> Vedi Utilizzo
+                </button>
+                <button class="btn btn-sm btn-secondary" onclick="window.editIngredient('${ingredient.id}')">
+                    <span>✏️</span> Modifica
+                </button>
+                ${ingredient.isCustom ? `
+                    <button class="btn btn-sm btn-danger" onclick="window.confirmDeleteIngredient('${ingredient.id}', '${ingredient.name}')">
+                        <span>🗑️</span> Elimina
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+async function updateIngredientsList() {
+    const listContainer = document.getElementById('ingredients-list');
+    if (listContainer) {
+        listContainer.innerHTML = renderIngredientsList();
+    }
+}
+
+// ============================================
+// INGREDIENT FORM
+// ============================================
+
+async function showIngredientForm(ingredientId = null) {
+    let ingredient = null;
+    let isEdit = false;
+
+    if (ingredientId) {
+        ingredient = allIngredients.find(i => i.id === ingredientId);
+        isEdit = true;
+    }
+
+    const modalContent = `
+        <div class="modal-header">
+            <h2>${isEdit ? '✏️ Modifica Ingrediente' : '➕ Nuovo Ingrediente'}</h2>
+            <button class="modal-close" onclick="window.closeModal()">×</button>
+        </div>
+        
+        <div class="modal-body">
+            <form id="ingredient-form" class="ingredient-form">
+                <div class="form-group">
+                    <label for="ing-name">Nome *</label>
+                    <input 
+                        type="text" 
+                        id="ing-name" 
+                        required 
+                        placeholder="Es. Mozzarella di bufala"
+                        value="${ingredient?.name || ''}"
+                    >
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ing-category">Categoria *</label>
+                        <select id="ing-category" required>
+                            <option value="">Seleziona...</option>
+                            ${categories.map(cat => `
+                                <option value="${cat.name}" ${ingredient?.category === cat.name ? 'selected' : ''}>
+                                    ${cat.icon} ${cat.name}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ing-subcategory">Sottocategoria</label>
+                        <input 
+                            type="text" 
+                            id="ing-subcategory" 
+                            placeholder="Es. Freschi, Stagionati"
+                            value="${ingredient?.subcategory || ''}"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Quantità</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ing-min-weight">Min</label>
+                            <input 
+                                type="number" 
+                                id="ing-min-weight" 
+                                min="0"
+                                placeholder="0"
+                                value="${ingredient?.minWeight || ''}"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ing-max-weight">Max</label>
+                            <input 
+                                type="number" 
+                                id="ing-max-weight" 
+                                min="0"
+                                placeholder="0"
+                                value="${ingredient?.maxWeight || ''}"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ing-unit">Unità</label>
+                            <select id="ing-unit">
+                                ${UNITS.map(unit => `
+                                    <option value="${unit}" ${ingredient?.defaultUnit === unit ? 'selected' : ''}>
+                                        ${unit}
+                                    </option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input 
+                            type="checkbox" 
+                            id="ing-post-bake"
+                            ${ingredient?.postBake ? 'checked' : ''}
+                        >
+                        <span>Aggiungere dopo la cottura</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="ing-tags">Tags (separati da virgola)</label>
+                    <input 
+                        type="text" 
+                        id="ing-tags" 
+                        placeholder="Es. vegetariano, premium, locale"
+                        value="${ingredient?.tags ? (Array.isArray(ingredient.tags) ? ingredient.tags.join(', ') : '') : ''}"
+                    >
+                    <small>Esempi: vegetariano, vegano, premium, locale, stagionale</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Stagionalità</label>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+                        ${SEASONS.map(season => `
+                            <label class="checkbox-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input 
+                                    type="checkbox" 
+                                    class="season-checkbox"
+                                    value="${season.value}"
+                                    ${ingredient?.season && Array.isArray(ingredient.season) && ingredient.season.includes(season.value) ? 'checked' : ''}
+                                >
+                                <span>${season.icon} ${season.label}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Allergeni</label>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+                        ${ALLERGENS.map(allergen => `
+                            <label class="checkbox-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input 
+                                    type="checkbox" 
+                                    class="allergen-checkbox"
+                                    value="${allergen.value}"
+                                    ${ingredient?.allergens && Array.isArray(ingredient.allergens) && ingredient.allergens.includes(allergen.value) ? 'checked' : ''}
+                                >
+                                <span>${allergen.icon} ${allergen.label}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="window.closeModal()">
+                Annulla
+            </button>
+            <button class="btn btn-primary" onclick="window.submitIngredientForm(${isEdit ? `'${ingredientId}'` : 'null'})">
+                ${isEdit ? 'Salva Modifiche' : 'Crea Ingrediente'}
+            </button>
+        </div>
+    `;
+
+    openModal(modalContent);
+}
+
+async function submitIngredientForm(ingredientId) {
+    const form = document.getElementById('ingredient-form');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    const name = document.getElementById('ing-name').value.trim();
+    const category = document.getElementById('ing-category').value;
+    const subcategory = document.getElementById('ing-subcategory').value.trim() || null;
+    const minWeight = parseInt(document.getElementById('ing-min-weight').value) || null;
+    const maxWeight = parseInt(document.getElementById('ing-max-weight').value) || null;
+    const defaultUnit = document.getElementById('ing-unit').value;
+    const postBake = document.getElementById('ing-post-bake').checked;
+    const tagsInput = document.getElementById('ing-tags').value.trim();
+    const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+
+    // Get selected seasons
+    const seasonCheckboxes = document.querySelectorAll('.season-checkbox:checked');
+    const season = Array.from(seasonCheckboxes).map(cb => cb.value);
+
+    // Get selected allergens
+    const allergenCheckboxes = document.querySelectorAll('.allergen-checkbox:checked');
+    const allergens = Array.from(allergenCheckboxes).map(cb => cb.value);
+
+    const ingredientData = {
+        name,
+        category,
+        subcategory,
+        minWeight,
+        maxWeight,
+        defaultUnit,
+        postBake,
+        tags,
+        season: season.length > 0 ? season : null,
+        allergens: allergens.length > 0 ? allergens : null,
+        phase: 'topping'
+    };
+
+    try {
+        if (ingredientId) {
+            // Update existing
+            await updateIngredient(ingredientId, ingredientData);
+        } else {
+            // Create new
+            await addIngredient(ingredientData);
+        }
+
+        closeModal();
+
+        // Reload and re-render
+        await renderIngredients({});
+
+    } catch (error) {
+        console.error('Error saving ingredient:', error);
+        alert('Errore nel salvare l\'ingrediente: ' + error.message);
+    }
+}
+
+// ============================================
+// DELETE CONFIRMATION
+// ============================================
+
+function confirmDeleteIngredient(id, name) {
+    const modalContent = `
+        <div class="modal-header">
+            <h2>🗑️ Elimina Ingrediente</h2>
+            <button class="modal-close" onclick="window.closeModal()">×</button>
+        </div>
+        
+        <div class="modal-body">
+            <p>Sei sicuro di voler eliminare <strong>${name}</strong>?</p>
+            <p class="text-warning">⚠️ Questa azione non può essere annullata.</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="window.closeModal()">
+                Annulla
+            </button>
+            <button class="btn btn-danger" onclick="window.deleteIngredientConfirmed('${id}')">
+                Elimina
+            </button>
+        </div>
+    `;
+
+    openModal(modalContent);
+}
+
+async function deleteIngredientConfirmed(id) {
+    try {
+        await deleteIngredient(id);
+        closeModal();
+        await renderIngredients({});
+    } catch (error) {
+        console.error('Error deleting ingredient:', error);
+        alert('Errore nell\'eliminare l\'ingrediente: ' + error.message);
+    }
+}
+
+// ============================================
+// INGREDIENT USAGE TRACKING
+// ============================================
+
+/**
+ * Get pizzas and preparations that use a specific ingredient
+ */
+async function getIngredientUsage(ingredientName) {
+    const allRecipes = await getAllRecipes();
+    const allPreparations = await getAllPreparations();
+
+    // Find pizzas using this ingredient
+    const pizzasUsing = allRecipes.filter(recipe => {
+        if (!recipe.baseIngredients || recipe.baseIngredients.length === 0) return false;
+        return recipe.baseIngredients.some(ing => ing.name === ingredientName);
+    });
+
+    // Find preparations using this ingredient
+    const preparationsUsing = allPreparations.filter(prep => {
+        if (!prep.ingredients || prep.ingredients.length === 0) return false;
+        return prep.ingredients.some(ing => ing.name === ingredientName);
+    });
+
+    return {
+        pizzas: pizzasUsing,
+        preparations: preparationsUsing
+    };
+}
+
+/**
+ * Show modal with ingredient usage in pizzas and preparations
+ */
+async function showIngredientUsage(ingredientId, ingredientName) {
+    const usage = await getIngredientUsage(ingredientName);
+    const pizzaCount = usage.pizzas.length;
+    const prepCount = usage.preparations.length;
+
+    const modalContent = `
+        <div class="modal-header">
+            <h2 class="modal-title">📊 Utilizzo "${ingredientName}"</h2>
+            <button class="modal-close" onclick="window.closeModal()">×</button>
+        </div>
+        
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+            <!-- Pizzas Section -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                    <span>🍕</span>
+                    <span>Pizze (${pizzaCount})</span>
+                </h3>
+                ${pizzaCount > 0 ? `
+                    <div style="display: grid; gap: 0.75rem;">
+                        ${usage.pizzas.map(pizza => `
+                            <div style="padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <h4 style="margin: 0; color: var(--color-white); font-size: 0.95rem;">${pizza.name}</h4>
+                                    ${pizza.tags ? `<div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
+                                        ${pizza.tags.slice(0, 2).map(tag => `<span class="badge" style="font-size: 0.7rem;">${tag}</span>`).join('')}
+                                    </div>` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : `
+                    <p style="color: var(--color-gray-400); font-style: italic;">Questo ingrediente non è ancora stato usato in nessuna pizza.</p>
+                `}
+            </div>
+            
+            <!-- Preparations Section -->
+            <div>
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                    <span>🥫</span>
+                    <span>Preparazioni (${prepCount})</span>
+                </h3>
+                ${prepCount > 0 ? `
+                    <div style="display: grid; gap: 0.75rem;">
+                        ${usage.preparations.map(prep => `
+                            <div style="padding: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <h4 style="margin: 0 0 0.25rem 0; color: var(--color-white); font-size: 0.95rem;">${prep.name}</h4>
+                                        <span class="badge" style="font-size: 0.7rem;">${prep.category}</span>
+                                    </div>
+                                    <span style="color: var(--color-gray-400); font-size: 0.8rem;">⏱️ ${prep.prepTime}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : `
+                    <p style="color: var(--color-gray-400); font-style: italic;">Questo ingrediente non è ancora stato usato in nessuna preparazione.</p>
+                `}
+            </div>
+            
+            ${pizzaCount === 0 && prepCount === 0 ? `
+                <div class="empty-state" style="margin-top: 2rem;">
+                    <div class="empty-icon">🔍</div>
+                    <h3 class="empty-title">Ingrediente non utilizzato</h3>
+                    <p class="empty-description">Questo ingrediente non è ancora stato usato in nessuna pizza o preparazione.</p>
+                </div>
+            ` : ''}
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="window.closeModal()">
+                Chiudi
+            </button>
+        </div>
+    `;
+
+    openModal(modalContent);
+}
+
+// ============================================
+// FILTER FUNCTIONS
+// ============================================
+
+async function filterIngredients(filter) {
+    currentFilter = filter;
+    await updateIngredientsList();
+
+    // Update active button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+}
+
+// ============================================
+// GLOBAL EXPORTS
+// ============================================
+
+window.showIngredientForm = showIngredientForm;
+window.submitIngredientForm = submitIngredientForm;
+window.editIngredient = (id) => showIngredientForm(id);
+window.confirmDeleteIngredient = confirmDeleteIngredient;
+window.deleteIngredientConfirmed = deleteIngredientConfirmed;
+window.filterIngredients = filterIngredients;
+window.showIngredientUsage = showIngredientUsage;

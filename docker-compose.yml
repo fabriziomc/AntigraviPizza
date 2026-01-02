@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  antigravipizza:
+    build: .
+    container_name: antigravipizza
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount data directory to persist SQLite database
+      - ./data:/app/data
+    environment:
+      - DB_TYPE=sqlite
+      - SQLITE_DB_PATH=/app/data/antigravipizza.db
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/recipes" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

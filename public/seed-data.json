@@ -1,0 +1,1052 @@
+{
+  "version": 2,
+  "exportDate": 1764682002794,
+  "recipes": [
+    {
+      "id": "041a4aae-3f2b-4ad9-a804-6c039dc69235",
+      "name": "Fior di latte e Tartufo bianco",
+      "pizzaiolo": "Enzo Coccia",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una alta idratazione con fior di latte e tartufo bianco, creata secondo la tradizione contemporanea.",
+      "ingredients": [
+        {
+          "name": "Fior di latte",
+          "quantity": 151,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Tartufo bianco",
+          "quantity": 12,
+          "unit": "g",
+          "category": "Altro",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Origano",
+          "quantity": 8,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": false
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Aggiungere fior di latte a pezzetti",
+          "All'uscita dal forno, aggiungere: tartufo bianco",
+          "Infornare a 477°C per 168 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "https://image.pollinations.ai/prompt/gourmet%20pizza%20Fior%20di%20latte%20e%20Tartufo%20bianco%2C%20toppings%3A%20Fior%20di%20latte%2C%20Tartufo%20bianco%2C%20professional%20food%20photography%2C%204k%2C%20highly%20detailed%2C%20italian%20style%2C%20rustic%20background",
+      "tags": [
+        "Vegetariana",
+        "Premium",
+        "Gourmet",
+        "Bianca"
+      ],
+      "dateAdded": 1764402807242,
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
+    },
+    {
+      "id": "19b5b704-b981-4603-bfb7-a6b911b7fcd4",
+      "name": "Crema di pistacchio e Mortadella",
+      "pizzaiolo": "Renato Bosco",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una alta idratazione con crema di pistacchio e mortadella, creata secondo la tradizione contemporanea.",
+      "ingredients": [
+        {
+          "name": "Crema di pistacchio",
+          "quantity": 50,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Mortadella",
+          "quantity": 69,
+          "unit": "g",
+          "category": "Carne",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Burrata",
+          "quantity": 137,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Pistacchi",
+          "quantity": 35,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "All'uscita dal forno, aggiungere: crema di pistacchio, mortadella, burrata, pistacchi",
+          "Infornare a 441°C per 161 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "",
+      "tags": [
+        "Bianca",
+        "Classica"
+      ],
+      "dateAdded": 1764400438825,
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
+    },
+    {
+      "id": "2d8edfca-a10b-4378-ac7a-8283366416d2",
+      "name": "La Speck Alto Adige",
+      "pizzaiolo": "Tony Gemignani",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una napoletana classica con speck alto adige e taleggio, creata secondo la tradizione napoletana.",
+      "ingredients": [
+        {
+          "name": "Speck Alto Adige",
+          "quantity": 60,
+          "unit": "g",
+          "category": "Carne",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Taleggio",
+          "quantity": 97,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Radicchio",
+          "quantity": 71,
+          "unit": "g",
+          "category": "Verdure",
+          "phase": "topping",
+          "postBake": false
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Aggiungere taleggio a pezzetti",
+          "Distribuire radicchio",
+          "All'uscita dal forno, aggiungere: speck alto adige",
+          "Infornare a 409°C per 125 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "",
+      "tags": [
+        "Napoletana",
+        "Bianca",
+        "Gourmet"
+      ],
+      "dateAdded": 1764400449966,
+      "isFavorite": false,
+      "suggestedDough": "Napoletana Classica"
+    },
+    {
+      "id": "37f905c9-e1df-406b-9805-fa292e98c22b",
+      "name": "La Burrata",
+      "pizzaiolo": "Enzo Coccia",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una alta idratazione con burrata e guanciale croccante, creata secondo la tradizione contemporanea.",
+      "ingredients": [
+        {
+          "name": "Pomodoro San Marzano",
+          "quantity": 200,
+          "unit": "g",
+          "category": "Salsa",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Burrata",
+          "quantity": 104,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Guanciale croccante",
+          "quantity": 74,
+          "unit": "g",
+          "category": "Carne",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Miele di acacia",
+          "quantity": 29,
+          "unit": "ml",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Distribuire pomodoro san marzano sulla base",
+          "Distribuire guanciale croccante",
+          "All'uscita dal forno, aggiungere: burrata, miele di acacia",
+          "Infornare a 456°C per 91 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "https://image.pollinations.ai/prompt/gourmet%20pizza%20La%20Burrata%2C%20toppings%3A%20Burrata%2C%20Guanciale%20croccante%2C%20professional%20food%20photography%2C%204k%2C%20highly%20detailed%2C%20italian%20style%2C%20rustic%20background",
+      "tags": [
+        "Rossa",
+        "Classica"
+      ],
+      "dateAdded": 1764402845355,
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
+    },
+    {
+      "id": "3deb0611-dbed-48bf-9160-300bcaed1456",
+      "name": "Speciale Burrata",
+      "pizzaiolo": "Gino Sorbillo",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una alta idratazione con burrata e pomodorini ciliegino, creata secondo la tradizione contemporanea.",
+      "ingredients": [
+        {
+          "name": "Burrata",
+          "quantity": 139,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Pomodorini ciliegino",
+          "quantity": 138,
+          "unit": "g",
+          "category": "Verdure",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Basilico fresco",
+          "quantity": 18,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Distribuire pomodorini ciliegino",
+          "All'uscita dal forno, aggiungere: burrata, basilico fresco",
+          "Infornare a 407°C per 104 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "",
+      "tags": [
+        "Vegetariana",
+        "Bianca",
+        "Gourmet"
+      ],
+      "dateAdded": 1764400449965,
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
+    },
+    {
+      "id": "45d59fa6-daff-4ac5-a937-c0e5f4627c34",
+      "name": "Funghi porcini Gourmet",
+      "pizzaiolo": "Gino Sorbillo",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una integrale con funghi porcini e salsiccia fresca, creata secondo la tradizione contemporanea.",
+      "ingredients": [
+        {
+          "name": "Funghi porcini",
+          "quantity": 81,
+          "unit": "g",
+          "category": "Verdure",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Salsiccia fresca",
+          "quantity": 91,
+          "unit": "g",
+          "category": "Carne",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Tartufo nero",
+          "quantity": 12,
+          "unit": "g",
+          "category": "Altro",
+          "phase": "topping",
+          "postBake": true
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Distribuire funghi porcini, salsiccia fresca",
+          "All'uscita dal forno, aggiungere: tartufo nero",
+          "Infornare a 401°C per 155 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "",
+      "tags": [
+        "Premium",
+        "Gourmet",
+        "Bianca"
+      ],
+      "dateAdded": 1764400452316,
+      "isFavorite": false,
+      "suggestedDough": "Integrale"
+    },
+    {
+      "id": "5ec1c7c7-a758-4125-9011-eed91c776598",
+      "name": "Pizza Provola affumicata e Caviale",
+      "pizzaiolo": "Franco Pepe",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una contemporanea con provola affumicata e caviale, creata secondo la tradizione contemporanea.",
+      "ingredients": [
+        {
+          "name": "Passata di pomodoro",
+          "quantity": 200,
+          "unit": "g",
+          "category": "Salsa",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Provola affumicata",
+          "quantity": 128,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Caviale",
+          "quantity": 12,
+          "unit": "g",
+          "category": "Altro",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Origano",
+          "quantity": 9,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Riduzione di balsamico",
+          "quantity": 18,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Distribuire passata di pomodoro sulla base",
+          "Aggiungere provola affumicata a pezzetti",
+          "All'uscita dal forno, aggiungere: caviale, riduzione di balsamico",
+          "Infornare a 400°C per 140 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "",
+      "tags": [
+        "Contemporanea",
+        "Vegetariana",
+        "Premium",
+        "Gourmet"
+      ],
+      "dateAdded": 1764400587500,
+      "isFavorite": false,
+      "suggestedDough": "Contemporanea"
+    },
+    {
+      "id": "64d032c2-cf27-4853-b0e0-f1c31775811a",
+      "name": "Pizza Burrata e Melanzane grigliate",
+      "pizzaiolo": "Franco Pepe",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una napoletana classica con burrata e melanzane grigliate, creata secondo la tradizione napoletana.",
+      "ingredients": [
+        {
+          "name": "Crema di pistacchio",
+          "quantity": 200,
+          "unit": "g",
+          "category": "Salsa",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Burrata",
+          "quantity": 111,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Melanzane grigliate",
+          "quantity": 83,
+          "unit": "g",
+          "category": "Verdure",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Zucchine",
+          "quantity": 96,
+          "unit": "g",
+          "category": "Verdure",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Basilico fresco",
+          "quantity": 15,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Distribuire crema di pistacchio sulla base",
+          "Distribuire melanzane grigliate, zucchine",
+          "All'uscita dal forno, aggiungere: crema di pistacchio, burrata, basilico fresco",
+          "Infornare a 466°C per 161 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "https://image.pollinations.ai/prompt/gourmet%20pizza%20Pizza%20Burrata%20e%20Melanzane%20grigliate%2C%20toppings%3A%20Burrata%2C%20Melanzane%20grigliate%2C%20professional%20food%20photography%2C%204k%2C%20highly%20detailed%2C%20italian%20style%2C%20rustic%20background",
+      "tags": [
+        "Napoletana",
+        "Vegetariana",
+        "Bianca"
+      ],
+      "dateAdded": 1764402807243,
+      "isFavorite": false,
+      "suggestedDough": "Napoletana Classica"
+    },
+    {
+      "id": "7cbd89d2-e1a9-42ae-8bc3-3c7d379e9bd3",
+      "name": "Speciale Pomodoro San Marzano",
+      "pizzaiolo": "Gino Sorbillo",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una alta idratazione con pomodoro san marzano e melanzane grigliate, creata secondo la tradizione contemporanea.",
+      "ingredients": [
+        {
+          "name": "Pomodoro San Marzano",
+          "quantity": 50,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Melanzane grigliate",
+          "quantity": 108,
+          "unit": "g",
+          "category": "Verdure",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Ricotta fresca",
+          "quantity": 108,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Basilico fresco",
+          "quantity": 17,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Distribuire melanzane grigliate",
+          "All'uscita dal forno, aggiungere: ricotta fresca, basilico fresco",
+          "Infornare a 456°C per 177 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "",
+      "tags": [
+        "Vegetariana",
+        "Bianca",
+        "Classica"
+      ],
+      "dateAdded": 1764400438829,
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
+    },
+    {
+      "id": "85f118c2-a355-4736-899d-6843c9c5ad0e",
+      "name": "Crema di burrata Gourmet",
+      "pizzaiolo": "Chris Bianco",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una napoletana classica con crema di burrata e nduja calabrese, creata secondo la tradizione napoletana.",
+      "ingredients": [
+        {
+          "name": "Crema di burrata",
+          "quantity": 50,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Nduja calabrese",
+          "quantity": 44,
+          "unit": "g",
+          "category": "Carne",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Cipolla caramellata",
+          "quantity": 58,
+          "unit": "g",
+          "category": "Verdure",
+          "phase": "topping",
+          "postBake": false
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Distribuire nduja calabrese, cipolla caramellata",
+          "All'uscita dal forno, aggiungere: crema di burrata",
+          "Infornare a 413°C per 111 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "https://image.pollinations.ai/prompt/gourmet%20pizza%20Crema%20di%20burrata%20Gourmet%2C%20toppings%3A%20Crema%20di%20burrata%2C%20Nduja%20calabrese%2C%20professional%20food%20photography%2C%204k%2C%20highly%20detailed%2C%20italian%20style%2C%20rustic%20background",
+      "tags": [
+        "Napoletana",
+        "Bianca",
+        "Classica"
+      ],
+      "dateAdded": 1764402807243,
+      "isFavorite": false,
+      "suggestedDough": "Napoletana Classica"
+    },
+    {
+      "id": "8813fb50-eb8a-4e88-beb9-adb3b2be4732",
+      "name": "Mozzarella di bufala Gourmet",
+      "pizzaiolo": "Renato Bosco",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una alta idratazione con mozzarella di bufala e funghi porcini, creata secondo la tradizione contemporanea.",
+      "ingredients": [
+        {
+          "name": "Pomodoro San Marzano",
+          "quantity": 200,
+          "unit": "g",
+          "category": "Salsa",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Mozzarella di bufala",
+          "quantity": 188,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Funghi porcini",
+          "quantity": 119,
+          "unit": "g",
+          "category": "Verdure",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Carciofi",
+          "quantity": 75,
+          "unit": "g",
+          "category": "Verdure",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Basilico fresco",
+          "quantity": 20,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Limone grattugiato",
+          "quantity": 6,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Distribuire pomodoro san marzano sulla base",
+          "Aggiungere mozzarella di bufala a pezzetti",
+          "Distribuire funghi porcini, carciofi",
+          "All'uscita dal forno, aggiungere: basilico fresco, limone grattugiato",
+          "Infornare a 408°C per 163 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "",
+      "tags": [
+        "Vegetariana",
+        "Rossa",
+        "Gourmet"
+      ],
+      "dateAdded": 1764400587500,
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
+    },
+    {
+      "id": "a722968e-82ca-4cef-a63f-bf83405dca63",
+      "name": "Provola affumicata e Salame piccante",
+      "pizzaiolo": "Enzo Coccia",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una alta idratazione con provola affumicata e salame piccante, creata secondo la tradizione contemporanea.",
+      "ingredients": [
+        {
+          "name": "Pesto di basilico",
+          "quantity": 200,
+          "unit": "g",
+          "category": "Salsa",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Provola affumicata",
+          "quantity": 132,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Salame piccante",
+          "quantity": 73,
+          "unit": "g",
+          "category": "Carne",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Miele di acacia",
+          "quantity": 26,
+          "unit": "ml",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Distribuire pesto di basilico sulla base",
+          "Aggiungere provola affumicata a pezzetti",
+          "Distribuire salame piccante",
+          "All'uscita dal forno, aggiungere: pesto di basilico, miele di acacia",
+          "Infornare a 466°C per 179 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "",
+      "tags": [
+        "Bianca",
+        "Classica"
+      ],
+      "dateAdded": 1764400587501,
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
+    },
+    {
+      "id": "aea42c39-9abf-4472-b619-cb9d923c687a",
+      "name": "Pizza Provola affumicata e Tartufo nero",
+      "pizzaiolo": "Enzo Coccia",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una romana croccante con provola affumicata e tartufo nero, creata secondo la tradizione romana.",
+      "ingredients": [
+        {
+          "name": "Pomodoro San Marzano",
+          "quantity": 200,
+          "unit": "g",
+          "category": "Salsa",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Provola affumicata",
+          "quantity": 131,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Tartufo nero",
+          "quantity": 11,
+          "unit": "g",
+          "category": "Altro",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Noci",
+          "quantity": 41,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Basilico fresco",
+          "quantity": 17,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Distribuire pomodoro san marzano sulla base",
+          "Aggiungere provola affumicata a pezzetti",
+          "All'uscita dal forno, aggiungere: tartufo nero, noci, basilico fresco",
+          "Infornare a 418°C per 102 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "",
+      "tags": [
+        "Romana",
+        "Vegetariana",
+        "Premium",
+        "Gourmet"
+      ],
+      "dateAdded": 1764400438829,
+      "isFavorite": true,
+      "suggestedDough": "Romana Croccante"
+    },
+    {
+      "id": "b284ef7f-9895-4b49-bd6c-945ddb4483ef",
+      "name": "Tartufo nero e Funghi porcini",
+      "pizzaiolo": "Chris Bianco",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una alta idratazione con tartufo nero e funghi porcini, creata secondo la tradizione contemporanea.",
+      "ingredients": [
+        {
+          "name": "Tartufo nero",
+          "quantity": 15,
+          "unit": "g",
+          "category": "Altro",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Funghi porcini",
+          "quantity": 112,
+          "unit": "g",
+          "category": "Verdure",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Stracciatella",
+          "quantity": 96,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": true
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Distribuire funghi porcini",
+          "All'uscita dal forno, aggiungere: tartufo nero, stracciatella",
+          "Infornare a 408°C per 166 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "https://image.pollinations.ai/prompt/gourmet%20pizza%20Tartufo%20nero%20e%20Funghi%20porcini%2C%20toppings%3A%20Tartufo%20nero%2C%20Funghi%20porcini%2C%20professional%20food%20photography%2C%204k%2C%20highly%20detailed%2C%20italian%20style%2C%20rustic%20background",
+      "tags": [
+        "Vegetariana",
+        "Premium",
+        "Gourmet",
+        "Bianca"
+      ],
+      "dateAdded": 1764402845356,
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
+    },
+    {
+      "id": "bdeaf026-af84-44a4-aff2-f8503f0e92ba",
+      "name": "Speciale Fior di latte",
+      "pizzaiolo": "Simone Padoan",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una napoletana classica con fior di latte e carciofi, creata secondo la tradizione napoletana.",
+      "ingredients": [
+        {
+          "name": "Fior di latte",
+          "quantity": 129,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Carciofi",
+          "quantity": 73,
+          "unit": "g",
+          "category": "Verdure",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Guanciale croccante",
+          "quantity": 66,
+          "unit": "g",
+          "category": "Carne",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Pecorino Romano",
+          "quantity": 40,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": false
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Aggiungere fior di latte, pecorino romano a pezzetti",
+          "Distribuire carciofi, guanciale croccante",
+          "Infornare a 416°C per 168 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "https://image.pollinations.ai/prompt/gourmet%20pizza%20Speciale%20Fior%20di%20latte%2C%20toppings%3A%20Fior%20di%20latte%2C%20Carciofi%2C%20professional%20food%20photography%2C%204k%2C%20highly%20detailed%2C%20italian%20style%2C%20rustic%20background",
+      "tags": [
+        "Napoletana",
+        "Bianca",
+        "Gourmet"
+      ],
+      "dateAdded": 1764402845355,
+      "isFavorite": false,
+      "suggestedDough": "Napoletana Classica"
+    },
+    {
+      "id": "d1b3ea6a-bc57-44ca-a8fb-f41856b6ff8c",
+      "name": "Speciale Funghi porcini",
+      "pizzaiolo": "Simone Padoan",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una contemporanea con funghi porcini e salsiccia fresca, creata secondo la tradizione contemporanea.",
+      "ingredients": [
+        {
+          "name": "Funghi porcini",
+          "quantity": 85,
+          "unit": "g",
+          "category": "Verdure",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Salsiccia fresca",
+          "quantity": 111,
+          "unit": "g",
+          "category": "Carne",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Tartufo nero",
+          "quantity": 18,
+          "unit": "g",
+          "category": "Altro",
+          "phase": "topping",
+          "postBake": true
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Distribuire funghi porcini, salsiccia fresca",
+          "All'uscita dal forno, aggiungere: tartufo nero",
+          "Infornare a 466°C per 164 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "",
+      "tags": [
+        "Contemporanea",
+        "Premium",
+        "Gourmet",
+        "Bianca"
+      ],
+      "dateAdded": 1764400449965,
+      "isFavorite": true,
+      "suggestedDough": "Contemporanea"
+    },
+    {
+      "id": "dff950f1-8310-40ca-b3d3-9b0eb3b6b2e4",
+      "name": "Pizza Mozzarella di bufala e Bresaola",
+      "pizzaiolo": "Renato Bosco",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una napoletana classica con mozzarella di bufala e bresaola, creata secondo la tradizione napoletana.",
+      "ingredients": [
+        {
+          "name": "Mozzarella di bufala",
+          "quantity": 184,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Bresaola",
+          "quantity": 48,
+          "unit": "g",
+          "category": "Carne",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Riduzione di balsamico",
+          "quantity": 22,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Pistacchi",
+          "quantity": 35,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Aggiungere mozzarella di bufala a pezzetti",
+          "All'uscita dal forno, aggiungere: bresaola, riduzione di balsamico, pistacchi",
+          "Infornare a 449°C per 99 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "",
+      "tags": [
+        "Napoletana",
+        "Bianca",
+        "Classica"
+      ],
+      "dateAdded": 1764400452317,
+      "isFavorite": false,
+      "suggestedDough": "Napoletana Classica"
+    },
+    {
+      "id": "f3f49a47-318f-4c17-bc1d-4c2da272ae9b",
+      "name": "Speciale Gorgonzola DOP",
+      "pizzaiolo": "Renato Bosco",
+      "source": "Generata da AntigraviPizza",
+      "description": "Una alta idratazione con gorgonzola dop e prosciutto crudo di parma, creata secondo la tradizione contemporanea.",
+      "ingredients": [
+        {
+          "name": "Pesto di basilico",
+          "quantity": 200,
+          "unit": "g",
+          "category": "Salsa",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Gorgonzola DOP",
+          "quantity": 83,
+          "unit": "g",
+          "category": "Formaggi",
+          "phase": "topping",
+          "postBake": false
+        },
+        {
+          "name": "Prosciutto crudo di Parma",
+          "quantity": 71,
+          "unit": "g",
+          "category": "Carne",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Peperoncino fresco",
+          "quantity": 14,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": true
+        },
+        {
+          "name": "Pere",
+          "quantity": 89,
+          "unit": "g",
+          "category": "Erbe e Spezie",
+          "phase": "topping",
+          "postBake": false
+        }
+      ],
+      "instructions": {
+        "topping": [
+          "Distribuire pesto di basilico sulla base",
+          "Aggiungere gorgonzola dop a pezzetti",
+          "All'uscita dal forno, aggiungere: pesto di basilico, prosciutto crudo di parma, peperoncino fresco",
+          "Infornare a 406°C per 140 secondi",
+          "Servire immediatamente ben calda"
+        ]
+      },
+      "imageUrl": "",
+      "tags": [
+        "Bianca",
+        "Classica"
+      ],
+      "dateAdded": 1764400452316,
+      "isFavorite": false,
+      "suggestedDough": "Alta Idratazione"
+    }
+  ]
+}

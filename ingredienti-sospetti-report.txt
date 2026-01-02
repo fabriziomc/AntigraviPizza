@@ -1,0 +1,298 @@
+
+=== ANALISI DETTAGLIATA INGREDIENTI ===
+
+Totale ingredienti: 273
+
+=== TOP 50 INGREDIENTI PER LUNGHEZZA NOME ===
+
+
+--------------------------------------------------------------------------------
+[1] ID: e0eeeaa7-4da6-4f4c-aa2e-8885c41c258a | Lunghezza nome: 31 caratteri
+Nome: soffriggere nell’olio il sedano
+Categoria ID: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+--------------------------------------------------------------------------------
+[2] ID: 804b0852-1ef0-4a34-84cf-99abca9cf955 | Lunghezza nome: 28 caratteri
+Nome: 100 gr di farina di castagne
+Categoria ID: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+--------------------------------------------------------------------------------
+[3] ID: 875dc1a9-ff74-43d3-955e-64ad7f37595c | Lunghezza nome: 26 caratteri
+Nome: Olio extravergine di oliva
+Categoria ID: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+--------------------------------------------------------------------------------
+[4] ID: 7e38851d-5599-4ce2-a7df-b1f915be97cb | Lunghezza nome: 25 caratteri
+Nome: Prosciutto crudo di Parma
+Categoria ID: ca899f64-0f6f-43a0-8d88-821b54be31a4
+Tags: ["meat_cured_delicate"]
+
+--------------------------------------------------------------------------------
+[5] ID: 448292ad-e588-40bf-8e6e-e521346e76bc | Lunghezza nome: 25 caratteri
+Nome: Prosciutto di San Daniele
+Categoria ID: ca899f64-0f6f-43a0-8d88-821b54be31a4
+Tags: ["meat_cured_delicate"]
+
+--------------------------------------------------------------------------------
+[6] ID: c1b0716e-5c5a-4714-9753-c89283840284 | Lunghezza nome: 24 caratteri
+Nome: Farina di grano saraceno
+Categoria ID: badfb995-b4f3-4a2a-bcda-fd91e015132a
+Tags: ["base_oil"]
+
+--------------------------------------------------------------------------------
+[7] ID: d781df4a-2536-429b-8024-2350b0015790 | Lunghezza nome: 23 caratteri
+Nome: Lievito di birra fresco
+Categoria ID: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+--------------------------------------------------------------------------------
+[8] ID: 303ccccf-940a-4cd1-91a3-28d717595717 | Lunghezza nome: 23 caratteri
+Nome: Salsa al pesto di olive
+Categoria ID: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+Tags: ["base_pesto"]
+
+--------------------------------------------------------------------------------
+[9] ID: 7706569f-4206-4b73-bf09-995c997d7132 | Lunghezza nome: 22 caratteri
+Nome: Lievito di birra secco
+Categoria ID: badfb995-b4f3-4a2a-bcda-fd91e015132a
+
+--------------------------------------------------------------------------------
+[10] ID: 51a34847-d060-4ec6-bfad-46e0647112f0 | Lunghezza nome: 22 caratteri
+Nome: Riduzione di balsamico
+Categoria ID: 1906de1a-a1ea-4398-99e1-758c47c091c7
+Tags: ["finish_tangy"]
+
+--------------------------------------------------------------------------------
+[11] ID: 83868fa4-55f9-4fad-ab6d-6e9dd8ae5c52 | Lunghezza nome: 22 caratteri
+Nome: Semi di sesamo tostati
+Categoria ID: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+--------------------------------------------------------------------------------
+[12] ID: ec2d6ef7-5452-402a-8b13-923dd282ffdf | Lunghezza nome: 22 caratteri
+Nome: Cavolo cappuccio viola
+Categoria ID: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+Tags: ["vegetable_cruciferous"]
+
+--------------------------------------------------------------------------------
+[13] ID: 630605a4-c843-4df0-bbe2-7dbfb66b95e0 | Lunghezza nome: 21 caratteri
+Nome: Olio EVO aromatizzato
+Categoria ID: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+Tags: ["base_oil"]
+
+--------------------------------------------------------------------------------
+[14] ID: 3bb43731-d39e-4750-aaa1-ae5ff723a7d1 | Lunghezza nome: 21 caratteri
+Nome: Liquirizia in polvere
+Categoria ID: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+--------------------------------------------------------------------------------
+[15] ID: 6487438a-18c0-4c0b-acee-58196c850919 | Lunghezza nome: 21 caratteri
+Nome: Scaglie di cioccolato
+Categoria ID: 1906de1a-a1ea-4398-99e1-758c47c091c7
+Tags: ["finish_sweet"]
+
+--------------------------------------------------------------------------------
+[16] ID: 644931c7-3c1f-4467-a5e5-06ebb885444c | Lunghezza nome: 21 caratteri
+Nome: Granella di pistacchi
+Categoria ID: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+--------------------------------------------------------------------------------
+[17] ID: 291ccbc4-3af4-4cfe-a232-340168b16fef | Lunghezza nome: 21 caratteri
+Nome: Stoccafisso ammollato
+Categoria ID: 59c43017-0e9e-4158-b1cb-9f17824aee42
+
+--------------------------------------------------------------------------------
+[18] ID: f78c3207-6943-4b06-941c-1165d7687d2e | Lunghezza nome: 21 caratteri
+Nome: Farina Grano saraceno
+Categoria ID: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+--------------------------------------------------------------------------------
+[19] ID: 7b5d0aa1-3b7c-4abd-906d-d9a7159649ab | Lunghezza nome: 20 caratteri
+Nome: Pomodorini datterini
+Categoria ID: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+Tags: ["vegetable_tomato_fresh"]
+
+--------------------------------------------------------------------------------
+[20] ID: d7e7f863-b041-45f7-89c8-2f501ef6aebc | Lunghezza nome: 20 caratteri
+Nome: Pomodoro San Marzano
+Categoria ID: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+Tags: ["base_tomato"]
+
+--------------------------------------------------------------------------------
+[21] ID: a701dc08-2570-4d29-935a-54fcf202cea8 | Lunghezza nome: 20 caratteri
+Nome: Mozzarella di bufala
+Categoria ID: 3dbbfdeb-b431-426b-8651-4420c3516631
+Tags: ["cheese_fresh"]
+
+--------------------------------------------------------------------------------
+[22] ID: a7bbeb69-4ea5-481c-bd6d-607e8a5112c1 | Lunghezza nome: 20 caratteri
+Nome: Culatello di Zibello
+Categoria ID: ca899f64-0f6f-43a0-8d88-821b54be31a4
+Tags: ["meat_cured_delicate"]
+
+--------------------------------------------------------------------------------
+[23] ID: 836333c2-267b-471e-8383-ebb9fb242422 | Lunghezza nome: 20 caratteri
+Nome: Pomodorini ciliegino
+Categoria ID: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+Tags: ["vegetable_tomato_fresh"]
+
+--------------------------------------------------------------------------------
+[24] ID: 16bb5781-9b29-4950-9c78-6b5b91485cda | Lunghezza nome: 20 caratteri
+Nome: Scorzette di arancia
+Categoria ID: 1906de1a-a1ea-4398-99e1-758c47c091c7
+
+--------------------------------------------------------------------------------
+[25] ID: a9462432-4f3c-4bad-a890-470ba227bb11 | Lunghezza nome: 20 caratteri
+Nome: Granella di mandorle
+Categoria ID: 32b1230e-f71b-4cfd-832c-05c9e411d143
+Tags: ["nut_crunchy"]
+
+--------------------------------------------------------------------------------
+[26] ID: 27df6ff3-7b70-4cc6-942e-a68af3667371 | Lunghezza nome: 20 caratteri
+Nome: cipolla o cipollotto
+Categoria ID: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+--------------------------------------------------------------------------------
+[27] ID: fa1620b1-d605-45b2-a7ab-6d9560f4f6fc | Lunghezza nome: 20 caratteri
+Nome: Gorgonzola DOP dolce
+Categoria ID: 3dbbfdeb-b431-426b-8651-4420c3516631
+Tags: ["cheese_blue"]
+
+--------------------------------------------------------------------------------
+[28] ID: 903e1205-b101-4db4-aaad-0325d954d123 | Lunghezza nome: 19 caratteri
+Nome: Crema di pistacchio
+Categoria ID: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+Tags: ["base_cream_nut"]
+
+--------------------------------------------------------------------------------
+[29] ID: 8bc3a6db-aee4-4a1e-b198-a0a7e80a2d3a | Lunghezza nome: 19 caratteri
+Nome: Passata di pomodoro
+Categoria ID: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+Tags: ["base_tomato"]
+
+--------------------------------------------------------------------------------
+[30] ID: 96d913a0-989d-4bf2-ac1d-ead10b8dd3f5 | Lunghezza nome: 19 caratteri
+Nome: Fontina Val d'Aosta
+Categoria ID: 3dbbfdeb-b431-426b-8651-4420c3516631
+Tags: ["cheese_aged"]
+
+--------------------------------------------------------------------------------
+[31] ID: 36f855ed-0558-4630-89bc-95f49a47774c | Lunghezza nome: 19 caratteri
+Nome: Parmigiano Reggiano
+Categoria ID: 3dbbfdeb-b431-426b-8651-4420c3516631
+Tags: ["cheese_aged"]
+
+--------------------------------------------------------------------------------
+[32] ID: 144fd770-8f21-43be-a281-cdadaa094b8d | Lunghezza nome: 19 caratteri
+Nome: Guanciale croccante
+Categoria ID: ca899f64-0f6f-43a0-8d88-821b54be31a4
+Tags: ["meat_fatty"]
+
+--------------------------------------------------------------------------------
+[33] ID: d4a8e65b-0db2-41b6-9686-682e0d83f53e | Lunghezza nome: 19 caratteri
+Nome: Cipolla caramellata
+Categoria ID: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+Tags: ["vegetable_onions"]
+
+--------------------------------------------------------------------------------
+[34] ID: 1d131dba-7921-4671-9b30-ed7e11c3dc08 | Lunghezza nome: 19 caratteri
+Nome: Melanzane grigliate
+Categoria ID: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+Tags: ["vegetable_grilled"]
+
+--------------------------------------------------------------------------------
+[35] ID: 6d48becf-f667-4418-b0fb-4e81b819c192 | Lunghezza nome: 19 caratteri
+Nome: Confettura di fichi
+Categoria ID: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+--------------------------------------------------------------------------------
+[36] ID: 0bc8f364-3ec7-4782-8782-6c752fb20227 | Lunghezza nome: 19 caratteri
+Nome: Pistacchi di Bronte
+Categoria ID: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+Tags: ["nut_creamy"]
+
+--------------------------------------------------------------------------------
+[37] ID: 6edcb1e5-c798-473b-a55d-cbf369847f13 | Lunghezza nome: 18 caratteri
+Nome: Crema di melanzane
+Categoria ID: e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5
+Tags: ["base_cream_vegetable"]
+
+--------------------------------------------------------------------------------
+[38] ID: 961f951f-c3bb-4c0e-8bcc-8908bef47dff | Lunghezza nome: 18 caratteri
+Nome: Provola affumicata
+Categoria ID: 3dbbfdeb-b431-426b-8651-4420c3516631
+Tags: ["cheese_smoked"]
+
+--------------------------------------------------------------------------------
+[39] ID: f8efa8e3-a097-4d94-9f9f-b057dfc4a85f | Lunghezza nome: 18 caratteri
+Nome: Lardo di Colonnata
+Categoria ID: ca899f64-0f6f-43a0-8d88-821b54be31a4
+Tags: ["meat_cured_intense"]
+
+--------------------------------------------------------------------------------
+[40] ID: da47e333-247d-4906-adb2-a454477481b0 | Lunghezza nome: 18 caratteri
+Nome: Carpaccio di tonno
+Categoria ID: 59c43017-0e9e-4158-b1cb-9f17824aee42
+Tags: ["premium"]
+
+--------------------------------------------------------------------------------
+[41] ID: cecea9d9-10b9-4623-baf0-d21e0972018d | Lunghezza nome: 18 caratteri
+Nome: Misto pesce paella
+Categoria ID: 59c43017-0e9e-4158-b1cb-9f17824aee42
+Tags: ["premium"]
+
+--------------------------------------------------------------------------------
+[42] ID: a1079486-65dd-427f-beb8-380dbd264b3d | Lunghezza nome: 18 caratteri
+Nome: Salmone affumicato
+Categoria ID: 59c43017-0e9e-4158-b1cb-9f17824aee42
+Tags: ["seafood_preserved"]
+
+--------------------------------------------------------------------------------
+[43] ID: 76f05c17-52d3-4e74-8a21-48a14ec7db5b | Lunghezza nome: 18 caratteri
+Nome: Pomodorini Pachino
+Categoria ID: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+
+--------------------------------------------------------------------------------
+[44] ID: 55bd31d1-fdf2-4abf-8acd-ea53cd792fe9 | Lunghezza nome: 18 caratteri
+Nome: Limone grattugiato
+Categoria ID: 1906de1a-a1ea-4398-99e1-758c47c091c7
+Tags: ["herb_citrus"]
+
+--------------------------------------------------------------------------------
+[45] ID: 6ae40fa4-c504-45b4-8481-252590a4f25d | Lunghezza nome: 18 caratteri
+Nome: Paprika affumicata
+Categoria ID: 1906de1a-a1ea-4398-99e1-758c47c091c7
+Tags: ["spice_hot"]
+
+--------------------------------------------------------------------------------
+[46] ID: c24908fa-f811-4bf0-b626-9dff47365a5c | Lunghezza nome: 18 caratteri
+Nome: Peperoncino fresco
+Categoria ID: 1906de1a-a1ea-4398-99e1-758c47c091c7
+Tags: ["spice_hot"]
+
+--------------------------------------------------------------------------------
+[47] ID: eb13cea6-27f0-492c-b9dc-67f2d2311748 | Lunghezza nome: 18 caratteri
+Nome: Confettura di pere
+Categoria ID: 32b1230e-f71b-4cfd-832c-05c9e411d143
+
+--------------------------------------------------------------------------------
+[48] ID: d3ad5d2f-7f6f-4a3a-a3c6-55f8aa28189e | Lunghezza nome: 18 caratteri
+Nome: Farina di castagne
+Categoria ID: c0667350-c6b3-406e-9cd2-1208bd3b41fa
+
+--------------------------------------------------------------------------------
+[49] ID: 5cac0599-685d-491d-b491-313191a22b7e | Lunghezza nome: 18 caratteri
+Nome: Carpaccio di manzo
+Categoria ID: ca899f64-0f6f-43a0-8d88-821b54be31a4
+
+--------------------------------------------------------------------------------
+[50] ID: 83b8508a-943a-417c-bc71-9f0c099ab7dd | Lunghezza nome: 18 caratteri
+Nome: Pomodori ciliegino
+Categoria ID: 6d6d0249-55a7-4340-a6bf-419c9326a1f0
+Tags: ["vegetable_tomato_fresh"]
+
+
+================================================================================
+=== RICERCA PATTERN SPECIFICI ===
+
+
+
+Nessun ingrediente sospetto trovato con i pattern specificati.

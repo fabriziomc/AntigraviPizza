@@ -1,0 +1,59 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (except .env.docker if needed)
+.env
+.env.*
+!.env.docker
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts (will be built in container)
+dist
+
+# Logs
+*.log
+logs
+
+# Database files (will be created in container)
+*.db
+*.db-shm
+*.db-wal
+data/*.db
+
+# Test files
+test
+tests
+*.test.js
+*.spec.js
+
+# Documentation
+README.md
+docs
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Batch files (Windows specific)
+*.bat
+
+# Temporary files
+tmp
+temp

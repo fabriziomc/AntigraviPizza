@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Data - AntigraviPizza</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .status.success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        .status.error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍕 Export Database - AntigraviPizza</h1>
+        
+        <div id="status" class="status info">
+            Inizializzazione in corso...
+        </div>
+
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-label">Ricette</div>
+                <div class="stat-number" id="recipeCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pizza Nights</div>
+                <div class="stat-number" id="nightCount">0</div>
+            </div>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <button id="exportBtn" onclick="exportData()">📥 Esporta Dati</button>
+            <button id="copyBtn" onclick="copyToClipboard()" style="display: none;">📋 Copia JSON</button>
+        </div>
+
+        <pre id="output" style="display: none;"></pre>
+    </div>
+
+    <script type="module">
+        import { initDB, exportData as dbExportData } from './src/modules/database.js';
+
+        let exportedData = null;
+
+        async function init() {
+            const statusEl = document.getElementById('status');
+            try {
+                await initDB();
+                statusEl.className = 'status success';
+                statusEl.textContent = '✅ Database inizializzato. Pronto per l\'export.';
+                document.getElementById('exportBtn').disabled = false;
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Errore nell\'inizializzazione: ' + error.message;
+                console.error(error);
+            }
+        }
+
+        window.exportData = async function() {
+            const statusEl = document.getElementById('status');
+            const outputEl = document.getElementById('output');
+            const statsEl = document.getElementById('stats');
+            const copyBtn = document.getElementById('copyBtn');
+            const exportBtn = document.getElementById('exportBtn');
+
+            try {
+                exportBtn.disabled = true;
+                statusEl.className = 'status info';
+                statusEl.textContent = '⏳ Esportazione in corso...';
+
+                exportedData = await dbExportData();
+                
+                // Update stats
+                document.getElementById('recipeCount').textContent = exportedData.recipes.length;
+                document.getElementById('nightCount').textContent = exportedData.pizzaNights.length;
+                statsEl.style.display = 'grid';
+
+                // Show JSON
+                outputEl.textContent = JSON.stringify(exportedData, null, 2);
+                outputEl.style.display = 'block';
+                copyBtn.style.display = 'inline-block';
+
+                statusEl.className = 'status success';
+                statusEl.textContent = `✅ Dati esportati con successo! ${exportedData.recipes.length} ricette, ${exportedData.pizzaNights.length} pizza nights.`;
+
+                // Auto-download
+                const blob = new Blob([JSON.stringify(exportedData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `antigravipizza-export-${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Errore nell\'esportazione: ' + error.message;
+                console.error(error);
+                exportBtn.disabled = false;
+            }
+        };
+
+        window.copyToClipboard = function() {
+            if (exportedData) {
+                navigator.clipboard.writeText(JSON.stringify(exportedData, null, 2))
+                    .then(() => {
+                        const copyBtn = document.getElementById('copyBtn');
+                        const originalText = copyBtn.textContent;
+                        copyBtn.textContent = '✅ Copiato!';
+                        setTimeout(() => {
+                            copyBtn.textContent = originalText;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        alert('Errore nella copia: ' + err.message);
+                    });
+            }
+        };
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

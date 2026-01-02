@@ -1,0 +1,439 @@
+[
+  {
+    "name": "Uova strapazzate",
+    "ingredients": [
+      "Tuorlo d'uovo e latte in stessa quantità cuocere in microonde fino a rassodamento. Poi stracciare",
+      "Uova",
+      "Latte"
+    ],
+    "row": 28
+  },
+  {
+    "name": "Coralli viola",
+    "ingredients": [
+      "bollire le patate viola intere senza buccia",
+      "dopodiché congelare e una volta raggiunta la temperatura ideale",
+      "grattugiare su dì un foglio dì carta forno e cuocere a 60/70 gradi",
+      "Patate viola"
+    ],
+    "row": 29
+  },
+  {
+    "name": "Baccalà mantecato",
+    "ingredients": [
+      "Stoccafisso ammollato",
+      "Alloro",
+      "Prezzemolo"
+    ],
+    "row": 30
+  },
+  {
+    "name": "Cipolla caramellata",
+    "ingredients": [
+      "Cipolle Tropea",
+      "Zucchero di canna"
+    ],
+    "row": 31
+  },
+  {
+    "name": "Pomodorini confit",
+    "ingredients": [
+      "Pomodorini",
+      "Zucchero di canna",
+      "Worchester",
+      "Tabasco"
+    ],
+    "row": 32
+  },
+  {
+    "name": "Pomodoro stracotto",
+    "ingredients": [
+      "Polpa di pomodoro",
+      "cipolla",
+      "carote",
+      "aglio"
+    ],
+    "row": 33
+  },
+  {
+    "name": "Crema di patate",
+    "ingredients": [
+      "soffriggere nell’olio il sedano",
+      "la carota e la cipolla",
+      "unire le patate a pasta gialla e cuocere fino a quando diventano tenere.",
+      "Sedano",
+      "Carota",
+      "Cipolla",
+      "Patate"
+    ],
+    "row": 34
+  },
+  {
+    "name": "Patate in crosta",
+    "ingredients": [
+      "Patate",
+      "Aglio",
+      "Rosmarino"
+    ],
+    "row": 35
+  },
+  {
+    "name": "Cavolo nero stufato",
+    "ingredients": [
+      "Bollire il cavolo nero dopo averlo privato della costa centrale. Poi ripassare in padella con aglio",
+      "olio e peperoncino",
+      "Cavolo nero",
+      "Aglio",
+      "Peperoncino"
+    ],
+    "row": 36
+  },
+  {
+    "name": "Crema di patate viola",
+    "ingredients": [
+      "soffriggere nell’olio il sedano",
+      "la carota e la cipolla",
+      "unire le patate viola e cuocere fino a quando diventano tenere.",
+      "Sedano",
+      "Carota",
+      "Cipolla",
+      "Patate"
+    ],
+    "row": 37
+  },
+  {
+    "name": "Crema di zucchine",
+    "ingredients": [
+      "Zucchine",
+      "Porri",
+      "Panna"
+    ],
+    "row": 38
+  },
+  {
+    "name": "Pomodori secchi (crema)",
+    "ingredients": [
+      "Frullare il tutto a crudo",
+      "Pomodori secchi",
+      "Olio",
+      "Aglio",
+      "Peperoncino",
+      "Origano",
+      "Timo",
+      "Capperi"
+    ],
+    "row": 39
+  },
+  {
+    "name": "Crema di friarielli",
+    "ingredients": [
+      "Friarielli"
+    ],
+    "row": 40
+  },
+  {
+    "name": "Crema di castagne",
+    "ingredients": [
+      "100 gr di farina di castagne",
+      "1 bicchiere di latte e 1 di acqua",
+      "sale",
+      "pepe",
+      "olio. Mettere sul fuoco molto basso fino a che si forma una crema morbida.",
+      "Farina di castagne",
+      "Latte"
+    ],
+    "row": 41
+  },
+  {
+    "name": "Crema di ceci",
+    "ingredients": [
+      "Ceci",
+      "Rosmarino"
+    ],
+    "row": 42
+  },
+  {
+    "name": "Crema di barbabietola",
+    "ingredients": [
+      "Barbabietola",
+      "Yogurt o Latte"
+    ],
+    "row": 43
+  },
+  {
+    "name": "Dadolata di patate",
+    "ingredients": [
+      "friggerele patate a pasta gialla tagliate a piccoli cubetti (anche friggitrice ad aria).",
+      "Patate"
+    ],
+    "row": 44
+  },
+  {
+    "name": "Guacamole",
+    "ingredients": [
+      "Avocado",
+      "Lime"
+    ],
+    "row": 45
+  },
+  {
+    "name": "Salsa al mango",
+    "ingredients": [
+      "frullare mango con olio",
+      "sale",
+      "pepe e (opzionale) senape",
+      "Mango",
+      "Senape"
+    ],
+    "row": 46
+  },
+  {
+    "name": "Gel di agrumi",
+    "ingredients": [
+      "Arancia",
+      "Limone",
+      "Zucchero",
+      "AgarAgar"
+    ],
+    "row": 47
+  },
+  {
+    "name": "Tartare di Gamberi",
+    "ingredients": [
+      "Pulire gamberi",
+      "unire lime",
+      "menta",
+      "cocco",
+      "kiwi",
+      "sale e pepe",
+      "Gamberi",
+      "Lime",
+      "Menta",
+      "Cocco",
+      "Kiwi"
+    ],
+    "row": 48
+  },
+  {
+    "name": "Comp.pere e zenzero",
+    "ingredients": [
+      "Pere",
+      "Zucchero di canna",
+      "Zenzero",
+      "Limone"
+    ],
+    "row": 49
+  },
+  {
+    "name": "Salsa di pistacchi",
+    "ingredients": [
+      "Pistacchi",
+      "Parmigiano",
+      "Basilico"
+    ],
+    "row": 50
+  },
+  {
+    "name": "Crema di piselli",
+    "ingredients": [
+      "Piselli",
+      "Panna",
+      "cipolla o cipollotto"
+    ],
+    "row": 51
+  },
+  {
+    "name": "Crema di pecorino",
+    "ingredients": [
+      "Pecorino",
+      "Burro",
+      "Latte",
+      "Farina"
+    ],
+    "row": 52
+  },
+  {
+    "name": "Baccalà in vasocottura",
+    "ingredients": [
+      "Baccalà",
+      "Prezzemolo"
+    ],
+    "row": 53
+  },
+  {
+    "name": "Anatra",
+    "ingredients": [
+      "Anatra",
+      "Arancia",
+      "Miele",
+      "Burro",
+      "Timo"
+    ],
+    "row": 54
+  },
+  {
+    "name": "Stracotto di manzo",
+    "ingredients": [
+      "Carne",
+      "Brodo di carne",
+      "Vino rosso",
+      "Aglio",
+      "Cipolla",
+      "Carota",
+      "Sedano"
+    ],
+    "row": 55
+  },
+  {
+    "name": "Misto Pesce paella",
+    "ingredients": [
+      "Gamberi",
+      "Scampi",
+      "Calamari",
+      "Cozze",
+      "Zafferano",
+      "Paprika dolce"
+    ],
+    "row": 56
+  },
+  {
+    "name": "Melanzane grigliate",
+    "ingredients": [
+      "Grigliare a fette verticali sottili",
+      "Melanzane"
+    ],
+    "row": 57
+  },
+  {
+    "name": "Finocchi grigliati",
+    "ingredients": [
+      "Finocchi"
+    ],
+    "row": 58
+  },
+  {
+    "name": "Emulsione di aglio nero",
+    "ingredients": [
+      "Aglio nero"
+    ],
+    "row": 59
+  },
+  {
+    "name": "Crema di Melone",
+    "ingredients": [
+      "Frullare melone e aggiungere olio per emulsionare. Aggiustare di sale e pepe",
+      "Melone"
+    ],
+    "row": 60
+  },
+  {
+    "name": "Tartare di Fassona",
+    "ingredients": [
+      "Fassona (o Chianina)",
+      "Limone",
+      "Parmigiano"
+    ],
+    "row": 61
+  },
+  {
+    "name": "Tonno Tataki",
+    "ingredients": [
+      "Filetti di tonno",
+      "Semi di Sesamo",
+      "Salsa di Soia",
+      "Miele",
+      "Zenzero"
+    ],
+    "row": 62
+  },
+  {
+    "name": "Manzo marinato",
+    "ingredients": [
+      "marinatura: Salsa di soia",
+      "Aceto balsamico",
+      "Zenzero",
+      "Peperoncino",
+      "Carpaccio di manzo",
+      "Salsa di soia",
+      "Aceto Balsamico"
+    ],
+    "row": 63
+  },
+  {
+    "name": "Pesto di rucola",
+    "ingredients": [
+      "Rucola",
+      "Pinoli",
+      "Pecorino",
+      "Parmigiano"
+    ],
+    "row": 64
+  },
+  {
+    "name": "Uovo marinato",
+    "ingredients": [
+      "Uova",
+      "Sale"
+    ],
+    "row": 65
+  },
+  {
+    "name": "Salsa aioli",
+    "ingredients": [
+      "Uova",
+      "Olio arachidi",
+      "Aglio",
+      "Limone",
+      "Sale"
+    ],
+    "row": 66
+  },
+  {
+    "name": "Verza e Patate",
+    "ingredients": [
+      "Patate",
+      "Verza",
+      "Burro",
+      "Aglio",
+      "Parmigiano"
+    ],
+    "row": 67
+  },
+  {
+    "name": "Chips di grano saraceno",
+    "ingredients": [
+      "Farina Grano saraceno",
+      "Farina 00"
+    ],
+    "row": 68
+  },
+  {
+    "name": "Maionese al wasabi",
+    "ingredients": [
+      "Uova",
+      "Olio",
+      "Wasabi",
+      "Limone"
+    ],
+    "row": 69
+  },
+  {
+    "name": "Salsa aioli",
+    "ingredients": [
+      "Uova",
+      "Olio",
+      "Aglio",
+      "Limone"
+    ],
+    "row": 70
+  },
+  {
+    "name": "Ananas caramellato",
+    "ingredients": [
+      "Ananas",
+      "Burro",
+      "Zucchero di canna"
+    ],
+    "row": 71
+  }
+]
