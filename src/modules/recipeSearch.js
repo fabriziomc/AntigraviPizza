@@ -78,11 +78,14 @@ export async function importSampleRecipes() {
     // Show loading message
     showToast(`Generazione di ${numRecipes} ricette gourmet in corso...`, 'info');
 
+    // Get suggested ingredients from global window object (set by Discovery.js)
+    const suggestedIngredients = window.autoSuggestedIngredients || [];
+
     // Import the recipe generator dynamically
     const { generateMultipleRecipes } = await import('./recipeGenerator.js');
 
     // Generate the requested number of recipes
-    const newRecipes = await generateMultipleRecipes(numRecipes);
+    const newRecipes = await generateMultipleRecipes(numRecipes, suggestedIngredients);
     let imported = 0;
 
     for (const recipe of newRecipes) {

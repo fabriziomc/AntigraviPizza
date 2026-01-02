@@ -82,6 +82,9 @@ const plannerFilterState = {
   sortBy: 'az'
 };
 
+// Track suggested ingredients for auto/mixed mode
+let plannerSuggestedIngredients = [];
+
 // ============================================
 // NEW PIZZA NIGHT MODAL
 // ============================================
@@ -175,6 +178,24 @@ async function showNewPizzaNightModal() {
                 <div style="font-size: 0.875rem; color: var(--color-gray-400);">Tu scegli alcune, l'AI completa ottimizzando</div>
               </div>
             </label>
+          </div>
+        </div>
+        
+        <!-- Ingredients Suggestions (for Auto/Mixed mode) -->
+        <div id="plannerSuggestionsUI" class="form-group" style="display: none; background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1.5rem;">
+          <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; color: var(--color-primary-light);">
+            <span>💡</span>
+            <span>Suggerimenti Ingredienti</span>
+          </label>
+          <p style="color: var(--color-gray-400); font-size: 0.8125rem; margin-bottom: 1rem;">
+            Pizze che contengono questi ingredienti saranno favorite.
+          </p>
+          
+          <div id="plannerIngredientsSelector" style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem;">
+            <!-- Populated via JS -->
+          </div>
+          <div id="plannerSelectedIngredients" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+            <!-- Selected chips -->
           </div>
         </div>
         
@@ -368,6 +389,9 @@ async function showNewPizzaNightModal() {
   // Setup mode selection listeners
   setupModeListeners();
 
+  // Populate suggested ingredients selector
+  populatePlannerIngredientsSelector(recipes);
+
   // Load guests after modal is rendered  
   loadGuestsIntoModal();
 }
@@ -387,6 +411,11 @@ function setupModeListeners() {
       if (manualSection) manualSection.style.display = 'none';
       if (autoUI) autoUI.style.display = 'none';
       if (mixedUI) mixedUI.style.display = 'none';
+
+      const suggestionsUI = document.getElementById('plannerSuggestionsUI');
+      if (suggestionsUI) {
+        suggestionsUI.style.display = (mode === 'auto' || mode === 'mixed') ? 'block' : 'none';
+      }
 
       // Show selected mode UI
       if (mode === 'manual' && manualSection) {
@@ -493,7 +522,10 @@ async function generateAutoPizzas() {
     const response = await fetch('/api/pizza-optimizer/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ numPizzas })
+      body: JSON.stringify({
+        numPizzas,
+        suggestedIngredients: plannerSuggestedIngredients.map(i => i.name)
+      })
     });
 
     if (!response.ok) throw new Error('Errore nella generazione');
@@ -549,7 +581,11 @@ async function generateMixedPizzas() {
     const response = await fetch('/api/pizza-optimizer/complete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fixedPizzaIds: manuallySelectedPizzaIds, numToGenerate })
+      body: JSON.stringify({
+        fixedPizzaIds: manuallySelectedPizzaIds,
+        numToGenerate,
+        suggestedIngredients: plannerSuggestedIngredients.map(i => i.name)
+      })
     });
 
     console.log('🔍 API Response status:', response.status);
@@ -814,6 +850,84 @@ function renderPizzaSelectionList(recipes) {
   } else {
     listContainer.innerHTML = '<p class="text-muted" style="padding: 1rem; text-align: center;">Nessuna ricetta trovata con questo filtro.</p>';
   }
+}
+
+// ============================================
+// SUGGESTED INGREDIENTS (Planner)
+// ============================================
+
+/**
+ * Populate planner ingredients selector
+ */
+function populatePlannerIngredientsSelector(recipes) {
+  const selector = document.getElementById('plannerIngredientsSelector');
+  if (!selector) return;
+
+  // Extract all ingredients from recipes
+  const ingredients = new Set();
+  recipes.forEach(recipe => {
+    (recipe.baseIngredients || []).forEach(ing => ingredients.add(ing.name || ing));
+    (recipe.preparations || []).forEach(prep => {
+      if (prep.ingredients) {
+        prep.ingredients.forEach(ing => ingredients.add(ing.name || ing));
+      }
+    });
+  });
+
+  const sorted = Array.from(ingredients).sort();
+  plannerSuggestedIngredients = [];
+
+  selector.innerHTML = `
+    <select id="plannerIngredientSelect" class="form-select" style="flex: 1;">
+      <option value="">Aggiungi ingrediente desiderato...</option>
+      ${sorted.map(ing => `<option value="${ing}">${ing}</option>`).join('')}
+    </select>
+    <button type="button" class="btn btn-sm btn-primary" onclick="window.addPlannerSuggestedIngredient()" style="min-width: 44px; font-size: 1.25rem; font-weight: bold;">
+      +
+    </button>
+  `;
+
+  // Clear chips
+  const chipsContainer = document.getElementById('plannerSelectedIngredients');
+  if (chipsContainer) chipsContainer.innerHTML = '';
+}
+
+/**
+ * Add suggested ingredient in planner
+ */
+window.addPlannerSuggestedIngredient = function () {
+  const select = document.getElementById('plannerIngredientSelect');
+  if (!select || !select.value) return;
+
+  const value = select.value;
+  if (plannerSuggestedIngredients.find(i => i.name === value)) return;
+
+  plannerSuggestedIngredients.push({ name: value });
+  renderPlannerSuggestedChips();
+  select.value = '';
+};
+
+/**
+ * Remove suggested ingredient in planner
+ */
+window.removePlannerSuggestedIngredient = function (name) {
+  plannerSuggestedIngredients = plannerSuggestedIngredients.filter(i => i.name !== name);
+  renderPlannerSuggestedChips();
+};
+
+/**
+ * Render chips in planner
+ */
+function renderPlannerSuggestedChips() {
+  const container = document.getElementById('plannerSelectedIngredients');
+  if (!container) return;
+
+  container.innerHTML = plannerSuggestedIngredients.map(ing => `
+    <div class="ingredient-chip" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem; background: var(--color-primary); color: white; border-radius: 1rem; font-size: 0.8125rem;">
+      ${ing.name}
+      <span onclick="window.removePlannerSuggestedIngredient('${ing.name}')" style="cursor: pointer; font-weight: bold; margin-left: 0.25rem;">✕</span>
+    </div>
+  `).join('');
 }
 
 async function showPizzaPreviewInPlanner(recipeId) {

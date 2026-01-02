@@ -486,6 +486,13 @@ a:hover {
   font-family: var(--font-primary);
   font-size: var(--text-base);
   transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.form-select option,
+.form-select optgroup {
+  background-color: var(--color-space-medium);
+  color: var(--color-white);
 }
 
 .form-input:focus,

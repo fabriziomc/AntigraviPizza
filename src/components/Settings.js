@@ -113,6 +113,54 @@ export async function renderSettings() {
           </div>
         </section>
 
+
+        <!-- Image Provider Configuration Section -->
+        <section class="settings-card">
+          <div class="card-header">
+            <span class="card-icon">🎨</span>
+            <h2>Configurazione Provider Immagini</h2>
+          </div>
+          <div class="card-body">
+            <p class="card-description">
+              Il sistema usa <strong>Google Gemini API</strong> - 50 immagini gratuite al giorno.<br>
+              Backup: <strong>AI Horde</strong> (illimitato ma più lento, 30-90 secondi).
+            </p>
+            
+            <div class="form-group" style="margin-top: 1rem;">
+              <label for="geminiApiKey" class="form-label">
+                🔑 Google Gemini API Key (raccomandato)
+              </label>
+              <input 
+                type="password" 
+                id="geminiApiKey" 
+                class="form-input" 
+                placeholder="AIza..."
+                value="${localStorage.getItem('geminiApiKey') || ''}"
+              >
+              <small class="text-muted" style="display: block; margin-top: 0.5rem;">
+                Ottieni una chiave gratuita su <a href="https://aistudio.google.com/apikey" target="_blank" style="color: var(--color-primary);">Google AI Studio</a>
+                <br>50 immagini al giorno gratuite. Veloce e alta qualità.
+              </small>
+            </div>
+
+            
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+              <button id="btnSaveImageProviderSettings" class="btn btn-primary">
+                <span class="icon">💾</span>
+                Salva API Key
+              </button>
+              <button id="btnTestImageProvider" class="btn btn-secondary">
+                <span class="icon">🧪</span>
+                Test Provider
+              </button>
+            </div>
+            
+            <div id="providerTestResult" style="margin-top: 1rem; display: none;">
+              <!-- Test results will appear here -->
+            </div>
+          </div>
+        </section>
+
         <!-- Image Management Section -->
         <section class="settings-card">
           <div class="card-header">
@@ -136,6 +184,7 @@ export async function renderSettings() {
             </div>
           </div>
         </section>
+
 
         <!-- Archetype Weights Section -->
         <section class="settings-card">
@@ -223,6 +272,79 @@ function setupEventListeners() {
     localStorage.setItem('maxOvenTemp', temp);
     showToast('✅ Impostazioni forno salvate!', 'success');
   });
+
+  // Save Image Provider Settings
+  document.getElementById('btnSaveImageProviderSettings').addEventListener('click', () => {
+    const geminiKey = document.getElementById('geminiApiKey').value.trim();
+
+    if (geminiKey) {
+      localStorage.setItem('geminiApiKey', geminiKey);
+      showToast('✅ Chiave Google Gemini salvata! Pronto per generare immagini.', 'success');
+    } else {
+      localStorage.removeItem('geminiApiKey');
+      showToast('ℹ️ Chiave rimossa, verrà usato AI Horde come fallback', 'info');
+    }
+  });
+
+  // Test Image Provider
+  document.getElementById('btnTestImageProvider').addEventListener('click', async () => {
+    const btn = document.getElementById('btnTestImageProvider');
+    const resultDiv = document.getElementById('providerTestResult');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="icon">⏳</span> Testing...';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = '<p style="color: var(--color-gray-400);">🔍 Testing providers...</p>';
+
+    try {
+      const { testProvider } = await import('../utils/imageProviders.js');
+
+      const results = [];
+
+      // Test Google Gemini (if API key provided)
+      const geminiKey = document.getElementById('geminiApiKey').value.trim();
+      if (geminiKey) {
+        resultDiv.innerHTML += '<p>🔑 Testing Google Gemini...</p>';
+        const geminiResult = await testProvider('gemini');
+        results.push({ provider: 'Google Gemini', ...geminiResult });
+      } else {
+        results.push({ provider: 'Google Gemini', success: false, error: 'API Key non configurata' });
+      }
+
+      // Test AI Horde (free backup)
+      resultDiv.innerHTML += '<p>🌐 Testing AI Horde (may take 30-90 seconds)...</p>';
+      const hordeResult = await testProvider('ai_horde');
+      results.push({ provider: 'AI Horde', ...hordeResult });
+
+      // Display results
+      let html = '<div style="margin-top: 1rem;"><h4>Risultati Test:</h4><ul style="list-style: none; padding: 0;">';
+      results.forEach(r => {
+        const icon = r.success ? '✅' : '❌';
+        const color = r.success ? 'var(--color-success)' : 'var(--color-error)';
+        const message = r.success ? 'Funzionante' : r.error;
+        html += `<li style="color: ${color}; margin: 0.5rem 0;">${icon} <strong>${r.provider}</strong>: ${message}</li>`;
+      });
+      html += '</ul></div>';
+
+      resultDiv.innerHTML = html;
+
+      const anySuccess = results.some(r => r.success);
+      if (anySuccess) {
+        showToast('✅ Almeno un provider funziona correttamente!', 'success');
+      } else {
+        showToast('⚠️ Tutti i provider hanno fallito il test', 'warning');
+      }
+
+    } catch (error) {
+      console.error('Test failed:', error);
+      resultDiv.innerHTML = `<p style="color: var(--color-error);">❌ Errore durante il test: ${error.message}</p>`;
+      showToast('❌ Errore durante il test dei provider', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="icon">🧪</span> Test Provider';
+    }
+  });
+
 
   // Export Database (download backup from server)
   document.getElementById('btnExportDB').addEventListener('click', async () => {
@@ -387,28 +509,38 @@ function setupEventListeners() {
         btn.innerHTML = `<span class="icon">⏳</span> Generando ${progress}/${recipesWithoutImages.length}...`;
 
         try {
-          // Generate image similar to how it's done in Library.js
+          // Generate image using multi-provider system
           const toppingIngredients = recipe.baseIngredients?.filter(ing =>
             ing.phase === 'topping' || ing.category !== 'Impasto'
           ) || [];
           const mainIngredients = toppingIngredients.slice(0, 3).map(i => i.name || 'condimento');
 
-          const imagePrompt = `gourmet pizza ${recipe.name}, toppings: ${mainIngredients.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
-          const timestamp = Date.now() + i; // Unique seed for each
-          // Use turbo model since default flux model is down
-          const newImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?model=turbo&width=800&height=600&nologo=true&seed=${timestamp}`;
+          // Detect if pizza has tomato base
+          const hasTomato = recipe.baseIngredients?.some(ing =>
+            ing.name.toLowerCase().includes('pomodor') ||
+            ing.name.toLowerCase().includes('salsa') ||
+            ing.name.toLowerCase().includes('passata')
+          ) || false;
+
+          // Import image provider
+          const { generatePizzaImage } = await import('../utils/imageProviders.js');
+
+          const result = await generatePizzaImage(recipe.name, mainIngredients, {
+            hasTomato,
+            seed: Date.now() + i // Unique seed for each
+          });
 
           // Update recipe via API
           const updateResponse = await fetch(`/api/recipes/${recipe.id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ imageUrl: newImageUrl })
+            body: JSON.stringify({ imageUrl: result.imageUrl })
           });
 
           if (!updateResponse.ok) throw new Error('API update failed');
 
           successCount++;
-          console.log(`✅ Generated image for: ${recipe.name}`);
+          console.log(`✅ Generated image for: ${recipe.name} using ${result.provider}`);
 
           // Small delay to avoid overwhelming the image service
           await new Promise(resolve => setTimeout(resolve, 500));

@@ -581,25 +581,50 @@ export async function generateRandomRecipe_legacy() {
 
 function findIngredientByName(name, INGREDIENTS_DB) {
     const allIngredients = [
-        ...INGREDIENTS_DB.cheeses,
-        ...INGREDIENTS_DB.meats,
-        ...INGREDIENTS_DB.vegetables,
-        ...INGREDIENTS_DB.premium,
-        ...INGREDIENTS_DB.finishes,
-        ...INGREDIENTS_DB.bases
+        ...(INGREDIENTS_DB.cheeses || []),
+        ...(INGREDIENTS_DB.meats || []),
+        ...(INGREDIENTS_DB.vegetables || []),
+        ...(INGREDIENTS_DB.premium || []),
+        ...(INGREDIENTS_DB.finishes || []),
+        ...(INGREDIENTS_DB.bases || [])
     ];
 
     const found = allIngredients.find(ing => ing.name === name);
     if (found) {
         return {
-            name: found.name,
+            ...found,
             quantity: found.minWeight && found.maxWeight
-                ? (found.minWeight + Math.random() * (found.maxWeight - found.minWeight))
+                ? Math.round(found.minWeight + Math.random() * (found.maxWeight - found.minWeight))
                 : 50,
             unit: found.defaultUnit || 'g',
-            category: found.category,
-            phase: found.phase || 'topping',
-            postBake: found.postBake
+            phase: found.phase || 'topping'
+        };
+    }
+    return null;
+}
+
+/**
+ * Trova un ingrediente per ID nel database locale
+ */
+function findIngredientById(id, INGREDIENTS_DB) {
+    const allIngredients = [
+        ...(INGREDIENTS_DB.cheeses || []),
+        ...(INGREDIENTS_DB.meats || []),
+        ...(INGREDIENTS_DB.vegetables || []),
+        ...(INGREDIENTS_DB.premium || []),
+        ...(INGREDIENTS_DB.finishes || []),
+        ...(INGREDIENTS_DB.bases || [])
+    ];
+
+    const found = allIngredients.find(ing => ing.id === id);
+    if (found) {
+        return {
+            ...found,
+            quantity: found.minWeight && found.maxWeight
+                ? Math.round(found.minWeight + Math.random() * (found.maxWeight - found.minWeight))
+                : 50,
+            unit: found.defaultUnit || 'g',
+            phase: found.phase || 'topping'
         };
     }
     return null;
@@ -919,13 +944,13 @@ async function selectPreparationsForPizza(ingredients, tags) {
 /**
  * Genera multiple ricette casuali con nomi garantiti unici
  */
-export async function generateMultipleRecipes(count = 3) {
+export async function generateMultipleRecipes(count = 3, suggestedIngredients = []) {
     const recipes = [];
     const generatedNames = []; // Track names generated in this batch
 
     for (let i = 0; i < count; i++) {
         // Pass previously generated names to avoid duplicates in this batch
-        const recipe = await generateRandomRecipe(generatedNames);
+        const recipe = await generateRandomRecipe(generatedNames, suggestedIngredients);
         recipes.push(recipe);
         generatedNames.push(recipe.name);
     }
@@ -936,7 +961,7 @@ export async function generateMultipleRecipes(count = 3) {
 /**
  * Genera una ricetta casuale (usata pubblicamente)
  */
-export async function generateRandomRecipe(additionalNames = []) {
+export async function generateRandomRecipe(additionalNames = [], suggestedIngredients = []) {
     // Load ingredients from database
     const INGREDIENTS_DB = await loadIngredientsFromDB();
 
@@ -959,13 +984,13 @@ export async function generateRandomRecipe(additionalNames = []) {
     // Select generation method based on weighted archetype
     const selectedArchetype = selectWeightedArchetype(archetypeWeights);
 
-    return await generateRecipe(selectedArchetype, combinations, INGREDIENTS_DB, existingNames);
+    return await generateRecipe(selectedArchetype, combinations, INGREDIENTS_DB, existingNames, suggestedIngredients);
 }
 
 /**
  * Funzione core di generazione (esportata per test e uso diretto)
  */
-export async function generateRecipe(selectedArchetype, combinations = [], INGREDIENTS_DB = null, existingNames = []) {
+export async function generateRecipe(selectedArchetype, combinations = [], INGREDIENTS_DB = null, existingNames = [], suggestedIngredients = []) {
     // If no DB provided, load it
     if (!INGREDIENTS_DB) INGREDIENTS_DB = await loadIngredientsFromDB();
 
@@ -980,19 +1005,63 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
     let recipeSource = null;
     let archetypeUsed = null;
 
+    // PRE-INJECT Suggested Ingredients if any
+    if (suggestedIngredients && suggestedIngredients.length > 0) {
+        suggestedIngredients.forEach(suggestion => {
+            // Can be ID or name
+            const found = findIngredientById(suggestion, INGREDIENTS_DB) ||
+                findIngredientByName(suggestion, INGREDIENTS_DB);
+
+            if (found) {
+                // Ensure we don't add the same ingredient twice
+                if (!ingredients.find(i => i.id === found.id || i.name === found.name)) {
+                    ingredients.push(found);
+                    mainIngredientNames.push(found.name);
+                }
+            }
+        });
+    }
+
     if (usePredefinedCombo && combinations.length > 0) {
         // Using predefined combination from database
-        const combo = combinations[Math.floor(Math.random() * combinations.length)];
-        mainIngredientNames = combo.slice(0, 2);
+        let combo;
+        if (suggestedIngredients && suggestedIngredients.length > 0) {
+            // Find combos that match suggestions
+            const bestMatches = combinations.filter(c =>
+                suggestedIngredients.some(si => c.includes(si))
+            );
 
+            if (bestMatches.length > 0) {
+                // Pick one of the best matches
+                combo = bestMatches[Math.floor(Math.random() * bestMatches.length)];
+            } else {
+                combo = combinations[Math.floor(Math.random() * combinations.length)];
+            }
+        } else {
+            combo = combinations[Math.floor(Math.random() * combinations.length)];
+        }
+
+        // Add combo ingredients (avoiding duplicates from pre-injection)
         combo.forEach(ingName => {
             const found = findIngredientByName(ingName, INGREDIENTS_DB);
-            if (found) ingredients.push(found);
+            if (found) {
+                if (!ingredients.find(i => i.name === found.name)) {
+                    ingredients.push(found);
+                }
+                if (!mainIngredientNames.includes(found.name)) {
+                    mainIngredientNames.push(found.name);
+                }
+            }
         });
+
+        // Use first two for the name if mainIngredientNames is too long
+        if (mainIngredientNames.length === 0) {
+            mainIngredientNames = combo.slice(0, 2);
+        }
 
         doughType = DOUGH_TYPES[Math.floor(Math.random() * DOUGH_TYPES.length)];
         pizzaName = await generatePizzaName(mainIngredientNames, existingNames);
-        description = `Una ${doughType.type.toLowerCase()} con ${mainIngredientNames.join(' e ').toLowerCase()}, creata secondo la tradizione.`;
+        description = `Una ${doughType.type.toLowerCase()} con ${mainIngredientNames.slice(0, 3).join(' e ').toLowerCase()}, creata secondo la tradizione.`;
 
         // Mark as combination-based
         recipeSource = 'combination';
@@ -1304,9 +1373,22 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
         ? 'pizza with red tomato sauce base'
         : 'pizza bianca, white pizza with NO tomato sauce, white base with olive oil';
 
-    const imagePrompt = `gourmet ${pizzaStyle}, ${pizzaName}, toppings: ${mainIngredientNames.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
-    // Use turbo model since default flux model is currently down
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?model=turbo&width=800&height=600&nologo=true`;
+    // Generate image using multi-provider system with automatic fallback
+    const { generatePizzaImage } = await import('../utils/imageProviders.js');
+
+    let imageUrl = '';
+    try {
+        const result = await generatePizzaImage(pizzaName, mainIngredientNames, {
+            hasTomato,
+            seed: Date.now()
+        });
+        imageUrl = result.imageUrl;
+        console.log(`✅ Image generated using provider: ${result.provider}`);
+    } catch (error) {
+        console.error('❌ Image generation failed:', error);
+        // Fallback to placeholder
+        imageUrl = 'https://via.placeholder.com/800x600/667eea/ffffff?text=🍕';
+    }
 
     return {
         name: pizzaName,

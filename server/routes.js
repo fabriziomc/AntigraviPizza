@@ -1,5 +1,6 @@
 import express from 'express';
 import DatabaseAdapter from './db-adapter.js';
+import generateImageRoute from './routes/generate-image.js';
 
 const router = express.Router();
 const dbAdapter = new DatabaseAdapter();
@@ -753,7 +754,7 @@ router.post('/seed-preparations', async (req, res) => {
 // Generate optimized pizza set (Automatic mode)
 router.post('/pizza-optimizer/generate', async (req, res) => {
     try {
-        const { numPizzas = 5, constraints = {} } = req.body;
+        const { numPizzas = 5, suggestedIngredients = [] } = req.body;
 
         if (numPizzas < 2 || numPizzas > 20) {
             return res.status(400).json({ error: 'numPizzas must be between 2 and 20' });
@@ -763,9 +764,45 @@ router.post('/pizza-optimizer/generate', async (req, res) => {
         const allRecipes = await dbAdapter.getAllRecipes();
         const pizzas = [];
 
-        // Randomly select numPizzas recipes
-        const availableRecipes = [...allRecipes];
-        for (let i = 0; i < numPizzas && availableRecipes.length > 0; i++) {
+        // Prioritize recipes with suggested ingredients
+        let availableRecipes = [...allRecipes];
+
+        if (suggestedIngredients.length > 0) {
+            const prioritized = availableRecipes.filter(recipe => {
+                const recipeIngredients = [
+                    ...(recipe.baseIngredients || []),
+                    ...(recipe.preparations || []).flatMap(p => p.ingredients || [])
+                ].map(i => (i.name || i).toLowerCase());
+
+                return suggestedIngredients.some(si =>
+                    recipeIngredients.some(ri => ri.includes(si.toLowerCase()))
+                );
+            });
+
+            // Sort by how many suggested ingredients they match
+            prioritized.sort((a, b) => {
+                const countA = suggestedIngredients.filter(si =>
+                    [...(a.baseIngredients || []), ...(a.preparations || []).flatMap(p => p.ingredients || [])]
+                        .some(i => (i.name || i).toLowerCase().includes(si.toLowerCase()))
+                ).length;
+                const countB = suggestedIngredients.filter(si =>
+                    [...(b.baseIngredients || []), ...(b.preparations || []).flatMap(p => p.ingredients || [])]
+                        .some(i => (i.name || i).toLowerCase().includes(si.toLowerCase()))
+                ).length;
+                return countB - countA;
+            });
+
+            // Take matching recipes first
+            while (pizzas.length < numPizzas && prioritized.length > 0) {
+                const selected = prioritized.shift();
+                pizzas.push(selected);
+                // Remove from general available list
+                availableRecipes = availableRecipes.filter(r => r.id !== selected.id);
+            }
+        }
+
+        // Randomly select remaining numPizzas recipes
+        while (pizzas.length < numPizzas && availableRecipes.length > 0) {
             const randomIndex = Math.floor(Math.random() * availableRecipes.length);
             const selected = availableRecipes.splice(randomIndex, 1)[0];
             pizzas.push(selected);
@@ -812,7 +849,7 @@ router.post('/pizza-optimizer/generate', async (req, res) => {
 // Complete pizza set with optimized suggestions (Mixed mode)
 router.post('/pizza-optimizer/complete', async (req, res) => {
     try {
-        const { fixedPizzaIds = [], numToGenerate = 3, constraints = {} } = req.body;
+        const { fixedPizzaIds = [], numToGenerate = 3, suggestedIngredients = [] } = req.body;
 
         if (!Array.isArray(fixedPizzaIds)) {
             return res.status(400).json({ error: 'fixedPizzaIds must be an array' });
@@ -839,11 +876,44 @@ router.post('/pizza-optimizer/complete', async (req, res) => {
         const suggestions = [];
         const allRecipes = await dbAdapter.getAllRecipes();
 
-        // Filter out fixed pizzas and select random ones
-        const availableRecipes = allRecipes.filter(r => !fixedPizzaIds.includes(r.id));
+        // Filter out fixed pizzas
+        let availableRecipes = allRecipes.filter(r => !fixedPizzaIds.includes(r.id));
 
-        // Randomly select numToGenerate recipes
-        for (let i = 0; i < numToGenerate && availableRecipes.length > 0; i++) {
+        // Prioritize recipes with suggested ingredients
+        if (suggestedIngredients.length > 0) {
+            const prioritized = availableRecipes.filter(recipe => {
+                const recipeIngredients = [
+                    ...(recipe.baseIngredients || []),
+                    ...(recipe.preparations || []).flatMap(p => p.ingredients || [])
+                ].map(i => (i.name || i).toLowerCase());
+
+                return suggestedIngredients.some(si =>
+                    recipeIngredients.some(ri => ri.includes(si.toLowerCase()))
+                );
+            });
+
+            // Sort by match quality
+            prioritized.sort((a, b) => {
+                const countA = suggestedIngredients.filter(si =>
+                    [...(a.baseIngredients || []), ...(a.preparations || []).flatMap(p => p.ingredients || [])]
+                        .some(i => (i.name || i).toLowerCase().includes(si.toLowerCase()))
+                ).length;
+                const countB = suggestedIngredients.filter(si =>
+                    [...(b.baseIngredients || []), ...(b.preparations || []).flatMap(p => p.ingredients || [])]
+                        .some(i => (i.name || i).toLowerCase().includes(si.toLowerCase()))
+                ).length;
+                return countB - countA;
+            });
+
+            while (suggestions.length < numToGenerate && prioritized.length > 0) {
+                const selected = prioritized.shift();
+                suggestions.push(selected);
+                availableRecipes = availableRecipes.filter(r => r.id !== selected.id);
+            }
+        }
+
+        // Randomly select remaining numToGenerate recipes
+        while (suggestions.length < numToGenerate && availableRecipes.length > 0) {
             const randomIndex = Math.floor(Math.random() * availableRecipes.length);
             const selected = availableRecipes.splice(randomIndex, 1)[0];
             suggestions.push(selected);
@@ -1078,6 +1148,12 @@ router.get('/health', (req, res) => {
         service: 'AntigraviPizza API'
     });
 });
+
+// ==========================================
+// IMAGE GENERATION PROXY
+// ==========================================
+router.post('/generate-image', generateImageRoute);
+
 
 // Keep-alive endpoint - same as health but named more explicitly
 router.get('/keep-alive', (req, res) => {

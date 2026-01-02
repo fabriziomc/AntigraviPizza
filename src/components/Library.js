@@ -584,16 +584,36 @@ async function handleRegenerateImage(recipe) {
     btn.innerHTML = '⏳ Generazione...';
 
     // Extract main ingredients for the prompt
-    const toppingIngredients = (recipe.baseIngredients || []).filter(i => i.phase === 'topping' || i.category !== 'Impasto');
+    // Parse baseIngredients if it's a string
+    const baseIngredientsArray = typeof recipe.baseIngredients === 'string'
+      ? JSON.parse(recipe.baseIngredients)
+      : (recipe.baseIngredients || []);
+
+    const toppingIngredients = baseIngredientsArray.filter(i => i.phase === 'topping' || i.category !== 'Impasto');
     const mainIngredients = toppingIngredients.slice(0, 3).map(i => i.name);
 
-    // Generate new image URL with timestamp to avoid caching
-    const imagePrompt = `gourmet pizza ${recipe.name}, toppings: ${mainIngredients.join(', ')}, professional food photography, 4k, highly detailed, italian style, rustic background`;
-    const timestamp = Date.now();
-    // Use turbo model since default flux model is down
-    const newImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?model=turbo&width=800&height=600&nologo=true&seed=${timestamp}`;
+    // Detect if pizza has tomato base
+    const hasTomato = baseIngredientsArray.some(ing =>
+      ing.name.toLowerCase().includes('pomodor') ||
+      ing.name.toLowerCase().includes('salsa') ||
+      ing.name.toLowerCase().includes('passata')
+    );
 
-    console.log('Generating new image:', newImageUrl);
+    // Generate new image using multi-provider system
+    const { generatePizzaImage } = await import('../utils/imageProviders.js');
+
+    let newImageUrl;
+    try {
+      const result = await generatePizzaImage(recipe.name, mainIngredients, {
+        hasTomato,
+        seed: Date.now()
+      });
+      newImageUrl = result.imageUrl;
+      console.log(`✅ Image regenerated using provider: ${result.provider}`);
+    } catch (error) {
+      console.error('❌ Image generation failed:', error);
+      throw new Error(`Impossibile generare l'immagine: ${error.message}`);
+    }
 
     // Update recipe in database FIRST (don't wait for image to load)
     console.log('Updating recipe in database via API...');

@@ -15,6 +15,8 @@ let cachedPreparations = [];
 
 // Track selected ingredients
 let selectedIngredients = [];
+// Track auto-suggested ingredients
+let autoSuggestedIngredients = [];
 // Cache ingredients from database
 let cachedIngredients = [];
 
@@ -76,6 +78,9 @@ function setupDiscoveryListeners() {
 
     // Populate Ingredients Selector
     populateIngredientsSelector();
+
+    // Populate Auto Ingredients Selector
+    populateAutoIngredientsSelector();
 }
 
 /**
@@ -375,6 +380,108 @@ window.removeIngredient = function (ingId) {
     if (index >= 0) {
         selectedIngredients.splice(index, 1);
         renderSelectedIngredients();
+    }
+};
+
+// ============================================
+// AUTO INGREDIENTS SELECTOR (Discovery)
+// ============================================
+
+/**
+ * Populate auto-ingredients selector
+ */
+async function populateAutoIngredientsSelector() {
+    const selector = document.getElementById('autoIngredientsSelector');
+    if (!selector) return;
+
+    if (cachedIngredients.length === 0) {
+        cachedIngredients = await getAllIngredients();
+    }
+
+    // Group by category
+    const byCategory = {};
+    cachedIngredients.forEach(ing => {
+        if (!byCategory[ing.category]) {
+            byCategory[ing.category] = [];
+        }
+        byCategory[ing.category].push(ing);
+    });
+
+    selector.innerHTML = `
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <select id="autoIngredientSelect" class="form-select" style="flex: 1;">
+                <option value="">Aggiungi un ingrediente suggerito...</option>
+                ${Object.entries(byCategory).map(([category, ings]) => `
+                    <optgroup label="${category}">
+                        ${ings.map(ing => `
+                            <option value="${ing.id}">${ing.name}</option>
+                        `).join('')}
+                    </optgroup>
+                `).join('')}
+            </select>
+            <button type="button" class="btn btn-sm btn-accent" onclick="window.addAutoIngredient()" style="min-width: 44px; font-size: 1.25rem; font-weight: bold;">
+                +
+            </button>
+        </div>
+    `;
+}
+
+/**
+ * Add auto-suggested ingredient
+ */
+window.addAutoIngredient = function () {
+    const select = document.getElementById('autoIngredientSelect');
+    if (!select || !select.value) return;
+
+    const ingId = select.value;
+    const ing = cachedIngredients.find(i => i.id === ingId);
+    if (!ing) return;
+
+    if (autoSuggestedIngredients.find(i => i.id === ingId)) {
+        showToast('Già suggerito', 'warning');
+        return;
+    }
+
+    autoSuggestedIngredients.push({
+        id: ingId,
+        name: ing.name
+    });
+
+    renderAutoSelectedIngredients();
+    select.value = '';
+};
+
+/**
+ * Render auto-selected ingredients as chips
+ */
+function renderAutoSelectedIngredients() {
+    const container = document.getElementById('autoSelectedIngredients');
+    if (!container) return;
+
+    if (autoSuggestedIngredients.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    container.innerHTML = autoSuggestedIngredients.map(si => `
+        <div class="ingredient-chip" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.8rem; background: var(--color-accent); color: white; border-radius: 2rem; font-size: 0.875rem; font-weight: 500;">
+            ${si.name}
+            <span onclick="window.removeAutoIngredient('${si.id}')" style="cursor: pointer; opacity: 0.8; font-weight: bold; margin-left: 0.25rem;">✕</span>
+        </div>
+    `).join('');
+
+    // Update window property so recipeSearch can access it
+    window.autoSuggestedIngredients = autoSuggestedIngredients.map(i => i.name);
+}
+
+/**
+ * Remove auto-suggested ingredient
+ */
+window.removeAutoIngredient = function (ingId) {
+    const index = autoSuggestedIngredients.findIndex(i => i.id === ingId);
+    if (index >= 0) {
+        autoSuggestedIngredients.splice(index, 1);
+        renderAutoSelectedIngredients();
     }
 };
 

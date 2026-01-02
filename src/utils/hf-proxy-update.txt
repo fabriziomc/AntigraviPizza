@@ -1,0 +1,29 @@
+﻿async function generateWithHuggingFace(prompt, options = {}) {
+    const apiToken = options.huggingfaceToken || localStorage.getItem('huggingfaceToken');
+    
+    if (!apiToken) {
+        throw new Error('Hugging Face API token not configured');
+    }
+
+    // Call server proxy instead of direct API to avoid CORS
+    const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            prompt,
+            provider: 'huggingface',
+            token: apiToken
+        }),
+        signal: AbortSignal.timeout(PROVIDER_CONFIG.timeout)
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(Server proxy error: .status} - );
+    }
+
+    const data = await response.json();
+    return data.imageUrl;
+}
