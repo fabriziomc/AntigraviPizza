@@ -515,29 +515,70 @@ async function generateAutoPizzas() {
     return;
   }
 
+  // Se ci sono pizze bloccate (PINNED), usiamo la logica Mixed per completare
+  const pinnedPizzaIds = manuallySelectedPizzaIds.filter(id =>
+    currentGeneratedPizzas.some(p => p.id === id)
+  );
+
   resultsDiv.innerHTML = '<p class="text-muted">🔄 Generazione in corso...</p>';
   resultsDiv.style.display = 'block';
 
   try {
-    const response = await fetch('/api/pizza-optimizer/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        numPizzas,
-        suggestedIngredients: plannerSuggestedIngredients.map(i => i.name)
-      })
-    });
+    let response;
+    if (pinnedPizzaIds.length > 0) {
+      // Logic same as Mixed mode - complete the selection
+      const numToGenerate = Math.max(1, numPizzas - pinnedPizzaIds.length);
+      response = await fetch('/api/pizza-optimizer/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fixedPizzaIds: pinnedPizzaIds,
+          numToGenerate,
+          suggestedIngredients: plannerSuggestedIngredients.map(i => i.name)
+        })
+      });
+    } else {
+      // Fresh new generation
+      response = await fetch('/api/pizza-optimizer/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          numPizzas,
+          suggestedIngredients: plannerSuggestedIngredients.map(i => i.name)
+        })
+      });
+    }
 
     if (!response.ok) throw new Error('Errore nella generazione');
 
     const data = await response.json();
+    const finalPizzas = data.pizzas || data.suggestions || [];
+
+    // Se avevamo pizze bloccate, assicuriamoci che siano incluse nel display (l'API Mixed le include già in data.suggestions?)
+    // In realtà l'API Mixed ritorna sia le fisse che le suggerite nel calcolo metriche, 
+    // ma data.suggestions sono SOLO le nuove? Devo verificare.
+    // Leggendo generateMixedPizzas esistente, sembra che data.suggestions siano quelle da aggiungere.
+
+    let displayedPizzas = finalPizzas;
+    if (pinnedPizzaIds.length > 0) {
+      // Recupera gli oggetti ricetta per le pizze bloccate per mostrarle insieme ai nuovi suggerimenti
+      const pinnedRecipes = currentGeneratedPizzas.filter(p => pinnedPizzaIds.includes(p.id));
+      displayedPizzas = [...pinnedRecipes, ...finalPizzas];
+    }
+
+    // Uncheck ALL previous auto-generated pizzas that are NOT in the current pinned list
+    document.querySelectorAll('#pizzaSelection input[type="checkbox"]:checked').forEach(checkbox => {
+      if (!manuallySelectedPizzaIds.includes(checkbox.value)) {
+        checkbox.checked = false;
+      }
+    });
 
     // Display results
-    displayGeneratedPizzas(data.pizzas, resultsDiv);
+    displayGeneratedPizzas(displayedPizzas, resultsDiv);
     displayMetrics(data.metrics, metricsDiv);
 
     // Auto-select these pizzas
-    selectGeneratedPizzas(data.pizzas);
+    selectGeneratedPizzas(displayedPizzas);
 
   } catch (error) {
     console.error('Error generating auto pizzas:', error);
@@ -547,6 +588,7 @@ async function generateAutoPizzas() {
 
 // Generate mixed pizzas
 let manuallySelectedPizzaIds = []; // Track manually selected pizzas
+let currentGeneratedPizzas = []; // NEW: Track currently displayed suggested pizzas
 
 async function generateMixedPizzas() {
   const allCheckedBoxes = document.querySelectorAll('#pizzaSelection input[type="checkbox"]:checked');
@@ -554,12 +596,8 @@ async function generateMixedPizzas() {
   const resultsDiv = document.getElementById('mixedResults');
   const metricsDiv = document.getElementById('metricsDisplay');
 
-  // On first call or when user changes selection, update manually selected IDs
-  // We need to identify which pizzas were manually selected vs auto-generated
-  if (manuallySelectedPizzaIds.length === 0 || resultsDiv.style.display === 'none') {
-    // First time or after reset - all checked boxes are manual selections
-    manuallySelectedPizzaIds = Array.from(allCheckedBoxes).map(cb => cb.value);
-  }
+  // Aggiorna manualmenteSelectedPizzaIds in base ai checkbox correnti
+  manuallySelectedPizzaIds = Array.from(allCheckedBoxes).map(cb => cb.value);
 
   if (manuallySelectedPizzaIds.length === 0) {
     alert('Seleziona almeno una pizza fissa');
@@ -570,9 +608,6 @@ async function generateMixedPizzas() {
     alert('Inserisci un numero valido di pizze da generare (1-15)');
     return;
   }
-
-  console.log('🔍 Mixed mode - Fixed pizza IDs:', manuallySelectedPizzaIds);
-  console.log('🔍 Mixed mode - Num to generate:', numToGenerate);
 
   resultsDiv.innerHTML = '<p class="text-muted">🔄 Generazione in corso...</p>';
   resultsDiv.style.display = 'block';
@@ -588,67 +623,96 @@ async function generateMixedPizzas() {
       })
     });
 
-    console.log('🔍 API Response status:', response.status);
-
     const data = await response.json();
-    console.log('🔍 API Response data:', data);
 
     if (!response.ok) {
       throw new Error(data.error || 'Errore nella generazione');
     }
 
-    if (!data.suggestions || data.suggestions.length === 0) {
-      resultsDiv.innerHTML = '<p style="color: var(--color-warning);">⚠️ Nessuna pizza suggerita. Prova con parametri diversi.</p>';
-      console.warn('No suggestions returned from API');
-      return;
-    }
-
-
-    // Clear previous auto-selections FIRST (uncheck previously generated pizzas)
+    // Uncheck ALL previous auto-generated pizzas that are NOT in the current fixed list
     document.querySelectorAll('#pizzaSelection input[type="checkbox"]:checked').forEach(checkbox => {
-      // Only uncheck if it's not a manually selected pizza
-      const recipeId = checkbox.value;
-      if (!manuallySelectedPizzaIds.includes(recipeId)) {
+      if (!manuallySelectedPizzaIds.includes(checkbox.value)) {
         checkbox.checked = false;
       }
     });
 
-    // Display suggestions (this replaces the HTML content)
-    displayGeneratedPizzas(data.suggestions, resultsDiv, 'Pizze Suggerite');
+    const newSuggestions = data.suggestions;
+
+    // Se avevamo suggerimenti precedenti bloccati, li preserviamo (anche se l'API /complete potrebbe averne ritornati di nuovi)
+    const pinnedRecipesFromCurrent = currentGeneratedPizzas.filter(p =>
+      manuallySelectedPizzaIds.includes(p.id)
+    );
+
+    // Uniamo i vecchi bloccati con i nuovi suggerimenti, evitando duplicati
+    const finalSuggestions = [...pinnedRecipesFromCurrent];
+    newSuggestions.forEach(p => {
+      if (!finalSuggestions.some(existing => existing.id === p.id)) {
+        finalSuggestions.push(p);
+      }
+    });
+
+    // Display suggestions
+    displayGeneratedPizzas(finalSuggestions, resultsDiv, 'Pizze Suggerite');
     displayMetrics(data.metrics, metricsDiv);
 
-    // Auto-select suggested pizzas (replaces previous suggestions)
-    selectGeneratedPizzas(data.suggestions);
+    // Auto-select suggested pizzas
+    selectGeneratedPizzas(finalSuggestions);
 
   } catch (error) {
     console.error('Error generating mixed pizzas:', error);
-    resultsDiv.innerHTML = `< p style = "color: var(--color-error);" >❌ Errore: ${error.message}</p > `;
+    resultsDiv.innerHTML = `<p style="color: var(--color-error);">❌ Errore: ${error.message}</p>`;
   }
 }
 
 // Display generated pizzas
 function displayGeneratedPizzas(pizzas, container, title = 'Pizze Generate') {
+  currentGeneratedPizzas = pizzas;
+  renderGeneratedPizzas(container, title);
+}
+
+// Internal render function to allow easy updates
+function renderGeneratedPizzas(container, title = 'Pizze Generate') {
+  const pizzas = currentGeneratedPizzas;
   container.innerHTML = `
     <h5 style="margin: 0 0 0.75rem 0;">${title} (${pizzas.length})</h5>
     <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-      ${pizzas.map(pizza => `
-        <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
+      ${pizzas.map(pizza => {
+    const isKept = manuallySelectedPizzaIds.includes(pizza.id);
+    return `
+        <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: ${isKept ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255,255,255,0.05)'}; border-radius: 0.5rem; border: 1px solid ${isKept ? 'var(--color-primary)' : 'transparent'};">
           <div style="flex: 1;">
-            <div style="font-weight: 600;">🍕 ${pizza.name}</div>
+            <div style="font-weight: 600;">🍕 ${pizza.name} ${isKept ? '<span title="Tenuta">📌</span>' : ''}</div>
             <div style="font-size: 0.875rem; color: var(--color-gray-400);">
               ${pizza.baseIngredients.map(i => i.name || i).join(', ')}
             </div>
           </div>
-          <button 
-            class="btn-preview-generated" 
-            data-recipe-id="${pizza.id}"
-            style="padding: 0.5rem 0.75rem; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--color-primary); border-radius: 0.375rem; color: var(--color-primary); cursor: pointer; font-size: 0.875rem; white-space: nowrap;"
-            title="Vedi ingredienti"
-          >
-            👁️ Vedi
-          </button>
+          <div style="display: flex; gap: 0.25rem;">
+            <button 
+              class="btn-preview-generated" 
+              data-recipe-id="${pizza.id}"
+              style="padding: 0.5rem; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--color-primary); border-radius: 0.375rem; color: var(--color-primary); cursor: pointer; font-size: 0.875rem;"
+              title="Vedi ingredienti"
+            >
+              👁️
+            </button>
+            <button 
+              onclick="window.toggleKeepPizza('${pizza.id}')"
+              style="padding: 0.5rem; background: ${isKept ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)'}; border: 1px solid ${isKept ? 'var(--color-primary)' : 'rgba(255,255,255,0.2)'}; border-radius: 0.375rem; color: white; cursor: pointer; font-size: 0.875rem;"
+              title="${isKept ? 'Rimuovi dai fissi' : 'Tieni questa pizza'}"
+            >
+              📌
+            </button>
+            <button 
+              onclick="window.removeGeneratedPizza('${pizza.id}')"
+              style="padding: 0.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.375rem; color: var(--color-error); cursor: pointer; font-size: 0.875rem;"
+              title="Elimina suggerimento"
+            >
+              🗑️
+            </button>
+          </div>
         </div>
-      `).join('')}
+      `;
+  }).join('')}
     </div>
   `;
   container.style.display = 'block';
@@ -662,6 +726,55 @@ function displayGeneratedPizzas(pizzas, container, title = 'Pizze Generate') {
     });
   });
 }
+
+// Handler to remove a generated pizza from suggestions
+window.removeGeneratedPizza = function (recipeId) {
+  currentGeneratedPizzas = currentGeneratedPizzas.filter(p => p.id !== recipeId);
+
+  // Also uncheck in the main list
+  const checkbox = document.querySelector(`#pizzaSelection input[value="${recipeId}"]`);
+  if (checkbox) checkbox.checked = false;
+
+  // Re-render
+  const autoUI = document.getElementById('autoResults');
+  const mixedUI = document.getElementById('mixedResults');
+  const container = (autoUI && autoUI.style.display !== 'none') ? autoUI : mixedUI;
+
+  if (container) {
+    renderGeneratedPizzas(container, container.id === 'autoResults' ? 'Pizze Generate' : 'Pizze Suggerite');
+  }
+
+  // Update fixed list if it was pinned
+  if (manuallySelectedPizzaIds.includes(recipeId)) {
+    manuallySelectedPizzaIds = manuallySelectedPizzaIds.filter(id => id !== recipeId);
+    updateFixedPizzasList();
+  }
+};
+
+// Handler to toggle "keep" status of a generated pizza
+window.toggleKeepPizza = function (recipeId) {
+  if (manuallySelectedPizzaIds.includes(recipeId)) {
+    manuallySelectedPizzaIds = manuallySelectedPizzaIds.filter(id => id !== recipeId);
+  } else {
+    manuallySelectedPizzaIds.push(recipeId);
+  }
+
+  // Sync with checkboxes in the main list
+  const checkbox = document.querySelector(`#pizzaSelection input[value="${recipeId}"]`);
+  if (checkbox) checkbox.checked = manuallySelectedPizzaIds.includes(recipeId);
+
+  // Update fixed list UI
+  updateFixedPizzasList();
+
+  // Re-render suggestions to show pinned status
+  const autoUI = document.getElementById('autoResults');
+  const mixedUI = document.getElementById('mixedResults');
+  const container = (autoUI && autoUI.style.display !== 'none') ? autoUI : mixedUI;
+
+  if (container) {
+    renderGeneratedPizzas(container, container.id === 'autoResults' ? 'Pizze Generate' : 'Pizze Suggerite');
+  }
+};
 
 // Display metrics
 function displayMetrics(metrics, container) {
@@ -706,7 +819,7 @@ function selectGeneratedPizzas(pizzas) {
 
   // Select generated pizzas
   pizzas.forEach(pizza => {
-    const checkbox = document.querySelector(`#pizzaSelection input[value = "${pizza.id}"]`);
+    const checkbox = document.querySelector(`#pizzaSelection input[value="${pizza.id}"]`);
     if (checkbox) checkbox.checked = true;
   });
 }
