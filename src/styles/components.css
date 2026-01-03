@@ -76,8 +76,9 @@
 
 .recipe-modal-meta {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-3) var(--space-6);
     margin-bottom: var(--space-6);
     padding-bottom: var(--space-6);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -226,7 +227,8 @@
 
 .planner-card-info {
     display: flex;
-    gap: var(--space-6);
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-6);
     margin-bottom: var(--space-4);
     padding: var(--space-4);
     background: rgba(255, 255, 255, 0.05);
@@ -418,6 +420,14 @@
 
 .stat-label {
     color: var(--color-gray-400);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.import-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -648,7 +658,7 @@
 /* === PREPARATIONS === */
 .preparations-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--space-6);
 }
 

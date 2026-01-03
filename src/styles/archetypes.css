@@ -45,7 +45,7 @@
 /* Archetypes Grid */
 .archetypes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -271,19 +271,19 @@
   .archetypes-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .archetype-icon {
     font-size: 2rem;
   }
-  
+
   .archetype-recipes-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
-  
+
   .origin-badge {
     font-size: 0.625rem;
     padding: 0.25rem 0.5rem;
@@ -351,7 +351,7 @@
   .archetype-criteria-section {
     padding: 1rem;
   }
-  
+
   .criteria-list li {
     font-size: 0.875rem;
   }

@@ -136,7 +136,7 @@ async function showNewPizzaNightModal() {
         <div class="form-group">
           <label class="form-label">Seleziona Ospiti (Opzionale)</label>
           <p style="font-size: 0.875rem; color: var(--color-gray-400); margin-bottom: 0.5rem;">Seleziona gli ospiti da invitare. Potrai inviare email dopo aver creato la serata.</p>
-          <div id="guestSelection" style="max-height: 150px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 0.5rem; padding: 0.5rem;">
+          <div id="guestSelection" style="max-height: 150px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 0.5rem; padding: 0.25rem;">
             <!-- Guests will be loaded here -->
             <p class="text-muted text-sm">Caricamento ospiti...</p>
           </div>
@@ -813,7 +813,7 @@ function displayMetrics(metrics, container) {
   if (!metricsContent) return;
 
   metricsContent.innerHTML = `
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
       <div style="text-align: center;">
         <div style="font-size: 2rem; font-weight: 700; color: var(--color-primary);">${metrics.totalScore}</div>
         <div style="font-size: 0.875rem; color: var(--color-gray-400);">Score Totale</div>
