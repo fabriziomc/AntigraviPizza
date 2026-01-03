@@ -16,7 +16,7 @@ import { initDB, getAllRecipes, getAllPizzaNights, initCombinations, initSeedDat
 import { NAV_ITEMS, VIEWS, FLAVOR_COMBINATIONS, PREPARATIONS } from './utils/constants.js';
 import { showToast } from './utils/helpers.js';
 import { state } from './store.js';
-import { openModal, closeModal } from './modules/ui.js';
+import { openModal, closeModal, setupSidebarListeners } from './modules/ui.js';
 
 // Import view renderers
 import { renderDashboard } from './components/Dashboard.js';
@@ -251,13 +251,8 @@ function setupEventListeners() {
     }
   });
 
-  // Mobile menu toggle
-  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-  if (mobileMenuToggle) {
-    mobileMenuToggle.addEventListener('click', () => {
-      document.getElementById('sidebar').classList.toggle('mobile-open');
-    });
-  }
+  // Mobile menu toggle & sidebar behavior
+  setupSidebarListeners();
 
   // Modal backdrop click to close
   const modalBackdrop = document.getElementById('modalBackdrop');

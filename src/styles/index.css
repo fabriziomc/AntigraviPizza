@@ -224,18 +224,43 @@ a:hover {
   min-height: 100vh;
 }
 
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 44px;
+  height: 44px;
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 1.5rem;
+  z-index: calc(var(--z-sticky) + 1);
+  cursor: pointer;
+  box-shadow: var(--shadow-glow);
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+}
+
+.mobile-menu-toggle:active {
+  transform: scale(0.9);
+}
+
 /* Sidebar Navigation */
 .sidebar {
   width: 280px;
-  background: rgba(26, 31, 58, 0.8);
-  backdrop-filter: blur(10px);
+  background: rgba(10, 14, 39, 0.95);
+  backdrop-filter: blur(20px);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   padding: var(--space-6);
   position: fixed;
   height: 100vh;
   overflow-y: auto;
   z-index: var(--z-sticky);
-  transition: transform var(--transition-base);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sidebar-header {
@@ -827,9 +852,14 @@ a:hover {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
   .sidebar {
     transform: translateX(-100%);
     width: 280px;
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
   }
 
   .sidebar.mobile-open {
@@ -839,6 +869,7 @@ a:hover {
   .main-content {
     margin-left: 0;
     padding: var(--space-4);
+    padding-top: calc(var(--mobile-nav-height) + 1rem);
   }
 
   .grid-2,
@@ -862,10 +893,10 @@ a:hover {
   /* Modal responsive fixes */
   .modal,
   .modal-content {
-    max-width: 100%;
-    width: 100%;
-    margin: 0;
-    border-radius: var(--radius-lg);
+    max-width: none;
+    width: 95%;
+    margin: 0 auto;
+    border-radius: var(--radius-xl);
   }
 
   .modal-header,
@@ -881,6 +912,11 @@ a:hover {
 
   .modal-footer .btn {
     width: 100%;
+    order: 1;
+  }
+
+  .modal-footer .btn-secondary {
+    order: 2;
   }
 
   .modal-title {
@@ -889,6 +925,34 @@ a:hover {
 
   .modal-backdrop {
     padding: var(--space-2);
+    align-items: center;
+    /* Center on tablets */
+  }
+}
+
+/* Smartphone Specific */
+@media (max-width: 480px) {
+
+  .modal,
+  .modal-content {
+    width: 100%;
+    height: 100%;
+    max-height: 100dvh;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  .modal-backdrop {
+    padding: 0;
+  }
+
+  .modal-body {
+    padding-bottom: 5rem;
+    /* Space for fixed buttons if needed */
+  }
+
+  .page-title {
+    font-size: var(--text-3xl);
   }
 }
 
