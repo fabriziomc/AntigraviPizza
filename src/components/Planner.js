@@ -477,7 +477,8 @@ function setupMixedModeListeners() {
 
 // Update fixed pizzas list in mixed mode
 function updateFixedPizzasList() {
-  const checkedBoxes = document.querySelectorAll('#pizzaSelection input[type="checkbox"]:checked');
+  const checkedBoxes = Array.from(document.querySelectorAll('#pizzaSelection input[type="checkbox"]:checked'))
+    .filter(cb => !cb.classList.contains('auto-generated'));
   const fixedList = document.getElementById('fixedPizzasList');
   const generateBtn = document.getElementById('mixedGenerateBtn');
 
