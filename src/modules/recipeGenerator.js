@@ -11,6 +11,9 @@ let INGREDIENTS_CACHE = null;
 // Cache for archetype weights
 let ARCHETYPE_WEIGHTS_CACHE = null;
 
+// Configuration for generation rules
+const MAX_TOTAL_INGREDIENTS = 5;
+
 /**
  * Load ingredients from database and organize by category
  */
@@ -872,8 +875,8 @@ async function selectPreparationsForPizza(ingredients, tags) {
         }
     }
 
-    // STRATEGIA 2: Matching per stile pizza (se non abbiamo già troppe preparazioni)
-    if (preparations.length < 2) {
+    // STRATEGIA 2: Matching per stile pizza (se non abbiamo già troppe preparazioni e non superiamo il limite totale)
+    if (preparations.length < 2 && (preparations.length + cleanedIngredients.length < MAX_TOTAL_INGREDIENTS)) {
         // Pizza Bianca -> Creme
         if (!hasTomato && Math.random() > 0.4) {
             const creamOptions = allPreparations.filter(p =>
@@ -952,8 +955,8 @@ async function selectPreparationsForPizza(ingredients, tags) {
         }
     }
 
-    // STRATEGIA 3: Matching per categoria verdure specifiche
-    if (preparations.length < 2) {
+    // STRATEGIA 3: Matching per categoria verdure specifiche (se non superiamo il limite totale)
+    if (preparations.length < 2 && (preparations.length + cleanedIngredients.length < MAX_TOTAL_INGREDIENTS)) {
         // Melanzane -> Melanzane grigliate (rimuove melanzane base)
         if (ingredientNames.some(n => n.includes('melanzane'))) {
             const prep = allPreparations.find(p => p.id === 'melanzane-grigliate' || p.id === 'prep-melanzane-grigliate');
@@ -1428,8 +1431,27 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
 
     const tags = determineTags(ingredients, doughType, archetypeUsed);
 
+    // Se superiamo il limite totale di 5 ingredienti (base + preparazioni), riduciamo gli ingredienti base
+    // prima di calcolare le preparazioni, per fare spazio.
+    if (ingredients.length > MAX_TOTAL_INGREDIENTS) {
+        console.log(`⚠️ Too many ingredients (${ingredients.length}). Truncating to ${MAX_TOTAL_INGREDIENTS}.`);
+        ingredients = ingredients.slice(0, MAX_TOTAL_INGREDIENTS);
+    }
+
     // Seleziona preparazioni intelligenti e rimuovi ingredienti base sostituiti
     const { preparations, cleanedIngredients } = await selectPreparationsForPizza(ingredients, tags);
+
+    // Controllo finale di sicurezza: se la somma di ingredienti e preparazioni supera ancora il limite
+    // (potrebbe succedere se selectPreparationsForPizza aggiunge qualcosa senza rimuovere)
+    let finalIngredients = cleanedIngredients;
+    let finalPreparations = preparations;
+
+    if (finalIngredients.length + finalPreparations.length > MAX_TOTAL_INGREDIENTS) {
+        const excess = (finalIngredients.length + finalPreparations.length) - MAX_TOTAL_INGREDIENTS;
+        console.log(`⚠️ Final count still too high (${finalIngredients.length + finalPreparations.length}). Removing ${excess} base ingredients.`);
+        // Rimuoviamo gli ultimi ingredienti base per far spazio alle preparazioni
+        finalIngredients = finalIngredients.slice(0, finalIngredients.length - excess);
+    }
 
     // Detect if pizza is white (no tomato) or red (with tomato)
     const hasTomato = ingredients.some(ing =>
@@ -1464,8 +1486,8 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
         pizzaiolo,
         source: 'Generata da AntigraviPizza',
         description,
-        baseIngredients: cleanedIngredients,  // Usa ingredienti puliti (senza duplicati con preparazioni)
-        preparations,                          // Preparazioni selezionate
+        baseIngredients: finalIngredients,  // Usa ingredienti puliti e limitati
+        preparations: finalPreparations,      // Preparazioni selezionate e limitate
         instructions,
         imageUrl,
         suggestedDough,
