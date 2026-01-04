@@ -19,8 +19,8 @@ export async function renderLibrary(appState) {
 async function renderFilters(recipes) {
   const filtersContainer = document.getElementById('recipeFilters');
 
-  // Extract unique ingredients from all recipes
-  const ingredientsSet = new Set();
+  // Extract unique ingredients from all recipes with their categories
+  const ingredientsMap = new Map();
   recipes.forEach(recipe => {
     try {
       // Parse baseIngredients
@@ -29,7 +29,9 @@ async function renderFilters(recipes) {
           ? JSON.parse(recipe.baseIngredients)
           : recipe.baseIngredients;
         baseIng.forEach(ing => {
-          if (ing.name) ingredientsSet.add(ing.name);
+          if (ing.name && !ingredientsMap.has(ing.name)) {
+            ingredientsMap.set(ing.name, ing.category || 'Altro');
+          }
         });
       }
 
@@ -41,7 +43,9 @@ async function renderFilters(recipes) {
         preps.forEach(prep => {
           if (prep.id) {
             const prepData = PREPARATIONS.find(p => p.id === prep.id);
-            if (prepData) ingredientsSet.add(prepData.name);
+            if (prepData && !ingredientsMap.has(prepData.name)) {
+              ingredientsMap.set(prepData.name, prepData.category || 'Altro');
+            }
           }
         });
       }
@@ -50,7 +54,19 @@ async function renderFilters(recipes) {
     }
   });
 
-  const sortedIngredients = Array.from(ingredientsSet).sort();
+  // Group ingredients by category
+  const byCategory = {};
+  ingredientsMap.forEach((category, name) => {
+    if (!byCategory[category]) {
+      byCategory[category] = [];
+    }
+    byCategory[category].push(name);
+  });
+
+  // Sort categories and ingredients within each category
+  Object.keys(byCategory).forEach(cat => {
+    byCategory[cat].sort();
+  });
 
   filtersContainer.innerHTML = `
     <div class="filters-scroll">
@@ -62,9 +78,28 @@ async function renderFilters(recipes) {
     </div>
     
     <div class="filters-sort" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+      <div style="position: relative; flex: 1; min-width: 160px;">
+        <input 
+          type="text" 
+          id="ingredientSearch" 
+          class="sort-select" 
+          placeholder="🔍 Cerca ingrediente..."
+          style="width: 100%; padding-right: 2.5rem;"
+        >
+        <button 
+          id="clearSearch" 
+          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--color-gray-400); cursor: pointer; font-size: 1.2rem; display: none;"
+          title="Cancella ricerca"
+        >×</button>
+      </div>
+      
       <select id="ingredientFilter" class="sort-select" style="min-width: 160px;">
         <option value="all">🥘 Tutti gli ingredienti</option>
-        ${sortedIngredients.map(ing => `<option value="${ing}">${ing}</option>`).join('')}
+        ${Object.entries(byCategory).sort(([a], [b]) => a.localeCompare(b)).map(([category, ings]) => `
+          <optgroup label="${category}">
+            ${ings.map(ing => `<option value="${ing}">${ing}</option>`).join('')}
+          </optgroup>
+        `).join('')}
       </select>
 
       <select id="recipeSort" class="sort-select">
@@ -76,6 +111,56 @@ async function renderFilters(recipes) {
       </select>
     </div>
   `;
+
+  // Add search functionality
+  const searchInput = document.getElementById('ingredientSearch');
+  const ingredientFilter = document.getElementById('ingredientFilter');
+  const clearBtn = document.getElementById('clearSearch');
+
+  if (searchInput && ingredientFilter) {
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase().trim();
+
+      // Show/hide clear button
+      if (clearBtn) {
+        clearBtn.style.display = searchTerm ? 'block' : 'none';
+      }
+
+      if (!searchTerm) {
+        // Reset to "all" if search is cleared
+        ingredientFilter.value = 'all';
+        ingredientFilter.dispatchEvent(new Event('change'));
+        return;
+      }
+
+      // Find matching ingredient
+      let found = false;
+      const options = ingredientFilter.querySelectorAll('option');
+      for (const option of options) {
+        if (option.value !== 'all' && option.textContent.toLowerCase().includes(searchTerm)) {
+          ingredientFilter.value = option.value;
+          ingredientFilter.dispatchEvent(new Event('change'));
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        // If no exact match, just trigger the filter with current value
+        ingredientFilter.dispatchEvent(new Event('change'));
+      }
+    });
+
+    // Clear button functionality
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearBtn.style.display = 'none';
+        ingredientFilter.value = 'all';
+        ingredientFilter.dispatchEvent(new Event('change'));
+      });
+    }
+  }
 }
 
 async function renderRecipes(state) {

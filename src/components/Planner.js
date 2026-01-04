@@ -1066,29 +1066,113 @@ function populatePlannerIngredientsSelector(recipes) {
   const selector = document.getElementById('plannerIngredientsSelector');
   if (!selector) return;
 
-  // Extract all ingredients from recipes
-  const ingredients = new Set();
+  // Extract all ingredients from recipes with their categories
+  const ingredientsMap = new Map();
   recipes.forEach(recipe => {
-    (recipe.baseIngredients || []).forEach(ing => ingredients.add(ing.name || ing));
+    (recipe.baseIngredients || []).forEach(ing => {
+      const name = ing.name || ing;
+      if (!ingredientsMap.has(name)) {
+        ingredientsMap.set(name, ing.category || 'Altro');
+      }
+    });
     (recipe.preparations || []).forEach(prep => {
       if (prep.ingredients) {
-        prep.ingredients.forEach(ing => ingredients.add(ing.name || ing));
+        prep.ingredients.forEach(ing => {
+          const name = ing.name || ing;
+          if (!ingredientsMap.has(name)) {
+            ingredientsMap.set(name, ing.category || 'Altro');
+          }
+        });
       }
     });
   });
 
-  const sorted = Array.from(ingredients).sort();
+  // Group by category
+  const byCategory = {};
+  ingredientsMap.forEach((category, name) => {
+    if (!byCategory[category]) {
+      byCategory[category] = [];
+    }
+    byCategory[category].push(name);
+  });
+
+  // Sort categories and ingredients
+  Object.keys(byCategory).forEach(cat => {
+    byCategory[cat].sort();
+  });
+
   plannerSuggestedIngredients = [];
 
   selector.innerHTML = `
-    <select id="plannerIngredientSelect" class="form-select" style="flex: 1;">
-      <option value="">Aggiungi ingrediente desiderato...</option>
-      ${sorted.map(ing => `<option value="${ing}">${ing}</option>`).join('')}
-    </select>
-    <button type="button" class="btn btn-sm btn-primary" onclick="window.addPlannerSuggestedIngredient()" style="min-width: 44px; font-size: 1.25rem; font-weight: bold;">
-      +
-    </button>
+    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+      <div style="position: relative; flex: 1; min-width: 200px;">
+        <input 
+          type="text" 
+          id="plannerIngredientSearch" 
+          class="form-select" 
+          placeholder="🔍 Cerca ingrediente..."
+          style="width: 100%; padding-right: 2.5rem;"
+        >
+        <button 
+          id="plannerClearSearch" 
+          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--color-gray-400); cursor: pointer; font-size: 1.2rem; display: none;"
+          title="Cancella ricerca"
+        >×</button>
+      </div>
+      
+      <select id="plannerIngredientSelect" class="form-select" style="flex: 1; min-width: 200px;">
+        <option value="">Aggiungi ingrediente desiderato...</option>
+        ${Object.entries(byCategory).sort(([a], [b]) => a.localeCompare(b)).map(([category, ings]) => `
+          <optgroup label="${category}">
+            ${ings.map(ing => `<option value="${ing}">${ing}</option>`).join('')}
+          </optgroup>
+        `).join('')}
+      </select>
+      
+      <button type="button" class="btn btn-sm btn-primary" onclick="window.addPlannerSuggestedIngredient()" style="min-width: 44px; font-size: 1.25rem; font-weight: bold;">
+        +
+      </button>
+    </div>
   `;
+
+  // Add search functionality
+  const searchInput = document.getElementById('plannerIngredientSearch');
+  const ingredientSelect = document.getElementById('plannerIngredientSelect');
+  const clearBtn = document.getElementById('plannerClearSearch');
+
+  if (searchInput && ingredientSelect) {
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase().trim();
+
+      // Show/hide clear button
+      if (clearBtn) {
+        clearBtn.style.display = searchTerm ? 'block' : 'none';
+      }
+
+      if (!searchTerm) {
+        ingredientSelect.value = '';
+        return;
+      }
+
+      // Find matching ingredient
+      const options = ingredientSelect.querySelectorAll('option');
+      for (const option of options) {
+        if (option.value && option.textContent.toLowerCase().includes(searchTerm)) {
+          ingredientSelect.value = option.value;
+          break;
+        }
+      }
+    });
+
+    // Clear button functionality
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearBtn.style.display = 'none';
+        ingredientSelect.value = '';
+      });
+    }
+  }
 
   // Clear chips
   const chipsContainer = document.getElementById('plannerSelectedIngredients');
