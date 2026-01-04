@@ -210,11 +210,9 @@ function renderIngredientsList() {
                 <button class="btn btn-sm btn-secondary" onclick="window.editIngredient('${ingredient.id}')">
                     <span>✏️</span> Modifica
                 </button>
-                ${ingredient.isCustom ? `
-                    <button class="btn btn-sm btn-danger" onclick="window.confirmDeleteIngredient('${ingredient.id}', '${ingredient.name}')">
-                        <span>🗑️</span> Elimina
-                    </button>
-                ` : ''}
+                <button class="btn btn-sm btn-danger" onclick="window.confirmDeleteIngredient('${ingredient.id}', '${ingredient.name}')">
+                    <span>🗑️</span> Elimina
+                </button>
             </div>
         </div>
     `).join('');
