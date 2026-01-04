@@ -1265,11 +1265,17 @@ router.delete('/ingredients/:id', async (req, res) => {
 // PATCH ingredient (update category or other properties)
 router.patch('/ingredients/:id', async (req, res) => {
     try {
+        console.log('[PATCH /ingredients/:id] Updating ingredient:', req.params.id);
+        console.log('[PATCH /ingredients/:id] Updates:', JSON.stringify(req.body));
+
         const ingredient = await dbAdapter.updateIngredient(req.params.id, req.body);
+
+        console.log('[PATCH /ingredients/:id] Update successful');
         res.json(ingredient);
     } catch (err) {
-        console.error('[PATCH /ingredients/:id] Error:', err);
-        res.status(500).json({ error: err.message });
+        console.error('[PATCH /ingredients/:id] Error:', err.message);
+        console.error('[PATCH /ingredients/:id] Stack:', err.stack);
+        res.status(500).json({ error: err.message, details: err.stack });
     }
 });
 

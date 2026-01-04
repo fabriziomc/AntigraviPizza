@@ -1011,14 +1011,21 @@ class DatabaseAdapter {
     }
 
     async updateIngredient(id, updates) {
+        console.log(`[updateIngredient] id: ${id}, updates:`, JSON.stringify(updates));
+
         // Fetch existing ingredient first
         const existing = await this.getIngredientById(id);
         if (!existing) {
+            console.error(`[updateIngredient] Ingredient ${id} not found`);
             throw new Error(`Ingredient with id ${id} not found`);
         }
 
+        console.log(`[updateIngredient] Existing ingredient:`, existing.name);
+
         // Merge updates with existing data
         const ingredient = { ...existing, ...updates };
+
+        console.log(`[updateIngredient] Merged ingredient category:`, ingredient.category);
 
         // Helper to safely stringify JSON fields
         const safeStringify = (value, fallback = null) => {
