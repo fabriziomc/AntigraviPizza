@@ -296,19 +296,22 @@ class DatabaseAdapter {
                 night.createdAt
             );
         } else {
-            await this.db.execute(`
-                INSERT INTO PizzaNights (id, name, date, guestCount, selectedPizzas, selectedGuests, notes, status, createdAt)
-                VALUES (@id, @name, @date, @guestCount, @selectedPizzas, @selectedGuests, @notes, @status, @createdAt)
-            `, {
-                id: night.id,
-                name: night.name,
-                date: night.date,
-                guestCount: night.guestCount,
-                selectedPizzas: selectedPizzasJson,
-                selectedGuests: selectedGuestsJson,
-                notes: night.notes || '',
-                status: night.status,
-                createdAt: night.createdAt
+            await this.db.execute({
+                sql: `INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                args: [
+                    night.id,
+                    night.name,
+                    night.date,
+                    night.guestCount,
+                    night.selectedDough || null,
+                    availableIngredientsJson,
+                    selectedPizzasJson,
+                    selectedGuestsJson,
+                    night.notes || '',
+                    night.status,
+                    night.createdAt
+                ]
             });
         }
         return night;
@@ -338,20 +341,23 @@ class DatabaseAdapter {
                 id
             );
         } else {
-            await this.db.execute(`
-                UPDATE PizzaNights 
-                SET name=@name, date=@date, guestCount=@guestCount, selectedPizzas=@selectedPizzas, 
-                    selectedGuests=@selectedGuests, notes=@notes, status=@status
-                WHERE id=@id
-            `, {
-                id,
-                name: night.name,
-                date: night.date,
-                guestCount: night.guestCount,
-                selectedPizzas: selectedPizzasJson,
-                selectedGuests: selectedGuestsJson,
-                notes: night.notes || '',
-                status: night.status
+            await this.db.execute({
+                sql: `UPDATE PizzaNights 
+                      SET name=?, date=?, guestCount=?, selectedDough=?, availableIngredients=?, 
+                          selectedPizzas=?, selectedGuests=?, notes=?, status=?
+                      WHERE id=?`,
+                args: [
+                    night.name,
+                    night.date,
+                    night.guestCount,
+                    night.selectedDough || null,
+                    availableIngredientsJson,
+                    selectedPizzasJson,
+                    selectedGuestsJson,
+                    night.notes || '',
+                    night.status,
+                    id
+                ]
             });
         }
         return night;

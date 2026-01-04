@@ -412,6 +412,24 @@ async function showNewPizzaNightModal() {
 
   // Load guests after modal is rendered  
   loadGuestsIntoModal();
+
+  // Add listener to update guest count automatically based on selection
+  const guestSelectionContainer = document.getElementById('guestSelection');
+  const guestCountInput = document.querySelector('input[name="guestCount"]');
+  if (guestSelectionContainer && guestCountInput) {
+    guestSelectionContainer.addEventListener('change', (e) => {
+      if (e.target.name === 'selectedGuests') {
+        const checkedGuests = guestSelectionContainer.querySelectorAll('input[name="selectedGuests"]:checked');
+        const checkedCount = checkedGuests.length;
+        if (checkedCount > 0) {
+          guestCountInput.value = checkedCount;
+        } else {
+          // If no guests selected, reset to default
+          guestCountInput.value = DEFAULT_GUEST_COUNT;
+        }
+      }
+    });
+  }
 }
 
 // Setup listeners for selection mode radio buttons
