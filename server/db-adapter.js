@@ -317,7 +317,15 @@ class DatabaseAdapter {
         return night;
     }
 
-    async updatePizzaNight(id, night) {
+    async updatePizzaNight(id, updates) {
+        // Fetch current night to merge with updates
+        const currentNight = await this.getPizzaNightById(id);
+        if (!currentNight) {
+            throw new Error(`Pizza night with id ${id} not found`);
+        }
+
+        const night = { ...currentNight, ...updates };
+
         const selectedPizzasJson = JSON.stringify(night.selectedPizzas || []);
         const selectedGuestsJson = JSON.stringify(night.selectedGuests || []);
         const availableIngredientsJson = JSON.stringify(night.availableIngredients || []);

@@ -855,6 +855,27 @@
     color: var(--color-white);
 }
 
+/* === FAVORITE TOGGLE (PLANNER) === */
+.btn-fav-toggle,
+.btn-fav-selection {
+    opacity: 0.3;
+    filter: grayscale(1);
+    transition: all var(--transition-base);
+}
+
+.btn-fav-toggle[data-favorite="true"],
+.btn-fav-selection[data-favorite="true"] {
+    opacity: 1;
+    filter: grayscale(0);
+}
+
+.btn-fav-toggle:hover,
+.btn-fav-selection:hover {
+    opacity: 1 !important;
+    filter: grayscale(0) !important;
+    transform: scale(1.3);
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
     .preparations-grid {
