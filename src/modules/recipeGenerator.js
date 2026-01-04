@@ -1463,23 +1463,6 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
         imageUrl = 'https://via.placeholder.com/800x600/667eea/ffffff?text=🍕';
     }
 
-    // --- DESCRIPTION FINALIZATION ---
-    // Generate description based on FINAL ingredients list after truncation and deduplication
-    const finalAllNames = [
-        ...uniquePreparations.map(p => p.name || p.id),
-        ...uniqueBaseIngredients.filter(i => !['Fior di latte', 'Provola affumicata', 'Mozzarella', 'Pomodoro San Marzano'].includes(i.name)).map(i => i.name)
-    ].slice(0, 3);
-
-    if (usePredefinedCombo || !description || description.includes('Pizza Incompleta')) {
-        // For predefined combos or incomplete, we already have a specialized logic or name
-        if (!description || usePredefinedCombo) {
-            description = `Una ${suggestedDough.toLowerCase()} con ${finalAllNames.join(' e ').toLowerCase()}, creata secondo la tradizione.`;
-        }
-    } else {
-        // For archetypes, we regenerate the description to ensure only final ingredients are mentioned
-        description = generateArchetypeDescription(archetypeUsed, uniqueBaseIngredients, uniquePreparations, suggestedDough);
-    }
-
     // --- FINAL SAFETY DEDUPLICATION ---
     // Ensure baseIngredients and preparations are internally and mutually unique
     const seenNames = new Set();
@@ -1503,6 +1486,23 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
             uniqueBaseIngredients.push(ing);
         }
     });
+
+    // --- DESCRIPTION FINALIZATION ---
+    // Generate description based on FINAL ingredients list after truncation and deduplication
+    const finalAllNames = [
+        ...uniquePreparations.map(p => p.name || p.id),
+        ...uniqueBaseIngredients.filter(i => !['Fior di latte', 'Provola affumicata', 'Mozzarella', 'Pomodoro San Marzano'].includes(i.name)).map(i => i.name)
+    ].slice(0, 3);
+
+    if (usePredefinedCombo || !description || description.includes('Pizza Incompleta')) {
+        // For predefined combos or incomplete, we already have a specialized logic or name
+        if (!description || usePredefinedCombo) {
+            description = `Una ${suggestedDough.toLowerCase()} con ${finalAllNames.join(' e ').toLowerCase()}, creata secondo la tradizione.`;
+        }
+    } else {
+        // For archetypes, we regenerate the description to ensure only final ingredients are mentioned
+        description = generateArchetypeDescription(archetypeUsed, uniqueBaseIngredients, uniquePreparations, suggestedDough);
+    }
 
     return {
         name: pizzaName,
