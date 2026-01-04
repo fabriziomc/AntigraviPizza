@@ -47,6 +47,9 @@ async function initApp() {
     await initDB();
     console.log('✅ Database initialized');
 
+    // Load and display version
+    loadVersion();
+
     // Initialize combinations (with error handling)
     try {
       await initCombinations(FLAVOR_COMBINATIONS);
@@ -295,6 +298,24 @@ window.navigateToView = navigateToView;
 export async function refreshData() {
   await loadData();
   await renderCurrentView();
+}
+
+// ============================================
+// VERSION DISPLAY
+// ============================================
+
+async function loadVersion() {
+  try {
+    const response = await fetch('/api/version');
+    const data = await response.json();
+    const versionElement = document.getElementById('appVersion');
+    if (versionElement) {
+      versionElement.textContent = data.version;
+      versionElement.title = `Deployed: ${new Date(data.timestamp).toLocaleString()}`;
+    }
+  } catch (err) {
+    console.error('Could not load version:', err);
+  }
 }
 
 // ============================================

@@ -1221,6 +1221,26 @@ router.get('/status', async (req, res) => {
 });
 
 // ==========================================
+// VERSION INFO
+// ==========================================
+
+// GET version info (commit hash)
+router.get('/version', (req, res) => {
+    try {
+        const { execSync } = require('child_process');
+        let version = 'unknown';
+        try {
+            version = execSync('git rev-parse --short HEAD').toString().trim();
+        } catch (err) {
+            console.error('Could not get git commit:', err.message);
+        }
+        res.json({ version, timestamp: new Date().toISOString() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ==========================================
 // INGREDIENT MANAGEMENT
 // ==========================================
 
