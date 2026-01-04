@@ -1220,4 +1220,30 @@ router.get('/status', async (req, res) => {
     }
 });
 
+// ==========================================
+// INGREDIENT MANAGEMENT
+// ==========================================
+
+// DELETE ingredient
+router.delete('/ingredients/:id', async (req, res) => {
+    try {
+        await dbAdapter.deleteIngredient(req.params.id);
+        res.json({ message: 'Ingredient deleted successfully' });
+    } catch (err) {
+        console.error('[DELETE /ingredients/:id] Error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PATCH ingredient (update category or other properties)
+router.patch('/ingredients/:id', async (req, res) => {
+    try {
+        const ingredient = await dbAdapter.updateIngredient(req.params.id, req.body);
+        res.json(ingredient);
+    } catch (err) {
+        console.error('[PATCH /ingredients/:id] Error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 export default router;

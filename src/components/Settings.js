@@ -247,12 +247,29 @@ export async function renderSettings() {
             </div>
           </div>
         </section>
+
+        <!-- Ingredient Management Section -->
+        <section class="settings-section">
+          <h2>🥘 Gestione Ingredienti</h2>
+          <div class="section-content">
+            <p style="color: var(--color-gray-300); margin-bottom: 1.5rem;">
+              Gestisci gli ingredienti del database: elimina quelli fake o cambia la loro categoria.
+            </p>
+            
+            <div id="ingredientsListContainer" style="margin-top: 1rem;">
+              <div style="text-align: center; padding: 2rem; color: var(--color-gray-400);">
+                Caricamento ingredienti...
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   `;
 
   setupEventListeners();
   populateArchetypeWeights(); // Load and display archetype weights
+  loadIngredientsForManagement(); // Load ingredients list
 }
 
 /**
@@ -869,4 +886,130 @@ function updateTotalWeight() {
     totalElement.textContent = total;
     totalElement.style.color = total === 100 ? 'var(--color-success)' : 'var(--color-warning)';
   }
+}
+
+// ============================================
+// INGREDIENT MANAGEMENT FUNCTIONS
+// ============================================
+
+const INGREDIENT_CATEGORIES = [
+  'Formaggi',
+  'Carni e Salumi',
+  'Verdure',
+  'Pesce e Frutti di Mare',
+  'Frutta e Frutta Secca',
+  'Basi e Salse',
+  'Condimenti e Spezie',
+  'Altro'
+];
+
+async function loadIngredientsForManagement() {
+  const container = document.getElementById('ingredientsListContainer');
+  if (!container) return;
+
+  try {
+    const response = await fetch('/api/ingredients');
+    const ingredients = await response.json();
+
+    // Group by category
+    const byCategory = {};
+    ingredients.forEach(ing => {
+      const cat = ing.category || 'Altro';
+      if (!byCategory[cat]) byCategory[cat] = [];
+      byCategory[cat].push(ing);
+    });
+
+    // Render grouped ingredients
+    container.innerHTML = Object.entries(byCategory)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([category, ings]) => `
+        <div style="margin-bottom: 2rem;">
+          <h3 style="color: var(--color-primary); margin-bottom: 1rem; font-size: 1.1rem;">
+            ${category} (${ings.length})
+          </h3>
+          <div style="display: grid; gap: 0.5rem;">
+            ${ings.map(ing => `
+              <div class="ingredient-row" data-id="${ing.id}" style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem;">
+                <span style="flex: 1; font-weight: 500;">${ing.name}</span>
+                <select class="category-selector" data-id="${ing.id}" style="padding: 0.4rem; border-radius: 0.25rem; background: var(--color-bg-secondary); color: var(--color-text); border: 1px solid var(--color-border);">
+                  ${INGREDIENT_CATEGORIES.map(cat =>
+        `<option value="${cat}" ${cat === category ? 'selected' : ''}>${cat}</option>`
+      ).join('')}
+                </select>
+                <button class="btn btn-sm btn-danger delete-ingredient" data-id="${ing.id}" data-name="${ing.name}" style="min-width: auto; padding: 0.4rem 0.8rem;">
+                  🗑️ Elimina
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+    // Attach event listeners
+    attachIngredientManagementListeners();
+  } catch (err) {
+    console.error('Error loading ingredients:', err);
+    container.innerHTML = `
+      <div style="text-align: center; padding: 2rem; color: var(--color-error);">
+        Errore nel caricamento degli ingredienti
+      </div>
+    `;
+  }
+}
+
+function attachIngredientManagementListeners() {
+  // Delete buttons
+  document.querySelectorAll('.delete-ingredient').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const id = e.target.dataset.id;
+      const name = e.target.dataset.name;
+
+      if (confirm(`Sei sicuro di voler eliminare "${name}"?`)) {
+        try {
+          const response = await fetch(`/api/ingredients/${id}`, { method: 'DELETE' });
+          if (response.ok) {
+            showToast(`Ingrediente "${name}" eliminato con successo`, 'success');
+            loadIngredientsForManagement(); // Reload list
+          } else {
+            throw new Error('Delete failed');
+          }
+        } catch (err) {
+          console.error('Error deleting ingredient:', err);
+          showToast(`Errore nell'eliminazione di "${name}"`, 'error');
+        }
+      }
+    });
+  });
+
+  // Category selectors
+  document.querySelectorAll('.category-selector').forEach(select => {
+    select.addEventListener('change', async (e) => {
+      const id = e.target.dataset.id;
+      const newCategory = e.target.value;
+      const row = e.target.closest('.ingredient-row');
+      const name = row.querySelector('span').textContent;
+
+      try {
+        const response = await fetch(`/api/ingredients/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category: newCategory })
+        });
+
+        if (response.ok) {
+          showToast(`"${name}" spostato in ${newCategory}`, 'success');
+          loadIngredientsForManagement(); // Reload to resort
+        } else {
+          throw new Error('Update failed');
+        }
+      } catch (err) {
+        console.error('Error updating category:', err);
+        showToast(`Errore nel cambio categoria per "${name}"`, 'error');
+        e.target.value = e.target.dataset.originalValue || 'Altro'; // Revert
+      }
+    });
+
+    // Store original value
+    select.dataset.originalValue = select.value;
+  });
 }
