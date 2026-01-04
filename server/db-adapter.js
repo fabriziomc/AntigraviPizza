@@ -1010,6 +1010,20 @@ class DatabaseAdapter {
         return ingredient;
     }
 
+    // Category name to UUID mapping for Turso (which uses categoryId instead of category text)
+    static CATEGORY_UUID_MAP = {
+        'Erbe e Spezie': '1906de1a-a1ea-4398-99e1-758c47c091c7',
+        'Frutta e Frutta Secca': '32b1230e-f71b-4cfd-832c-05c9e411d143',
+        'Formaggi': '3dbbfdeb-b431-426b-8651-4420c3516631',
+        'Pesce e Frutti di Mare': '59c43017-0e9e-4158-b1cb-9f17824aee42',
+        'Verdure e Ortaggi': '6d6d0249-55a7-4340-a6bf-419c9326a1f0',
+        'Latticini': '80a97e5f-8907-47bc-9d9f-848d38ebb5db',
+        'Impasti': 'badfb995-b4f3-4a2a-bcda-fd91e015132a',
+        'Altro': 'c0667350-c6b3-406e-9cd2-1208bd3b41fa',
+        'Carni e Salumi': 'ca899f64-0f6f-43a0-8d88-821b54be31a4',
+        'Basi e Salse': 'e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5'
+    };
+
     async updateIngredient(id, updates) {
         console.log(`[updateIngredient] id: ${id}, updates:`, JSON.stringify(updates));
 
@@ -1065,18 +1079,21 @@ class DatabaseAdapter {
             console.log(`[updateIngredient] Args:`, [ingredient.name, ingredient.category, ingredient.subcategory, ingredient.minWeight, ingredient.maxWeight, ingredient.defaultUnit, ingredient.postBake, ingredient.phase, 'seasonJson', 'allergensJson', 'tagsJson', id]);
 
             try {
-                // DELETE+INSERT workaround for Turso UPDATE bug
+                // DELETE+INSERT workaround for Turso (uses categoryId UUID instead of category text)
+                const categoryUuid = DatabaseAdapter.CATEGORY_UUID_MAP[ingredient.category] || DatabaseAdapter.CATEGORY_UUID_MAP['Altro'];
+                console.log(`[updateIngredient] Converting category "${ingredient.category}" → UUID "${categoryUuid}"`);
+
                 await this.db.execute({
                     sql: 'DELETE FROM Ingredients WHERE id = ?',
                     args: [id]
                 });
                 await this.db.execute({
-                    sql: `INSERT INTO Ingredients (id, name, category, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded)
+                    sql: `INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded)
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     args: [
                         id,
                         ingredient.name,
-                        ingredient.category,
+                        categoryUuid, // Use UUID instead of text
                         ingredient.subcategory || null,
                         ingredient.minWeight || null,
                         ingredient.maxWeight || null,
