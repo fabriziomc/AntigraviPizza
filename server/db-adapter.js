@@ -1010,7 +1010,16 @@ class DatabaseAdapter {
         return ingredient;
     }
 
-    async updateIngredient(id, ingredient) {
+    async updateIngredient(id, updates) {
+        // Fetch existing ingredient first
+        const existing = await this.getIngredientById(id);
+        if (!existing) {
+            throw new Error(`Ingredient with id ${id} not found`);
+        }
+
+        // Merge updates with existing data
+        const ingredient = { ...existing, ...updates };
+
         const seasonJson = ingredient.season ? JSON.stringify(ingredient.season) : null;
         const allergensJson = JSON.stringify(ingredient.allergens || []);
         const tagsJson = JSON.stringify(ingredient.tags || []);
