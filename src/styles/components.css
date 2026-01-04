@@ -101,6 +101,21 @@
     margin-bottom: var(--space-8);
 }
 
+.recipe-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    /* Default to 1 column for mobile */
+    gap: var(--space-8);
+    margin-bottom: var(--space-8);
+}
+
+@media (min-width: 768px) {
+    .recipe-modal-grid {
+        grid-template-columns: 1fr 1fr;
+        /* Switch to 2 columns for desktop */
+    }
+}
+
 .recipe-modal-section-title {
     font-size: var(--text-xl);
     font-weight: 700;

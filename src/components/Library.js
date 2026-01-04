@@ -358,7 +358,7 @@ async function showRecipeModal(recipeId) {
       
       ${recipe.description ? `<p>${recipe.description}</p>` : ''}
       
-      <div class="recipe-modal-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+      <div class="recipe-modal-grid">
         <!-- IMPASTO SUGGERITO SECTION -->
         <div class="recipe-section-group">
             <h3 class="recipe-modal-section-title" style="border-bottom: 1px solid var(--color-primary); padding-bottom: 0.5rem;">🥣 Impasto</h3>

@@ -1152,7 +1152,7 @@ async function showPizzaPreviewInPlanner(recipeId) {
 
       ${recipe.description ? `<p style="margin-bottom: 1.5rem; color: var(--color-gray-300);">${recipe.description}</p>` : ''}
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+      <div class="recipe-modal-grid">
         <div>
           <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--color-primary);">🥗 Ingredienti Base</h3>
           ${baseIngredients.length > 0 ? `
