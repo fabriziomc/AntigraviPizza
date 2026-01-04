@@ -1096,6 +1096,32 @@ function addIngredientUniquely(list, namesList, ingredient, options = {}) {
 }
 
 /**
+ * Check if ingredients array already contains an ingredient from a specific category or with specific tags
+ * Used to avoid adding redundant ingredients when user provides forced/suggested ingredients
+ */
+function checkIfCategoryAlreadyCovered(ingredientsList, category = null, tags = []) {
+    if (!ingredientsList || ingredientsList.length === 0) return false;
+
+    // Check by category
+    if (category) {
+        const hasCategoryMatch = ingredientsList.some(ing =>
+            ing.category && ing.category.toLowerCase() === category.toLowerCase()
+        );
+        if (hasCategoryMatch) return true;
+    }
+
+    // Check by tags
+    if (tags && tags.length > 0) {
+        return ingredientsList.some(ing => {
+            if (!ing.tags || !Array.isArray(ing.tags)) return false;
+            return tags.some(tag => ing.tags.includes(tag));
+        });
+    }
+
+    return false;
+}
+
+/**
  * Funzione core di generazione (esportata per test e uso diretto)
  */
 export async function generateRecipe(selectedArchetype, combinations = [], INGREDIENTS_DB = null, existingNames = [], suggestedIngredients = []) {
@@ -1176,10 +1202,14 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
                 const fruit = fruitArr[0];
                 const crunch = crunchArr[0];
 
-                if (cheese) {
-                    addIngredientUniquely(ingredients, mainIngredientNames, cheese, { quantity: 80, category: 'Formaggi', phase: 'topping' });
-                } else missingSlots.push('Formaggio sapido');
+                // Only add cheese if not already covered by forced ingredients
+                if (!checkIfCategoryAlreadyCovered(ingredients, 'Formaggi', ['cheese_blue', 'cheese_soft', 'cheese_aged'])) {
+                    if (cheese) {
+                        addIngredientUniquely(ingredients, mainIngredientNames, cheese, { quantity: 80, category: 'Formaggi', phase: 'topping' });
+                    } else missingSlots.push('Formaggio sapido');
+                }
 
+                // Fruit is usually needed for this archetype
                 if (fruit) {
                     addIngredientUniquely(ingredients, mainIngredientNames, fruit, { quantity: 60, category: 'Frutta e Frutta Secca', phase: 'topping', postBake: fruit.name !== 'Pere' });
                 } else missingSlots.push('Frutta dolce');
@@ -1206,13 +1236,19 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
                     addIngredientUniquely(ingredients, mainIngredientNames, cream, { quantity: (cream.category === 'Salsa' || cream.category === 'Basi e Salse') ? 80 : 15, category: 'Basi e Salse', phase: 'topping', postBake: cream.postBake });
                 } else missingSlots.push('Crema/Tartufo');
 
-                if (mushroom) {
-                    addIngredientUniquely(ingredients, mainIngredientNames, mushroom, { quantity: 100, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
-                } else missingSlots.push('Funghi');
+                // Only add mushrooms if not already covered
+                if (!checkIfCategoryAlreadyCovered(ingredients, 'Verdure e Ortaggi', ['vegetable_mushrooms'])) {
+                    if (mushroom) {
+                        addIngredientUniquely(ingredients, mainIngredientNames, mushroom, { quantity: 100, category: 'Verdure e Ortaggi', phase: 'topping', postBake: false });
+                    } else missingSlots.push('Funghi');
+                }
 
-                if (meat) {
-                    addIngredientUniquely(ingredients, mainIngredientNames, meat, { quantity: 80, category: 'Carni e Salumi', phase: 'topping', postBake: meat.postBake });
-                } else missingSlots.push('Carne intensa');
+                // Only add meat if not already covered by forced ingredients  
+                if (!checkIfCategoryAlreadyCovered(ingredients, 'Carni e Salumi', ['meat_cured_intense', 'meat_cooked', 'meat_fatty'])) {
+                    if (meat) {
+                        addIngredientUniquely(ingredients, mainIngredientNames, meat, { quantity: 80, category: 'Carni e Salumi', phase: 'topping', postBake: meat.postBake });
+                    } else missingSlots.push('Carne intensa');
+                }
 
                 addIngredientUniquely(ingredients, null, { name: 'Provola affumicata', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
                 break;
