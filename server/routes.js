@@ -81,6 +81,16 @@ router.delete('/recipes/:id', async (req, res) => {
     }
 });
 
+// Sync all recipe ratings based on pizza nights
+router.post('/recipes/sync-ratings', async (req, res) => {
+    try {
+        const results = await dbAdapter.recalculateAllRecipeRatings();
+        res.json({ message: 'Ratings synced successfully', results });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ==========================================
 // PIZZA NIGHTS
 // ==========================================

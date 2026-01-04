@@ -196,7 +196,14 @@ function createRecipeCard(recipe) {
       </button>
       ${originBadge}
       <div class="recipe-card-body">
-        <h3 class="recipe-card-title">${recipe.name}</h3>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <h3 class="recipe-card-title" style="margin: 0;">${recipe.name}</h3>
+          ${recipe.rating > 0 ? `
+            <div class="recipe-card-rating" title="Valutazione media degli ospiti">
+              ⭐ ${Number(recipe.rating).toFixed(1)}
+            </div>
+          ` : ''}
+        </div>
         <div class="recipe-card-tags">
           ${recipe.tags.slice(0, 3).map(tag => `
             <span class="tag">${tag}</span>

@@ -362,7 +362,63 @@ class DatabaseAdapter {
         if (!pizza.ratings) pizza.ratings = [];
         pizza.ratings.push(Number(rating));
 
-        return await this.updatePizzaNight(nightId, { selectedPizzas: pizzas });
+        const updatedNight = await this.updatePizzaNight(nightId, { selectedPizzas: pizzas });
+
+        // Sync global rating for the recipe
+        await this.syncRecipeRating(recipeId);
+
+        return updatedNight;
+    }
+
+    async syncRecipeRating(recipeId) {
+        // Fetch all pizza nights to aggregate ratings
+        let allNights;
+        if (this.isSQLite) {
+            allNights = this.db.prepare('SELECT selectedPizzas FROM PizzaNights').all().map(n => this.parsePizzaNight(n));
+        } else {
+            const result = await this.db.execute('SELECT selectedPizzas FROM PizzaNights');
+            allNights = result.rows.map(n => this.parsePizzaNight(n));
+        }
+
+        let totalScore = 0;
+        let totalVotes = 0;
+
+        allNights.forEach(night => {
+            const pizzas = night.selectedPizzas || [];
+            const pizza = pizzas.find(p => (p.recipeId || p.id) === recipeId);
+            if (pizza && pizza.ratings && pizza.ratings.length > 0) {
+                pizza.ratings.forEach(v => {
+                    totalScore += Number(v);
+                    totalVotes++;
+                });
+            }
+        });
+
+        const average = totalVotes > 0 ? (totalScore / totalVotes) : 0;
+
+        // Update recipe table with the new average rating
+        if (this.isSQLite) {
+            this.db.prepare('UPDATE Recipes SET rating = ? WHERE id = ?').run(average, recipeId);
+        } else {
+            await this.db.execute({
+                sql: 'UPDATE Recipes SET rating = ? WHERE id = ?',
+                args: [average, recipeId]
+            });
+        }
+        return { average, totalVotes };
+    }
+
+    async recalculateAllRecipeRatings() {
+        // Get all recipes
+        const recipes = await this.getAllRecipes();
+        const results = [];
+
+        for (const recipe of recipes) {
+            const syncResult = await this.syncRecipeRating(recipe.id);
+            results.push({ id: recipe.id, name: recipe.name, ...syncResult });
+        }
+
+        return results;
     }
 
     async deletePizzaNight(id) {
