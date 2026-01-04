@@ -245,17 +245,31 @@ async function generateWithPollinations(prompt, options = {}) {
     // Use turbo model since flux is down
     const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=turbo&width=800&height=600&nologo=true&seed=${seed}`;
 
-    // Verify the URL is accessible
+    // Verify the image content is not a rate-limit placeholder
     const response = await fetch(imageUrl, {
-        method: 'HEAD',
-        signal: AbortSignal.timeout(10000)
+        method: 'GET',
+        signal: AbortSignal.timeout(15000)
     });
 
     if (!response.ok) {
         throw new Error(`Pollinations image not accessible: ${response.status}`);
     }
 
-    return imageUrl;
+    const blob = await response.blob();
+
+    // Check for the "RATE LIMITS" placeholder signature (identified as 1,396,239 bytes)
+    const PLATEHOLDER_SIZE = 1396239;
+    if (blob.size === PLATEHOLDER_SIZE) {
+        throw new Error('Pollinations rate limit reached (returned placeholder image)');
+    }
+
+    // Convert to Data URL to persist the actual image and avoid reloading issues
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
 }
 
 /**
