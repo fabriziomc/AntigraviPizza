@@ -408,22 +408,77 @@ async function populateAutoIngredientsSelector() {
     });
 
     selector.innerHTML = `
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <select id="autoIngredientSelect" class="form-select" style="flex: 1;">
-                <option value="">Aggiungi un ingrediente suggerito...</option>
-                ${Object.entries(byCategory).map(([category, ings]) => `
-                    <optgroup label="${category}">
-                        ${ings.map(ing => `
-                            <option value="${ing.id}">${ing.name}</option>
-                        `).join('')}
-                    </optgroup>
-                `).join('')}
-            </select>
-            <button type="button" class="btn btn-sm btn-accent" onclick="window.addAutoIngredient()" style="min-width: 44px; font-size: 1.25rem; font-weight: bold;">
-                +
-            </button>
-        </div>
-    `;
+    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+      <div style="position: relative; flex: 1; min-width: 200px;">
+        <input 
+          type="text" 
+          id="autoIngredientSearch" 
+          class="form-select" 
+          placeholder="🔍 Cerca ingrediente..."
+          style="width: 100%; padding-right: 2.5rem;"
+        >
+        <button 
+          id="autoClearSearch" 
+          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--color-gray-400); cursor: pointer; font-size: 1.2rem; display: none;"
+          title="Cancella ricerca"
+        >×</button>
+      </div>
+      
+      <select id="autoIngredientSelect" class="form-select" style="flex: 1; min-width: 200px;">
+        <option value="">Aggiungi un ingrediente suggerito...</option>
+        ${Object.entries(byCategory).map(([category, ings]) => `
+          <optgroup label="${category}">
+            ${ings.map(ing => `
+              <option value="${ing.id}">${ing.name}</option>
+            `).join('')}
+          </optgroup>
+        `).join('')}
+      </select>
+      
+      <button type="button" class="btn btn-sm btn-accent" onclick="window.addAutoIngredient()" style="min-width: 44px; font-size: 1.25rem; font-weight: bold;">
+        +
+      </button>
+    </div>
+  `;
+
+    // Add search functionality
+    const searchInput = document.getElementById('autoIngredientSearch');
+    const ingredientSelect = document.getElementById('autoIngredientSelect');
+    const clearBtn = document.getElementById('autoClearSearch');
+
+    if (searchInput && ingredientSelect) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+
+            // Show/hide clear button
+            if (clearBtn) {
+                clearBtn.style.display = searchTerm ? 'block' : 'none';
+            }
+
+            if (!searchTerm) {
+                ingredientSelect.value = '';
+                return;
+            }
+
+            // Find matching ingredient
+            const options = ingredientSelect.querySelectorAll('option');
+            for (const option of options) {
+                if (option.value && option.textContent.toLowerCase().includes(searchTerm)) {
+                    ingredientSelect.value = option.value;
+                    break;
+                }
+            }
+        });
+
+        // Clear button functionality
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                clearBtn.style.display = 'none';
+                ingredientSelect.value = '';
+            });
+        }
+    }
 }
 
 /**

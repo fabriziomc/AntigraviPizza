@@ -1402,15 +1402,6 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
 
     const pizzaiolo = FAMOUS_PIZZAIOLOS[Math.floor(Math.random() * FAMOUS_PIZZAIOLOS.length)];
 
-    // Generate only topping instructions (dough instructions are in DOUGH_RECIPES)
-    const instructions = {
-        topping: [
-            ...generateCookingInstructions(ingredients),
-            `Infornare a ${Math.floor(400 + Math.random() * 80)}°C per ${Math.floor(90 + Math.random() * 90)} secondi`,
-            `Servire immediatamente ben calda`
-        ]
-    };
-
     const tags = determineTags(ingredients, doughType, archetypeUsed);
 
     // Se superiamo il limite totale di 5 ingredienti (base + preparazioni), riduciamo gli ingredienti base
@@ -1503,6 +1494,16 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
         // For archetypes, we regenerate the description to ensure only final ingredients are mentioned
         description = generateArchetypeDescription(archetypeUsed, uniqueBaseIngredients, uniquePreparations, suggestedDough);
     }
+
+    // --- INSTRUCTIONS GENERATION ---
+    // Generate instructions based on FINAL ingredients after deduplication
+    const instructions = {
+        topping: [
+            ...generateCookingInstructions(uniqueBaseIngredients),
+            `Infornare a ${Math.floor(400 + Math.random() * 80)}°C per ${Math.floor(90 + Math.random() * 90)} secondi`,
+            `Servire immediatamente ben calda`
+        ]
+    };
 
     return {
         name: pizzaName,
