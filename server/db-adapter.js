@@ -1020,9 +1020,16 @@ class DatabaseAdapter {
         // Merge updates with existing data
         const ingredient = { ...existing, ...updates };
 
-        const seasonJson = ingredient.season ? JSON.stringify(ingredient.season) : null;
-        const allergensJson = JSON.stringify(ingredient.allergens || []);
-        const tagsJson = JSON.stringify(ingredient.tags || []);
+        // Helper to safely stringify JSON fields
+        const safeStringify = (value, fallback = null) => {
+            if (value === null || value === undefined) return fallback;
+            if (typeof value === 'string') return value; // Already stringified
+            return JSON.stringify(value);
+        };
+
+        const seasonJson = safeStringify(ingredient.season, null);
+        const allergensJson = safeStringify(ingredient.allergens, JSON.stringify([]));
+        const tagsJson = safeStringify(ingredient.tags, JSON.stringify([]));
 
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
