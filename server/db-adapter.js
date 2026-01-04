@@ -1060,27 +1060,36 @@ class DatabaseAdapter {
             );
         } else {
             // Turso - use positional parameters WITHOUT quotes
-            await this.db.execute({
-                sql: `UPDATE Ingredients 
-                      SET name=?, category=?, subcategory=?, minWeight=?, maxWeight=?, 
-                          defaultUnit=?, postBake=?, phase=?, season=?, allergens=?, tags=?
-                      WHERE id=?`,
-                args: [
-                    ingredient.name,
-                    ingredient.category,
-                    ingredient.subcategory || null,
-                    ingredient.minWeight || null,
-                    ingredient.maxWeight || null,
-                    ingredient.defaultUnit || 'g',
-                    ingredient.postBake ? 1 : 0,
-                    ingredient.phase || 'topping',
-                    seasonJson,
-                    allergensJson,
-                    tagsJson,
-                    id
-                ]
-            });
-            console.log(`[updateIngredient] Turso UPDATE executed successfully`);
+            console.log(`[updateIngredient] About to execute Turso UPDATE...`);
+            console.log(`[updateIngredient] SQL:`, `UPDATE Ingredients SET name=?, category=?, subcategory=?, minWeight=?, maxWeight=?, defaultUnit=?, postBake=?, phase=?, season=?, allergens=?, tags=? WHERE id=?`);
+            console.log(`[updateIngredient] Args:`, [ingredient.name, ingredient.category, ingredient.subcategory, ingredient.minWeight, ingredient.maxWeight, ingredient.defaultUnit, ingredient.postBake, ingredient.phase, 'seasonJson', 'allergensJson', 'tagsJson', id]);
+
+            try {
+                await this.db.execute({
+                    sql: `UPDATE Ingredients 
+                          SET name=?, category=?, subcategory=?, minWeight=?, maxWeight=?, 
+                              defaultUnit=?, postBake=?, phase=?, season=?, allergens=?, tags=?
+                          WHERE id=?`,
+                    args: [
+                        ingredient.name,
+                        ingredient.category,
+                        ingredient.subcategory || null,
+                        ingredient.minWeight || null,
+                        ingredient.maxWeight || null,
+                        ingredient.defaultUnit || 'g',
+                        ingredient.postBake ? 1 : 0,
+                        ingredient.phase || 'topping',
+                        seasonJson,
+                        allergensJson,
+                        tagsJson,
+                        id
+                    ]
+                });
+                console.log(`[updateIngredient] Turso UPDATE executed successfully`);
+            } catch (execError) {
+                console.error(`[updateIngredient] Turso UPDATE failed:`, execError);
+                throw execError;
+            }
         }
         return ingredient;
     }
