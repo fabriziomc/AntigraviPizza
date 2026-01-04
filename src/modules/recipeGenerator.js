@@ -519,12 +519,15 @@ function selectRandomIngredients(category, count = 1) {
  * @returns {Array} Ingredienti selezionati
  */
 function selectIngredientWithFallback(tags, categoryName, INGREDIENTS_DB, count = 1, strict = false, excludeNames = []) {
+    // Normalize excludeNames for better matching
+    const normalizedExcludes = excludeNames.map(name => name.toLowerCase().trim());
+
     // 1. Prova con i tag
     let results = getAllIngredientsByTags(tags, INGREDIENTS_DB);
 
     // Filtra per nomi da escludere
-    if (excludeNames.length > 0) {
-        results = results.filter(ing => !excludeNames.includes(ing.name));
+    if (normalizedExcludes.length > 0) {
+        results = results.filter(ing => !normalizedExcludes.includes(ing.name.toLowerCase().trim()));
     }
 
     // 2. Se non ci sono risultati e non siamo in strict mode, fallback alla categoria
@@ -543,8 +546,8 @@ function selectIngredientWithFallback(tags, categoryName, INGREDIENTS_DB, count 
         let fallbackResults = categoryMap[categoryName] || [];
 
         // Filtra anche il fallback
-        if (excludeNames.length > 0) {
-            fallbackResults = fallbackResults.filter(ing => !excludeNames.includes(ing.name));
+        if (normalizedExcludes.length > 0) {
+            fallbackResults = fallbackResults.filter(ing => !normalizedExcludes.includes(ing.name.toLowerCase().trim()));
         }
         results = fallbackResults;
     }
@@ -563,8 +566,8 @@ function selectIngredientWithFallback(tags, categoryName, INGREDIENTS_DB, count 
         ];
 
         // Filtra anche l'estremo fallback
-        if (excludeNames.length > 0) {
-            allIngredients = allIngredients.filter(ing => !excludeNames.includes(ing.name));
+        if (normalizedExcludes.length > 0) {
+            allIngredients = allIngredients.filter(ing => !normalizedExcludes.includes(ing.name.toLowerCase().trim()));
         }
 
         return selectRandomIngredients(allIngredients, count);
@@ -1061,10 +1064,12 @@ export async function generateRandomRecipe(additionalNames = [], suggestedIngred
 function addIngredientUniquely(list, namesList, ingredient, options = {}) {
     if (!ingredient) return false;
 
-    // Controlla se è già presente per ID o Nome
+    const normalizedName = ingredient.name.toLowerCase().trim();
+
+    // Controlla se è già presente per ID o Nome (case-insensitive)
     const isDuplicate = list.some(item =>
         (item.id && ingredient.id && item.id === ingredient.id) ||
-        item.name === ingredient.name
+        (item.name && item.name.toLowerCase().trim() === normalizedName)
     );
 
     if (isDuplicate) return false;
@@ -1083,7 +1088,7 @@ function addIngredientUniquely(list, namesList, ingredient, options = {}) {
     list.push(entry);
 
     // Aggiungi ai nomi principali se non presente
-    if (namesList && namesList.includes && !namesList.includes(ingredient.name)) {
+    if (namesList && namesList.includes && !namesList.some(name => name.toLowerCase().trim() === normalizedName)) {
         namesList.push(ingredient.name);
     }
 
@@ -1481,19 +1486,43 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
         imageUrl = 'https://via.placeholder.com/800x600/667eea/ffffff?text=🍕';
     }
 
+    // --- FINAL SAFETY DEDUPLICATION ---
+    // Ensure baseIngredients and preparations are internally and mutually unique
+    const seenNames = new Set();
+
+    // 1. Process preparations first (they are usually more specific/important)
+    const uniquePreparations = [];
+    finalPreparations.forEach(prep => {
+        const name = (prep.name || prep.id || '').toLowerCase().trim();
+        if (name && !seenNames.has(name)) {
+            seenNames.add(name);
+            uniquePreparations.push(prep);
+        }
+    });
+
+    // 2. Process baseIngredients, removing anything already seen in preparations or duplicates within itself
+    const uniqueBaseIngredients = [];
+    finalIngredients.forEach(ing => {
+        const name = (ing.name || '').toLowerCase().trim();
+        if (name && !seenNames.has(name)) {
+            seenNames.add(name);
+            uniqueBaseIngredients.push(ing);
+        }
+    });
+
     return {
         name: pizzaName,
         pizzaiolo,
         source: 'Generata da AntigraviPizza',
         description,
-        baseIngredients: finalIngredients,  // Usa ingredienti puliti e limitati
-        preparations: finalPreparations,      // Preparazioni selezionate e limitate
+        baseIngredients: uniqueBaseIngredients,
+        preparations: uniquePreparations,
         instructions,
         imageUrl,
         suggestedDough,
         tags,
-        recipeSource,                          // NEW: Track source
-        archetypeUsed,                         // NEW: Track archetype
-        isIncomplete                           // NEW: Flag for incomplete pizza
+        recipeSource,
+        archetypeUsed,
+        isIncomplete
     };
 }
