@@ -1059,12 +1059,12 @@ class DatabaseAdapter {
                 id
             );
         } else {
-            // Turso - use positional parameters
+            // Turso - use positional parameters with quoted column names
             await this.db.execute({
-                sql: `UPDATE Ingredients 
-                      SET name=?, category=?, subcategory=?, minWeight=?, maxWeight=?, 
-                          defaultUnit=?, postBake=?, phase=?, season=?, allergens=?, tags=?
-                      WHERE id = ?`,
+                sql: `UPDATE "Ingredients" 
+                      SET "name"=?, "category"=?, "subcategory"=?, "minWeight"=?, "maxWeight"=?, 
+                          "defaultUnit"=?, "postBake"=?, "phase"=?, "season"=?, "allergens"=?, "tags"=?
+                      WHERE "id" = ?`,
                 args: [
                     ingredient.name,
                     ingredient.category,
