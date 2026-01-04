@@ -317,6 +317,68 @@
             color: #6b7280;
         }
 
+        .pizza-rating-container {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed rgba(124, 45, 18, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .rating-label {
+            font-weight: 600;
+            color: #7c2d12;
+            font-size: 0.9rem;
+        }
+
+        .rating-select-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rating-select {
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: 2px solid #f59e0b;
+            background: white;
+            color: #7c2d12;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .rating-select:hover {
+            background: #fef3c7;
+        }
+
+        .rating-select:disabled {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .rating-success {
+            color: #059669;
+            font-size: 0.8rem;
+            font-weight: 600;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
         @media (max-width: 640px) {
             .container {
                 padding: 1.5rem;
@@ -483,6 +545,10 @@
                         ? `<img src="${pizza.image}" alt="${pizza.name}" class="pizza-image" onerror="this.style.display='none'">`
                         : '';
 
+                    // Check if already rated in this session
+                    const storageKey = `rating_${pizzaNight.id}_${pizza.id}`;
+                    const existingRating = localStorage.getItem(storageKey);
+
                     return `
                         <div class="pizza-item">
                             <h3 class="pizza-name">🍕 ${pizza.name}</h3>
@@ -490,6 +556,20 @@
                             <div class="pizza-ingredients">
                                 <div class="ingredients-title">Ingredienti:</div>
                                 ${ingredientsList}
+                            </div>
+                            <div class="pizza-rating-container">
+                                <span class="rating-label">Ti è piaciuta? Dai un voto (1-10):</span>
+                                <div class="rating-select-wrapper" id="rating-wrap-${pizza.id}">
+                                    ${existingRating
+                            ? `<span class="rating-success">Grazie per il tuo voto: ${existingRating}/10 ⭐</span>`
+                            : `
+                                        <select onchange="submitRating('${pizza.id}', this.value)" class="rating-select">
+                                            <option value="">Vota...</option>
+                                            ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<option value="${n}">${n}</option>`).join('')}
+                                        </select>
+                                        `
+                        }
+                                </div>
                             </div>
                         </div>
                     `;
@@ -510,6 +590,43 @@
         function closeMenu() {
             const modal = document.getElementById('menuModal');
             modal.classList.remove('active');
+        }
+
+        // Submit rating to API
+        async function submitRating(recipeId, rating) {
+            if (!rating) return;
+
+            const pizzaNightId = window.location.hash.split('/')[1];
+            const wrapper = document.getElementById(`rating-wrap-${recipeId}`);
+
+            // Show optimistic feedback
+            wrapper.innerHTML = '<span class="loading" style="font-size: 0.8rem;">Salvataggio...</span>';
+
+            try {
+                const response = await fetch(`/api/pizza-nights/${pizzaNightId}/rate-pizza`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recipeId, rating })
+                });
+
+                if (!response.ok) throw new Error('Errore nel salvataggio');
+
+                // Save to localStorage to avoid double voting
+                localStorage.setItem(`rating_${pizzaNightId}_${recipeId}`, rating);
+
+                wrapper.innerHTML = `
+                    <span class="rating-success">Grazie per il tuo voto: ${rating}/10 ⭐</span>
+                `;
+            } catch (err) {
+                console.error(err);
+                wrapper.innerHTML = `
+                    <div class="error" style="font-size: 0.8rem; margin: 0; padding: 0.2rem;">Riprova più tardi</div>
+                    <select onchange="submitRating('${recipeId}', this.value)" class="rating-select">
+                        <option value="">Vota...</option>
+                        ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<option value="${n}">${n}</option>`).join('')}
+                    </select>
+                `;
+            }
         }
 
         // Close modal when clicking outside
@@ -539,6 +656,11 @@
                     throw new Error('Serata pizza non trovata');
                 }
                 const pizzaNight = await pizzaNightResponse.json();
+
+                // Check if the pizza night is completed
+                if (pizzaNight.status === 'completed') {
+                    throw new Error('Questa serata è terminata. Grazie per aver partecipato!');
+                }
 
                 // Fetch theme data
                 const themeResponse = await fetch(`/api/pizza-nights/${pizzaNightId}/theme`);

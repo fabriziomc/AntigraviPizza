@@ -155,6 +155,26 @@ router.post('/pizza-nights', async (req, res) => {
     }
 });
 
+router.post('/pizza-nights/:id/rate-pizza', async (req, res) => {
+    try {
+        const { recipeId, rating } = req.body;
+        if (!recipeId || !rating) {
+            return res.status(400).json({ error: 'Missing recipeId or rating' });
+        }
+
+        // Check if night is completed
+        const currentNight = await dbAdapter.getPizzaNightById(req.params.id);
+        if (currentNight && currentNight.status === 'completed') {
+            return res.status(403).json({ error: 'Cannot rate a completed night' });
+        }
+
+        const night = await dbAdapter.ratePizzaInNight(req.params.id, recipeId, rating);
+        res.json(night);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 router.put('/pizza-nights/:id', async (req, res) => {
     try {
         const night = await dbAdapter.updatePizzaNight(req.params.id, req.body);

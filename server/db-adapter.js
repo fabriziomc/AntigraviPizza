@@ -350,6 +350,21 @@ class DatabaseAdapter {
         return night;
     }
 
+    async ratePizzaInNight(nightId, recipeId, rating) {
+        const night = await this.getPizzaNightById(nightId);
+        if (!night) throw new Error('Pizza night not found');
+
+        const pizzas = night.selectedPizzas || [];
+        const pizza = pizzas.find(p => (p.recipeId || p.id) === recipeId);
+
+        if (!pizza) throw new Error('Pizza not found in this night');
+
+        if (!pizza.ratings) pizza.ratings = [];
+        pizza.ratings.push(Number(rating));
+
+        return await this.updatePizzaNight(nightId, { selectedPizzas: pizzas });
+    }
+
     async deletePizzaNight(id) {
         if (this.isSQLite) {
             const stmt = this.db.prepare('DELETE FROM PizzaNights WHERE id=?');

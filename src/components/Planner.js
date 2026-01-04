@@ -1811,7 +1811,14 @@ async function viewPizzaNightDetails(nightId) {
                     <button class="btn-fav-toggle" data-recipe-id="${pizza.recipeId}" data-night-id="${nightId}" data-favorite="${isFavorite ? 'true' : 'false'}" style="background: none; border: none; cursor: pointer; font-size: 1.25rem; padding: 0.25rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
                        ${isFavorite ? '⭐' : '☆'}
                     </button>
-                    <span style="font-weight: 500;">${pizza.recipeName}</span>
+                    <div>
+                        <span style="font-weight: 500;">${pizza.recipeName}</span>
+                        ${pizza.ratings && pizza.ratings.length > 0 ? `
+                            <span title="${pizza.ratings.length} voti" style="font-size: 0.75rem; background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold;">
+                                ⭐ ${(pizza.ratings.reduce((a, b) => a + b, 0) / pizza.ratings.length).toFixed(1)}
+                            </span>
+                        ` : ''}
+                    </div>
                   </div>
                   <span style="color: var(--color-accent-light); font-weight: 700;">×${pizza.quantity}</span>
                 </li>
