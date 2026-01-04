@@ -1065,12 +1065,16 @@ class DatabaseAdapter {
             console.log(`[updateIngredient] Args:`, [ingredient.name, ingredient.category, ingredient.subcategory, ingredient.minWeight, ingredient.maxWeight, ingredient.defaultUnit, ingredient.postBake, ingredient.phase, 'seasonJson', 'allergensJson', 'tagsJson', id]);
 
             try {
+                // DELETE+INSERT workaround for Turso UPDATE bug
                 await this.db.execute({
-                    sql: `UPDATE Ingredients 
-                          SET name=?, category=?, subcategory=?, minWeight=?, maxWeight=?, 
-                              defaultUnit=?, postBake=?, phase=?, season=?, allergens=?, tags=?
-                          WHERE id=?`,
+                    sql: 'DELETE FROM Ingredients WHERE id = ?',
+                    args: [id]
+                });
+                await this.db.execute({
+                    sql: `INSERT INTO Ingredients (id, name, category, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     args: [
+                        id,
                         ingredient.name,
                         ingredient.category,
                         ingredient.subcategory || null,
@@ -1082,10 +1086,11 @@ class DatabaseAdapter {
                         seasonJson,
                         allergensJson,
                         tagsJson,
-                        id
+                        ingredient.isCustom ? 1 : 0,
+                        ingredient.dateAdded || Date.now()
                     ]
                 });
-                console.log(`[updateIngredient] Turso UPDATE executed successfully`);
+                console.log(`[updateIngredient] DELETE+INSERT completed successfully`);
             } catch (execError) {
                 console.error(`[updateIngredient] Turso UPDATE failed:`, execError);
                 throw execError;
