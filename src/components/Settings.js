@@ -247,29 +247,12 @@ export async function renderSettings() {
             </div>
           </div>
         </section>
-
-        <!-- Ingredient Management Section -->
-        <section class="settings-section">
-          <h2>🥘 Gestione Ingredienti</h2>
-          <div class="section-content">
-            <p style="color: var(--color-gray-300); margin-bottom: 1.5rem;">
-              Gestisci gli ingredienti del database: elimina quelli fake o cambia la loro categoria.
-            </p>
-            
-            <div id="ingredientsListContainer" style="margin-top: 1rem;">
-              <div style="text-align: center; padding: 2rem; color: var(--color-gray-400);">
-                Caricamento ingredienti...
-              </div>
-            </div>
-          </div>
-        </section>
       </div>
     </div>
   `;
 
   setupEventListeners();
   populateArchetypeWeights(); // Load and display archetype weights
-  loadIngredientsForManagement(); // Load ingredients list
 }
 
 /**
