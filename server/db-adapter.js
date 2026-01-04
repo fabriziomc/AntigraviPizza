@@ -1059,25 +1059,28 @@ class DatabaseAdapter {
                 id
             );
         } else {
-            await this.db.execute(`
-                UPDATE Ingredients 
-                SET name=@name, category=@category, subcategory=@subcategory, minWeight=@minWeight, maxWeight=@maxWeight, 
-                    defaultUnit=@defaultUnit, postBake=@postBake, phase=@phase, season=@season, allergens=@allergens, tags=@tags
-                WHERE id = @id
-            `, {
-                id,
-                name: ingredient.name,
-                category: ingredient.category,
-                subcategory: ingredient.subcategory || null,
-                minWeight: ingredient.minWeight || null,
-                maxWeight: ingredient.maxWeight || null,
-                defaultUnit: ingredient.defaultUnit || 'g',
-                postBake: ingredient.postBake ? 1 : 0,
-                phase: ingredient.phase || 'topping',
-                season: seasonJson,
-                allergens: allergensJson,
-                tags: tagsJson
+            // Turso - use positional parameters
+            await this.db.execute({
+                sql: `UPDATE Ingredients 
+                      SET name=?, category=?, subcategory=?, minWeight=?, maxWeight=?, 
+                          defaultUnit=?, postBake=?, phase=?, season=?, allergens=?, tags=?
+                      WHERE id = ?`,
+                args: [
+                    ingredient.name,
+                    ingredient.category,
+                    ingredient.subcategory || null,
+                    ingredient.minWeight || null,
+                    ingredient.maxWeight || null,
+                    ingredient.defaultUnit || 'g',
+                    ingredient.postBake ? 1 : 0,
+                    ingredient.phase || 'topping',
+                    seasonJson,
+                    allergensJson,
+                    tagsJson,
+                    id
+                ]
             });
+            console.log(`[updateIngredient] Turso UPDATE executed successfully`);
         }
         return ingredient;
     }
