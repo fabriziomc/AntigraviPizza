@@ -1259,6 +1259,14 @@ function attachCardListeners(container) {
     });
   });
 
+  // Reopen buttons
+  container.querySelectorAll('.btn-reopen').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const nightId = btn.dataset.nightId;
+      reopenPizzaNightAction(nightId);
+    });
+  });
+
   // Delete buttons
   container.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1342,7 +1350,12 @@ function createPizzaNightCard(night) {
             <span>✓</span>
             Completa
           </button>
-        ` : ''}
+        ` : `
+          <button class="btn btn-ghost btn-sm btn-reopen" data-night-id="${night.id}" title="Riporta a pianificata">
+            <span>🔄</span>
+            Ripristina
+          </button>
+        `}
           <button class="btn btn-ghost btn-sm btn-delete" data-night-id="${night.id}">
             <span>🗑️</span>
           </button>
@@ -2154,12 +2167,25 @@ async function downloadShoppingListForNight(nightId, nightName) {
 // Local action functions
 async function completePizzaNightAction(nightId) {
   try {
-    await completePizzaNight(nightId);
+    const db = await import('../modules/database.js');
+    await db.updatePizzaNight(nightId, { status: 'completed' });
     showToast('✅ Serata completata!', 'success');
     await renderPizzaNights();
   } catch (error) {
     console.error('Failed to complete pizza night:', error);
     showToast('❌ Errore nel completare la serata', 'error');
+  }
+}
+
+async function reopenPizzaNightAction(nightId) {
+  try {
+    const db = await import('../modules/database.js');
+    await db.updatePizzaNight(nightId, { status: 'planned' });
+    showToast('🔄 Serata riportata a pianificata', 'info');
+    await renderPizzaNights();
+  } catch (error) {
+    console.error('Failed to reopen pizza night:', error);
+    showToast('❌ Errore nel ripristinare la serata', 'error');
   }
 }
 
@@ -2527,10 +2553,11 @@ function nextPizza() {
 async function completePizzaNightLive() {
   if (confirm('Segnare la serata come completata?')) {
     try {
-      await completePizzaNight(liveModeState.nightId);
+      const db = await import('../modules/database.js');
+      await db.updatePizzaNight(liveModeState.nightId, { status: 'completed' });
       exitLiveMode();
       await renderPizzaNights(); // Refresh list
-      showToast('🎉 Serata completata! Buon appetito!', 'success');
+      showToast('🎉 Serata completata! Alla prossima!', 'success');
     } catch (error) {
       console.error('Failed to complete pizza night:', error);
       showToast('❌ Errore nel completare la serata: ' + error.message, 'error');
@@ -2583,5 +2610,6 @@ window.exitLiveMode = exitLiveMode;
 window.previousPizza = previousPizza;
 window.nextPizza = nextPizza;
 window.completePizzaNightLive = completePizzaNightLive;
+window.reopenPizzaNightAction = reopenPizzaNightAction;
 window.saveIngredientCheck = saveIngredientCheck;
 window.savePrepCheck = savePrepCheck;
