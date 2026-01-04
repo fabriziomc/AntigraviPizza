@@ -1279,4 +1279,21 @@ router.patch('/ingredients/:id', async (req, res) => {
     }
 });
 
+// PUT ingredient (alias for PATCH - used by ingredient detail page)
+router.put('/ingredients/:id', async (req, res) => {
+    try {
+        console.log('[PUT /ingredients/:id] Updating ingredient:', req.params.id);
+        console.log('[PUT /ingredients/:id] Updates:', JSON.stringify(req.body));
+
+        const ingredient = await dbAdapter.updateIngredient(req.params.id, req.body);
+
+        console.log('[PUT /ingredients/:id] Update successful');
+        res.json(ingredient);
+    } catch (err) {
+        console.error('[PUT /ingredients/:id] Error:', err.message);
+        console.error('[PUT /ingredients/:id] Stack:', err.stack);
+        res.status(500).json({ error: err.message, details: err.stack });
+    }
+});
+
 export default router;
