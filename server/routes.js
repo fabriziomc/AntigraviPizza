@@ -1227,13 +1227,20 @@ router.get('/status', async (req, res) => {
 // GET version info (commit hash)
 router.get('/version', (req, res) => {
     try {
-        const { execSync } = require('child_process');
-        let version = 'unknown';
-        try {
-            version = execSync('git rev-parse --short HEAD').toString().trim();
-        } catch (err) {
-            console.error('Could not get git commit:', err.message);
+        // Try to get version from environment variable first (set in Render)
+        let version = process.env.GIT_COMMIT_SHA || process.env.RENDER_GIT_COMMIT || 'dev';
+
+        // If not available, try Git command (for local dev)
+        if (version === 'dev') {
+            try {
+                const { execSync } = require('child_process');
+                version = execSync('git rev-parse --short HEAD').toString().trim();
+            } catch (err) {
+                // Git not available, use timestamp instead
+                version = new Date().toISOString().substring(0, 10).replace(/-/g, '');
+            }
         }
+
         res.json({ version, timestamp: new Date().toISOString() });
     } catch (err) {
         res.status(500).json({ error: err.message });
