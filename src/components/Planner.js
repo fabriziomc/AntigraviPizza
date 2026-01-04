@@ -2018,7 +2018,7 @@ async function saveAvailableIngredients(nightId) {
     showToast(`✅ ${availableIngredients.length} ingredienti salvati come disponibili`, 'success');
 
     // Refresh the view
-    await refreshData();
+    await renderPizzaNights();
   } catch (error) {
     console.error('Error saving available ingredients:', error);
     showToast('❌ Errore nel salvare gli ingredienti', 'error');
@@ -2155,9 +2155,11 @@ async function downloadShoppingListForNight(nightId, nightName) {
 async function completePizzaNightAction(nightId) {
   try {
     await completePizzaNight(nightId);
-    await refreshData();
+    showToast('✅ Serata completata!', 'success');
+    await renderPizzaNights();
   } catch (error) {
     console.error('Failed to complete pizza night:', error);
+    showToast('❌ Errore nel completare la serata', 'error');
   }
 }
 
@@ -2528,10 +2530,10 @@ async function completePizzaNightLive() {
       await completePizzaNight(liveModeState.nightId);
       exitLiveMode();
       await renderPizzaNights(); // Refresh list
-      alert('🎉 Serata completata! Buon appetito!');
+      showToast('🎉 Serata completata! Buon appetito!', 'success');
     } catch (error) {
       console.error('Failed to complete pizza night:', error);
-      alert('Errore nel completare la serata: ' + error.message);
+      showToast('❌ Errore nel completare la serata: ' + error.message, 'error');
     }
   }
 }
