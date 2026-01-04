@@ -1147,21 +1147,12 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
         }
 
         // Add combo ingredients (avoiding duplicates from pre-injection)
-        combo.forEach(ingName => {
-            const found = findIngredientByName(ingName, INGREDIENTS_DB);
-            if (found) {
-                addIngredientUniquely(ingredients, mainIngredientNames, found);
-            }
-        });
-
-        // Use first two for the name if mainIngredientNames is too long
         if (mainIngredientNames.length === 0) {
             mainIngredientNames = combo.slice(0, 2);
         }
 
         doughType = DOUGH_TYPES[Math.floor(Math.random() * DOUGH_TYPES.length)];
         pizzaName = await generatePizzaName(mainIngredientNames, existingNames);
-        description = `Una ${doughType.type.toLowerCase()} con ${mainIngredientNames.slice(0, 3).join(' e ').toLowerCase()}, creata secondo la tradizione.`;
 
         // Mark as combination-based
         recipeSource = 'combination';
@@ -1198,8 +1189,6 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
                 } else missingSlots.push('Elemento croccante');
 
                 addIngredientUniquely(ingredients, null, { name: 'Fior di latte', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
-
-                description = `Un perfetto equilibrio tra la sapidità del ${(cheese?.name || 'Formaggio').toLowerCase()} e la dolcezza di ${(fruit?.name || 'Frutta').toLowerCase()}, completata dalla croccantezza di ${(crunch?.name || 'Granella').toLowerCase()}.`;
                 break;
 
             case 'terra_bosco':
@@ -1226,8 +1215,6 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
                 } else missingSlots.push('Carne intensa');
 
                 addIngredientUniquely(ingredients, null, { name: 'Provola affumicata', quantity: 100, unit: 'g', category: 'Formaggi', phase: 'topping', postBake: false });
-
-                description = `I profumi del bosco con ${(mushroom?.name || 'Funghi').toLowerCase()} e ${(meat?.name || 'Carne').toLowerCase()}, su una base rustica.`;
                 break;
 
             case 'fresca_estiva':
@@ -1262,8 +1249,6 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
                 if (freshMeat?.name && (freshMeat.name.includes('Alici') || freshMeat.name.includes('Salmone'))) {
                     addIngredientUniquely(ingredients, null, { name: 'Limone grattugiato', quantity: 5, unit: 'g', category: 'Erbe e Spezie', phase: 'topping', postBake: true });
                 }
-
-                description = `Freschezza assoluta con ${(freshCheese?.name || 'Formaggio').toLowerCase()} e ${(freshMeat?.name || 'Salume').toLowerCase()} aggiunti a crudo.`;
                 break;
 
             case 'piccante_decisa':
@@ -1291,8 +1276,6 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
                 if (finish) {
                     addIngredientUniquely(ingredients, mainIngredientNames, finish);
                 } else missingSlots.push('Tocco finale');
-
-                description = `Il carattere deciso della ${(spicy?.name || 'Salume piccante').toLowerCase()} bilanciato dalla dolcezza di ${(finish?.name || 'Tocco finale').toLowerCase()}.`;
                 break;
 
             case 'mare':
@@ -1323,8 +1306,6 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
 
                 if (citrus) addIngredientUniquely(ingredients, null, citrus, { quantity: 5, category: 'Erbe e Spezie', phase: 'topping', postBake: true });
                 if (herb) addIngredientUniquely(ingredients, null, herb, { quantity: 10, category: 'Erbe e Spezie', phase: 'topping', postBake: true });
-
-                description = `I sapori del mare con ${(seafood?.name || 'Pesce').toLowerCase()} e ${(seaVeg?.name || 'Verdura').toLowerCase()}, esaltati da agrumi e erbe fresche.`;
                 break;
 
             case 'vegana':
@@ -1357,8 +1338,6 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
                 } else missingSlots.push('Semi/Granella');
 
                 addIngredientUniquely(ingredients, null, { name: 'Basilico fresco', quantity: 10, unit: 'g', category: 'Erbe e Spezie', phase: 'topping', postBake: true });
-
-                description = `Una pizza completamente vegetale con ${(veganVeg1?.name || 'Verdura 1').toLowerCase()} e ${(veganVeg2?.name || 'Verdura 2').toLowerCase()}, ricca di sapori naturali.`;
                 break;
 
             case 'fusion':
@@ -1392,8 +1371,6 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
                 if (fusionFinish) {
                     addIngredientUniquely(ingredients, mainIngredientNames, fusionFinish, { quantity: 20, category: 'Altro', phase: 'topping', postBake: true });
                 } else missingSlots.push('Tocco fusion');
-
-                description = `Un'interpretazione contemporanea con ${(fusionCheese?.name || 'Formaggio').toLowerCase()}, ${(fusionMeat?.name || 'Salume').toLowerCase()} e ${(fusionVeg?.name || 'Verdura').toLowerCase()}.`;
                 break;
         }
     }
@@ -1486,6 +1463,23 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
         imageUrl = 'https://via.placeholder.com/800x600/667eea/ffffff?text=🍕';
     }
 
+    // --- DESCRIPTION FINALIZATION ---
+    // Generate description based on FINAL ingredients list after truncation and deduplication
+    const finalAllNames = [
+        ...uniquePreparations.map(p => p.name || p.id),
+        ...uniqueBaseIngredients.filter(i => !['Fior di latte', 'Provola affumicata', 'Mozzarella', 'Pomodoro San Marzano'].includes(i.name)).map(i => i.name)
+    ].slice(0, 3);
+
+    if (usePredefinedCombo || !description || description.includes('Pizza Incompleta')) {
+        // For predefined combos or incomplete, we already have a specialized logic or name
+        if (!description || usePredefinedCombo) {
+            description = `Una ${suggestedDough.toLowerCase()} con ${finalAllNames.join(' e ').toLowerCase()}, creata secondo la tradizione.`;
+        }
+    } else {
+        // For archetypes, we regenerate the description to ensure only final ingredients are mentioned
+        description = generateArchetypeDescription(archetypeUsed, uniqueBaseIngredients, uniquePreparations, suggestedDough);
+    }
+
     // --- FINAL SAFETY DEDUPLICATION ---
     // Ensure baseIngredients and preparations are internally and mutually unique
     const seenNames = new Set();
@@ -1525,4 +1519,37 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
         archetypeUsed,
         isIncomplete
     };
+}
+
+/**
+ * Genera una descrizione basata sull'archetipo e sugli ingredienti EFFETTIVI rimasti
+ */
+function generateArchetypeDescription(archetype, ingredients, preparations, doughType) {
+    const all = [...preparations, ...ingredients];
+    const getNames = (count = 2) => all.filter(i => !['Fior di latte', 'Provola affumicata', 'Mozzarella', 'Pomodoro San Marzano'].includes(i.name)).map(i => i.name).slice(0, count);
+
+    const names = getNames(3);
+    const ingredientsStr = names.length > 1
+        ? names.slice(0, -1).join(', ') + ' e ' + names.slice(-1)
+        : names[0] || 'ingredienti selezionati';
+
+    switch (archetype) {
+        case 'dolce_salato':
+            return `Un perfetto equilibrio tra sapidità e dolcezza con ${ingredientsStr.toLowerCase()}, su base ${doughType.toLowerCase()}.`;
+        case 'terra_bosco':
+            return `I profumi del bosco e della terra con ${ingredientsStr.toLowerCase()}, su una base rustica di tipo ${doughType.toLowerCase()}.`;
+        case 'fresca_estiva':
+            return `Freschezza assoluta con ${ingredientsStr.toLowerCase()} aggiunti a crudo su una ${doughType.toLowerCase()}.`;
+        case 'piccante_decisa':
+            return `Il carattere deciso e piccante di ${ingredientsStr.toLowerCase()} bilanciato con cura.`;
+        case 'mare':
+            return `I sapori del mare con ${ingredientsStr.toLowerCase()}, esaltati da aromi freschi su base ${doughType.toLowerCase()}.`;
+        case 'vegana':
+            return `Una pizza completamente vegetale con ${ingredientsStr.toLowerCase()}, ricca di sapori naturali.`;
+        case 'fusion':
+        case 'classica':
+        case 'tradizionale':
+        default:
+            return `Un'interpretazione contemporanea con ${ingredientsStr.toLowerCase()} su impasto ${doughType.toLowerCase()}.`;
+    }
 }
