@@ -353,7 +353,7 @@ async function addIngredientRow(data = null) {
 
   const row = document.createElement('div');
   row.className = 'ingredient-row';
-  row.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;';
+  row.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;';
 
   // Group ingredients by category
   const byCategory = {};
@@ -385,7 +385,6 @@ async function addIngredientRow(data = null) {
     <input type="number" class="form-input ing-quantity" placeholder="Qtà totale" value="${data?.quantity || ''}" step="0.01" required>
     <input type="text" class="form-input" name="ing_unit[]" placeholder="Unità" value="${data?.unit || ''}" required>
     <input type="number" class="form-input ing-per-portion" placeholder="Per porz." value="${data?.perPortion || ''}" step="0.01" readonly style="background: #e8e8e8; color: #333; font-weight: 500; cursor: not-allowed;" title="Calcolato automaticamente: Qtà ÷ Porzioni">
-    <input type="text" class="form-input" name="ing_category[]" placeholder="Categoria" value="${data?.category || ''}">
     <button type="button" class="btn btn-ghost btn-sm" onclick="this.parentElement.remove()">🗑️</button>
   `;
 
@@ -492,7 +491,6 @@ async function submitPreparationForm(prepId) {
   const ingredients = [];
   const ingNames = formData.getAll('ing_name[]');
   const ingUnits = formData.getAll('ing_unit[]');
-  const ingCategories = formData.getAll('ing_category[]');
 
   // Get quantities and perPortions from the actual input elements (including readonly ones)
   const quantityInputs = document.querySelectorAll('.ing-quantity');
@@ -500,12 +498,15 @@ async function submitPreparationForm(prepId) {
 
   for (let i = 0; i < ingNames.length; i++) {
     if (ingNames[i].trim()) {
+      // Find the ingredient to get its category
+      const selectedIngredient = cachedIngredients.find(ing => ing.name === ingNames[i].trim());
+
       ingredients.push({
         name: ingNames[i].trim(),
         quantity: parseFloat(quantityInputs[i].value),
         unit: ingUnits[i].trim(),
         perPortion: parseFloat(perPortionInputs[i].value),
-        category: ingCategories[i].trim() || 'Altro'
+        category: selectedIngredient?.category || 'Altro'
       });
     }
   }
