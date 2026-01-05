@@ -142,11 +142,11 @@ function createPreparationCard(prep) {
           <span>📖</span>
           Vedi Ricetta
         </button>
+        <button class="btn btn-secondary btn-sm edit-preparation-btn" data-prep-id="${prep.id}">
+          <span>✏️</span>
+          Modifica
+        </button>
         ${prep.isCustom ? `
-          <button class="btn btn-secondary btn-sm edit-preparation-btn" data-prep-id="${prep.id}">
-            <span>✏️</span>
-            Modifica
-          </button>
           <button class="btn btn-ghost btn-sm delete-preparation-btn" data-prep-id="${prep.id}">
             <span>🗑️</span>
           </button>
