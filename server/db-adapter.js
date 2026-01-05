@@ -965,15 +965,33 @@ class DatabaseAdapter {
         const allergensJson = JSON.stringify(ingredient.allergens || []);
         const tagsJson = JSON.stringify(ingredient.tags || []);
 
+        // Convert category name to categoryId UUID
+        let categoryId;
+        if (ingredient.categoryId) {
+            // Already has categoryId (UUID)
+            categoryId = ingredient.categoryId;
+        } else if (ingredient.category) {
+            // Convert category name to UUID
+            categoryId = DatabaseAdapter.CATEGORY_UUID_MAP[ingredient.category];
+            if (!categoryId) {
+                // Fallback to 'Altro' if category not found
+                console.warn(`Category "${ingredient.category}" not found in mapping, using 'Altro'`);
+                categoryId = DatabaseAdapter.CATEGORY_UUID_MAP['Altro'];
+            }
+        } else {
+            // No category specified, use 'Altro' as default
+            categoryId = DatabaseAdapter.CATEGORY_UUID_MAP['Altro'];
+        }
+
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
-                INSERT INTO Ingredients (id, name, category, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded)
+                INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 ingredient.id,
                 ingredient.name,
-                ingredient.category,
+                categoryId,  // Use categoryId UUID instead of category name
                 ingredient.subcategory || null,
                 ingredient.minWeight || null,
                 ingredient.maxWeight || null,
@@ -988,12 +1006,12 @@ class DatabaseAdapter {
             );
         } else {
             await this.db.execute(`
-                INSERT INTO Ingredients (id, name, category, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded)
-                VALUES (@id, @name, @category, @subcategory, @minWeight, @maxWeight, @defaultUnit, @postBake, @phase, @season, @allergens, @tags, @isCustom, @dateAdded)
+                INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded)
+                VALUES (@id, @name, @categoryId, @subcategory, @minWeight, @maxWeight, @defaultUnit, @postBake, @phase, @season, @allergens, @tags, @isCustom, @dateAdded)
             `, {
                 id: ingredient.id,
                 name: ingredient.name,
-                category: ingredient.category,
+                categoryId: categoryId,  // Use categoryId UUID instead of category name
                 subcategory: ingredient.subcategory || null,
                 minWeight: ingredient.minWeight || null,
                 maxWeight: ingredient.maxWeight || null,
@@ -1014,6 +1032,7 @@ class DatabaseAdapter {
     static CATEGORY_UUID_MAP = {
         'Erbe e Spezie': '1906de1a-a1ea-4398-99e1-758c47c091c7',
         'Frutta e Frutta Secca': '32b1230e-f71b-4cfd-832c-05c9e411d143',
+        'Frutta': '32b1230e-f71b-4cfd-832c-05c9e411d143',  // Alias for Frutta e Frutta Secca
         'Formaggi': '3dbbfdeb-b431-426b-8651-4420c3516631',
         'Pesce e Frutti di Mare': '59c43017-0e9e-4158-b1cb-9f17824aee42',
         'Verdure e Ortaggi': '6d6d0249-55a7-4340-a6bf-419c9326a1f0',
