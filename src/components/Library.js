@@ -591,6 +591,10 @@ async function showRecipeModal(recipeId) {
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="window.closeRecipeModal()">Chiudi</button>
+      <button class="btn btn-primary" id="btnEditRecipe">
+        <span>✏️</span>
+        Modifica Ricetta
+      </button>
       <button class="btn btn-accent" id="btnDeleteRecipe">
         <span>🗑️</span>
         Elimina
@@ -605,6 +609,14 @@ async function showRecipeModal(recipeId) {
   if (regenerateBtn) {
     regenerateBtn.addEventListener('click', async () => {
       await handleRegenerateImage(recipe);
+    });
+  }
+
+  // Attach edit recipe listener
+  const editBtn = document.getElementById('btnEditRecipe');
+  if (editBtn) {
+    editBtn.addEventListener('click', () => {
+      enableEditMode(recipe);
     });
   }
 
@@ -764,6 +776,286 @@ async function handleRegenerateImage(recipe) {
     }
   }
 }
+
+/**
+ * Enable edit mode for recipe ingredients and preparations
+ */
+async function enableEditMode(recipe) {
+  const { getAllIngredients, getAllPreparations } = await import('../modules/database.js');
+
+  // Load all available ingredients and preparations
+  const allIngredients = await getAllIngredients();
+  const allPreparations = await getAllPreparations();
+
+  // Parse current ingredients and preparations
+  const currentIngredients = typeof recipe.baseIngredients === 'string'
+    ? JSON.parse(recipe.baseIngredients)
+    : (recipe.baseIngredients || []);
+
+  const currentPreparations = typeof recipe.preparations === 'string'
+    ? JSON.parse(recipe.preparations)
+    : (recipe.preparations || []);
+
+  const modalBody = document.querySelector('.modal-body');
+  const modalFooter = document.querySelector('.modal-footer');
+
+  // Render edit mode UI
+  modalBody.innerHTML = `
+    <div class="edit-mode-container">
+      <h3 style="margin-bottom: 1rem;">✏️ Modifica Ricetta: ${recipe.name}</h3>
+      
+      <!-- Ingredients Section -->
+      <div class="edit-section">
+        <h4 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span>🥘 Ingredienti</span>
+          <button class="btn btn-small btn-primary" id="btnAddIngredient">+ Aggiungi</button>
+        </h4>
+        <div id="ingredientsList" class="edit-list">
+          ${currentIngredients.map((ing, idx) => renderIngredientRow(ing, idx, allIngredients)).join('')}
+        </div>
+      </div>
+      
+      <!-- Preparations Section -->
+      <div class="edit-section" style="margin-top: 2rem;">
+        <h4 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span>🥫 Preparazioni</span>
+          <button class="btn btn-small btn-primary" id="btnAddPreparation">+ Aggiungi</button>
+        </h4>
+        <div id="preparationsList" class="edit-list">
+          ${currentPreparations.map((prep, idx) => renderPreparationRow(prep, idx, allPreparations)).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+
+  modalFooter.innerHTML = `
+    <button class="btn btn-secondary" id="btnCancelEdit">Annulla</button>
+    <button class="btn btn-primary" id="btnSaveEdit">💾 Salva Modifiche</button>
+  `;
+
+  // Attach event listeners
+  document.getElementById('btnAddIngredient').addEventListener('click', () => {
+    const list = document.getElementById('ingredientsList');
+    const idx = list.children.length;
+    list.insertAdjacentHTML('beforeend', renderIngredientRow({}, idx, allIngredients));
+    attachRemoveListeners();
+  });
+
+  document.getElementById('btnAddPreparation').addEventListener('click', () => {
+    const list = document.getElementById('preparationsList');
+    const idx = list.children.length;
+    list.insertAdjacentHTML('beforeend', renderPreparationRow({}, idx, allPreparations));
+    attachRemoveListeners();
+  });
+
+  document.getElementById('btnCancelEdit').addEventListener('click', () => {
+    showRecipeModal(recipe.id);
+  });
+
+  document.getElementById('btnSaveEdit').addEventListener('click', async () => {
+    await saveRecipeChanges(recipe.id);
+  });
+
+  // Attach remove listeners to existing rows
+  attachRemoveListeners();
+}
+
+/**
+ * Attach remove button listeners
+ */
+function attachRemoveListeners() {
+  document.querySelectorAll('.remove-row').forEach(btn => {
+    btn.onclick = (e) => {
+      e.target.closest('.edit-row').remove();
+    };
+  });
+}
+
+/**
+ * Render ingredient row for editing
+ */
+function renderIngredientRow(ingredient, index, allIngredients) {
+  return `
+    <div class="edit-row" data-index="${index}">
+      <select class="edit-input ingredient-select" data-field="id" style="flex: 2;">
+        <option value="">Seleziona ingrediente...</option>
+        ${allIngredients.map(ing => `
+          <option value="${ing.id}" ${ingredient.id === ing.id ? 'selected' : ''}>
+            ${ing.name}
+          </option>
+        `).join('')}
+      </select>
+      <input type="number" class="edit-input" data-field="quantity" placeholder="Quantità" 
+             value="${ingredient.quantity || ''}" min="0" step="0.1" style="flex: 1;">
+      <select class="edit-input" data-field="unit" style="flex: 1;">
+        <option value="g" ${ingredient.unit === 'g' ? 'selected' : ''}>g</option>
+        <option value="ml" ${ingredient.unit === 'ml' ? 'selected' : ''}>ml</option>
+        <option value="q.b." ${ingredient.unit === 'q.b.' ? 'selected' : ''}>q.b.</option>
+        <option value="pz" ${ingredient.unit === 'pz' ? 'selected' : ''}>pz</option>
+      </select>
+      <label style="display: flex; align-items: center; gap: 0.25rem; flex: 1;">
+        <input type="checkbox" data-field="postBake" ${ingredient.postBake ? 'checked' : ''}>
+        <span style="font-size: 0.875rem;">Post-cottura</span>
+      </label>
+      <button class="btn btn-small btn-accent remove-row" style="padding: 0.25rem 0.5rem;">×</button>
+    </div>
+  `;
+}
+
+/**
+ * Render preparation row for editing
+ */
+function renderPreparationRow(preparation, index, allPreparations) {
+  return `
+    <div class="edit-row" data-index="${index}">
+      <select class="edit-input preparation-select" data-field="id" style="flex: 2;">
+        <option value="">Seleziona preparazione...</option>
+        ${allPreparations.map(prep => `
+          <option value="${prep.id}" ${preparation.id === prep.id ? 'selected' : ''}>
+            ${prep.name}
+          </option>
+        `).join('')}
+      </select>
+      <input type="number" class="edit-input" data-field="quantity" placeholder="Quantità" 
+             value="${preparation.quantity || ''}" min="0" step="0.1" style="flex: 1;">
+      <input type="text" class="edit-input" data-field="unit" placeholder="Unità" 
+             value="${preparation.unit || 'g'}" style="flex: 1;">
+      <select class="edit-input" data-field="timing" style="flex: 1;">
+        <option value="before" ${preparation.timing === 'before' ? 'selected' : ''}>Prima cottura</option>
+        <option value="after" ${preparation.timing === 'after' ? 'selected' : ''}>Dopo cottura</option>
+      </select>
+      <button class="btn btn-small btn-accent remove-row" style="padding: 0.25rem 0.5rem;">×</button>
+    </div>
+  `;
+}
+
+/**
+ * Save recipe changes
+ */
+async function saveRecipeChanges(recipeId) {
+  try {
+    const btn = document.getElementById('btnSaveEdit');
+    btn.textContent = '💾 Salvataggio...';
+    btn.disabled = true;
+
+    // Collect ingredients
+    const ingredientRows = document.querySelectorAll('#ingredientsList .edit-row');
+    const baseIngredients = [];
+
+    ingredientRows.forEach((row, idx) => {
+      const ingredientSelect = row.querySelector('.ingredient-select');
+      const selectedId = ingredientSelect.value;
+
+      if (!selectedId) return; // Skip empty rows
+
+      const selectedOption = ingredientSelect.options[ingredientSelect.selectedIndex];
+      const name = selectedOption.textContent.trim();
+      const quantity = parseFloat(row.querySelector('[data-field="quantity"]').value) || 0;
+      const unit = row.querySelector('[data-field="unit"]').value;
+      const postBake = row.querySelector('[data-field="postBake"]').checked ? 1 : 0;
+
+      baseIngredients.push({ id: selectedId, name, quantity, unit, postBake });
+    });
+
+    // Collect preparations
+    const preparationRows = document.querySelectorAll('#preparationsList .edit-row');
+    const preparations = [];
+
+    preparationRows.forEach(row => {
+      const prepSelect = row.querySelector('.preparation-select');
+      const selectedId = prepSelect.value;
+
+      if (!selectedId) return; // Skip empty rows
+
+      const quantity = parseFloat(row.querySelector('[data-field="quantity"]').value) || 0;
+      const unit = row.querySelector('[data-field="unit"]').value;
+      const timing = row.querySelector('[data-field="timing"]').value;
+
+      preparations.push({ id: selectedId, quantity, unit, timing });
+    });
+
+    // Save to backend
+    const response = await fetch(`/api/recipes/${recipeId}/components`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ baseIngredients, preparations })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to save changes');
+    }
+
+    // Success!
+    showToast('Modifiche salvate con successo!', 'success');
+    await renderRecipes(state);
+    showRecipeModal(recipeId);
+
+  } catch (error) {
+    console.error('Failed to save recipe changes:', error);
+    showToast('Errore nel salvataggio: ' + error.message, 'error');
+
+    const btn = document.getElementById('btnSaveEdit');
+    if (btn) {
+      btn.textContent = '💾 Salva Modifiche';
+      btn.disabled = false;
+    }
+  }
+}
+
+// Add CSS for edit mode
+const editModeStyles = document.createElement('style');
+editModeStyles.textContent = `
+  .edit-mode-container {
+    padding: 1rem;
+  }
+  
+  .edit-section {
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .edit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .edit-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.5rem;
+    background: var(--color-bg-secondary);
+    border-radius: 0.375rem;
+  }
+  
+  .edit-input {
+    padding: 0.5rem;
+    border: 1px solid var(--color-gray-600);
+    border-radius: 0.375rem;
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+  }
+  
+  .edit-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+  
+  .btn-small {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .remove-row {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+`;
+document.head.appendChild(editModeStyles);
 
 // Global functions for modal
 window.closeRecipeModal = closeModal;

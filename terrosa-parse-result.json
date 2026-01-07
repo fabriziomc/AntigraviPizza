@@ -1,0 +1,23 @@
+{
+  "name": "La Terrosa",
+  "baseIngredients": [
+    {
+      "original": "Fior di latte",
+      "normalized": "fior di latte"
+    },
+    {
+      "original": "crema di carciofi",
+      "normalized": "crema di carciofi"
+    }
+  ],
+  "toppingsPostBake": [
+    {
+      "original": "Chips di carciofi fritti",
+      "normalized": "chips di carciofi fritti"
+    },
+    {
+      "original": "scaglie di parmigiano reggiano 36 mesi e gocce di riduzione di aceto balsamico",
+      "normalized": "scaglie di parmigiano reggiano 36 mesi e gocce di riduzione di aceto balsamico"
+    }
+  ]
+}

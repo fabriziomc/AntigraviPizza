@@ -70,6 +70,66 @@ router.patch('/recipes/:id', async (req, res) => {
     }
 });
 
+// PATCH recipe components (ingredients + preparations) with validation
+router.patch('/recipes/:id/components', async (req, res) => {
+    try {
+        console.log(`🔧 [PATCH /recipes/${req.params.id}/components] Updating components`);
+        const { baseIngredients, preparations } = req.body;
+
+        // Validate ingredients exist in database
+        if (baseIngredients) {
+            const allIngredients = await dbAdapter.getAllIngredients();
+            const ingredientIds = new Set(allIngredients.map(i => i.id));
+
+            for (const ing of baseIngredients) {
+                if (!ingredientIds.has(ing.id)) {
+                    return res.status(400).json({
+                        error: `Ingredient with id ${ing.id} not found`
+                    });
+                }
+                // Validate required fields
+                if (!ing.name || ing.quantity == null || !ing.unit) {
+                    return res.status(400).json({
+                        error: 'Each ingredient must have name, quantity, and unit'
+                    });
+                }
+            }
+        }
+
+        // Validate preparations exist in database
+        if (preparations) {
+            const allPreparations = await dbAdapter.getAllPreparations();
+            const prepIds = new Set(allPreparations.map(p => p.id));
+
+            for (const prep of preparations) {
+                if (!prepIds.has(prep.id)) {
+                    return res.status(400).json({
+                        error: `Preparation with id ${prep.id} not found`
+                    });
+                }
+                // Validate required fields
+                if (prep.quantity == null || !prep.unit) {
+                    return res.status(400).json({
+                        error: 'Each preparation must have quantity and unit'
+                    });
+                }
+            }
+        }
+
+        // Update recipe with validated components
+        const updateData = {};
+        if (baseIngredients) updateData.baseIngredients = baseIngredients;
+        if (preparations) updateData.preparations = preparations;
+
+        const recipe = await dbAdapter.updateRecipe(req.params.id, updateData);
+        console.log(`✅ [PATCH /recipes/${req.params.id}/components] Updated successfully`);
+        res.json(recipe);
+    } catch (err) {
+        console.error(`❌ [PATCH /recipes/${req.params.id}/components] Error:`, err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 // DELETE recipe
 router.delete('/recipes/:id', async (req, res) => {
@@ -88,6 +148,53 @@ router.post('/recipes/sync-ratings', async (req, res) => {
         res.json({ message: 'Ratings synced successfully', results });
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+// Import recipe from text
+router.post('/import-recipe', async (req, res) => {
+    try {
+        console.log('📥 [POST /import-recipe] Received import request');
+        const { recipeText } = req.body;
+
+        if (!recipeText || typeof recipeText !== 'string') {
+            return res.status(400).json({ error: 'recipeText is required and must be a string' });
+        }
+
+        // Import parser and service
+        const { parseRecipeFile } = await import('./recipeParser.js');
+        const { importMultipleRecipes } = await import('./recipeImportService.js');
+
+        // Parse recipes from text
+        console.log('🔍 Parsing recipe text...');
+        const parsedRecipes = parseRecipeFile(recipeText);
+        console.log(`✅ Parsed ${parsedRecipes.length} recipe(s)`);
+
+        if (parsedRecipes.length === 0) {
+            return res.status(400).json({
+                error: 'No recipes found in text',
+                hint: 'Make sure recipes are numbered (e.g., "1. Pizza Name")'
+            });
+        }
+
+        // Import all parsed recipes
+        console.log('💾 Importing recipes into database...');
+        const results = await importMultipleRecipes(parsedRecipes, dbAdapter);
+
+        console.log(`✅ Import complete: ${results.success.length} succeeded, ${results.failed.length} failed`);
+
+        res.json({
+            success: true,
+            imported: results.success.length,
+            failed: results.failed.length,
+            recipes: results.success.map(r => r.recipe),
+            createdIngredients: results.totalCreatedIngredients,
+            createdPreparations: results.totalCreatedPreparations,
+            errors: results.failed.length > 0 ? results.failed : undefined
+        });
+    } catch (err) {
+        console.error('❌ [POST /import-recipe] Error:', err);
+        res.status(500).json({ error: err.message, stack: err.stack });
     }
 });
 

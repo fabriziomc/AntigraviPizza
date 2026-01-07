@@ -1,0 +1,23 @@
+{
+  "name": "La Rossa Caramellata",
+  "baseIngredients": [
+    {
+      "original": "Pomodoro San Marzano",
+      "normalized": "pomodoro san marzano"
+    },
+    {
+      "original": "cipolle caramellate",
+      "normalized": "cipolle caramellate"
+    }
+  ],
+  "toppingsPostBake": [
+    {
+      "original": "Scaglie di parmigiano reggiano 36 mesi",
+      "normalized": "scaglie di parmigiano reggiano"
+    },
+    {
+      "original": "gocce di aceto balsamico",
+      "normalized": "gocce di aceto balsamico"
+    }
+  ]
+}

@@ -113,6 +113,56 @@ export async function renderSettings() {
           </div>
         </section>
 
+        <!-- Recipe Import Section -->
+        <section class="settings-card">
+          <div class="card-header">
+            <span class="card-icon">📝</span>
+            <h2>Importa Ricette</h2>
+          </div>
+          <div class="card-body">
+            <p class="card-description">
+              Importa ricette da testo in italiano. Il sistema riconoscerà automaticamente ingredienti e preparazioni.
+            </p>
+            
+            <div class="form-group">
+              <label for="recipeTextInput" class="form-label">Incolla il testo delle ricette</label>
+              <textarea 
+                id="recipeTextInput" 
+                class="form-input" 
+                rows="10" 
+                placeholder="1. Nome Pizza
+Base: ingredienti base
+Top (In cottura): ingredienti in cottura
+Top (Post-cottura): ingredienti post cottura
+Perché funziona: descrizione
+
+2. Altra Pizza
+..."
+                style="font-family: monospace; font-size: 0.9rem;"
+              ></textarea>
+              <small class="text-muted" style="display: block; margin-top: 0.5rem;">
+                Formato: ricette numerate con sezioni Base, Top (In cottura), Top (Post-cottura), Perché funziona
+              </small>
+            </div>
+
+            <div class="action-group">
+              <input type="file" id="fileImportRecipe" accept=".txt" style="display: none;">
+              <button id="btnImportRecipeFile" class="btn btn-secondary">
+                <span class="icon">📁</span>
+                Carica da File
+              </button>
+              <button id="btnImportRecipeText" class="btn btn-primary">
+                <span class="icon">🚀</span>
+                Importa Ricette
+              </button>
+            </div>
+
+            <div id="importRecipeResult" style="margin-top: 1rem; display: none;">
+              <!-- Import results will appear here -->
+            </div>
+          </div>
+        </section>
+
 
         <!-- Image Provider Configuration Section -->
         <section class="settings-card">
@@ -681,7 +731,149 @@ function setupEventListeners() {
           console.error('Reseed failed:', error);
           showToast('❌ Errore durante il ripristino: ' + error.message, 'error');
         }
-      });
+      })
+  });
+
+
+  // ============================================
+  // RECIPE IMPORT LISTENERS
+  // ============================================
+
+  // Import Recipe from File
+  const fileInputRecipe = document.getElementById('fileImportRecipe');
+  document.getElementById('btnImportRecipeFile').addEventListener('click', () => {
+    fileInputRecipe.click();
+  });
+
+  fileInputRecipe.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const resultDiv = document.getElementById('importRecipeResult');
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = '<p style="color: var(--color-gray-400);">📖 Lettura file...</p>';
+
+      // Import recipe importer module
+      const { uploadRecipeFile, formatImportResult } = await import('../modules/recipeImporter.js');
+
+      // Upload and import
+      const result = await uploadRecipeFile(file);
+      const formatted = formatImportResult(result);
+
+      // Display results
+      if (formatted.success) {
+        resultDiv.innerHTML = `
+          <div style="padding: 1rem; background: var(--color-success-bg); border-left: 4px solid var(--color-success); border-radius: 4px;">
+            <h4 style="margin: 0 0 0.5rem 0; color: var(--color-success);">✅ Import Completato!</h4>
+            <pre style="white-space: pre-wrap; margin: 0; font-size: 0.9rem;">${formatted.summary}</pre>
+            ${formatted.recipes.length > 0 ? `
+              <details style="margin-top: 0.5rem;">
+                <summary style="cursor: pointer; color: var(--color-success);">Ricette importate (${formatted.recipes.length})</summary>
+                <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
+                  ${formatted.recipes.map(r => `<li>${r.name}</li>`).join('')}
+                </ul>
+              </details>
+            ` : ''}
+          </div>
+        `;
+        showToast(`✅ ${result.imported} ricetta/e importata/e!`, 'success');
+
+        // Clear textarea
+        document.getElementById('recipeTextInput').value = '';
+      } else {
+        throw new Error('Import failed');
+      }
+    } catch (error) {
+      console.error('Recipe import failed:', error);
+      const resultDiv = document.getElementById('importRecipeResult');
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = `
+        <div style="padding: 1rem; background: var(--color-error-bg); border-left: 4px solid var(--color-error); border-radius: 4px;">
+          <h4 style="margin: 0 0 0.5rem 0; color: var(--color-error);">❌ Errore Import</h4>
+          <p style="margin: 0;">${error.message}</p>
+        </div>
+      `;
+      showToast('❌ Errore durante l\'import: ' + error.message, 'error');
+    }
+
+    // Reset file input
+    fileInputRecipe.value = '';
+  });
+
+  // Import Recipe from Text
+  document.getElementById('btnImportRecipeText').addEventListener('click', async () => {
+    const textarea = document.getElementById('recipeTextInput');
+    const recipeText = textarea.value.trim();
+
+    if (!recipeText) {
+      showToast('⚠️ Inserisci il testo delle ricette', 'warning');
+      return;
+    }
+
+    try {
+      const btn = document.getElementById('btnImportRecipeText');
+      const resultDiv = document.getElementById('importRecipeResult');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="icon">⏳</span> Importazione...';
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = '<p style="color: var(--color-gray-400);">🔍 Analisi ricette in corso...</p>';
+
+      // Import recipe importer module
+      const { importRecipeText, formatImportResult } = await import('../modules/recipeImporter.js');
+
+      // Import recipes
+      const result = await importRecipeText(recipeText);
+      const formatted = formatImportResult(result);
+
+      // Display results
+      if (formatted.success) {
+        resultDiv.innerHTML = `
+          <div style="padding: 1rem; background: var(--color-success-bg); border-left: 4px solid var(--color-success); border-radius: 4px;">
+            <h4 style="margin: 0 0 0.5rem 0; color: var(--color-success);">✅ Import Completato!</h4>
+            <pre style="white-space: pre-wrap; margin: 0; font-size: 0.9rem;">${formatted.summary}</pre>
+            ${formatted.recipes.length > 0 ? `
+              <details style="margin-top: 0.5rem;">
+                <summary style="cursor: pointer; color: var(--color-success);">Ricette importate (${formatted.recipes.length})</summary>
+                <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
+                  ${formatted.recipes.map(r => `<li>${r.name}</li>`).join('')}
+                </ul>
+              </details>
+            ` : ''}
+            ${formatted.errors.length > 0 ? `
+              <details style="margin-top: 0.5rem;">
+                <summary style="cursor: pointer; color: var(--color-warning);">⚠️ Errori (${formatted.errors.length})</summary>
+                <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem; color: var(--color-warning);">
+                  ${formatted.errors.map(e => `<li>${e.recipe}: ${e.error}</li>`).join('')}
+                </ul>
+              </details>
+            ` : ''}
+          </div>
+        `;
+        showToast(`✅ ${result.imported} ricetta/e importata/e!`, 'success');
+
+        // Clear textarea on success
+        textarea.value = '';
+      } else {
+        throw new Error('Import failed');
+      }
+    } catch (error) {
+      console.error('Recipe import failed:', error);
+      const resultDiv = document.getElementById('importRecipeResult');
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = `
+        <div style="padding: 1rem; background: var(--color-error-bg); border-left: 4px solid var(--color-error); border-radius: 4px;">
+          <h4 style="margin: 0 0 0.5rem 0; color: var(--color-error);">❌ Errore Import</h4>
+          <p style="margin: 0;">${error.message}</p>
+        </div>
+      `;
+      showToast('❌ Errore durante l\'import: ' + error.message, 'error');
+    } finally {
+      const btn = document.getElementById('btnImportRecipeText');
+      btn.disabled = false;
+      btn.innerHTML = '<span class="icon">🚀</span> Importa Ricette';
+    }
   });
 
 
