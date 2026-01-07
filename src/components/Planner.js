@@ -1832,6 +1832,14 @@ async function viewPizzaNightDetails(nightId) {
       .filter(g => g && g.phone);
   }
 
+  // Calculate ingredient counts
+  const availableIngredients = night.availableIngredients || [];
+  const fullIngredientsList = await generateShoppingList(night.selectedPizzas, night.selectedDough, []);
+  const toBuyIngredientsList = await generateShoppingList(night.selectedPizzas, night.selectedDough, availableIngredients);
+
+  const totalIngredientsCount = Object.values(fullIngredientsList).reduce((sum, list) => sum + list.length, 0);
+  const toBuyCount = Object.values(toBuyIngredientsList).reduce((sum, list) => sum + list.length, 0);
+
   const modalContent = `
       <div class="modal-header">
         <h2 class="modal-title">${night.name}</h2>
@@ -1911,6 +1919,37 @@ async function viewPizzaNightDetails(nightId) {
             </ul>
           ` : '<p class="text-muted">Nessuna pizza selezionata</p>'}
           </div>
+
+          ${night.selectedPizzas.length > 0 ? `
+          <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 0.75rem; padding: 1.25rem;">
+            <h4 style="color: var(--color-primary-light); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span>📦</span>
+              <span>Riepilogo Dispensa</span>
+            </h4>
+            <div style="display: flex; gap: 2rem; align-items: center;">
+              <div>
+                <div style="font-size: 0.75rem; color: var(--color-gray-400); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Totale Ingredienti</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: white;">${totalIngredientsCount}</div>
+              </div>
+              <div style="height: 30px; border-left: 2px solid rgba(255,255,255,0.1);"></div>
+              <div>
+                <div style="font-size: 0.75rem; color: var(--color-gray-400); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Da Acquistare</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: ${toBuyCount > 0 ? 'var(--color-accent-light)' : '#10b981'};">
+                  ${toBuyCount}
+                </div>
+              </div>
+            </div>
+            ${toBuyCount === 0 ? `
+              <div style="margin-top: 0.75rem; display: flex; align-items: center; gap: 0.5rem; color: #10b981; font-size: 0.875rem; font-weight: 600;">
+                <span style="font-size: 1.1rem;">✅</span> Tutto in dispensa!
+              </div>
+            ` : `
+              <div style="margin-top: 0.75rem; color: var(--color-gray-400); font-size: 0.8125rem;">
+                <span style="color: #10b981; font-weight: 600;">${totalIngredientsCount - toBuyCount}</span> ingredienti già disponibili su ${totalIngredientsCount} totali.
+              </div>
+            `}
+          </div>
+          ` : ''}
 
           ${night.notes ? `
           <div>
@@ -2121,8 +2160,9 @@ async function saveAvailableIngredients(nightId) {
     closeModal();
     showToast(`✅ ${availableIngredients.length} ingredienti salvati come disponibili`, 'success');
 
-    // Refresh the view
+    // Refresh the local state and re-open details to show updated counters
     await renderPizzaNights();
+    setTimeout(() => viewPizzaNightDetails(nightId), 300);
   } catch (error) {
     console.error('Error saving available ingredients:', error);
     showToast('❌ Errore nel salvare gli ingredienti', 'error');

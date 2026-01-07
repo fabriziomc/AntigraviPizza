@@ -237,13 +237,18 @@ async function renderShoppingListForNight(nightId) {
             <span>${category}</span>
           </h3>
           <ul class="shopping-items">
-            ${ingredients.map((ing, index) => `
-              <li class="shopping-item" data-category="${category}" data-index="${index}">
-                <div class="shopping-checkbox" onclick="window.toggleShoppingItem(this)"></div>
+            ${ingredients.map((ing, index) => {
+      const isChecked = night.availableIngredients && night.availableIngredients.some(avail =>
+        avail.toLowerCase() === ing.name.toLowerCase()
+      );
+      return `
+              <li class="shopping-item ${isChecked ? 'checked' : ''}" data-category="${category}" data-index="${index}">
+                <div class="shopping-checkbox ${isChecked ? 'checked' : ''}" onclick="window.toggleShoppingItem(this)"></div>
                 <span class="shopping-item-name">${ing.name}</span>
                 <span class="shopping-item-quantity">${formatQuantity(ing.quantity, ing.unit)}</span>
               </li>
-            `).join('')}
+            `;
+    }).join('')}
           </ul>
         </div>
       `).join('')}
@@ -272,12 +277,46 @@ async function renderShoppingListForNight(nightId) {
 // Make functions globally accessible for inline onclick handlers
 window.clearSelectedNight = clearSelectedNight;
 
-window.toggleShoppingItem = (element) => {
+window.toggleShoppingItem = async (element) => {
   const item = element.closest('.shopping-item');
   const checkbox = element;
+  const ingredientName = item.querySelector('.shopping-item-name').textContent;
+  const nightId = state.selectedPizzaNight;
 
+  if (!nightId) {
+    console.warn('No pizza night selected for toggle');
+    return;
+  }
+
+  // Visual toggle for immediate feedback
   checkbox.classList.toggle('checked');
   item.classList.toggle('checked');
+
+  try {
+    const { getPizzaNightById, updatePizzaNight } = await import('../modules/database.js');
+    const night = await getPizzaNightById(nightId);
+
+    if (!night) return;
+
+    let available = night.availableIngredients || [];
+    const isChecked = checkbox.classList.contains('checked');
+
+    if (isChecked) {
+      if (!available.includes(ingredientName)) {
+        available.push(ingredientName);
+      }
+    } else {
+      available = available.filter(name => name !== ingredientName);
+    }
+
+    await updatePizzaNight(nightId, { availableIngredients: available });
+    console.log(`✅ Pantry updated for ${ingredientName}: ${isChecked ? 'available' : 'needed'}`);
+  } catch (error) {
+    console.error('Failed to persist shopping item state:', error);
+    // Revert visual state on error
+    checkbox.classList.toggle('checked');
+    item.classList.toggle('checked');
+  }
 };
 
 window.downloadShoppingListAction = async (nightId, nightName) => {

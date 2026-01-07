@@ -389,6 +389,10 @@ async function showRecipeModal(recipeId) {
   const recipe = await getRecipeById(recipeId);
   if (!recipe) return;
 
+  // Load all preparations from database to include user-created ones
+  const { getAllPreparations } = await import('../modules/database.js');
+  const allPreparations = await getAllPreparations();
+
   // Helper to split ingredients
   const baseIngredients = recipe.baseIngredients || [];
   const doughIngredients = baseIngredients.filter(i => i.phase === 'dough' || i.category === 'Impasto');
@@ -482,7 +486,7 @@ async function showRecipeModal(recipeId) {
       // Add preparations
       if (recipe.preparations && recipe.preparations.length > 0) {
         recipe.preparations.forEach(prep => {
-          const prepData = PREPARATIONS.find(p => p.id === prep.id);
+          const prepData = allPreparations.find(p => p.id === prep.id);
           if (prepData) {
             // Determine timing: use prep.timing if set, otherwise fall back to prepData.postCooking
             let timing = 'before'; // default
