@@ -146,6 +146,15 @@ function createPreparationCard(prep) {
           <span>✏️</span>
           Modifica
         </button>
+        ${prep.recipeUrl ? `
+            <a href="${prep.recipeUrl}" target="_blank" class="btn btn-ghost btn-sm" title="Vedi su GialloZafferano" style="color: #ffc107;">
+                <span>🥡</span>
+            </a>
+        ` : `
+            <button class="btn btn-ghost btn-sm link-gz-btn" data-prep-id="${prep.id}" onclick="event.stopPropagation(); window.linkGzGlobal('${prep.id}')" title="Collega a GialloZafferano">
+                <span>🔗</span>
+            </button>
+        `}
         ${prep.isCustom ? `
           <button class="btn btn-ghost btn-sm delete-preparation-btn" data-prep-id="${prep.id}">
             <span>🗑️</span>
@@ -744,6 +753,40 @@ async function showPreparationModal(prepId) {
   openModal(modalContent);
 }
 
+// Link GZ function
+async function linkGz(prepId) {
+  const btn = document.querySelector(`.link-gz-btn[data-prep-id="${prepId}"]`);
+  const originalContent = btn ? btn.innerHTML : '';
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span>';
+  }
+
+  try {
+    const response = await fetch(`/api/preparations/${prepId}/link-gz`, { method: 'POST' });
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      showToast('Collegamento riuscito!', 'success');
+      await renderPreparationsGrid();
+    } else {
+      showToast(data.error || 'Nessuna ricetta trovata', 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Errore di comunicazione', 'error');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalContent;
+    }
+  }
+}
+
 // Global functions for modal callbacks
 window.showPreparationFormGlobal = showPreparationForm;
 window.submitPreparationForm = submitPreparationForm;
@@ -752,3 +795,4 @@ window.addInstructionRow = addInstructionRow;
 window.addTipRow = addTipRow;
 window.renumberInstructions = renumberInstructions;
 window.showPizzasUsingPreparationGlobal = showPizzasUsingPreparation;
+window.linkGzGlobal = linkGz;

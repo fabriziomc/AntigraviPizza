@@ -560,6 +560,10 @@ router.delete('/combinations/:id', async (req, res) => {
 // PREPARATIONS
 // ==========================================
 
+// ==========================================
+// PREPARATIONS
+// ==========================================
+
 router.get('/preparations', async (req, res) => {
     try {
         console.time('🚀 getAllPreparations');
@@ -579,6 +583,114 @@ router.get('/preparations/:id', async (req, res) => {
         }
         res.json(preparation);
     } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// NEW: Link GialloZafferano recipe to preparation
+router.post('/preparations/:id/link-gz', async (req, res) => {
+    try {
+        console.log(`🔗 [POST /preparations/${req.params.id}/link-gz] Request received`);
+        const prepId = req.params.id;
+        const prep = await dbAdapter.getPreparationById(prepId);
+
+        if (!prep) {
+            return res.status(404).json({ error: 'Preparation not found' });
+        }
+
+        // Import GZ search logic (reusing or duplicating simple logic for now since it's small)
+        // Ideally we'd move searchGz to a utility file, but for speed I'll implement inline or import if I made it a module.
+        // I made populate-gz-urls.js a script, not a module export.
+        // Let's create a quick helper or just inline the logic here using dynamic import of https if needed, 
+        // but routes.js is module so we can just use https. 
+        // Wait, routes.js imports express etc.
+
+        console.log(`🔍 Searching GZ for "${prep.name}"...`);
+        const { default: https } = await import('https');
+
+        const searchGz = (term) => {
+            return new Promise((resolve, reject) => {
+
+                const fetchUrl = (url, redirectCount = 0) => {
+                    if (redirectCount > 5) {
+                        console.log('⚠️ [GZ] Too many redirects. Aborting.');
+                        return resolve(null);
+                    }
+
+                    console.log(`🔎 [GZ] Fetching (${redirectCount}): ${url}`);
+
+                    const options = {
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                            'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7'
+                        }
+                    };
+
+                    https.get(url, options, (response) => {
+                        console.log(`🔎 [GZ] Status: ${response.statusCode}`);
+
+                        if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                            const nextUrl = response.headers.location;
+
+                            if (nextUrl.includes('ricette.giallozafferano.it') && nextUrl.endsWith('.html')) {
+                                console.log('   ✅ [GZ] Direct hit! Redirected to recipe.');
+                                return resolve(nextUrl);
+                            }
+
+                            console.log('   ↪️ [GZ] Following redirect...');
+                            return fetchUrl(nextUrl, redirectCount + 1);
+                        }
+
+                        let data = '';
+                        response.on('data', chunk => data += chunk);
+                        response.on('end', () => {
+                            console.log(`🔎 [GZ] Body received: ${data.length} bytes`);
+                            const recipeLinkRegex = /href="(https:\/\/ricette\.giallozafferano\.it\/[^"]+\.html)"/g;
+                            let match = recipeLinkRegex.exec(data);
+                            if (match) {
+                                console.log(`   ✅ [GZ] Regex match: ${match[1]}`);
+                                resolve(match[1]);
+                            } else {
+                                console.log(`   ❌ [GZ] No regex match found in body.`);
+                                resolve(null);
+                            }
+                        });
+                    }).on('error', err => {
+                        console.error('GZ Search Error:', err);
+                        resolve(null);
+                    });
+                };
+
+                const initialUrl = `https://www.giallozafferano.it/ricerca-ricette/${encodeURIComponent(term)}`;
+                fetchUrl(initialUrl);
+            });
+        };
+
+        const url = await searchGz(prep.name);
+
+        if (url) {
+            console.log(`✅ [GZ] Found URL: ${url}`);
+
+            // Use specific method to update ONLY the URL, avoiding full update issues
+            // Check if method exists (it should, we just added it)
+            if (typeof dbAdapter.updatePreparationLink === 'function') {
+                await dbAdapter.updatePreparationLink(prepId, url);
+            } else {
+                console.warn('⚠️ [GZ] updatePreparationLink method missing, falling back (risky)...');
+                await dbAdapter.updatePreparation(prepId, { recipeUrl: url });
+            }
+
+            // Return updated preparation
+            const updated = await dbAdapter.getPreparationById(prepId);
+            res.json({ success: true, url, preparation: updated });
+        } else {
+            console.log('❌ No URL found');
+            res.status(404).json({ error: `Nessuna ricetta trovata per "${prep.name}" (Status checked)` });
+        }
+
+    } catch (err) {
+        console.error('Error linking GZ:', err);
         res.status(500).json({ error: err.message });
     }
 });

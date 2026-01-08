@@ -869,6 +869,19 @@ class DatabaseAdapter {
         return prep;
     }
 
+    async updatePreparationLink(id, url) {
+        if (this.isSQLite) {
+            const stmt = this.db.prepare('UPDATE Preparations SET recipeUrl = ? WHERE id = ?');
+            stmt.run(url, id);
+        } else {
+            await this.db.execute({
+                sql: 'UPDATE Preparations SET recipeUrl = ? WHERE id = ?',
+                args: [url, id]
+            });
+        }
+        return this.getPreparationById(id);
+    }
+
     async deletePreparation(id) {
         if (this.isSQLite) {
             const stmt = this.db.prepare('DELETE FROM Preparations WHERE id=?');
