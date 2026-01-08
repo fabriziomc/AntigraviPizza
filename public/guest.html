@@ -520,29 +520,56 @@
             pizzaList.innerHTML = '<div class="loading-spinner">🍕 Caricamento menu...</div>';
 
             try {
-                const pizzaNight = window.currentPizzaNight;
                 if (!pizzaNight || !pizzaNight.selectedPizzas || pizzaNight.selectedPizzas.length === 0) {
                     throw new Error('Nessuna pizza disponibile');
                 }
 
+                // Fetch all preparations for name resolution
+                const allPrepsResponse = await fetch('/api/preparations');
+                const allPreps = allPrepsResponse.ok ? await allPrepsResponse.json() : [];
+                const prepsMap = new Map(allPreps.map(p => [p.id, p]));
+
                 // Fetch all pizza details
                 const pizzaPromises = pizzaNight.selectedPizzas.map(pizza => {
-                    // Handle both string IDs and objects with recipeId property
                     const id = typeof pizza === 'string' ? pizza : pizza.recipeId;
                     return fetch(`/api/recipes/${id}`).then(res => res.json());
                 });
-
 
                 const pizzas = await Promise.all(pizzaPromises);
 
                 // Render pizzas
                 pizzaList.innerHTML = pizzas.map(pizza => {
-                    const ingredientsList = pizza.baseIngredients && pizza.baseIngredients.length > 0
-                        ? pizza.baseIngredients.map(ing => ing.name || ing).join(', ')
+                    // Combine all ingredient sources
+                    const allIngredients = [
+                        ...(pizza.baseIngredients || []),
+                        ...(pizza.toppingsDuringBake || []),
+                        ...(pizza.toppingsPostBake || [])
+                    ];
+
+                    const ingredientsList = allIngredients.length > 0
+                        ? allIngredients.map(ing => ing.name || ing.ingredientName || ing).join(', ')
                         : 'Ingredienti non disponibili';
 
-                    const imageTag = pizza.image
-                        ? `<img src="${pizza.image}" alt="${pizza.name}" class="pizza-image" onerror="this.style.display='none'">`
+                    // Resolve preparations names
+                    const recipePreps = pizza.preparations || [];
+                    const prepNames = recipePreps
+                        .map(p => {
+                            const found = prepsMap.get(p.id);
+                            return found ? found.name : null;
+                        })
+                        .filter(Boolean);
+
+                    const preparationsSection = prepNames.length > 0
+                        ? `
+                        <div class="pizza-ingredients" style="margin-top: 0.75rem;">
+                            <div class="ingredients-title">Preparazioni:</div>
+                            ${prepNames.join(', ')}
+                        </div>
+                        `
+                        : '';
+
+                    const imageTag = (pizza.imageUrl || pizza.image)
+                        ? `<img src="${pizza.imageUrl || pizza.image}" alt="${pizza.name}" class="pizza-image" onerror="this.style.display='none'">`
                         : '';
 
                     // Check if already rated in this session
@@ -557,6 +584,7 @@
                                 <div class="ingredients-title">Ingredienti:</div>
                                 ${ingredientsList}
                             </div>
+                            ${preparationsSection}
                             <div class="pizza-rating-container">
                                 <span class="rating-label">Ti è piaciuta? Dai un voto (1-10):</span>
                                 <div class="rating-select-wrapper" id="rating-wrap-${pizza.id}">
