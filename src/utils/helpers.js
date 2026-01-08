@@ -128,8 +128,22 @@ export function aggregateIngredients(recipes, quantities) {
     recipes.forEach((recipe, index) => {
         const multiplier = quantities[index] || 1;
 
-        const ingredients = recipe.baseIngredients || recipe.ingredients || [];
-        ingredients.forEach(ingredient => {
+        // Combine all possible ingredient arrays
+        const rawIngredients = [
+            ...(recipe.baseIngredients || []),
+            ...(recipe.toppingsDuringBake || []),
+            ...(recipe.ingredients || [])
+        ];
+
+        // Add post-bake toppings and mark them
+        const postBakeIngredients = (recipe.toppingsPostBake || []).map(ing => ({
+            ...ing,
+            postBake: true
+        }));
+
+        const allIngredients = [...rawIngredients, ...postBakeIngredients];
+
+        allIngredients.forEach(ingredient => {
             // Safety check
             if (!ingredient || !ingredient.name) return;
 
@@ -139,13 +153,13 @@ export function aggregateIngredients(recipes, quantities) {
                 aggregated[key] = {
                     name: ingredient.name,
                     quantity: 0,
-                    unit: ingredient.unit,
+                    unit: ingredient.unit || 'q.b.',
                     category: ingredient.category || 'Altro'
                 };
             }
 
             // Convert to base unit, add, then convert back
-            const baseQuantity = convertToBaseUnit(ingredient.quantity, ingredient.unit);
+            const baseQuantity = convertToBaseUnit(ingredient.quantity || 0, ingredient.unit || 'q.b.');
             const totalBase = convertToBaseUnit(aggregated[key].quantity, aggregated[key].unit);
             aggregated[key].quantity = (totalBase + (baseQuantity * multiplier)) /
                 (convertToBaseUnit(1, aggregated[key].unit));

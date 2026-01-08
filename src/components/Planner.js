@@ -1893,13 +1893,30 @@ async function viewPizzaNightDetails(nightId) {
             <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">🍕 Pizze Selezionate</h4>
             ${night.selectedPizzas.length > 0 ? `
             <ul style="list-style: none; padding: 0;">
-              ${await Promise.all(night.selectedPizzas.map(async pizza => {
+              ${await Promise.all(night.selectedPizzas.map(async (pizza, index) => {
     // Fetch recipe to get favorite status
     const recipe = await import('../modules/database.js').then(m => m.getRecipeById(pizza.recipeId)).catch(() => null);
     const isFavorite = recipe ? recipe.isFavorite : false;
+    const isFirst = index === 0;
+    const isLast = index === night.selectedPizzas.length - 1;
+
     return `
-                <li style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
-                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <li style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                  <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1;">
+                    <!-- Reorder Controls -->
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                      <button 
+                        onclick="window.movePizzaUp('${nightId}', ${index})" 
+                        style="background: none; border: none; cursor: pointer; font-size: 0.75rem; padding: 2px; line-height: 1; visibility: ${isFirst ? 'hidden' : 'visible'}; color: var(--color-primary-light);"
+                        title="Sposta su"
+                      >🔼</button>
+                      <button 
+                        onclick="window.movePizzaDown('${nightId}', ${index})" 
+                        style="background: none; border: none; cursor: pointer; font-size: 0.75rem; padding: 2px; line-height: 1; visibility: ${isLast ? 'hidden' : 'visible'}; color: var(--color-primary-light);"
+                        title="Sposta giù"
+                      >🔽</button>
+                    </div>
+
                     <button class="btn-fav-toggle" data-recipe-id="${pizza.recipeId}" data-night-id="${nightId}" data-favorite="${isFavorite ? 'true' : 'false'}" style="background: none; border: none; cursor: pointer; font-size: 1.25rem; padding: 0.25rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
                        ${isFavorite ? '⭐' : '☆'}
                     </button>
@@ -2022,6 +2039,57 @@ async function viewPizzaNightDetails(nightId) {
     }
   }, 100);
 }
+
+// Function to move a pizza up in the list
+window.movePizzaUp = async function (nightId, index) {
+  if (index <= 0) return;
+  try {
+    const { getPizzaNightById, updatePizzaNight } = await import('../modules/database.js');
+    const night = await getPizzaNightById(nightId);
+    if (!night) return;
+
+    // Swap items
+    const pizzas = [...night.selectedPizzas];
+    const temp = pizzas[index];
+    pizzas[index] = pizzas[index - 1];
+    pizzas[index - 1] = temp;
+
+    // Update database
+    await updatePizzaNight(nightId, { ...night, selectedPizzas: pizzas });
+
+    // Re-render modal and grid
+    await viewPizzaNightDetails(nightId);
+    await renderPizzaNights();
+  } catch (error) {
+    console.error('Failed to move pizza up:', error);
+    showToast('Errore nel riordinamento', 'error');
+  }
+};
+
+// Function to move a pizza down in the list
+window.movePizzaDown = async function (nightId, index) {
+  try {
+    const { getPizzaNightById, updatePizzaNight } = await import('../modules/database.js');
+    const night = await getPizzaNightById(nightId);
+    if (!night || index >= night.selectedPizzas.length - 1) return;
+
+    // Swap items
+    const pizzas = [...night.selectedPizzas];
+    const temp = pizzas[index];
+    pizzas[index] = pizzas[index + 1];
+    pizzas[index + 1] = temp;
+
+    // Update database
+    await updatePizzaNight(nightId, { ...night, selectedPizzas: pizzas });
+
+    // Re-render modal and grid
+    await viewPizzaNightDetails(nightId);
+    await renderPizzaNights();
+  } catch (error) {
+    console.error('Failed to move pizza down:', error);
+    showToast('Errore nel riordinamento', 'error');
+  }
+};
 
 // ============================================
 // MANAGE AVAILABLE INGREDIENTS
@@ -2539,22 +2607,38 @@ function renderLivePizza() {
   document.querySelector('.pizza-name').textContent = pizza.name || 'Pizza';
 
   // Separate ingredients and preparations by phase
-  const ingredients = pizza.baseIngredients || [];
+  // Combine all possible ingredient arrays for the recipe
+  const ingredients = [
+    ...(pizza.baseIngredients || []),
+    ...(pizza.toppingsDuringBake || []),
+    ...(pizza.ingredients || [])
+  ];
+
+  // Add post-bake toppings and mark them
+  const postBakeToppings = (pizza.toppingsPostBake || []).map(ing => ({
+    ...ing,
+    postBake: true
+  }));
+
+  const allIngredients = [...ingredients, ...postBakeToppings];
   const preparations = pizza.preparations || [];
 
   console.log('🔍 Live Mode Debug:');
   console.log('  - Pizza:', pizza.name);
-  console.log('  - baseIngredients:', ingredients);
+  console.log('  - All ingredients:', allIngredients);
   console.log('  - preparations:', preparations);
 
-  const beforeIngredients = ingredients.filter(ing => !ing.postBake);
-  const afterIngredients = ingredients.filter(ing => ing.postBake === true);
+  const beforeIngredients = allIngredients.filter(ing => !ing.postBake);
+  const afterIngredients = allIngredients.filter(ing => ing.postBake === true);
 
   console.log('  - beforeIngredients:', beforeIngredients);
   console.log('  - afterIngredients:', afterIngredients);
 
-  const beforePreparations = preparations.filter(prep => !prep.timing || prep.timing === 'before');
-  const afterPreparations = preparations.filter(prep => prep.timing === 'after');
+  // For preparations, some might have 'timing' property and others might be in separate lists if we added them in parser
+  // But currently parser puts them in instructions, not separate arrays. 
+  // However, we should check if they have timing 'after' or 'post-bake'
+  const beforePreparations = preparations.filter(prep => !prep.timing || (prep.timing !== 'after' && prep.timing !== 'post-bake'));
+  const afterPreparations = preparations.filter(prep => prep.timing === 'after' || prep.timing === 'post-bake');
 
   // Render BEFORE cooking content
   renderCookingPhaseContent('beforeCookingContent', beforeIngredients, beforePreparations, 'before');
