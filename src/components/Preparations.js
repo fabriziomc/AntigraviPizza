@@ -21,7 +21,7 @@ export async function renderPreparations() {
     <div class="preparations-container fade-in">
       <div class="page-header">
         <div>
-          <h1 class="page-title">🥫 Preparazioni</h1>
+          <h1 class="page-title">🥫 Preparazioni (v2)</h1>
           <p class="page-description">Ricette per ingredienti composti - creme, salse e condimenti</p>
         </div>
         <button class="btn btn-primary" id="newPreparationBtn">
@@ -147,13 +147,26 @@ function createPreparationCard(prep) {
           Modifica
         </button>
         ${prep.recipeUrl ? `
-            <a href="${prep.recipeUrl}" target="_blank" class="btn btn-ghost btn-sm" title="Vedi su GialloZafferano" style="color: #ffc107;">
-                <span>🥡</span>
-            </a>
+            <div style="display: flex; gap: 0.25rem;">
+                <a href="${prep.recipeUrl}" target="_blank" class="btn btn-ghost btn-sm" title="Vedi su GialloZafferano" style="color: #ffc107;">
+                    <span>🥡</span>
+                </a>
+                <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); window.editLinkGzGlobal('${prep.id}', '${prep.recipeUrl}')" title="Modifica link">
+                    <span>✏️</span>
+                </button>
+                <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); window.unlinkGzGlobal('${prep.id}')" title="Rimuovi link">
+                    <span>❌</span>
+                </button>
+            </div>
         ` : `
-            <button class="btn btn-ghost btn-sm link-gz-btn" data-prep-id="${prep.id}" onclick="event.stopPropagation(); window.linkGzGlobal('${prep.id}')" title="Collega a GialloZafferano">
-                <span>🔗</span>
-            </button>
+            <div style="display: flex; gap: 0.25rem;">
+                <button class="btn btn-ghost btn-sm link-gz-btn" data-prep-id="${prep.id}" onclick="event.stopPropagation(); window.linkGzGlobal('${prep.id}')" title="Collega automaticamente">
+                    <span>✨</span>
+                </button>
+                <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); window.editLinkGzGlobal('${prep.id}', '')" title="Inserisci link manualmente">
+                    <span>🔗</span>
+                </button>
+            </div>
         `}
         ${prep.isCustom ? `
           <button class="btn btn-ghost btn-sm delete-preparation-btn" data-prep-id="${prep.id}">
@@ -267,6 +280,11 @@ async function showPreparationForm(prepId = null) {
         <div class="form-group">
           <label class="form-label">Descrizione</label>
           <textarea class="form-textarea" name="description" rows="2" placeholder="Breve descrizione...">${prep?.description || ''}</textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Link Ricetta (Opzionale)</label>
+          <input type="url" class="form-input" name="recipeUrl" value="${prep?.recipeUrl || ''}" placeholder="https://...">
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
@@ -537,6 +555,7 @@ async function submitPreparationForm(prepId) {
     yield: parseInt(formData.get('yield')),
     prepTime: formData.get('prepTime').trim(),
     difficulty: formData.get('difficulty'),
+    recipeUrl: formData.get('recipeUrl')?.trim() || null,
     ingredients,
     instructions,
     tips
@@ -753,6 +772,7 @@ async function showPreparationModal(prepId) {
   openModal(modalContent);
 }
 
+
 // Link GZ function
 async function linkGz(prepId) {
   const btn = document.querySelector(`.link-gz-btn[data-prep-id="${prepId}"]`);
@@ -787,6 +807,34 @@ async function linkGz(prepId) {
   }
 }
 
+// Unlink GZ function
+async function unlinkGz(prepId) {
+  if (!confirm('Vuoi rimuovere il collegamento alla ricetta?')) return;
+  try {
+    await updatePreparation(prepId, { recipeUrl: null });
+    showToast('Link rimosso', 'success');
+    await renderPreparationsGrid();
+  } catch (e) {
+    console.error(e);
+    showToast('Errore', 'error');
+  }
+}
+
+// Edit Link GZ function
+async function editLinkGz(prepId, currentUrl) {
+  const newUrl = prompt('Inserisci il link alla ricetta:', currentUrl || '');
+  if (newUrl === null) return; // Cancelled
+
+  try {
+    await updatePreparation(prepId, { recipeUrl: newUrl });
+    showToast('Link aggiornato', 'success');
+    await renderPreparationsGrid();
+  } catch (e) {
+    console.error(e);
+    showToast('Errore', 'error');
+  }
+}
+
 // Global functions for modal callbacks
 window.showPreparationFormGlobal = showPreparationForm;
 window.submitPreparationForm = submitPreparationForm;
@@ -796,3 +844,5 @@ window.addTipRow = addTipRow;
 window.renumberInstructions = renumberInstructions;
 window.showPizzasUsingPreparationGlobal = showPizzasUsingPreparation;
 window.linkGzGlobal = linkGz;
+window.unlinkGzGlobal = unlinkGz;
+window.editLinkGzGlobal = editLinkGz;
