@@ -573,15 +573,19 @@
                         }
                     });
 
-                    // Render unified list
-                    const itemsList = unifiedItems.length > 0
-                        ? unifiedItems.map(item => {
-                            const postBakeIcon = item.isPostBake ? ' 📤' : '';
-                            const postBakeStyle = item.isPostBake ? 'font-weight: 600; color: #f97316;' : '';
-                            const prepBadge = item.type === 'preparation' ? ' 🥫' : '';
-                            return `<span style="${postBakeStyle}">${item.name}${prepBadge}${postBakeIcon}</span>`;
-                        }).join(', ')
+                    // Separate pre-bake and post-bake items
+                    const preBakeItems = unifiedItems.filter(item => !item.isPostBake);
+                    const postBakeItems = unifiedItems.filter(item => item.isPostBake);
+
+                    // Render pre-bake items (no distinction between ingredients and preparations)
+                    const preBakeList = preBakeItems.length > 0
+                        ? preBakeItems.map(item => item.name).join(', ')
                         : 'Ingredienti non disponibili';
+
+                    // Render post-bake items only if they exist
+                    const postBakeSection = postBakeItems.length > 0
+                        ? `<br><strong style="color: #f97316;">In uscita:</strong> ${postBakeItems.map(item => item.name).join(', ')}`
+                        : '';
 
                     const imageTag = (pizza.imageUrl || pizza.image)
                         ? `<img src="${pizza.imageUrl || pizza.image}" alt="${pizza.name}" class="pizza-image" onerror="this.style.display='none'">`
@@ -596,8 +600,8 @@
                             <h3 class="pizza-name">🍕 ${pizza.name}</h3>
                             ${imageTag}
                             <div class="pizza-ingredients">
-                                <div class="ingredients-title">Ingredienti e Preparazioni:</div>
-                                ${itemsList}
+                                <div class="ingredients-title">Ingredienti:</div>
+                                ${preBakeList}${postBakeSection}
                             </div>
                             <div class="pizza-rating-container">
                                 <span class="rating-label">Ti è piaciuta? Dai un voto (1-10):</span>
