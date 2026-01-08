@@ -783,8 +783,8 @@ class DatabaseAdapter {
 
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
-                INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom, recipeUrl)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 prep.id,
@@ -798,31 +798,44 @@ class DatabaseAdapter {
                 instructionsJson,
                 tipsJson,
                 prep.dateAdded || Date.now(),
-                prep.isCustom !== undefined ? (prep.isCustom ? 1 : 0) : 1
+                prep.isCustom !== undefined ? (prep.isCustom ? 1 : 0) : 1,
+                prep.recipeUrl || null
             );
         } else {
-            await this.db.execute(`
-                INSERT INTO Preparations (id, name, category, description, [yield], prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom)
-                VALUES (@id, @name, @category, @description, @yield, @prepTime, @difficulty, @ingredients, @instructions, @tips, @dateAdded, @isCustom)
-            `, {
-                id: prep.id,
-                name: prep.name,
-                category: prep.category,
-                description: prep.description || '',
-                yield: prep.yield || 4,
-                prepTime: prep.prepTime || '',
-                difficulty: prep.difficulty || 'Media',
-                ingredients: ingredientsJson,
-                instructions: instructionsJson,
-                tips: tipsJson,
-                dateAdded: prep.dateAdded || Date.now(),
-                isCustom: prep.isCustom !== undefined ? (prep.isCustom ? 1 : 0) : 1
+            await this.db.execute({
+                sql: `
+                INSERT INTO Preparations (id, name, category, description, [yield], prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom, recipeUrl)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `,
+                args: [
+                    prep.id,
+                    prep.name,
+                    prep.category,
+                    prep.description || '',
+                    prep.yield || 4,
+                    prep.prepTime || '',
+                    prep.difficulty || 'Media',
+                    ingredientsJson,
+                    instructionsJson,
+                    tipsJson,
+                    prep.dateAdded || Date.now(),
+                    prep.isCustom !== undefined ? (prep.isCustom ? 1 : 0) : 1,
+                    prep.recipeUrl || null
+                ]
             });
         }
         return prep;
     }
 
-    async updatePreparation(id, prep) {
+    async updatePreparation(id, updates) {
+        // Fetch current preparation to merge with updates
+        const currentPrep = await this.getPreparationById(id);
+        if (!currentPrep) {
+            throw new Error(`Preparation with id ${id} not found`);
+        }
+
+        const prep = { ...currentPrep, ...updates };
+
         const ingredientsJson = JSON.stringify(prep.ingredients || []);
         const instructionsJson = JSON.stringify(prep.instructions || []);
         const tipsJson = JSON.stringify(prep.tips || []);
@@ -831,7 +844,7 @@ class DatabaseAdapter {
             const stmt = this.db.prepare(`
                 UPDATE Preparations 
                 SET name=?, category=?, description=?, yield=?, prepTime=?, difficulty=?, 
-                    ingredients=?, instructions=?, tips=?
+                    ingredients=?, instructions=?, tips=?, recipeUrl=?
                 WHERE id=?
             `);
             stmt.run(
@@ -844,26 +857,30 @@ class DatabaseAdapter {
                 ingredientsJson,
                 instructionsJson,
                 tipsJson,
+                prep.recipeUrl || null,
                 id
             );
         } else {
-            await this.db.execute(`
+            await this.db.execute({
+                sql: `
                 UPDATE Preparations 
-                SET name=@name, category=@category, description=@description, [yield]=@yield, 
-                    prepTime=@prepTime, difficulty=@difficulty, ingredients=@ingredients, 
-                    instructions=@instructions, tips=@tips
-                WHERE id=@id
-            `, {
-                id,
-                name: prep.name,
-                category: prep.category,
-                description: prep.description || '',
-                yield: prep.yield || 4,
-                prepTime: prep.prepTime || '',
-                difficulty: prep.difficulty || 'Media',
-                ingredients: ingredientsJson,
-                instructions: instructionsJson,
-                tips: tipsJson
+                SET name=?, category=?, description=?, [yield]=?, prepTime=?, difficulty=?, 
+                    ingredients=?, instructions=?, tips=?, recipeUrl=?
+                WHERE id=?
+                `,
+                args: [
+                    prep.name,
+                    prep.category,
+                    prep.description || '',
+                    prep.yield || 4,
+                    prep.prepTime || '',
+                    prep.difficulty || 'Media',
+                    ingredientsJson,
+                    instructionsJson,
+                    tipsJson,
+                    prep.recipeUrl || null,
+                    id
+                ]
             });
         }
         return prep;
