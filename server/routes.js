@@ -673,6 +673,17 @@ router.post('/preparations/:id/link-gz', async (req, res) => {
                                 candidates.push({ url, title });
                             }
 
+                            // Secondary Regex for Blog Results (span.gz-title or article > a[href*="blog"])
+                            // Structure: <a href="https://blog.giallozafferano.it/..." title="..."> ... <span class="gz-title">Title</span>
+                            const blogRegex = /<a[^>]*href="(https:\/\/blog\.giallozafferano\.it\/[^"]+)"[^>]*title="([^"]+)"/g;
+                            while ((match = blogRegex.exec(data)) !== null) {
+                                const url = match[1];
+                                let title = match[2];
+                                // Simple entity decode for common quotes
+                                title = title.replace(/&#039;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+                                candidates.push({ url, title });
+                            }
+
                             if (candidates.length === 0) {
                                 console.log('   ❌ [GZ] No results found matching regex.');
                                 return resolve(null);
