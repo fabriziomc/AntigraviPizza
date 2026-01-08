@@ -606,14 +606,14 @@ router.post('/preparations/:id/link-gz', async (req, res) => {
             console.log(`✅ [GZ] Selected URL: ${bestUrl}`);
 
             if (typeof dbAdapter.updatePreparationLink === 'function') {
-                await dbAdapter.updatePreparationLink(prepId, url);
+                await dbAdapter.updatePreparationLink(prepId, bestUrl);
             } else {
                 console.warn('⚠️ [GZ] updatePreparationLink method missing, falling back...');
-                await dbAdapter.updatePreparation(prepId, { recipeUrl: url });
+                await dbAdapter.updatePreparation(prepId, { recipeUrl: bestUrl });
             }
 
             const updated = await dbAdapter.getPreparationById(prepId);
-            res.json({ success: true, url, preparation: updated });
+            res.json({ success: true, url: bestUrl, preparation: updated });
         } else {
             console.log('❌ No URL found');
             res.status(404).json({ error: `Nessuna ricetta trovata per "${prep.name}"` });

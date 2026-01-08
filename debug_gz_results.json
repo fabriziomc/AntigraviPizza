@@ -1,5 +1,23 @@
 [
   {
+    "url": "https://blog.giallozafferano.it/renatabriano/ananas-caramellato-ricetta/",
+    "title": "Ananas caramellato",
+    "rawDistance": 0,
+    "score": -10
+  },
+  {
+    "url": "https://blog.giallozafferano.it/paola67/ricetta-ananas-in-padella/",
+    "title": "Ananas in padella",
+    "rawDistance": 7,
+    "score": 7
+  },
+  {
+    "url": "https://blog.giallozafferano.it/msp/cachi-caramellato-croccante/",
+    "title": "Cachi caramellato croccante",
+    "rawDistance": 15,
+    "score": 15
+  },
+  {
     "url": "https://ricette.giallozafferano.it/Torta-cocco-e-ananas.html",
     "title": "Torta cocco e ananas",
     "rawDistance": 16,
@@ -9,6 +27,18 @@
     "url": "https://ricette.giallozafferano.it/Tiramisu-all-ananas.html",
     "title": "Tiramisù all'ananas",
     "rawDistance": 16,
+    "score": 16
+  },
+  {
+    "url": "https://blog.giallozafferano.it/community/",
+    "title": "Crea il tuo blog",
+    "rawDistance": 16,
+    "score": 16
+  },
+  {
+    "url": "https://blog.giallozafferano.it/ritaamordicucina/ricetta-torta-rovesciata-allananas-caramellato/",
+    "title": "Torta rovesciata all'ananas caramellato",
+    "rawDistance": 21,
     "score": 16
   },
   {
@@ -36,6 +66,12 @@
     "score": 18
   },
   {
+    "url": "https://blog.giallozafferano.it/ricettandocondany/ricetta-panna-cotta-al-cocco-e-ananas-caramellato/",
+    "title": "Panna cotta al cocco e ananas caramellato",
+    "rawDistance": 23,
+    "score": 18
+  },
+  {
     "url": "https://ricette.giallozafferano.it/Sorbetto-di-ananas-e-menta.html",
     "title": "Sorbetto di ananas e menta",
     "rawDistance": 20,
@@ -60,8 +96,20 @@
     "score": 22
   },
   {
+    "url": "https://blog.giallozafferano.it/laseseinpadella/biscotti-avena-ananas-zenzero/",
+    "title": "BISCOTTI AVENA ANANAS E ZENZERO",
+    "rawDistance": 24,
+    "score": 24
+  },
+  {
     "url": "https://ricette.giallozafferano.it/Come-pulire-e-tagliare-l-ananas.html",
     "title": "Come pulire e tagliare l'ananas",
+    "rawDistance": 25,
+    "score": 25
+  },
+  {
+    "url": "https://blog.giallozafferano.it/msp/ananas-grigliato-crema-yogurt/",
+    "title": "Ananas grigliato con crema di yogurt",
     "rawDistance": 25,
     "score": 25
   },
@@ -78,6 +126,24 @@
     "score": 26
   },
   {
+    "url": "https://blog.giallozafferano.it/piovonoricette/ricetta-insalata-con-salmone-ananas-e-avocado/",
+    "title": "Insalata con salmone, ananas e avocado",
+    "rawDistance": 28,
+    "score": 28
+  },
+  {
+    "url": "https://blog.giallozafferano.it/catiaincucina/ricetta-spiedini-di-ananas-e-formaggio-idea-aperitivo/",
+    "title": "Spiedini di ananas e formaggio. Idea aperitivo",
+    "rawDistance": 33,
+    "score": 33
+  },
+  {
+    "url": "https://blog.giallozafferano.it/timoelenticchie/eco-rovesciata-allananas-mela-scarti/",
+    "title": "Torta rovesciata all'ananas e mela con scarti",
+    "rawDistance": 35,
+    "score": 35
+  },
+  {
     "url": "https://ricette.giallozafferano.it/Torta-rovesciata-all-ananas.html",
     "title": "Torta rovesciata all'ananas (facile  e veloce)",
     "rawDistance": 36,
@@ -88,5 +154,17 @@
     "title": "Arrosto al latte caramellato con ananas e mais facile",
     "rawDistance": 38,
     "score": 38
+  },
+  {
+    "url": "https://blog.giallozafferano.it/lericettedimarci13/ricetta-torta-mimosa-allananas-caramellato/",
+    "title": "Torta mimosa all'ananas caramellato. Ricetta passo dopo passo.",
+    "rawDistance": 44,
+    "score": 39
+  },
+  {
+    "url": "https://blog.giallozafferano.it/dadcook/ricetta-parfait-yogurt-greco-caramellato-ricetta/",
+    "title": "Parfait di Yogurt Greco Caramellato: il Dessert Veloce e Croccante",
+    "rawDistance": 52,
+    "score": 52
   }
 ]
