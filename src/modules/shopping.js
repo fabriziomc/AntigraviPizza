@@ -56,8 +56,30 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
     // Get quantities
     const quantities = selectedPizzas.map(item => item.quantity);
 
+    // Track which pizzas use which ingredients (by ingredient name)
+    const ingredientPizzaMap = new Map(); // Map<ingredientName, Set<pizzaIndex>>
+
     // Aggregate ingredients from pizzas (toppings only)
     const aggregated = aggregateIngredients(recipes, quantities);
+
+    // Track pizza usage for base ingredients
+    recipes.forEach((recipe, index) => {
+        const rawIngredients = [
+            ...(recipe.baseIngredients || []),
+            ...(recipe.toppingsDuringBake || []),
+            ...(recipe.toppingsPostBake || []),
+            ...(recipe.ingredients || [])
+        ];
+
+        rawIngredients.forEach(ing => {
+            if (!ing || !ing.name) return;
+            const key = ing.name.toLowerCase();
+            if (!ingredientPizzaMap.has(key)) {
+                ingredientPizzaMap.set(key, new Set());
+            }
+            ingredientPizzaMap.get(key).add(index);
+        });
+    });
 
     // Fetch preparations from database
     const preparations = await getAllPreparations();
@@ -81,6 +103,13 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
                         console.warn('Skipping ingredient without name:', ingredient);
                         return;
                     }
+
+                    // Track pizza usage
+                    const key = ingredientData.name.toLowerCase();
+                    if (!ingredientPizzaMap.has(key)) {
+                        ingredientPizzaMap.set(key, new Set());
+                    }
+                    ingredientPizzaMap.get(key).add(index);
 
                     // Calculate how much of this ingredient we need
                     let scaledQuantity;
@@ -120,8 +149,15 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
             // Calculate how many batches of dough we need
             const batchesNeeded = Math.ceil(totalPizzas / doughRecipe.yield);
 
-            // Add dough ingredients
+            // Add dough ingredients (they're used in ALL pizzas)
             doughRecipe.ingredients.forEach(ingredient => {
+                const key = ingredient.name.toLowerCase();
+                // Dough is used in all pizzas
+                if (!ingredientPizzaMap.has(key)) {
+                    ingredientPizzaMap.set(key, new Set());
+                }
+                recipes.forEach((_, idx) => ingredientPizzaMap.get(key).add(idx));
+
                 const existingIndex = aggregated.findIndex(i => i.name === ingredient.name);
                 const totalQuantity = ingredient.quantity * batchesNeeded;
 
@@ -140,6 +176,12 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
             });
         }
     }
+
+    // Add pizzaCount to each ingredient
+    aggregated.forEach(ingredient => {
+        const key = ingredient.name.toLowerCase();
+        ingredient.pizzaCount = ingredientPizzaMap.has(key) ? ingredientPizzaMap.get(key).size : 0;
+    });
 
     // Filter out available ingredients (case-insensitive matching)
     const filtered = aggregated.filter(ingredient =>
@@ -191,21 +233,22 @@ export function formatShoppingList(groupedList) {
  * Export shopping list as text
  */
 export function exportShoppingListAsText(groupedList, pizzaNightName) {
-    let text = `🍕 LISTA SPESA - ${pizzaNightName}\n`;
+    let text = `LISTA SPESA - ${pizzaNightName}\n`;
     text += `${'='.repeat(50)}\n\n`;
 
     for (const [category, ingredients] of Object.entries(groupedList)) {
-        text += `📦 ${category.toUpperCase()}\n`;
+        text += `${category.toUpperCase()}\n`;
         text += `${'-'.repeat(50)}\n`;
 
         ingredients.forEach(ing => {
-            text += `☐ ${ing.name} - ${formatQuantity(ing.quantity, ing.unit)}\n`;
+            const pizzaCountText = ing.pizzaCount ? ` (${ing.pizzaCount} pizze)` : '';
+            text += `[ ] ${ing.name} - ${formatQuantity(ing.quantity, ing.unit)}${pizzaCountText}\n`;
         });
 
         text += '\n';
     }
 
-    text += `\nGenerato da AntigraviPizza 🚀\n`;
+    text += `\nGenerato da AntigraviPizza\n`;
 
     return text;
 }

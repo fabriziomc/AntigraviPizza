@@ -2236,36 +2236,37 @@ async function manageAvailableIngredients(nightId) {
   for (const [category, items] of Object.entries(fullList)) {
     const icon = getCategoryIcon(category);
     itemsHTML += `
-  < div class="shopping-category" data - category="${category}" >
+      <div class="shopping-category" data-category="${category}">
         <h3 class="category-title">${icon} ${category}</h3>
         <div class="shopping-items">
           ${items.map(item => {
       const isChecked = availableIngredients.some(avail =>
         avail.toLowerCase() === item.name.toLowerCase()
       );
+      const pizzaCountBadge = item.pizzaCount ? `<span style="font-size: 0.75rem; color: var(--color-primary-light); margin-left: 0.5rem;">(${item.pizzaCount} pizze)</span>` : '';
       return `
             <div class="shopping-item ${isChecked ? 'checked' : ''}">
               <div class="shopping-item-checkbox ${isChecked ? 'checked' : ''}" 
                    onclick="this.classList.toggle('checked'); this.closest('.shopping-item').classList.toggle('checked');">
               </div>
               <div class="shopping-item-content">
-                <span class="item-name" data-ingredient-name="${item.name}">${item.name}</span>
+                <span class="item-name" data-ingredient-name="${item.name}">${item.name}${pizzaCountBadge}</span>
                 <span class="item-quantity">${formatQuantity(item.quantity, item.unit)}</span>
               </div>
             </div>
           `;
     }).join('')}
         </div>
-      </div >
+      </div>
   `;
   }
 
   // Create and show modal
   const modalContent = `
-  < div class="modal-header" >
+      <div class="modal-header">
         <h2>✓ Ingredienti Disponibili - ${night.name}</h2>
         <button class="modal-close" onclick="window.closeModal()">×</button>
-      </div >
+      </div>
       <div class="modal-body">
         <p style="color: var(--color-gray-300); margin-bottom: 1.5rem;">
           Seleziona gli ingredienti che hai già in casa. La lista spesa mostrerà solo quelli da acquistare.
@@ -2319,7 +2320,7 @@ async function saveAvailableIngredients(nightId) {
     night.availableIngredients = availableIngredients;
 
     // Send the complete updated night object
-    const response = await fetch(`/ api / pizza - nights / ${nightId} `, {
+    const response = await fetch(`/api/pizza-nights/${nightId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(night)
@@ -2421,29 +2422,32 @@ async function viewShoppingListForNight(nightId) {
   for (const [category, items] of Object.entries(groupedList)) {
     const icon = getCategoryIcon(category);
     itemsHTML += `
-  < div class="shopping-category" >
+      <div class="shopping-category">
         <h3 class="category-title">${icon} ${category}</h3>
         <div class="shopping-items">
-          ${items.map(item => `
+          ${items.map(item => {
+      const pizzaCountBadge = item.pizzaCount ? `<span style="font-size: 0.75rem; color: var(--color-primary-light); margin-left: 0.5rem;">(${item.pizzaCount} pizze)</span>` : '';
+      return `
             <div class="shopping-item">
               <div class="shopping-item-checkbox" onclick="this.classList.toggle('checked'); this.closest('.shopping-item').classList.toggle('checked');"></div>
               <div class="shopping-item-content">
-                <span class="item-name">${item.name}</span>
+                <span class="item-name">${item.name}${pizzaCountBadge}</span>
                 <span class="item-quantity">${formatQuantity(item.quantity, item.unit)}</span>
               </div>
             </div>
-          `).join('')}
+          `;
+    }).join('')}
         </div>
-      </div >
+      </div>
   `;
   }
 
   // Create and show modal
   const modalContent = `
-  < div class="modal-header" >
+      <div class="modal-header">
         <h2>🛒 Lista Spesa - ${night.name}</h2>
         <button class="modal-close" onclick="window.closeModal()">×</button>
-      </div >
+      </div>
       <div class="modal-body">
         <div class="shopping-list-container">
           ${itemsHTML}
@@ -2496,7 +2500,7 @@ async function reopenPizzaNightAction(nightId) {
 
 async function deletePizzaNightAction(nightId) {
   const modalContent = `
-  < div class="modal-header" >
+      <div class="modal-header">
         <h2 class="modal-title">Elimina Serata</h2>
         <button class="modal-close" onclick="window.closeModal()">×</button>
       </div >
