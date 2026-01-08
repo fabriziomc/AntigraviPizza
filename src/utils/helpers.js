@@ -131,12 +131,18 @@ export function aggregateIngredients(recipes, quantities, ingredientMap = {}, ca
 
     // Helper to resolve ingredient category
     const resolveCategory = (ingredient) => {
-        // If we have maps and an ingredientId, resolve from database
+        // First try to use categoryId directly from the ingredient
+        if (ingredient.categoryId && categoryMap[ingredient.categoryId]) {
+            return categoryMap[ingredient.categoryId];
+        }
+        // Then try to resolve from ingredientId if available
         if (ingredient.ingredientId && ingredientMap[ingredient.ingredientId]) {
             const resolved = ingredientMap[ingredient.ingredientId];
-            return categoryMap[resolved.categoryId] || ingredient.category || 'Altro';
+            if (resolved.categoryId && categoryMap[resolved.categoryId]) {
+                return categoryMap[resolved.categoryId];
+            }
         }
-        // Otherwise use embedded category
+        // Otherwise use embedded category or fallback to 'Altro'
         return ingredient.category || 'Altro';
     };
 
