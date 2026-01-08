@@ -224,6 +224,10 @@ async function renderShoppingListForNight(nightId) {
           <span>📥</span>
           Scarica
         </button>
+        <button class="btn btn-primary" style="margin-left: 0.5rem; background-color: #e53935; border-color: #e53935;" onclick="window.openBringModal('${night.id}')">
+          <span>🛒</span>
+          Bring!
+        </button>
       </div>
     </div>
     
@@ -378,5 +382,210 @@ window.showShoppingListModal = async (nightId) => {
   `;
 
   document.body.appendChild(modal);
+};
+
+// ============================================
+// BRING! INTEGRATION
+// ============================================
+
+window.openBringModal = async (nightId) => {
+  console.log('🛒 [Bring] Opening modal for night:', nightId);
+  try {
+    const night = await getPizzaNightById(nightId);
+    console.log('🛒 [Bring] Fetched night data:', night);
+
+    if (!night) {
+      console.error('🛒 [Bring] Night not found!');
+      alert('Errore: Impossibile recuperare i dati della serata.');
+      return;
+    }
+
+    // Create modal
+    const existingModal = document.getElementById('bringModal');
+    if (existingModal) existingModal.remove();
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay'; // Changed from 'modal active'
+    modal.id = 'bringModal';
+    modal.style.zIndex = '9999'; // Force high z-index
+    // Ensure display is flex to center content (handled by CSS but reinforcing)
+    modal.style.display = 'flex';
+
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.5rem;">🛒</span>
+                    <h2 style="margin: 0;">Invia a Bring!</h2>
+                </div>
+                <button class="modal-close" onclick="this.closest('#bringModal').remove()">×</button>
+            </div>
+            <div class="modal-body" id="bringModalBody">
+                <div id="bringLoginStep">
+                    <div style="background: rgba(229, 57, 53, 0.1); border-left: 4px solid #e53935; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px;">
+                        <p style="margin: 0; font-size: 0.9rem;">Accedi con il tuo account Bring! per vedere le tue liste. Le credenziali non vengono salvate permanentemente.</p>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email</label>
+                        <input type="email" id="bringEmail" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;" placeholder="iltuonome@example.com">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Password</label>
+                        <input type="password" id="bringPassword" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;" placeholder="La tua password Bring!">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; justify-content: center; background-color: #e53935; border-color: #e53935;" onclick="window.loginToBring()">
+                        Connetti a Bring!
+                    </button>
+                    ${localStorage.getItem('bring_email') ? `<div style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: #888; cursor: pointer;" onclick="document.getElementById('bringEmail').value = localStorage.getItem('bring_email')">Usa email salvata: ${localStorage.getItem('bring_email')}</div>` : ''}
+                </div>
+                
+                <div id="bringListStep" style="display: none;">
+                    <h3 style="margin-bottom: 1rem;">Seleziona una lista</h3>
+                    <div id="bringListsContainer" style="display: grid; gap: 0.75rem; margin-bottom: 1.5rem; max-height: 300px; overflow-y: auto;"></div>
+                    <button class="btn btn-primary" style="width: 100%; justify-content: center; background-color: #e53935; border-color: #e53935;" onclick="window.sendToBringList('${nightId}')">
+                        Invia Ingredienti
+                    </button>
+                </div>
+                
+                <div id="bringSuccessStep" style="display: none; text-align: center; padding: 2rem;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+                    <h3 style="margin-bottom: 0.5rem;">Ingredienti Inviati!</h3>
+                    <p style="color: #666; margin-bottom: 2rem;">La lista della spesa è stata aggiornata su Bring!</p>
+                    <button class="btn btn-secondary" onclick="document.getElementById('bringModal').remove()">Chiudi</button>
+                </div>
+                
+                <div id="bringLoading" style="display: none; text-align: center; padding: 3rem;">
+                    <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #e53935; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <p style="margin-top: 1rem; color: #666;">Operazione in corso...</p>
+                    <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Load saved email if any
+    const savedEmail = localStorage.getItem('bring_email');
+    if (savedEmail) document.getElementById('bringEmail').value = savedEmail;
+
+  } catch (error) {
+    console.error('🛒 [Bring] Error opening modal:', error);
+    alert('Si è verificato un errore: ' + error.message);
+  }
+};
+
+window.loginToBring = async () => {
+  const email = document.getElementById('bringEmail').value;
+  const password = document.getElementById('bringPassword').value;
+
+  if (!email || !password) {
+    alert('Inserisci email e password');
+    return;
+  }
+
+  document.getElementById('bringLoginStep').style.display = 'none';
+  document.getElementById('bringLoading').style.display = 'block';
+
+  try {
+    const response = await fetch('/api/bring/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || 'Login fallito');
+    }
+
+    const lists = await response.json();
+
+    // Save email
+    localStorage.setItem('bring_email', email);
+    // Save creds in memory for next step
+    window.currentBringCreds = { email, password };
+
+    // Render lists
+    const container = document.getElementById('bringListsContainer');
+    if (lists.length === 0) {
+      container.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Nessuna lista trovata. Crea una lista su Bring! e riprova.</div>';
+    } else {
+      container.innerHTML = lists.map(list => `
+                <label style="display: flex; align-items: center; padding: 1rem; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.05)'" onmouseout="this.style.background='rgba(0,0,0,0.03)'">
+                    <input type="radio" name="bringList" value="${list.uuid}" style="margin-right: 12px; transform: scale(1.2);">
+                    <div>
+                        <div style="font-weight: 600; font-size: 1rem;">${list.name}</div>
+                        <div style="font-size: 0.8rem; color: #888;">${list.theme || 'Nessun tema'}</div>
+                    </div>
+                </label>
+            `).join('');
+
+      // Auto-select first list
+      if (lists.length > 0) {
+        container.querySelector('input').checked = true;
+      }
+    }
+
+    document.getElementById('bringLoading').style.display = 'none';
+    document.getElementById('bringListStep').style.display = 'block';
+
+  } catch (error) {
+    alert('Errore: ' + error.message);
+    document.getElementById('bringLoading').style.display = 'none';
+    document.getElementById('bringLoginStep').style.display = 'block';
+  }
+};
+
+window.sendToBringList = async (nightId) => {
+  const listUuid = document.querySelector('input[name="bringList"]:checked')?.value;
+  if (!listUuid) {
+    alert('Seleziona una lista');
+    return;
+  }
+
+  document.getElementById('bringListStep').style.display = 'none';
+  document.getElementById('bringLoading').style.display = 'block';
+
+  try {
+    const night = await getPizzaNightById(nightId);
+
+    // Need to regenerate list to get items
+    const groupedList = await generateShoppingList(night.selectedPizzas, night.selectedDough);
+
+    // Flatten list and format
+    const items = [];
+    Object.values(groupedList).forEach(categoryItems => {
+      categoryItems.forEach(item => {
+        items.push({
+          name: item.name,
+          specification: formatQuantity(item.quantity, item.unit)
+        });
+      });
+    });
+
+    const { email, password } = window.currentBringCreds;
+
+    const response = await fetch('/api/bring/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, listUuid, items })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || 'Invio fallito');
+    }
+
+    const result = await response.json();
+    console.log('Fatto:', result);
+
+    document.getElementById('bringLoading').style.display = 'none';
+    document.getElementById('bringSuccessStep').style.display = 'block';
+
+  } catch (error) {
+    alert('Errore: ' + error.message);
+    document.getElementById('bringLoading').style.display = 'none';
+    document.getElementById('bringListStep').style.display = 'block';
+  }
 };
 

@@ -157,11 +157,13 @@ export async function getAllPizzaNights() {
 }
 
 export async function getPizzaNightById(id) {
-    // Since we don't have a specific endpoint for single night in routes yet, filter from all
-    // Or better, assume we added it or will add it.
-    // For now, let's just fetch all and find.
-    const nights = await getAllPizzaNights();
-    return nights.find(n => n.id === id);
+    console.log(`🌐 [DB-SQL] Fetching pizza night ${id}...`);
+    const response = await fetch(`${API_URL}/pizza-nights/${id}`);
+    if (!response.ok) {
+        console.warn(`Failed to fetch pizza night ${id}`);
+        return null;
+    }
+    return await response.json();
 }
 
 export async function updatePizzaNight(id, updates) {

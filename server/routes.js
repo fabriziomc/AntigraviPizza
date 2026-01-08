@@ -1403,4 +1403,38 @@ router.put('/ingredients/:id', async (req, res) => {
     }
 });
 
+// ==========================================
+// BRING! INTEGRATION
+// ==========================================
+
+router.post('/bring/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password required' });
+        }
+        const { getBringLists } = await import('./bring-service.js');
+        const lists = await getBringLists(email, password);
+        res.json(lists);
+    } catch (err) {
+        console.error('Bring Login Error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/bring/add', async (req, res) => {
+    try {
+        const { email, password, listUuid, items } = req.body;
+        if (!email || !password || !listUuid || !items) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        const { addToBringList } = await import('./bring-service.js');
+        const result = await addToBringList(email, password, listUuid, items);
+        res.json(result);
+    } catch (err) {
+        console.error('Bring Add Items Error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 export default router;
