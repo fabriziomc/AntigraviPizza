@@ -59,8 +59,8 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
     // Track which pizzas use which ingredients (by ingredient name)
     const ingredientPizzaMap = new Map(); // Map<ingredientName, Set<pizzaIndex>>
 
-    // Aggregate ingredients from pizzas (toppings only)
-    const aggregated = aggregateIngredients(recipes, quantities);
+    // Aggregate ingredients from pizzas (toppings only) - pass maps for category resolution
+    const aggregated = aggregateIngredients(recipes, quantities, ingredientMap, categoryMap);
 
     // Track pizza usage for base ingredients
     recipes.forEach((recipe, index) => {

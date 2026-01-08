@@ -121,9 +121,24 @@ export function formatQuantity(quantity, unit) {
 
 /**
  * Aggregate ingredients from multiple recipes
+ * @param {Array} recipes - Array of recipe objects
+ * @param {Array} quantities - Array of quantities for each recipe
+ * @param {Object} ingredientMap - Optional map of ingredient IDs to ingredient objects
+ * @param {Object} categoryMap - Optional map of category IDs to category names
  */
-export function aggregateIngredients(recipes, quantities) {
+export function aggregateIngredients(recipes, quantities, ingredientMap = {}, categoryMap = {}) {
     const aggregated = {};
+
+    // Helper to resolve ingredient category
+    const resolveCategory = (ingredient) => {
+        // If we have maps and an ingredientId, resolve from database
+        if (ingredient.ingredientId && ingredientMap[ingredient.ingredientId]) {
+            const resolved = ingredientMap[ingredient.ingredientId];
+            return categoryMap[resolved.categoryId] || ingredient.category || 'Altro';
+        }
+        // Otherwise use embedded category
+        return ingredient.category || 'Altro';
+    };
 
     recipes.forEach((recipe, index) => {
         const multiplier = quantities[index] || 1;
@@ -154,7 +169,7 @@ export function aggregateIngredients(recipes, quantities) {
                     name: ingredient.name,
                     quantity: 0,
                     unit: ingredient.unit || 'q.b.',
-                    category: ingredient.category || 'Altro'
+                    category: resolveCategory(ingredient)
                 };
             }
 
