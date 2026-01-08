@@ -125,24 +125,38 @@ export function formatQuantity(quantity, unit) {
  * @param {Array} quantities - Array of quantities for each recipe
  * @param {Object} ingredientMap - Optional map of ingredient IDs to ingredient objects
  * @param {Object} categoryMap - Optional map of category IDs to category names
+ * @param {Object} ingredientNameMap - Optional map of ingredient names (lowercase) to ingredient objects
  */
-export function aggregateIngredients(recipes, quantities, ingredientMap = {}, categoryMap = {}) {
+export function aggregateIngredients(recipes, quantities, ingredientMap = {}, categoryMap = {}, ingredientNameMap = {}) {
     const aggregated = {};
 
     // Helper to resolve ingredient category
     const resolveCategory = (ingredient) => {
-        // First try to use categoryId directly from the ingredient
+        // 1. Try categoryId directly from ingredient
         if (ingredient.categoryId && categoryMap[ingredient.categoryId]) {
             return categoryMap[ingredient.categoryId];
         }
-        // Then try to resolve from ingredientId if available
+
+        // 2. Try ingredientId resolution
         if (ingredient.ingredientId && ingredientMap[ingredient.ingredientId]) {
             const resolved = ingredientMap[ingredient.ingredientId];
             if (resolved.categoryId && categoryMap[resolved.categoryId]) {
                 return categoryMap[resolved.categoryId];
             }
         }
-        // Otherwise use embedded category or fallback to 'Altro'
+
+        // 3. Fallback: Lookup by NAME using ingredientNameMap
+        if (ingredient.name) {
+            const nameKey = ingredient.name.toLowerCase();
+            if (ingredientNameMap[nameKey]) {
+                const resolved = ingredientNameMap[nameKey];
+                if (resolved.categoryId && categoryMap[resolved.categoryId]) {
+                    return categoryMap[resolved.categoryId];
+                }
+            }
+        }
+
+        // 4. Last resort: embedded category or 'Altro'
         return ingredient.category || 'Altro';
     };
 

@@ -24,8 +24,13 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
 
     // Create lookup maps
     const ingredientMap = {};
+    const ingredientNameMap = {}; // New map for name-based lookup
+
     allIngredients.forEach(ing => {
         ingredientMap[ing.id] = ing;
+        if (ing.name) {
+            ingredientNameMap[ing.name.toLowerCase()] = ing;
+        }
     });
 
     const categoryMap = {};
@@ -60,7 +65,7 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
     const ingredientPizzaMap = new Map(); // Map<ingredientName, Set<pizzaIndex>>
 
     // Aggregate ingredients from pizzas (toppings only) - pass maps for category resolution
-    const aggregated = aggregateIngredients(recipes, quantities, ingredientMap, categoryMap);
+    const aggregated = aggregateIngredients(recipes, quantities, ingredientMap, categoryMap, ingredientNameMap);
 
     // Track pizza usage for base ingredients
     recipes.forEach((recipe, index) => {
