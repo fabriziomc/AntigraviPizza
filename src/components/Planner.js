@@ -1856,27 +1856,27 @@ async function viewPizzaNightDetails(nightId) {
             <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">👥 Ospiti</h4>
             <p>${night.guestCount} persone</p>
             ${guestNames.length > 0 ? `
-            <p class="text-muted text-sm" style="margin-top: 0.25rem;">
-              ${guestNames.join(', ')}
-            </p>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem;">
+              ${guestNames.map(name => `<span class="tag" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: var(--color-gray-200); font-size: 0.75rem; padding: 0.2rem 0.6rem;">${name}</span>`).join('')}
+            </div>
           ` : ''}
           ${guestsWithEmail.length > 0 ? `
             <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 0.5rem;">
-              <div style="font-size: 0.875rem; color: var(--color-success); font-weight: 600; margin-bottom: 0.25rem;">
+              <div style="font-size: 0.875rem; color: var(--color-success); font-weight: 600; margin-bottom: 0.5rem;">
                 📧 ${guestsWithEmail.length} ${guestsWithEmail.length === 1 ? 'ospite ha' : 'ospiti hanno'} un'email
               </div>
-              <div style="font-size: 0.75rem; color: var(--color-gray-400);">
-                ${guestsWithEmail.map(g => g.email).join(', ')}
+              <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+                ${guestsWithEmail.map(g => `<span style="font-size: 0.75rem; color: var(--color-gray-400); background: rgba(0,0,0,0.2); padding: 0.15rem 0.4rem; border-radius: 0.25rem; overflow-wrap: anywhere; word-break: break-all;">${g.email}</span>`).join('')}
               </div>
             </div>
           ` : ''}
           ${guestsWithPhone.length > 0 ? `
             <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(37, 211, 102, 0.1); border: 1px solid rgba(37, 211, 102, 0.3); border-radius: 0.5rem;">
-              <div style="font-size: 0.875rem; color: var(--color-success); font-weight: 600; margin-bottom: 0.25rem;">
+              <div style="font-size: 0.875rem; color: var(--color-success); font-weight: 600; margin-bottom: 0.5rem;">
                 📱 ${guestsWithPhone.length} ${guestsWithPhone.length === 1 ? 'ospite ha' : 'ospiti hanno'} WhatsApp
               </div>
-              <div style="font-size: 0.75rem; color: var(--color-gray-400);">
-                ${guestsWithPhone.map(g => g.phone).join(', ')}
+              <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+                ${guestsWithPhone.map(g => `<span style="font-size: 0.75rem; color: var(--color-gray-400); background: rgba(0,0,0,0.2); padding: 0.15rem 0.4rem; border-radius: 0.25rem; white-space: nowrap;">${g.phone}</span>`).join('')}
               </div>
             </div>
           ` : ''}
@@ -2006,6 +2006,10 @@ async function viewPizzaNightDetails(nightId) {
           <span>✓</span>
           Ingredienti Disponibili
         </button>
+        <button class="btn btn-secondary" onclick="window.closeModal(); setTimeout(() => window.viewPizzaNightPreparations('${night.id}'), 100);">
+          <span>🧪</span>
+          Preparazioni
+        </button>
         <button class="btn btn-primary" onclick="window.closeModal(); setTimeout(() => window.viewShoppingListForNight('${night.id}'), 100);">
           <span>🛒</span>
           Lista Spesa
@@ -2042,6 +2046,7 @@ async function viewPizzaNightDetails(nightId) {
 
 // Function to move a pizza up in the list
 window.movePizzaUp = async function (nightId, index) {
+  console.log(`⬆️[PLANNER] movePizzaUp called for index ${index}`);
   if (index <= 0) return;
   try {
     const { getPizzaNightById, updatePizzaNight } = await import('../modules/database.js');
@@ -2054,10 +2059,14 @@ window.movePizzaUp = async function (nightId, index) {
     pizzas[index] = pizzas[index - 1];
     pizzas[index - 1] = temp;
 
+    console.log('🔄 [PLANNER] New order being saved:', pizzas.map(p => p.recipeName));
+
     // Update database
-    await updatePizzaNight(nightId, { ...night, selectedPizzas: pizzas });
+    const updated = await updatePizzaNight(nightId, { ...night, selectedPizzas: pizzas });
+    console.log('✅ [PLANNER] Database update response:', updated);
 
     // Re-render modal and grid
+    console.log('♻️ [PLANNER] Refreshing details...');
     await viewPizzaNightDetails(nightId);
     await renderPizzaNights();
   } catch (error) {
@@ -2068,6 +2077,7 @@ window.movePizzaUp = async function (nightId, index) {
 
 // Function to move a pizza down in the list
 window.movePizzaDown = async function (nightId, index) {
+  console.log(`⬇️[PLANNER] movePizzaDown called for index ${index}`);
   try {
     const { getPizzaNightById, updatePizzaNight } = await import('../modules/database.js');
     const night = await getPizzaNightById(nightId);
@@ -2079,10 +2089,14 @@ window.movePizzaDown = async function (nightId, index) {
     pizzas[index] = pizzas[index + 1];
     pizzas[index + 1] = temp;
 
+    console.log('🔄 [PLANNER] New order being saved:', pizzas.map(p => p.recipeName));
+
     // Update database
-    await updatePizzaNight(nightId, { ...night, selectedPizzas: pizzas });
+    const updated = await updatePizzaNight(nightId, { ...night, selectedPizzas: pizzas });
+    console.log('✅ [PLANNER] Database update response:', updated);
 
     // Re-render modal and grid
+    console.log('♻️ [PLANNER] Refreshing details...');
     await viewPizzaNightDetails(nightId);
     await renderPizzaNights();
   } catch (error) {
@@ -2090,6 +2104,98 @@ window.movePizzaDown = async function (nightId, index) {
     showToast('Errore nel riordinamento', 'error');
   }
 };
+
+// ============================================
+// VIEW PIZZA NIGHT PREPARATIONS
+// ============================================
+
+async function viewPizzaNightPreparations(nightId) {
+  closeModal();
+
+  // Get pizza night data
+  const night = await getPizzaNightById(nightId);
+  if (!night) return;
+
+  try {
+    const { getRecipeById, getAllPreparations } = await import('../modules/database.js');
+
+    // Resolve all recipes to collect preparations
+    const recipes = await Promise.all(
+      night.selectedPizzas.map(item => getRecipeById(item.recipeId))
+    );
+
+    // Collect unique preparation IDs
+    const prepIds = new Set();
+    recipes.forEach(recipe => {
+      if (recipe.preparations) {
+        recipe.preparations.forEach(p => prepIds.add(p.id));
+      }
+    });
+
+    if (prepIds.size === 0) {
+      showToast('Nessuna preparazione richiesta per questa serata');
+      viewPizzaNightDetails(nightId);
+      return;
+    }
+
+    // Get all preparations details
+    const allPrepsData = await getAllPreparations();
+    const nightPreps = allPrepsData.filter(p => prepIds.has(p.id));
+
+    // Build modal HTML
+    let prepsHTML = nightPreps.map(prep => `
+      <div style="background: rgba(255,255,255,0.05); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--color-accent-light);">
+        <h3 style="color: var(--color-accent-light); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span>🧪</span> ${prep.name}
+        </h3>
+        
+        <div style="margin-bottom: 1rem;">
+          <h4 style="font-size: 0.875rem; color: var(--color-gray-400); margin-bottom: 0.5rem; text-transform: uppercase;">Ingredienti</h4>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+            ${prep.ingredients.map(ing => `
+              <span style="background: rgba(255,255,255,0.1); padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.8125rem;">
+                ${ing.name}: ${ing.quantity}${ing.unit}
+              </span>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div>
+          <h4 style="font-size: 0.875rem; color: var(--color-gray-400); margin-bottom: 0.5rem; text-transform: uppercase;">Procedimento</h4>
+          <p style="white-space: pre-wrap; line-height: 1.6;">${prep.instructions}</p>
+        </div>
+      </div>
+    `).join('');
+
+    const modalContent = `
+      <div class="modal-header">
+        <h2>🧪 Preparazioni - ${night.name}</h2>
+        <button class="modal-close" onclick="window.viewPizzaNightDetails('${nightId}')">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--color-gray-300); margin-bottom: 1.5rem;">
+          Queste sono le preparazioni necessarie per le pizze selezionate (topping e salse speciali).
+        </p>
+        <div class="preparations-list">
+          ${prepsHTML}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.viewPizzaNightDetails('${nightId}')">Indietro</button>
+        <button class="btn btn-primary" onclick="window.closeModal()">Chiudi</button>
+      </div>
+    `;
+
+    openModal(modalContent);
+  } catch (error) {
+    console.error('Failed to load preparations:', error);
+    showToast('Errore nel caricamento delle preparazioni', 'error');
+    viewPizzaNightDetails(nightId);
+  }
+}
+
+// Make it global
+window.viewPizzaNightPreparations = viewPizzaNightPreparations;
 
 // ============================================
 // MANAGE AVAILABLE INGREDIENTS
@@ -2130,7 +2236,7 @@ async function manageAvailableIngredients(nightId) {
   for (const [category, items] of Object.entries(fullList)) {
     const icon = getCategoryIcon(category);
     itemsHTML += `
-      <div class="shopping-category" data-category="${category}">
+  < div class="shopping-category" data - category="${category}" >
         <h3 class="category-title">${icon} ${category}</h3>
         <div class="shopping-items">
           ${items.map(item => {
@@ -2150,16 +2256,16 @@ async function manageAvailableIngredients(nightId) {
           `;
     }).join('')}
         </div>
-      </div>
-      `;
+      </div >
+  `;
   }
 
   // Create and show modal
   const modalContent = `
-      <div class="modal-header">
+  < div class="modal-header" >
         <h2>✓ Ingredienti Disponibili - ${night.name}</h2>
         <button class="modal-close" onclick="window.closeModal()">×</button>
-      </div>
+      </div >
       <div class="modal-body">
         <p style="color: var(--color-gray-300); margin-bottom: 1.5rem;">
           Seleziona gli ingredienti che hai già in casa. La lista spesa mostrerà solo quelli da acquistare.
@@ -2193,7 +2299,7 @@ async function manageAvailableIngredients(nightId) {
           💾 Salva
         </button>
       </div>
-      `;
+`;
 
   openModal(modalContent);
 }
@@ -2213,7 +2319,7 @@ async function saveAvailableIngredients(nightId) {
     night.availableIngredients = availableIngredients;
 
     // Send the complete updated night object
-    const response = await fetch(`/api/pizza-nights/${nightId}`, {
+    const response = await fetch(`/ api / pizza - nights / ${nightId} `, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(night)
@@ -2315,7 +2421,7 @@ async function viewShoppingListForNight(nightId) {
   for (const [category, items] of Object.entries(groupedList)) {
     const icon = getCategoryIcon(category);
     itemsHTML += `
-      <div class="shopping-category">
+  < div class="shopping-category" >
         <h3 class="category-title">${icon} ${category}</h3>
         <div class="shopping-items">
           ${items.map(item => `
@@ -2328,16 +2434,16 @@ async function viewShoppingListForNight(nightId) {
             </div>
           `).join('')}
         </div>
-      </div>
-      `;
+      </div >
+  `;
   }
 
   // Create and show modal
   const modalContent = `
-      <div class="modal-header">
+  < div class="modal-header" >
         <h2>🛒 Lista Spesa - ${night.name}</h2>
         <button class="modal-close" onclick="window.closeModal()">×</button>
-      </div>
+      </div >
       <div class="modal-body">
         <div class="shopping-list-container">
           ${itemsHTML}
@@ -2351,7 +2457,7 @@ async function viewShoppingListForNight(nightId) {
           📥 Scarica PDF
         </button>
       </div>
-      `;
+`;
 
   openModal(modalContent);
 }
@@ -2390,10 +2496,10 @@ async function reopenPizzaNightAction(nightId) {
 
 async function deletePizzaNightAction(nightId) {
   const modalContent = `
-      <div class="modal-header">
+  < div class="modal-header" >
         <h2 class="modal-title">Elimina Serata</h2>
         <button class="modal-close" onclick="window.closeModal()">×</button>
-      </div>
+      </div >
       <div class="modal-body">
         <p>Sei sicuro di voler eliminare questa serata? L'azione non può essere annullata.</p>
       </div>
@@ -2403,7 +2509,7 @@ async function deletePizzaNightAction(nightId) {
           <span>🗑️</span> Elimina
         </button>
       </div>
-      `;
+`;
   openModal(modalContent);
 }
 
@@ -2601,7 +2707,7 @@ function renderLivePizza() {
 
   // Update progress
   document.querySelector('.progress-indicator').textContent =
-    `Pizza ${current} di ${total}`;
+    `Pizza ${current} di ${total} `;
 
   // Update pizza name
   document.querySelector('.pizza-name').textContent = pizza.name || 'Pizza';
@@ -2628,11 +2734,14 @@ function renderLivePizza() {
   console.log('  - All ingredients:', allIngredients);
   console.log('  - preparations:', preparations);
 
-  const beforeIngredients = allIngredients.filter(ing => !ing.postBake);
-  const afterIngredients = allIngredients.filter(ing => ing.postBake === true);
+  const beforeIngredients = allIngredients.filter(ing => !ing.postBake || ing.postBake === 0 || ing.postBake === '0');
+  const afterIngredients = allIngredients.filter(ing => !!ing.postBake && (ing.postBake === true || ing.postBake === 1 || ing.postBake === 'true' || ing.postBake === '1'));
 
-  console.log('  - beforeIngredients:', beforeIngredients);
-  console.log('  - afterIngredients:', afterIngredients);
+  console.log('  - beforeIngredients count:', beforeIngredients.length);
+  console.log('  - afterIngredients count:', afterIngredients.length);
+  if (afterIngredients.length > 0) {
+    console.log('  - afterIngredients:', afterIngredients);
+  }
 
   // For preparations, some might have 'timing' property and others might be in separate lists if we added them in parser
   // But currently parser puts them in instructions, not separate arrays. 
@@ -2664,7 +2773,7 @@ function renderCookingPhaseContent(containerId, ingredients, preparations, phase
 
   // Check if there's any content for this phase
   if (ingredients.length === 0 && preparations.length === 0) {
-    html = `<p class="text-muted" style="text-align: center; padding: 2rem;">Nessun ingrediente o preparazione per questa fase</p>`;
+    html = `< p class="text-muted" style = "text-align: center; padding: 2rem;" > Nessun ingrediente o preparazione per questa fase</p > `;
     container.innerHTML = html;
     return;
   }
@@ -2680,10 +2789,10 @@ function renderCookingPhaseContent(containerId, ingredients, preparations, phase
       const unit = ing.unit || '';
 
       return `
-        <div class="ingredient-item">
-          <span>${ingName}${quantity ? ` - ${quantity}${unit}` : ''}</span>
-        </div>
-        `;
+  < div class="ingredient-item" >
+    <span>${ingName}${quantity ? ` - ${quantity}${unit}` : ''}</span>
+        </div >
+  `;
     }).join('');
 
     html += '</div></div>';
@@ -2705,10 +2814,10 @@ function renderCookingPhaseContent(containerId, ingredients, preparations, phase
       }
 
       return `
-        <div class="step">
-          <span>${prepName}</span>
-        </div>
-      `;
+  < div class="step" >
+    <span>${prepName}</span>
+        </div >
+  `;
     }).join('');
 
     html += '</div></div>';
@@ -2718,12 +2827,12 @@ function renderCookingPhaseContent(containerId, ingredients, preparations, phase
 }
 
 function saveIngredientCheck(index, checked) {
-  const checkKey = `${liveModeState.currentIndex}-ing-${index}`;
+  const checkKey = `${liveModeState.currentIndex} -ing - ${index} `;
   liveModeState.checkedIngredients[checkKey] = checked;
 }
 
 function savePrepCheck(index, checked) {
-  const checkKey = `${liveModeState.currentIndex}-prep-${index}`;
+  const checkKey = `${liveModeState.currentIndex} -prep - ${index} `;
   liveModeState.checkedPreparations[checkKey] = checked;
 }
 

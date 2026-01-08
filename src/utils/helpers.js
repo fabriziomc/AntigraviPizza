@@ -172,8 +172,15 @@ export function aggregateIngredients(recipes, quantities) {
 /**
  * Group ingredients by category
  */
-export function groupByCategory(ingredients) {
+export function groupByCategory(ingredients, categoryOrder = []) {
     const grouped = {};
+
+    // If category order is provided, pre-populate keys to maintain order
+    if (categoryOrder && categoryOrder.length > 0) {
+        categoryOrder.forEach(cat => {
+            grouped[cat] = [];
+        });
+    }
 
     ingredients.forEach(ingredient => {
         const category = ingredient.category || 'Altro';
@@ -181,6 +188,13 @@ export function groupByCategory(ingredients) {
             grouped[category] = [];
         }
         grouped[category].push(ingredient);
+    });
+
+    // Remove empty categories that were pre-populated but not used
+    Object.keys(grouped).forEach(key => {
+        if (grouped[key].length === 0) {
+            delete grouped[key];
+        }
     });
 
     return grouped;

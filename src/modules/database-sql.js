@@ -147,9 +147,13 @@ export async function createPizzaNight(nightData) {
 }
 
 export async function getAllPizzaNights() {
-    const response = await fetch(`${API_URL}/pizza-nights`);
+    console.log('🌐 [DB-SQL] Fetching all pizza nights...');
+    // Add timestamp to prevent caching
+    const response = await fetch(`${API_URL}/pizza-nights?t=${Date.now()}`);
     if (!response.ok) throw new Error('Failed to fetch pizza nights');
-    return await response.json();
+    const data = await response.json();
+    console.log('🌐 [DB-SQL] Fetched pizza nights counts:', data.length);
+    return data;
 }
 
 export async function getPizzaNightById(id) {
@@ -161,13 +165,16 @@ export async function getPizzaNightById(id) {
 }
 
 export async function updatePizzaNight(id, updates) {
+    console.log(`🌐 [DB-SQL] Updating pizza night ${id}...`);
     const response = await fetch(`${API_URL}/pizza-nights/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
     });
     if (!response.ok) throw new Error('Failed to update pizza night');
-    return await response.json();
+    const result = await response.json();
+    console.log(`🌐 [DB-SQL] Update successful for ${id}`);
+    return result;
 }
 
 export async function deletePizzaNight(id) {

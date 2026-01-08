@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS Recipes (
     source TEXT,
     description TEXT,
     baseIngredients TEXT, -- JSON (ingredienti base)
+    toppingsDuringBake TEXT, -- JSON (nuovo!)
+    toppingsPostBake TEXT, -- JSON (nuovo!)
     preparations TEXT, -- JSON (preparazioni)
     instructions TEXT, -- JSON
     imageUrl TEXT,

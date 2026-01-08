@@ -148,8 +148,21 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
         )
     );
 
-    // Group by category
-    const grouped = groupByCategory(filtered);
+    // Group by category, respecting displayOrder
+    const categoryOrder = allCategories
+        .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+        .map(c => c.name);
+
+    // Ensure "Impasto" is in the order if not already (it might be a virtual category)
+    if (!categoryOrder.includes('Impasto')) {
+        categoryOrder.unshift('Impasto'); // Usually first
+    }
+    // Ensure "Altro" is last if not already
+    if (!categoryOrder.includes('Altro')) {
+        categoryOrder.push('Altro');
+    }
+
+    const grouped = groupByCategory(filtered, categoryOrder);
 
     return grouped;
 }

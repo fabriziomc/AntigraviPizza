@@ -26,6 +26,8 @@ class DatabaseAdapter {
         return {
             ...record,
             baseIngredients: record.baseIngredients ? (typeof record.baseIngredients === 'string' ? JSON.parse(record.baseIngredients) : record.baseIngredients) : [],
+            toppingsDuringBake: record.toppingsDuringBake ? (typeof record.toppingsDuringBake === 'string' ? JSON.parse(record.toppingsDuringBake) : record.toppingsDuringBake) : [],
+            toppingsPostBake: record.toppingsPostBake ? (typeof record.toppingsPostBake === 'string' ? JSON.parse(record.toppingsPostBake) : record.toppingsPostBake) : [],
             preparations: record.preparations ? (typeof record.preparations === 'string' ? JSON.parse(record.preparations) : record.preparations) : [],
             instructions: record.instructions ? (typeof record.instructions === 'string' ? JSON.parse(record.instructions) : record.instructions) : [],
             tags: record.tags ? (typeof record.tags === 'string' ? JSON.parse(record.tags) : record.tags) : [],
@@ -82,14 +84,16 @@ class DatabaseAdapter {
 
     async createRecipe(recipe) {
         const baseIngredientsJson = JSON.stringify(recipe.baseIngredients || []);
+        const toppingsDuringJson = JSON.stringify(recipe.toppingsDuringBake || []);
+        const toppingsPostJson = JSON.stringify(recipe.toppingsPostBake || []);
         const preparationsJson = JSON.stringify(recipe.preparations || []);
         const instructionsJson = JSON.stringify(recipe.instructions || []);
         const tagsJson = JSON.stringify(recipe.tags || []);
 
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
-                INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, preparations, instructions, imageUrl, dough, suggestedDough, archetype, recipeSource, archetypeUsed, createdAt, dateAdded, isFavorite, rating, tags)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, toppingsDuringBake, toppingsPostBake, preparations, instructions, imageUrl, dough, suggestedDough, archetype, recipeSource, archetypeUsed, createdAt, dateAdded, isFavorite, rating, tags)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 recipe.id,
@@ -98,6 +102,8 @@ class DatabaseAdapter {
                 recipe.source || '',
                 recipe.description || '',
                 baseIngredientsJson,
+                toppingsDuringJson,
+                toppingsPostJson,
                 preparationsJson,
                 instructionsJson,
                 recipe.imageUrl || '',
@@ -115,8 +121,8 @@ class DatabaseAdapter {
         } else {
             // Turso
             await this.db.execute({
-                sql: `INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, preparations, instructions, imageUrl, dough, suggestedDough, archetype, recipeSource, archetypeUsed, createdAt, dateAdded, isFavorite, rating, tags)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                sql: `INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, toppingsDuringBake, toppingsPostBake, preparations, instructions, imageUrl, dough, suggestedDough, archetype, recipeSource, archetypeUsed, createdAt, dateAdded, isFavorite, rating, tags)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 args: [
                     recipe.id,
                     recipe.name,
@@ -124,6 +130,8 @@ class DatabaseAdapter {
                     recipe.source || '',
                     recipe.description || '',
                     baseIngredientsJson,
+                    toppingsDuringJson,
+                    toppingsPostJson,
                     preparationsJson,
                     instructionsJson,
                     recipe.imageUrl || '',
@@ -154,6 +162,8 @@ class DatabaseAdapter {
         const recipe = { ...currentRecipe, ...updates };
 
         const baseIngredientsJson = JSON.stringify(recipe.baseIngredients || []);
+        const toppingsDuringJson = JSON.stringify(recipe.toppingsDuringBake || []);
+        const toppingsPostJson = JSON.stringify(recipe.toppingsPostBake || []);
         const preparationsJson = JSON.stringify(recipe.preparations || []);
         const instructionsJson = JSON.stringify(recipe.instructions || []);
         const tagsJson = JSON.stringify(recipe.tags || []);
@@ -161,7 +171,7 @@ class DatabaseAdapter {
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
                 UPDATE Recipes 
-                SET name=?, pizzaiolo=?, source=?, description=?, baseIngredients=?, preparations=?, instructions=?, 
+                SET name=?, pizzaiolo=?, source=?, description=?, baseIngredients=?, toppingsDuringBake=?, toppingsPostBake=?, preparations=?, instructions=?, 
                     imageUrl=?, dough=?, suggestedDough=?, archetype=?, recipeSource=?, archetypeUsed=?, isFavorite=?, rating=?, tags=?
                 WHERE id = ?
             `);
@@ -171,6 +181,8 @@ class DatabaseAdapter {
                 recipe.source || '',
                 recipe.description || '',
                 baseIngredientsJson,
+                toppingsDuringJson,
+                toppingsPostJson,
                 preparationsJson,
                 instructionsJson,
                 recipe.imageUrl || '',
@@ -186,8 +198,8 @@ class DatabaseAdapter {
             );
         } else {
             await this.db.execute({
-                sql: `UPDATE Recipes SET name=?, pizzaiolo=?, source=?, description=?, baseIngredients=?, preparations=?, instructions=?, imageUrl=?, dough=?, suggestedDough=?, archetype=?, recipeSource=?, archetypeUsed=?, isFavorite=?, rating=?, tags=? WHERE id = ?`,
-                args: [recipe.name, recipe.pizzaiolo || 'Sconosciuto', recipe.source || '', recipe.description || '', baseIngredientsJson, preparationsJson, instructionsJson, recipe.imageUrl || '', recipe.dough || '', recipe.suggestedDough || '', recipe.archetype || '', recipe.recipeSource || null, recipe.archetypeUsed || null, recipe.isFavorite ? 1 : 0, recipe.rating || 0, tagsJson, id]
+                sql: `UPDATE Recipes SET name=?, pizzaiolo=?, source=?, description=?, baseIngredients=?, toppingsDuringBake=?, toppingsPostBake=?, preparations=?, instructions=?, imageUrl=?, dough=?, suggestedDough=?, archetype=?, recipeSource=?, archetypeUsed=?, isFavorite=?, rating=?, tags=? WHERE id = ?`,
+                args: [recipe.name, recipe.pizzaiolo || 'Sconosciuto', recipe.source || '', recipe.description || '', baseIngredientsJson, toppingsDuringJson, toppingsPostJson, preparationsJson, instructionsJson, recipe.imageUrl || '', recipe.dough || '', recipe.suggestedDough || '', recipe.archetype || '', recipe.recipeSource || null, recipe.archetypeUsed || null, recipe.isFavorite ? 1 : 0, recipe.rating || 0, tagsJson, id]
             });
         }
         return recipe;
@@ -297,6 +309,7 @@ class DatabaseAdapter {
     }
 
     async updatePizzaNight(id, updates) {
+        console.log(`💾 [DB-ADAPTER] Updating pizza night ${id} with:`, JSON.stringify(updates, null, 2));
         // Fetch current night to merge with updates
         const currentNight = await this.getPizzaNightById(id);
         if (!currentNight) {

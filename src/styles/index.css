@@ -680,6 +680,8 @@ a:hover {
 
 .modal-body {
   padding: var(--space-6);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .modal-footer {
