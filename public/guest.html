@@ -539,34 +539,49 @@
 
                 // Render pizzas
                 pizzaList.innerHTML = pizzas.map(pizza => {
-                    // Combine all ingredient sources
+                    // Create unified list of ingredients and preparations
+                    const unifiedItems = [];
+
+                    // Add ingredients
                     const allIngredients = [
                         ...(pizza.baseIngredients || []),
                         ...(pizza.toppingsDuringBake || []),
                         ...(pizza.toppingsPostBake || [])
                     ];
 
-                    const ingredientsList = allIngredients.length > 0
-                        ? allIngredients.map(ing => ing.name || ing.ingredientName || ing).join(', ')
-                        : 'Ingredienti non disponibili';
+                    allIngredients.forEach(ing => {
+                        const name = ing.name || ing.ingredientName || ing;
+                        const isPostBake = ing.postBake === true || ing.postBake === 1 || ing.postBake === '1';
+                        unifiedItems.push({
+                            name,
+                            isPostBake,
+                            type: 'ingredient'
+                        });
+                    });
 
-                    // Resolve preparations names
+                    // Add preparations
                     const recipePreps = pizza.preparations || [];
-                    const prepNames = recipePreps
-                        .map(p => {
-                            const found = prepsMap.get(p.id);
-                            return found ? found.name : null;
-                        })
-                        .filter(Boolean);
+                    recipePreps.forEach(prep => {
+                        const found = prepsMap.get(prep.id);
+                        if (found) {
+                            const isPostBake = prep.timing === 'after';
+                            unifiedItems.push({
+                                name: found.name,
+                                isPostBake,
+                                type: 'preparation'
+                            });
+                        }
+                    });
 
-                    const preparationsSection = prepNames.length > 0
-                        ? `
-                        <div class="pizza-ingredients" style="margin-top: 0.75rem;">
-                            <div class="ingredients-title">Preparazioni:</div>
-                            ${prepNames.join(', ')}
-                        </div>
-                        `
-                        : '';
+                    // Render unified list
+                    const itemsList = unifiedItems.length > 0
+                        ? unifiedItems.map(item => {
+                            const postBakeIcon = item.isPostBake ? ' 📤' : '';
+                            const postBakeStyle = item.isPostBake ? 'font-weight: 600; color: #f97316;' : '';
+                            const prepBadge = item.type === 'preparation' ? ' 🥫' : '';
+                            return `<span style="${postBakeStyle}">${item.name}${prepBadge}${postBakeIcon}</span>`;
+                        }).join(', ')
+                        : 'Ingredienti non disponibili';
 
                     const imageTag = (pizza.imageUrl || pizza.image)
                         ? `<img src="${pizza.imageUrl || pizza.image}" alt="${pizza.name}" class="pizza-image" onerror="this.style.display='none'">`
@@ -581,10 +596,9 @@
                             <h3 class="pizza-name">🍕 ${pizza.name}</h3>
                             ${imageTag}
                             <div class="pizza-ingredients">
-                                <div class="ingredients-title">Ingredienti:</div>
-                                ${ingredientsList}
+                                <div class="ingredients-title">Ingredienti e Preparazioni:</div>
+                                ${itemsList}
                             </div>
-                            ${preparationsSection}
                             <div class="pizza-rating-container">
                                 <span class="rating-label">Ti è piaciuta? Dai un voto (1-10):</span>
                                 <div class="rating-select-wrapper" id="rating-wrap-${pizza.id}">

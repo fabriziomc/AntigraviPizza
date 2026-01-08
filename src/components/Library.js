@@ -528,8 +528,9 @@ async function showRecipeModal(recipeId) {
                 `;
         } else {
           const { prep, prepData } = item.data;
+          const isPostCooking = item.timing === 'after';
           return `
-                    <li class="ingredient-item" style="background: rgba(249, 115, 22, 0.05); border-left: 3px solid var(--color-accent);">
+                    <li class="ingredient-item" style="background: rgba(249, 115, 22, 0.05); ${isPostCooking ? 'border-left: 3px solid var(--color-accent);' : ''}">
                     <div style="display: flex; flex-direction: column; width: 100%;">
                         <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; gap: 0.5rem;">
                             <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1;">
@@ -881,27 +882,33 @@ function attachRemoveListeners() {
 function renderIngredientRow(ingredient, index, allIngredients) {
   return `
     <div class="edit-row" data-index="${index}">
-      <select class="edit-input ingredient-select" data-field="id" style="flex: 2;">
-        <option value="">Seleziona ingrediente...</option>
-        ${allIngredients.map(ing => `
-          <option value="${ing.id}" ${ingredient.id === ing.id ? 'selected' : ''}>
-            ${ing.name}
-          </option>
-        `).join('')}
-      </select>
-      <input type="number" class="edit-input" data-field="quantity" placeholder="Quantità" 
-             value="${ingredient.quantity || ''}" min="0" step="0.1" style="flex: 1;">
-      <select class="edit-input" data-field="unit" style="flex: 1;">
-        <option value="g" ${ingredient.unit === 'g' ? 'selected' : ''}>g</option>
-        <option value="ml" ${ingredient.unit === 'ml' ? 'selected' : ''}>ml</option>
-        <option value="q.b." ${ingredient.unit === 'q.b.' ? 'selected' : ''}>q.b.</option>
-        <option value="pz" ${ingredient.unit === 'pz' ? 'selected' : ''}>pz</option>
-      </select>
-      <label style="display: flex; align-items: center; gap: 0.25rem; flex: 1;">
-        <input type="checkbox" data-field="postBake" ${ingredient.postBake ? 'checked' : ''}>
-        <span style="font-size: 0.875rem;">Post-cottura</span>
-      </label>
-      <button class="btn btn-small btn-accent remove-row" style="padding: 0.25rem 0.5rem;">×</button>
+      <div class="edit-row-main">
+        <select class="edit-input ingredient-select" data-field="id" style="flex: 2; min-width: 150px;">
+          <option value="">Ingrediente...</option>
+          ${allIngredients.map(ing => `
+            <option value="${ing.id}" ${ingredient.id === ing.id ? 'selected' : ''}>
+              ${ing.name}
+            </option>
+          `).join('')}
+        </select>
+        <div class="edit-row-group">
+          <input type="number" class="edit-input" data-field="quantity" placeholder="Quantità" 
+                 value="${ingredient.quantity || ''}" min="0" step="0.1" style="width: 70px;">
+          <select class="edit-input" data-field="unit" style="width: 60px;">
+            <option value="g" ${ingredient.unit === 'g' ? 'selected' : ''}>g</option>
+            <option value="ml" ${ingredient.unit === 'ml' ? 'selected' : ''}>ml</option>
+            <option value="q.b." ${ingredient.unit === 'q.b.' ? 'selected' : ''}>q.b.</option>
+            <option value="pz" ${ingredient.unit === 'pz' ? 'selected' : ''}>pz</option>
+          </select>
+        </div>
+      </div>
+      <div class="edit-row-footer">
+        <label class="checkbox-label">
+          <input type="checkbox" data-field="postBake" ${ingredient.postBake ? 'checked' : ''}>
+          <span>Post-cottura</span>
+        </label>
+        <button class="btn btn-small btn-accent remove-row">×</button>
+      </div>
     </div>
   `;
 }
@@ -912,23 +919,29 @@ function renderIngredientRow(ingredient, index, allIngredients) {
 function renderPreparationRow(preparation, index, allPreparations) {
   return `
     <div class="edit-row" data-index="${index}">
-      <select class="edit-input preparation-select" data-field="id" style="flex: 2;">
-        <option value="">Seleziona preparazione...</option>
-        ${allPreparations.map(prep => `
-          <option value="${prep.id}" ${preparation.id === prep.id ? 'selected' : ''}>
-            ${prep.name}
-          </option>
-        `).join('')}
-      </select>
-      <input type="number" class="edit-input" data-field="quantity" placeholder="Quantità" 
-             value="${preparation.quantity || ''}" min="0" step="0.1" style="flex: 1;">
-      <input type="text" class="edit-input" data-field="unit" placeholder="Unità" 
-             value="${preparation.unit || 'g'}" style="flex: 1;">
-      <select class="edit-input" data-field="timing" style="flex: 1;">
-        <option value="before" ${preparation.timing === 'before' ? 'selected' : ''}>Prima cottura</option>
-        <option value="after" ${preparation.timing === 'after' ? 'selected' : ''}>Dopo cottura</option>
-      </select>
-      <button class="btn btn-small btn-accent remove-row" style="padding: 0.25rem 0.5rem;">×</button>
+      <div class="edit-row-main">
+        <select class="edit-input preparation-select" data-field="id" style="flex: 2; min-width: 150px;">
+          <option value="">Preparazione...</option>
+          ${allPreparations.map(prep => `
+            <option value="${prep.id}" ${preparation.id === prep.id ? 'selected' : ''}>
+              ${prep.name}
+            </option>
+          `).join('')}
+        </select>
+        <div class="edit-row-group">
+          <input type="number" class="edit-input" data-field="quantity" placeholder="Quantità" 
+                 value="${preparation.quantity || ''}" min="0" step="0.1" style="width: 70px;">
+          <input type="text" class="edit-input" data-field="unit" placeholder="Unità" 
+                 value="${preparation.unit || 'g'}" style="width: 50px;">
+        </div>
+      </div>
+      <div class="edit-row-footer">
+        <select class="edit-input" data-field="timing" style="flex: 1;">
+          <option value="before" ${preparation.timing === 'before' ? 'selected' : ''}>Prima</option>
+          <option value="after" ${preparation.timing === 'after' ? 'selected' : ''}>Dopo</option>
+        </select>
+        <button class="btn btn-small btn-accent remove-row">×</button>
+      </div>
     </div>
   `;
 }
@@ -1028,11 +1041,60 @@ editModeStyles.textContent = `
   
   .edit-row {
     display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    padding: 0.5rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
     background: var(--color-bg-secondary);
-    border-radius: 0.375rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-gray-700);
+  }
+  
+  .edit-row-main {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    align-items: center;
+  }
+  
+  .edit-row-group {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+  }
+  
+  .edit-row-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--color-gray-400);
+  }
+
+  /* Desktop optimization */
+  @media (min-width: 768px) {
+    .edit-row {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    .edit-row-main {
+      flex: 3;
+    }
+    .edit-row-footer {
+      flex: 1;
+      border-top: none;
+      padding-top: 0;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
   }
   
   .edit-input {
@@ -1042,6 +1104,15 @@ editModeStyles.textContent = `
     background: var(--color-bg-primary);
     color: var(--color-text-primary);
     font-size: 0.875rem;
+  }
+  
+  .edit-input option,
+  .ingredient-select option,
+  .preparation-select option,
+  select.edit-input option {
+    background: var(--color-bg-primary) !important;
+    color: #000000 !important;
+    padding: 0.5rem;
   }
   
   .edit-input:focus {
