@@ -2460,6 +2460,10 @@ async function viewShoppingListForNight(nightId) {
         <button class="btn btn-primary" onclick="window.downloadShoppingListForNight('${nightId}', '${night.name}')">
           📥 Scarica PDF
         </button>
+        <button class="btn btn-primary" style="margin-left: 0.5rem; background-color: #e53935; border-color: #e53935;" onclick="window.openBringModal('${nightId}')">
+          <span>🛒</span>
+          Bring!
+        </button>
       </div>
 `;
 

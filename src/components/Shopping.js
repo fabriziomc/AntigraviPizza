@@ -468,6 +468,22 @@ window.openBringModal = async (nightId) => {
     const savedEmail = localStorage.getItem('bring_email');
     if (savedEmail) document.getElementById('bringEmail').value = savedEmail;
 
+    // AUTO-LOGIN CHECK
+    const savedPassword = localStorage.getItem('bring_password');
+    if (savedEmail && savedPassword) {
+      console.log('🛒 [Bring] Auto-login credentials found');
+      document.getElementById('bringEmail').value = savedEmail;
+      document.getElementById('bringPassword').value = savedPassword;
+
+      // Switch to loading view immediately
+      document.getElementById('bringLoginStep').style.display = 'none';
+      document.getElementById('bringLoading').style.display = 'block';
+      document.querySelector('#bringLoading p').textContent = 'Accesso automatico a Bring...';
+
+      // Trigger login
+      setTimeout(() => window.loginToBring(), 500);
+    }
+
   } catch (error) {
     console.error('🛒 [Bring] Error opening modal:', error);
     alert('Si è verificato un errore: ' + error.message);
@@ -554,11 +570,12 @@ window.sendToBringList = async (nightId) => {
 
     // Flatten list and format
     const items = [];
-    Object.values(groupedList).forEach(categoryItems => {
+    Object.entries(groupedList).forEach(([category, categoryItems]) => {
       categoryItems.forEach(item => {
         items.push({
           name: item.name,
-          specification: formatQuantity(item.quantity, item.unit)
+          specification: formatQuantity(item.quantity, item.unit),
+          category: category
         });
       });
     });

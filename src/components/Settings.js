@@ -211,6 +211,35 @@ Perché funziona: descrizione
           </div>
         </section>
 
+        <!-- Bring! Integration Settings -->
+        <section class="settings-card">
+          <div class="card-header">
+            <span class="card-icon">🛒</span>
+            <h2>Integrazione Bring!</h2>
+          </div>
+          <div class="card-body">
+            <p class="card-description">
+              Salva le tue credenziali Bring! per connetterti automaticamente quando esporti la lista della spesa.
+              <br><small style="color: var(--color-warning);">⚠️ La password viene salvata in chiaro nel browser. Usa questa funzione solo su dispositivi sicuri.</small>
+            </p>
+            
+            <div class="form-group">
+              <label for="bringEmailSetting" class="form-label">Email</label>
+              <input type="email" id="bringEmailSetting" class="form-input" value="${localStorage.getItem('bring_email') || ''}">
+            </div>
+
+            <div class="form-group">
+              <label for="bringPasswordSetting" class="form-label">Password</label>
+              <input type="password" id="bringPasswordSetting" class="form-input" value="${localStorage.getItem('bring_password') || ''}">
+            </div>
+            
+            <button id="btnSaveBringSettings" class="btn btn-primary">
+              <span class="icon">💾</span>
+              Salva Credenziali Bring!
+            </button>
+          </div>
+        </section>
+
         <!-- Image Management Section -->
         <section class="settings-card">
           <div class="card-header">
@@ -392,6 +421,32 @@ function setupEventListeners() {
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<span class="icon">🧪</span> Test Provider';
+    }
+  });
+
+  // Save Bring! Settings
+  document.getElementById('btnSaveBringSettings').addEventListener('click', () => {
+    const email = document.getElementById('bringEmailSetting').value.trim();
+    const password = document.getElementById('bringPasswordSetting').value.trim();
+
+    if (email) {
+      localStorage.setItem('bring_email', email);
+    } else {
+      localStorage.removeItem('bring_email');
+    }
+
+    if (password) {
+      localStorage.setItem('bring_password', password);
+    } else {
+      localStorage.removeItem('bring_password');
+    }
+
+    if (email && password) {
+      showToast('✅ Credenziali Bring! salvate!', 'success');
+    } else if (!email && !password) {
+      showToast('ℹ️ Credenziali Bring! rimosse', 'info');
+    } else {
+      showToast('⚠️ Inserisci sia email che password per l\'autologin', 'warning');
     }
   });
 

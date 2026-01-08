@@ -47,8 +47,15 @@ export async function addToBringList(email, password, listUuid, items) {
 
         for (const item of items) {
             try {
+                // Construct specification with category if available
+                let spec = item.specification || '';
+                if (item.category) {
+                    // Add category to spec (e.g. "200g • Formaggi")
+                    spec = spec ? `${spec} • ${item.category}` : item.category;
+                }
+
                 // saveItem(listUuid, itemName, specification)
-                await bring.saveItem(listUuid, item.name, item.specification || '');
+                await bring.saveItem(listUuid, item.name, spec);
                 successCount++;
             } catch (err) {
                 console.error(`❌ [Bring Service] Failed to add item ${item.name}:`, err.message);
