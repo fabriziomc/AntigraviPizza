@@ -566,7 +566,7 @@ window.sendToBringList = async (nightId) => {
     const night = await getPizzaNightById(nightId);
 
     // Need to regenerate list to get items
-    const groupedList = await generateShoppingList(night.selectedPizzas, night.selectedDough);
+    const groupedList = await generateShoppingList(night.selectedPizzas, night.selectedDough, night.availableIngredients);
 
     // Flatten list and format
     const items = [];

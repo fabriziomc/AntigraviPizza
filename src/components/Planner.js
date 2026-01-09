@@ -1981,7 +1981,7 @@ async function viewPizzaNightDetails(nightId) {
           </div>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" style="flex-direction: column; align-items: stretch; gap: 0.75rem;">
         <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
         ${guestsWithEmail.length > 0 ? `
         <button class="btn btn-success" onclick="window.sendGuestInvites('${night.id}')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
@@ -1996,7 +1996,7 @@ async function viewPizzaNightDetails(nightId) {
         </button>
       ` : ''}
         ${night.selectedPizzas.length > 0 && night.status === 'planned' ? `
-        <button class="btn btn-success" onclick="window.startLiveMode('${night.id}')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+        <button class="btn btn-accent" onclick="window.startLiveMode('${night.id}')" style="background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);">
           <span>🍕</span>
           Avvia Serata
         </button>

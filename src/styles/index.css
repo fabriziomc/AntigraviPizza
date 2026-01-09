@@ -625,12 +625,15 @@ a:hover {
   padding: var(--space-4);
 }
 
+
 .modal {
   background: var(--color-space-medium);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-2xl);
-  max-width: 800px;
-  width: 100%;
+  max-width: 1100px;
+  /* Increased from 800px */
+  width: 95%;
+  /* Increased from 100% to ensure some margin on mobile */
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow-2xl);
@@ -690,6 +693,7 @@ a:hover {
   justify-content: flex-end;
   padding: var(--space-6);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-wrap: wrap !important;
 }
 
 /* Modal Overlay (for Preparations and similar components) */
