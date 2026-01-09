@@ -1,6 +1,12 @@
 import express from 'express';
 import DatabaseAdapter from './db-adapter.js';
 import generateImageRoute from './routes/generate-image.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 const dbAdapter = new DatabaseAdapter();
@@ -54,6 +60,43 @@ router.put('/recipes/:id', async (req, res) => {
         res.json(recipe);
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+// UPLOAD recipe image
+router.post('/recipes/:id/image', async (req, res) => {
+    try {
+        const { imageBase64 } = req.body;
+        if (!imageBase64) {
+            return res.status(400).json({ error: 'No image data provided' });
+        }
+
+        // Remove header if present (e.g., "data:image/jpeg;base64,")
+        const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+
+        // Generate unique filename
+        const filename = `pizza-${req.params.id}-${Date.now()}.jpg`;
+        const uploadDir = path.join(__dirname, '../public/uploads');
+        const filepath = path.join(uploadDir, filename);
+
+        // Ensure directory exists
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        // Save file
+        await fs.promises.writeFile(filepath, base64Data, 'base64');
+
+        // Update recipe URL
+        const imageUrl = `/uploads/${filename}`;
+        const recipe = await dbAdapter.updateRecipe(req.params.id, { imageUrl });
+
+        console.log(`📸 [POST /recipes/${req.params.id}/image] Image uploaded: ${imageUrl}`);
+        res.json({ imageUrl, recipe });
+    } catch (err) {
+        console.error('❌ [POST /recipes/:id/image] Error:', err);
+        console.error(err.stack); // Log stack trace
+        res.status(500).json({ error: err.message, stack: err.stack });
     }
 });
 

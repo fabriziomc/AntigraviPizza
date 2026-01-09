@@ -28,7 +28,15 @@ export async function renderPlanner(appState) {
 
         <!-- Current Pizza Display -->
         <div class="live-pizza-card">
-          <h2 class="pizza-name">Caricamento...</h2>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+             <h2 class="pizza-name" style="margin: 0;">Caricamento...</h2>
+             <div>
+               <button id="btnUploadPhoto" class="btn btn-sm btn-secondary" onclick="document.getElementById('livePhotoInput').click()">
+                 <span>📷</span> Foto
+               </button>
+               <input type="file" id="livePhotoInput" accept="image/*" style="display: none;" onchange="window.handlePizzaPhotoUpload(this)">
+             </div>
+          </div>
           
           <!-- Before Cooking Section -->
           <div class="cooking-phase-section">
@@ -2531,6 +2539,110 @@ async function confirmDeletePizzaNight(nightId) {
     console.error('Failed to delete pizza night:', error);
   }
 }
+
+// ==========================================
+// PHOTO UPLOAD
+// ==========================================
+window.handlePizzaPhotoUpload = async function (input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const pizza = liveModeState.pizzas[liveModeState.currentIndex];
+  if (!pizza) return;
+
+  // Show loading state
+  const btn = document.getElementById('btnUploadPhoto');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<span>⏳</span> Elaborazione...';
+  btn.disabled = true;
+
+  try {
+    // 1. Read file
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = function (e) {
+      const img = new Image();
+      img.src = e.target.result;
+
+      img.onload = async function () {
+        // 2. Resize and Compress
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress to JPEG 80%
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        console.log(`📸 Image compressed: ${(compressedBase64.length / 1024).toFixed(2)} KB`);
+
+        // 3. Upload
+        try {
+          const response = await fetch(`/api/recipes/${pizza.id}/image`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: compressedBase64 })
+          });
+
+          if (!response.ok) throw new Error('Upload failed');
+
+          const data = await response.json();
+
+          // 4. Update UI
+          const pizzaCard = document.querySelector('.live-pizza-card');
+
+          // Remove existing image if present
+          const existingImg = pizzaCard.querySelector('.pizza-live-image');
+          if (existingImg) existingImg.remove();
+
+          // Add new image
+          const imgEl = document.createElement('img');
+          imgEl.src = compressedBase64;
+          imgEl.className = 'pizza-live-image';
+          imgEl.style.width = '100%';
+          imgEl.style.maxHeight = '300px';
+          imgEl.style.objectFit = 'cover';
+          imgEl.style.borderRadius = '0.5rem';
+          imgEl.style.marginTop = '1rem';
+          imgEl.style.marginBottom = '1rem';
+
+          // Insert after name
+          const nameEl = pizzaCard.querySelector('.pizza-name');
+          nameEl.insertAdjacentElement('afterend', imgEl);
+
+          btn.innerHTML = '<span>✅</span> Foto Salvata!';
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }, 2000);
+
+        } catch (err) {
+          console.error('Upload error:', err);
+          btn.innerHTML = '<span>❌</span> Errore';
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }, 2000);
+        }
+      };
+    };
+
+  } catch (err) {
+    console.error('File reading error:', err);
+    btn.innerHTML = '<span>❌</span> Errore';
+    btn.disabled = false;
+  }
+};
 
 // ============================================
 // LIVE MODE FUNCTIONS
