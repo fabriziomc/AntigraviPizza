@@ -430,19 +430,43 @@ async function showRecipeModal(recipeId) {
           class="recipe-modal-image"
           onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%232a2f4a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2250%22>🍕</text></svg>'"
         />
-        <button 
-          id="btnRegenerateImage" 
-          class="btn btn-secondary" 
-          style="position: absolute; top: 10px; right: 10px; padding: 8px 16px; font-size: 14px; background: rgba(255, 255, 255, 0.9); color: var(--color-primary); border: 1px solid var(--color-primary);"
-          title="Rigenera immagine"
-        >
-          🔄 Rigenera Immagine
-        </button>
+        <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 0.5rem; z-index: 10;">
+          <button 
+            id="btnDeleteImage" 
+            class="btn btn-secondary" 
+            onclick="window.handleDeleteRecipeImage('${recipe.id}')"
+            style="padding: 8px 12px; font-size: 14px; background: rgba(255, 255, 255, 0.9); color: var(--color-error); border: 1px solid var(--color-error); border-radius: 4px; cursor: pointer;"
+            title="Elimina foto"
+          >
+            🗑️
+          </button>
+          
+          <button 
+            id="btnUploadExample" 
+            class="btn btn-secondary" 
+            onclick="document.getElementById('recipePhotoInput').click()"
+            style="padding: 8px 16px; font-size: 14px; background: rgba(255, 255, 255, 0.9); color: var(--color-primary); border: 1px solid var(--color-primary); border-radius: 4px; cursor: pointer;"
+            title="Carica foto"
+          >
+            📷 Foto
+          </button>
+
+          <button 
+            id="btnRegenerateImage" 
+            class="btn btn-secondary" 
+            style="padding: 8px 16px; font-size: 14px; background: rgba(255, 255, 255, 0.9); color: var(--color-primary); border: 1px solid var(--color-primary); border-radius: 4px; cursor: pointer;"
+            title="Rigenera immagine"
+          >
+            🔄 Rigenera
+          </button>
+        </div>
+        
+        <input type="file" id="recipePhotoInput" accept="image/*" style="display: none;" onchange="window.handleRecipePhotoUpload(this, '${recipe.id}')">
       </div>
       
       
       <div class="recipe-modal-meta">
-        ${recipe.source ? `<a href="${recipe.source}" target="_blank" class="recipe-modal-source">🔗 Fonte</a>` : ''}
+        
       </div>
       
       ${recipe.description ? `<p>${recipe.description}</p>` : ''}
@@ -1134,3 +1158,127 @@ document.head.appendChild(editModeStyles);
 
 // Global functions for modal
 window.closeRecipeModal = closeModal;
+
+// ==========================================
+// PHOTO UPLOAD & DELETE (Library)
+// ==========================================
+window.handleRecipePhotoUpload = async function (input, recipeId) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const btn = document.getElementById('btnUploadExample');
+  const originalText = btn ? btn.innerHTML : '📷 Foto';
+
+  if (btn) {
+    btn.innerHTML = '⏳';
+    btn.disabled = true;
+  }
+
+  try {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = function (e) {
+      const img = new Image();
+      img.src = e.target.result;
+
+      img.onload = async function () {
+        // Resize and Compress
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        console.log(`📸 Image compressed: ${(compressedBase64.length / 1024).toFixed(2)} KB`);
+
+        try {
+          // Import state if needed, assuming renderRecipes is available in scope or window
+          // But Library.js uses local 'state' variable passed to renderRecipes.
+          // We might need to access the global state or the module-level state if exported.
+          // For now, we'll try calling renderRecipes with the module-level 'state' variable which seems to be in scope.
+
+          const response = await fetch(`/api/recipes/${recipeId}/image`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: compressedBase64 })
+          });
+
+          if (!response.ok) throw new Error('Upload failed');
+
+          const data = await response.json();
+
+          // Update UI
+          const recipeImg = document.getElementById('recipeModalImage');
+          if (recipeImg) {
+            recipeImg.src = compressedBase64;
+          }
+
+          // We need to refresh the grid. renderRecipes relies on 'state' var in Library.js 
+          if (typeof renderRecipes === 'function' && typeof state !== 'undefined') {
+            await renderRecipes(state);
+          }
+
+          showToast('Foto caricata con successo!', 'success');
+
+        } catch (err) {
+          console.error('Upload error:', err);
+          showToast('Errore nel caricamento della foto', 'error');
+        } finally {
+          if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }
+        }
+      };
+    };
+  } catch (err) {
+    console.error('File reading error:', err);
+    if (btn) {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
+  }
+};
+
+window.handleDeleteRecipeImage = async function (recipeId) {
+  if (!confirm('Vuoi eliminare la foto corrente e tornare a quella predefinita (o placeholder)?')) return;
+
+  try {
+    // We update with imageUrl = null to reset it
+    const response = await fetch(`/api/recipes/${recipeId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageUrl: null })
+    });
+
+    if (!response.ok) throw new Error('Delete image failed');
+
+    // Update UI
+    const recipeImg = document.getElementById('recipeModalImage');
+    if (recipeImg) {
+      // Set to placeholder or let onerror handle it
+      recipeImg.src = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%232a2f4a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2250%22>🍕</text></svg>';
+    }
+
+    // Refresh grid
+    if (typeof renderRecipes === 'function' && typeof state !== 'undefined') {
+      await renderRecipes(state);
+    }
+    showToast('Foto eliminata', 'success');
+
+  } catch (err) {
+    console.error('Delete image error:', err);
+    showToast('Errore nell\'eliminazione della foto', 'error');
+  }
+};
