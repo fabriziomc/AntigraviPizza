@@ -69,7 +69,7 @@ export async function getAllRecipes() {
 }
 
 export async function getRecipeById(id) {
-    const response = await fetch(`${API_URL}/recipes/${id}`);
+    const response = await fetch(`${API_URL}/recipes/${id}?t=${Date.now()}`);
     if (!response.ok) throw new Error('Failed to fetch recipe');
     return await response.json();
 }

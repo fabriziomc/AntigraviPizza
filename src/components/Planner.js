@@ -37,6 +37,9 @@ export async function renderPlanner(appState) {
                <input type="file" id="livePhotoInput" accept="image/*" style="display: none;" onchange="window.handlePizzaPhotoUpload(this)">
              </div>
           </div>
+
+          <!-- Dedicated Image Container -->
+          <div id="liveImageContainer" style="margin: 1rem 0; min-height: 0;"></div>
           
           <!-- Before Cooking Section -->
           <div class="cooking-phase-section">
@@ -2598,28 +2601,25 @@ window.handlePizzaPhotoUpload = async function (input) {
 
           const data = await response.json();
 
+          // UPDATE STATE so navigation works
+          if (liveModeState && liveModeState.pizzas[liveModeState.currentIndex]) {
+            liveModeState.pizzas[liveModeState.currentIndex].imageUrl = data.imageUrl;
+          }
+
           // 4. Update UI
-          const pizzaCard = document.querySelector('.live-pizza-card');
+          const imageContainer = document.getElementById('liveImageContainer');
 
-          // Remove existing image if present
-          const existingImg = pizzaCard.querySelector('.pizza-live-image');
-          if (existingImg) existingImg.remove();
+          if (imageContainer) {
+            imageContainer.innerHTML = `
+                <img src="${compressedBase64}" 
+                     class="pizza-live-image" 
+                     style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 0.5rem; display: block;" 
+                     alt="Nuova foto">
+              `;
+            imageContainer.style.display = 'block';
+          }
 
-          // Add new image
-          const imgEl = document.createElement('img');
-          imgEl.src = compressedBase64;
-          imgEl.className = 'pizza-live-image';
-          imgEl.style.width = '100%';
-          imgEl.style.maxHeight = '300px';
-          imgEl.style.objectFit = 'cover';
-          imgEl.style.borderRadius = '0.5rem';
-          imgEl.style.marginTop = '1rem';
-          imgEl.style.marginBottom = '1rem';
-
-          // Insert after name
-          const nameEl = pizzaCard.querySelector('.pizza-name');
-          nameEl.insertAdjacentElement('afterend', imgEl);
-
+          // Update button text
           btn.innerHTML = '<span>✅</span> Foto Salvata!';
           setTimeout(() => {
             btn.innerHTML = originalText;
@@ -2710,6 +2710,7 @@ async function startLiveMode(nightId) {
         }
 
         pizzas.push(recipe);
+        console.log(`Pushed pizza: ${recipe.name}, imageUrl: ${recipe.imageUrl}`);
       }
     }
 
@@ -2735,6 +2736,8 @@ async function startLiveMode(nightId) {
     liveModeState.nightId = nightId;
     liveModeState.pizzas = pizzas;
     liveModeState.currentIndex = 0;
+    liveModeState.checkedIngredients = {};
+    liveModeState.checkedPreparations = {};
     liveModeState.checkedIngredients = {};
     liveModeState.checkedPreparations = {};
     liveModeState.cookingInstructions = cookingInfo.formatted;
@@ -2831,6 +2834,27 @@ function renderLivePizza() {
 
   // Update pizza name
   document.querySelector('.pizza-name').textContent = pizza.name || 'Pizza';
+
+  // Handle Image Display
+  const imageContainer = document.getElementById('liveImageContainer');
+
+  if (imageContainer) {
+    if (pizza.imageUrl) {
+      imageContainer.innerHTML = `
+            <img src="${pizza.imageUrl}?t=${Date.now()}" 
+                 class="pizza-live-image" 
+                 style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 0.5rem; display: block;" 
+                 alt="${pizza.name}">
+        `;
+      imageContainer.style.display = 'block';
+    } else {
+      imageContainer.innerHTML = '';
+      imageContainer.style.display = 'none';
+    }
+  } else {
+    // Fallback if container is missing (should not happen with new HTML)
+    console.error('liveImageContainer not found!');
+  }
 
   // Separate ingredients and preparations by phase
   // Combine all possible ingredient arrays for the recipe
