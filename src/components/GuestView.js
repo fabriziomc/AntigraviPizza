@@ -89,7 +89,11 @@ export default function GuestView() {
     return (
         <div className="guest-view" style={{ background: themeData?.config?.gradient }}>
             <div className="christmas-card">
-                <div className="header-emoji">{themeData?.config?.emoji || '🍕'}</div>
+                {pizzaNight.imageUrl ? (
+                    <img src={pizzaNight.imageUrl} alt={pizzaNight.name} className="header-image" />
+                ) : (
+                    <div className="header-emoji">{themeData?.config?.emoji || '🍕'}</div>
+                )}
 
                 <div className="card-header">
                     <h1 className="pizza-night-name">{pizzaNight.name}</h1>

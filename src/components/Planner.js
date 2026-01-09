@@ -2799,6 +2799,10 @@ async function startLiveMode(nightId) {
 
 // Setup swipe gestures for mobile navigation
 function setupSwipeGestures(container) {
+  // Prevent duplicate listeners
+  if (container.dataset.swipeInitialized) return;
+  container.dataset.swipeInitialized = 'true';
+
   let touchStartX = 0;
   let touchEndX = 0;
   let touchStartY = 0;
