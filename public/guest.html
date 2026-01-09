@@ -736,12 +736,24 @@
                     ? `<button class="menu-button" onclick="showMenu()">🍕 Menù</button>`
                     : '';
 
+                // Prioritize uploaded image -> theme image -> emoji
+                let imageHtml = '';
+                let emojiHtml = '';
+
+                if (pizzaNight.imageUrl) {
+                    imageHtml = `<img src="${pizzaNight.imageUrl}" alt="${pizzaNight.name}" class="theme-image">`;
+                } else if (themeData.config.imagePath) {
+                    imageHtml = `<img src="${themeData.config.imagePath}" alt="Immagine Tema" class="theme-image" onerror="this.style.display='none'">`;
+                } else {
+                    emojiHtml = `<div class="header-emoji">${themeData.config.emoji}</div>`;
+                }
+
                 content.innerHTML = `
-                    <div class="header-emoji">${themeData.config.emoji}</div>
+                    ${emojiHtml}
                     <div class="pizza-night-title">${pizzaNight.name || 'Serata Pizza Speciale'}</div>
                     <h1 class="guest-name">Ciao ${guest.name}! 👋</h1>
                     
-                    <img src="${themeData.config.imagePath}" alt="Immagine Tema" class="theme-image" onerror="this.style.display='none'">
+                    ${imageHtml}
                     
                     <div class="decorations">${themeData.config.decorations}</div>
                     

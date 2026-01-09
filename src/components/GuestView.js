@@ -26,10 +26,13 @@ export default function GuestView() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch pizza night data
-                const pizzaNightResponse = await fetch(`/api/pizza-nights/${pizzaNightId}`);
+                // Fetch pizza night data with cache busting
+                console.log(`🔍 [GuestView] Fetching night ${pizzaNightId}...`);
+                const pizzaNightResponse = await fetch(`/api/pizza-nights/${pizzaNightId}?t=${Date.now()}`);
                 if (!pizzaNightResponse.ok) throw new Error('Serata pizza non trovata');
                 const pizzaNightData = await pizzaNightResponse.json();
+                console.log('✅ [GuestView] Data received:', pizzaNightData);
+
 
                 // Fetch theme data
                 const themeResponse = await fetch(`/api/pizza-nights/${pizzaNightId}/theme`);
@@ -91,6 +94,8 @@ export default function GuestView() {
             <div className="christmas-card">
                 {pizzaNight.imageUrl ? (
                     <img src={pizzaNight.imageUrl} alt={pizzaNight.name} className="header-image" />
+                ) : themeData?.config?.imagePath ? (
+                    <img src={themeData.config.imagePath} alt="Theme Header" className="header-image" />
                 ) : (
                     <div className="header-emoji">{themeData?.config?.emoji || '🍕'}</div>
                 )}
