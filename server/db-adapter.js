@@ -270,8 +270,8 @@ class DatabaseAdapter {
 
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
-                INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt, imageUrl)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 night.id,
@@ -284,12 +284,13 @@ class DatabaseAdapter {
                 selectedGuestsJson,
                 night.notes || '',
                 night.status,
-                night.createdAt
+                night.createdAt,
+                night.imageUrl || ''
             );
         } else {
             await this.db.execute({
-                sql: `INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                sql: `INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt, imageUrl)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 args: [
                     night.id,
                     night.name,
@@ -301,7 +302,8 @@ class DatabaseAdapter {
                     selectedGuestsJson,
                     night.notes || '',
                     night.status,
-                    night.createdAt
+                    night.createdAt,
+                    night.imageUrl || ''
                 ]
             });
         }
@@ -325,7 +327,7 @@ class DatabaseAdapter {
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
                 UPDATE PizzaNights 
-                SET name=?, date=?, guestCount=?, selectedDough=?, availableIngredients=?, selectedPizzas=?, selectedGuests=?, notes=?, status=?
+                SET name=?, date=?, guestCount=?, selectedDough=?, availableIngredients=?, selectedPizzas=?, selectedGuests=?, notes=?, status=?, imageUrl=?
                 WHERE id=?
             `);
             stmt.run(
@@ -338,13 +340,14 @@ class DatabaseAdapter {
                 selectedGuestsJson,
                 night.notes || '',
                 night.status,
+                night.imageUrl || '',
                 id
             );
         } else {
             await this.db.execute({
                 sql: `UPDATE PizzaNights 
                       SET name=?, date=?, guestCount=?, selectedDough=?, availableIngredients=?, 
-                          selectedPizzas=?, selectedGuests=?, notes=?, status=?
+                          selectedPizzas=?, selectedGuests=?, notes=?, status=?, imageUrl=?
                       WHERE id=?`,
                 args: [
                     night.name,
@@ -356,6 +359,7 @@ class DatabaseAdapter {
                     selectedGuestsJson,
                     night.notes || '',
                     night.status,
+                    night.imageUrl || '',
                     id
                 ]
             });

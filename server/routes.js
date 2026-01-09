@@ -261,6 +261,30 @@ router.get('/pizza-nights/:id', async (req, res) => {
     }
 });
 
+// NEW: Upload/Update Pizza Night Image
+router.post('/pizza-nights/:id/image', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { imageBase64 } = req.body;
+
+        if (!imageBase64) {
+            return res.status(400).json({ error: 'imageBase64 is required' });
+        }
+
+        console.log(`📸 Received image update for pizza night ${id}`);
+
+        // Update database with new image URL (base64 data URI)
+        const updatedNight = await dbAdapter.updatePizzaNight(id, {
+            imageUrl: imageBase64
+        });
+
+        res.json({ success: true, imageUrl: imageBase64, night: updatedNight });
+    } catch (error) {
+        console.error('Failed to update pizza night image:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // GET theme for a pizza night
 router.get('/pizza-nights/:id/theme', async (req, res) => {
     try {

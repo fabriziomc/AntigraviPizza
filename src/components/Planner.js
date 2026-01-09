@@ -1857,6 +1857,36 @@ async function viewPizzaNightDetails(nightId) {
         <button class="modal-close" onclick="window.closeModal()">×</button>
       </div>
       <div class="modal-body">
+        <div style="position: relative; margin-bottom: 1.5rem; border-radius: 0.75rem; overflow: hidden; background: rgba(0,0,0,0.3); min-height: 200px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
+          ${night.imageUrl ?
+      `<img src="${night.imageUrl}" style="width: 100%; height: auto; max-height: 350px; object-fit: cover;">` :
+      `<div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; color: var(--color-text-secondary); opacity: 0.5;">
+                 <div style="font-size: 3rem;">📸</div>
+                 <div style="font-size: 0.875rem;">Nessuna foto</div>
+               </div>`
+    }
+          
+          <div style="position: absolute; top: 0.75rem; right: 0.75rem; z-index: 10;">
+            <button id="btnUploadNightPhoto" class="btn" onclick="document.getElementById('pizzaNightPhotoInput').click()" style="
+              background: rgba(0,0,0,0.6); 
+              color: white; 
+              border: 1px solid rgba(255,255,255,0.2); 
+              border-radius: 2rem; 
+              padding: 0.5rem 1rem; 
+              backdrop-filter: blur(4px);
+              display: flex; 
+              align-items: center; 
+              gap: 0.5rem;
+              font-size: 0.875rem;
+              cursor: pointer;
+              transition: all 0.2s;
+            ">
+              <span>📷</span> Foto
+            </button>
+          </div>
+          <input type="file" id="pizzaNightPhotoInput" accept="image/*" style="display: none" onchange="window.handlePizzaNightPhotoUpload(this, '${night.id}')">
+        </div>
+
         <div style="display: grid; gap: 1.5rem;">
           <div>
             <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">📅 Data</h4>
@@ -1905,13 +1935,13 @@ async function viewPizzaNightDetails(nightId) {
             ${night.selectedPizzas.length > 0 ? `
             <ul style="list-style: none; padding: 0;">
               ${await Promise.all(night.selectedPizzas.map(async (pizza, index) => {
-    // Fetch recipe to get favorite status
-    const recipe = await import('../modules/database.js').then(m => m.getRecipeById(pizza.recipeId)).catch(() => null);
-    const isFavorite = recipe ? recipe.isFavorite : false;
-    const isFirst = index === 0;
-    const isLast = index === night.selectedPizzas.length - 1;
+      // Fetch recipe to get favorite status
+      const recipe = await import('../modules/database.js').then(m => m.getRecipeById(pizza.recipeId)).catch(() => null);
+      const isFavorite = recipe ? recipe.isFavorite : false;
+      const isFirst = index === 0;
+      const isLast = index === night.selectedPizzas.length - 1;
 
-    return `
+      return `
                 <li style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
                   <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1;">
                     <!-- Reorder Controls -->
@@ -1943,7 +1973,7 @@ async function viewPizzaNightDetails(nightId) {
                   <span style="color: var(--color-accent-light); font-weight: 700;">×${pizza.quantity}</span>
                 </li>
               `;
-  })).then(results => results.join(''))}
+    })).then(results => results.join(''))}
             </ul>
           ` : '<p class="text-muted">Nessuna pizza selezionata</p>'}
           </div>
@@ -3049,6 +3079,90 @@ function exitLiveMode() {
     checkedPreparations: {}
   };
 }
+
+// NEW: Handle Pizza Night Photo Upload
+window.handlePizzaNightPhotoUpload = async function (input, nightId) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const btn = document.getElementById('btnUploadNightPhoto');
+    const originalContent = btn.innerHTML;
+
+    // Show loading state
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> Caricamento...';
+
+    try {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = async function () {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Resize logic (max 1200px)
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG with 70% quality
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+          console.log(`📸 Uploading photo for night ${nightId}, size: ${(dataUrl.length / 1024).toFixed(2)}KB`);
+
+          // Upload to server
+          const response = await fetch(`/api/pizza-nights/${nightId}/image`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: dataUrl })
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server error: ${errorText}`);
+          }
+
+          const result = await response.json();
+          console.log('✅ Photo uploaded successfully:', result);
+
+          showToast('Foto caricata con successo!', 'success');
+
+          // Refresh the modal to show the new image
+          await viewPizzaNightDetails(nightId);
+
+          // Also refresh the main list if needed (optional)
+          await refreshData();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Failed to upload photo:', error);
+      showToast('Errore durante il caricamento della foto', 'error');
+
+      // Reset button
+      btn.disabled = false;
+      btn.innerHTML = originalContent;
+    }
+  }
+};
+
 
 // Global functions for modals (still needed for inline onclick in modals)
 window.viewPizzaNightDetails = viewPizzaNightDetails;
