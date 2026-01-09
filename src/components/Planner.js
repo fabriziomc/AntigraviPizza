@@ -2781,7 +2781,7 @@ function renderCookingPhaseContent(containerId, ingredients, preparations, phase
 
   // Check if there's any content for this phase
   if (ingredients.length === 0 && preparations.length === 0) {
-    html = `< p class="text-muted" style = "text-align: center; padding: 2rem;" > Nessun ingrediente o preparazione per questa fase</p > `;
+    html = `<p class="text-muted" style="text-align: center; padding: 2rem;">Nessun ingrediente o preparazione per questa fase</p>`;
     container.innerHTML = html;
     return;
   }
@@ -2797,10 +2797,10 @@ function renderCookingPhaseContent(containerId, ingredients, preparations, phase
       const unit = ing.unit || '';
 
       return `
-  < div class="ingredient-item" >
-    <span>${ingName}${quantity ? ` - ${quantity}${unit}` : ''}</span>
-        </div >
-  `;
+        <div class="ingredient-item">
+          <span>${ingName}${quantity ? ` - ${quantity}${unit}` : ''}</span>
+        </div>
+      `;
     }).join('');
 
     html += '</div></div>';
@@ -2822,10 +2822,10 @@ function renderCookingPhaseContent(containerId, ingredients, preparations, phase
       }
 
       return `
-  < div class="step" >
-    <span>${prepName}</span>
-        </div >
-  `;
+        <div class="step">
+          <span>${prepName}</span>
+        </div>
+      `;
     }).join('');
 
     html += '</div></div>';
@@ -2835,12 +2835,12 @@ function renderCookingPhaseContent(containerId, ingredients, preparations, phase
 }
 
 function saveIngredientCheck(index, checked) {
-  const checkKey = `${liveModeState.currentIndex} -ing - ${index} `;
+  const checkKey = `${liveModeState.currentIndex}-ing-${index}`;
   liveModeState.checkedIngredients[checkKey] = checked;
 }
 
 function savePrepCheck(index, checked) {
-  const checkKey = `${liveModeState.currentIndex} -prep - ${index} `;
+  const checkKey = `${liveModeState.currentIndex}-prep-${index}`;
   liveModeState.checkedPreparations[checkKey] = checked;
 }
 

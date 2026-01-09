@@ -572,9 +572,14 @@ window.sendToBringList = async (nightId) => {
     const items = [];
     Object.entries(groupedList).forEach(([category, categoryItems]) => {
       categoryItems.forEach(item => {
+        let spec = formatQuantity(item.quantity, item.unit);
+        if (item.pizzaCount) {
+          spec += ` (${item.pizzaCount} pizze)`;
+        }
+
         items.push({
           name: item.name,
-          specification: formatQuantity(item.quantity, item.unit),
+          specification: spec,
           category: category
         });
       });
