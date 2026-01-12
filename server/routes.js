@@ -64,6 +64,7 @@ router.put('/recipes/:id', async (req, res) => {
 });
 
 // UPLOAD recipe image
+// UPLOAD recipe image
 router.post('/recipes/:id/image', async (req, res) => {
     try {
         const { imageBase64 } = req.body;
@@ -71,28 +72,21 @@ router.post('/recipes/:id/image', async (req, res) => {
             return res.status(400).json({ error: 'No image data provided' });
         }
 
-        // Remove header if present (e.g., "data:image/jpeg;base64,")
-        const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+        // Validate that it looks like a base64 string (basic check)
+        // Client sends "data:image/jpeg;base64,..." usually.
+        // We store the FULL string so <img src="..."> works directly.
+        
+        let imageUrlToStore = imageBase64;
+        
+        // If the client sent just the raw base64 without prefix (unlikely given Planner.js), 
+        // we might want to ensure prefix, but Planner.js sends canvas.toDataURL() which includes it.
+        // So we just store exactly what we get, assuming it's a Data URI.
 
-        // Generate unique filename
-        const filename = `pizza-${req.params.id}-${Date.now()}.jpg`;
-        const uploadDir = path.join(__dirname, '../public/uploads');
-        const filepath = path.join(uploadDir, filename);
+        // Update recipe URL directly with the Base64 data
+        const recipe = await dbAdapter.updateRecipe(req.params.id, { imageUrl: imageUrlToStore });
 
-        // Ensure directory exists
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-
-        // Save file
-        await fs.promises.writeFile(filepath, base64Data, 'base64');
-
-        // Update recipe URL
-        const imageUrl = `/uploads/${filename}`;
-        const recipe = await dbAdapter.updateRecipe(req.params.id, { imageUrl });
-
-        console.log(`📸 [POST /recipes/${req.params.id}/image] Image uploaded: ${imageUrl}`);
-        res.json({ imageUrl, recipe });
+        console.log(`📸 [POST /recipes/${req.params.id}/image] Image uploaded (Base64 length: ${imageUrlToStore.length})`);
+        res.json({ imageUrl: imageUrlToStore, recipe });
     } catch (err) {
         console.error('❌ [POST /recipes/:id/image] Error:', err);
         console.error(err.stack); // Log stack trace
