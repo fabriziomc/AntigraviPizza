@@ -1422,6 +1422,221 @@ class DatabaseAdapter {
             return { success: true, count: DEFAULT_WEIGHTS.length };
         }
     }
+
+    // ==========================================
+    // USERS & AUTHENTICATION
+    // ==========================================
+
+    async createUser(userData) {
+        if (this.isSQLite) {
+            const stmt = this.db.prepare(`
+                INSERT INTO Users (id, email, password, name, businessName, createdAt, lastLogin)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            `);
+            stmt.run(
+                userData.id,
+                userData.email,
+                userData.password,
+                userData.name,
+                userData.businessName,
+                userData.createdAt,
+                userData.lastLogin
+            );
+        } else {
+            await this.db.execute({
+                sql: `INSERT INTO Users (id, email, password, name, businessName, createdAt, lastLogin)
+                      VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                args: [
+                    userData.id,
+                    userData.email,
+                    userData.password,
+                    userData.name,
+                    userData.businessName,
+                    userData.createdAt,
+                    userData.lastLogin
+                ]
+            });
+        }
+
+        // Return user without password
+        const { password, ...userWithoutPassword } = userData;
+        return userWithoutPassword;
+    }
+
+    async getUserByEmail(email) {
+        if (this.isSQLite) {
+            const stmt = this.db.prepare('SELECT * FROM Users WHERE email = ?');
+            return stmt.get(email);
+        } else {
+            const result = await this.db.execute({
+                sql: 'SELECT * FROM Users WHERE email = ?',
+                args: [email]
+            });
+            return result.rows[0] || null;
+        }
+    }
+
+    async getUserById(id) {
+        if (this.isSQLite) {
+            const stmt = this.db.prepare('SELECT * FROM Users WHERE id = ?');
+            return stmt.get(id);
+        } else {
+            const result = await this.db.execute({
+                sql: 'SELECT * FROM Users WHERE id = ?',
+                args: [id]
+            });
+            return result.rows[0] || null;
+        }
+    }
+
+    async updateUserLastLogin(id) {
+        const now = Date.now();
+        if (this.isSQLite) {
+            const stmt = this.db.prepare('UPDATE Users SET lastLogin = ? WHERE id = ?');
+            stmt.run(now, id);
+        } else {
+            await this.db.execute({
+                sql: 'UPDATE Users SET lastLogin = ? WHERE id = ?',
+                args: [now, id]
+            });
+        }
+    }
+
+    async updateUser(id, updates) {
+        const allowedFields = ['name', 'businessName', 'password'];
+        const fields = [];
+        const values = [];
+
+        for (const [key, value] of Object.entries(updates)) {
+            if (allowedFields.includes(key)) {
+                fields.push(`${key} = ?`);
+                values.push(value);
+            }
+        }
+
+        if (fields.length === 0) {
+            throw new Error('No valid fields to update');
+        }
+
+        values.push(id);
+        const sql = `UPDATE Users SET ${fields.join(', ')} WHERE id = ?`;
+
+        if (this.isSQLite) {
+            const stmt = this.db.prepare(sql);
+            stmt.run(...values);
+        } else {
+            await this.db.execute({ sql, args: values });
+        }
+
+        return this.getUserById(id);
+    }
+
+    async createUserSettings(userId) {
+        const settingsId = 'settings-' + userId;
+        const defaultSettings = {
+            id: settingsId,
+            userId,
+            bringEmail: null,
+            bringPassword: null,
+            geminiModel: 'gemini-1.5-flash',
+            defaultDough: null,
+            preferences: '{}'
+        };
+
+        if (this.isSQLite) {
+            const stmt = this.db.prepare(`
+                INSERT INTO Settings (id, userId, bringEmail, bringPassword, geminiModel, defaultDough, preferences)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            `);
+            stmt.run(
+                defaultSettings.id,
+                defaultSettings.userId,
+                defaultSettings.bringEmail,
+                defaultSettings.bringPassword,
+                defaultSettings.geminiModel,
+                defaultSettings.defaultDough,
+                defaultSettings.preferences
+            );
+        } else {
+            await this.db.execute({
+                sql: `INSERT INTO Settings (id, userId, bringEmail, bringPassword, geminiModel, defaultDough, preferences)
+                      VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                args: [
+                    defaultSettings.id,
+                    defaultSettings.userId,
+                    defaultSettings.bringEmail,
+                    defaultSettings.bringPassword,
+                    defaultSettings.geminiModel,
+                    defaultSettings.defaultDough,
+                    defaultSettings.preferences
+                ]
+            });
+        }
+
+        return defaultSettings;
+    }
+
+    async getUserSettings(userId) {
+        if (this.isSQLite) {
+            const stmt = this.db.prepare('SELECT * FROM Settings WHERE userId = ?');
+            const settings = stmt.get(userId);
+            if (settings && settings.preferences) {
+                settings.preferences = JSON.parse(settings.preferences);
+            }
+            return settings;
+        } else {
+            const result = await this.db.execute({
+                sql: 'SELECT * FROM Settings WHERE userId = ?',
+                args: [userId]
+            });
+            const settings = result.rows[0] || null;
+            if (settings && settings.preferences) {
+                settings.preferences = JSON.parse(settings.preferences);
+            }
+            return settings;
+        }
+    }
+
+    async updateUserSettings(userId, updates) {
+        const allowedFields = ['bringEmail', 'bringPassword', 'geminiModel', 'defaultDough', 'preferences'];
+        const fields = [];
+        const values = [];
+
+        for (const [key, value] of Object.entries(updates)) {
+            if (allowedFields.includes(key)) {
+                fields.push(`${key} = ?`);
+                // Stringify preferences if it's an object
+                values.push(key === 'preferences' && typeof value === 'object' ? JSON.stringify(value) : value);
+            }
+        }
+
+        if (fields.length === 0) {
+            throw new Error('No valid fields to update');
+        }
+
+        values.push(userId);
+        const sql = `UPDATE Settings SET ${fields.join(', ')} WHERE userId = ?`;
+
+        if (this.isSQLite) {
+            const stmt = this.db.prepare(sql);
+            stmt.run(...values);
+        } else {
+            await this.db.execute({ sql, args: values });
+        }
+
+        return this.getUserSettings(userId);
+    }
+
+    async initializeUserDefaults(userId) {
+        // This method will be called when a new user registers
+        // It should copy default categories and ingredients to the new user
+
+        // For now, we'll assume categories and ingredients are shared
+        // If you want user-specific categories/ingredients, implement copying logic here
+
+        console.log(`✅ Initialized defaults for user ${userId}`);
+        return { success: true };
+    }
 }
 
 // ============================================

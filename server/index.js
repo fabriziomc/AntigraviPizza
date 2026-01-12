@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import recipeRoutes from './routes.js';
+import authRoutes from './auth/auth-routes.js';
+import { authenticateToken } from './auth/auth-middleware.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
@@ -24,10 +26,28 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// API routes MUST come before static file serving
-app.use('/api', recipeRoutes);
+// IMPORTANT: Auth routes MUST come before protected routes
+// Public authentication routes (no auth required)
+app.use('/api/auth', authRoutes);
 
-// Serve static files from public directory (for guest.html and theme images)
+// Protected API routes (auth required) - skip /api/auth/* and guest-accessible routes
+app.use('/api', (req, res, next) => {
+    // Skip authentication for /api/auth routes
+    if (req.path.startsWith('/auth')) {
+        return next();
+    }
+
+    // Skip authentication for GET requests to pizza-nights (needed for guest view)
+    // Guests need to view pizza night details and themes without logging in
+    if (req.method === 'GET' && req.path.match(/^\/pizza-nights(\/[^\/]+)?(\/theme)?$/)) {
+        return next();
+    }
+
+    // Apply authentication for all other /api routes
+    authenticateToken(req, res, next);
+}, recipeRoutes);
+
+// Serve static files from public directory (for guest.html, login.html, register.html, and theme images)
 const publicPath = path.join(__dirname, '../public');
 app.use(express.static(publicPath));
 console.log('Public path:', publicPath);
@@ -48,6 +68,12 @@ app.use((req, res, next) => {
         return next();
     }
 
+    // Public routes that don't require authentication
+    const publicRoutes = ['/login.html', '/register.html', '/guest.html'];
+    if (publicRoutes.some(route => req.path.startsWith(route))) {
+        return next();
+    }
+
     // Serve index.html for all other routes
     if (existsSync(indexPath)) {
         res.sendFile(indexPath);
@@ -56,9 +82,11 @@ app.use((req, res, next) => {
     }
 });
 
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Server is running on http://0.0.0.0:${PORT}`);
-    console.log('🚀 SERVER VERSION: v2 (GZ Update)');
+    console.log('🚀 SERVER VERSION: v3 (Multi-User Auth)');
     console.log(`📊 Environment: ${process.env.NODE_ENV}`);
     console.log(`💾 Database: ${process.env.DB_TYPE}`);
+    console.log('🔐 Authentication: Enabled');
 });

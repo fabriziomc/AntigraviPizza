@@ -265,6 +265,43 @@ Perché funziona: descrizione
         </section>
 
 
+        <!-- Password Change Section -->
+        <section class="settings-card">
+          <div class="card-header">
+            <span class="card-icon">🔐</span>
+            <h2>Cambio Password</h2>
+          </div>
+          <div class="card-body">
+            <p class="card-description">
+              Cambia la password del tuo account. La password deve essere di almeno 8 caratteri.
+            </p>
+            
+            <div class="form-group">
+              <label for="currentPassword" class="form-label">Password Attuale</label>
+              <input type="password" id="currentPassword" class="form-input" autocomplete="current-password">
+            </div>
+
+            <div class="form-group">
+              <label for="newPassword" class="form-label">Nuova Password</label>
+              <input type="password" id="newPassword" class="form-input" autocomplete="new-password">
+              <small class="text-muted" style="display: block; margin-top: 0.5rem;">
+                Minimo 8 caratteri
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmPassword" class="form-label">Conferma Nuova Password</label>
+              <input type="password" id="confirmPassword" class="form-input" autocomplete="new-password">
+            </div>
+            
+            <button id="btnChangePassword" class="btn btn-primary">
+              <span class="icon">🔑</span>
+              Cambia Password
+            </button>
+          </div>
+        </section>
+
+
         <!-- Archetype Weights Section -->
         <section class="settings-card">
           <div class="card-header">
@@ -447,6 +484,58 @@ function setupEventListeners() {
       showToast('ℹ️ Credenziali Bring! rimosse', 'info');
     } else {
       showToast('⚠️ Inserisci sia email che password per l\'autologin', 'warning');
+    }
+  });
+
+  // Change Password
+  document.getElementById('btnChangePassword').addEventListener('click', async () => {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    // Validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showToast('⚠️ Compila tutti i campi', 'warning');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      showToast('⚠️ La nuova password deve essere di almeno 8 caratteri', 'warning');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showToast('⚠️ Le password non corrispondono', 'warning');
+      return;
+    }
+
+    try {
+      const btn = document.getElementById('btnChangePassword');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="icon">⏳</span> Cambio in corso...';
+
+      // Import changePassword function
+      const { changePassword } = await import('../modules/auth.js');
+
+      await changePassword(currentPassword, newPassword);
+
+      showToast('✅ Password cambiata con successo!', 'success');
+
+      // Clear form
+      document.getElementById('currentPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+
+      btn.disabled = false;
+      btn.innerHTML = '<span class="icon">🔑</span> Cambia Password';
+
+    } catch (error) {
+      console.error('Password change error:', error);
+      showToast('❌ ' + error.message, 'error');
+
+      const btn = document.getElementById('btnChangePassword');
+      btn.disabled = false;
+      btn.innerHTML = '<span class="icon">🔑</span> Cambia Password';
     }
   });
 

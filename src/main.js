@@ -17,6 +17,7 @@ import { NAV_ITEMS, VIEWS, FLAVOR_COMBINATIONS, PREPARATIONS } from './utils/con
 import { showToast } from './utils/helpers.js';
 import { state } from './store.js';
 import { openModal, closeModal, setupSidebarListeners } from './modules/ui.js';
+import { requireAuth, getUser, withAuth, logout } from './modules/auth.js';
 
 // Import view renderers
 import { renderDashboard } from './components/Dashboard.js';
@@ -40,7 +41,17 @@ console.log('✅ All imports loaded');
 
 async function initApp() {
   console.log('🎯 initApp called');
-  console.log('🚀 AntigraviPizza v1.1 - Dough Filter Loaded');
+  console.log('🚀 AntigraviPizza v2.0 - Multi-User Authentication');
+
+  // Check authentication first
+  const isAuth = await requireAuth();
+  if (!isAuth) {
+    return; // requireAuth will redirect to login
+  }
+
+  // Get current user
+  const currentUser = getUser();
+  console.log('👤 Logged in as:', currentUser?.name);
 
   try {
     // Initialize database
@@ -137,7 +148,26 @@ function renderNavigation() {
         <span>${item.label}</span>
       </a>
     </li>
-  `).join('');
+  `).join('') + `
+    <li class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+      <a href="#" id="logoutBtn" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: var(--color-danger); text-decoration: none; border-radius: 0.5rem; transition: background-color 0.2s; cursor: pointer;">
+        <span style="font-size: 1.25rem;">🚪</span>
+        <span>Logout</span>
+      </a>
+    </li>
+  `;
+
+  // Add logout button click handler
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation(); // Prevent event bubbling
+      if (confirm('Sei sicuro di voler uscire?')) {
+        logout();
+      }
+    });
+  }
 }
 
 function navigateToView(viewId) {
@@ -306,7 +336,7 @@ export async function refreshData() {
 
 async function loadVersion() {
   try {
-    const response = await fetch('/api/version');
+    const response = await fetch('/api/version', withAuth());
     const data = await response.json();
     const versionElement = document.getElementById('appVersion');
     if (versionElement) {

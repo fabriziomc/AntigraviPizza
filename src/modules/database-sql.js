@@ -3,9 +3,25 @@
 // ============================================
 
 import { generateUUID } from '../utils/helpers.js';
+import { getToken } from './auth.js';
 
 // Use relative URL so it works both locally (with proxy) and in production
 const API_URL = '/api';
+
+/**
+ * Helper function to add auth headers to fetch requests
+ */
+function authFetch(url, options = {}) {
+    const token = getToken();
+    return fetch(url, {
+        ...options,
+        headers: {
+            ...options.headers,
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json'
+        }
+    });
+}
 
 /**
  * Initialize Database (No-op for SQL as connection is per request)
@@ -52,9 +68,8 @@ export async function addRecipe(recipeData) {
         archetypeUsed: recipeData.archetypeUsed || null     // Name of archetype if applicable
     };
 
-    const response = await fetch(`${API_URL}/recipes`, {
+    const response = await authFetch(`${API_URL}/recipes`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(recipe)
     });
 
@@ -63,21 +78,20 @@ export async function addRecipe(recipeData) {
 }
 
 export async function getAllRecipes() {
-    const response = await fetch(`${API_URL}/recipes`);
+    const response = await authFetch(`${API_URL}/recipes`);
     if (!response.ok) throw new Error('Failed to fetch recipes');
     return await response.json();
 }
 
 export async function getRecipeById(id) {
-    const response = await fetch(`${API_URL}/recipes/${id}?t=${Date.now()}`);
+    const response = await authFetch(`${API_URL}/recipes/${id}?t=${Date.now()}`);
     if (!response.ok) throw new Error('Failed to fetch recipe');
     return await response.json();
 }
 
 export async function updateRecipe(id, updates) {
-    const response = await fetch(`${API_URL}/recipes/${id}`, {
+    const response = await authFetch(`${API_URL}/recipes/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
     });
     if (!response.ok) throw new Error('Failed to update recipe');
@@ -85,7 +99,7 @@ export async function updateRecipe(id, updates) {
 }
 
 export async function deleteRecipe(id) {
-    const response = await fetch(`${API_URL}/recipes/${id}`, {
+    const response = await authFetch(`${API_URL}/recipes/${id}`, {
         method: 'DELETE'
     });
     if (!response.ok) throw new Error('Failed to delete recipe');
@@ -137,9 +151,8 @@ export async function createPizzaNight(nightData) {
         createdAt: Date.now()
     };
 
-    const response = await fetch(`${API_URL}/pizza-nights`, {
+    const response = await authFetch(`${API_URL}/pizza-nights`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pizzaNight)
     });
     if (!response.ok) throw new Error('Failed to create pizza night');
@@ -149,7 +162,7 @@ export async function createPizzaNight(nightData) {
 export async function getAllPizzaNights() {
     console.log('🌐 [DB-SQL] Fetching all pizza nights...');
     // Add timestamp to prevent caching
-    const response = await fetch(`${API_URL}/pizza-nights?t=${Date.now()}`);
+    const response = await authFetch(`${API_URL}/pizza-nights?t=${Date.now()}`);
     if (!response.ok) throw new Error('Failed to fetch pizza nights');
     const data = await response.json();
     console.log('🌐 [DB-SQL] Fetched pizza nights counts:', data.length);
@@ -158,7 +171,7 @@ export async function getAllPizzaNights() {
 
 export async function getPizzaNightById(id) {
     console.log(`🌐 [DB-SQL] Fetching pizza night ${id}...`);
-    const response = await fetch(`${API_URL}/pizza-nights/${id}`);
+    const response = await authFetch(`${API_URL}/pizza-nights/${id}`);
     if (!response.ok) {
         console.warn(`Failed to fetch pizza night ${id}`);
         return null;
@@ -168,9 +181,8 @@ export async function getPizzaNightById(id) {
 
 export async function updatePizzaNight(id, updates) {
     console.log(`🌐 [DB-SQL] Updating pizza night ${id}...`);
-    const response = await fetch(`${API_URL}/pizza-nights/${id}`, {
+    const response = await authFetch(`${API_URL}/pizza-nights/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
     });
     if (!response.ok) throw new Error('Failed to update pizza night');
@@ -180,7 +192,7 @@ export async function updatePizzaNight(id, updates) {
 }
 
 export async function deletePizzaNight(id) {
-    const response = await fetch(`${API_URL}/pizza-nights/${id}`, {
+    const response = await authFetch(`${API_URL}/pizza-nights/${id}`, {
         method: 'DELETE'
     });
     if (!response.ok) throw new Error('Failed to delete pizza night');
@@ -211,9 +223,8 @@ export async function addGuest(guestData) {
         phone: guestData.phone || null,
         createdAt: Date.now()
     };
-    const response = await fetch(`${API_URL}/guests`, {
+    const response = await authFetch(`${API_URL}/guests`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(guest)
     });
     if (!response.ok) throw new Error('Failed to add guest');
@@ -221,9 +232,8 @@ export async function addGuest(guestData) {
 }
 
 export async function updateGuest(guestId, updates) {
-    const response = await fetch(`${API_URL}/guests/${guestId}`, {
+    const response = await authFetch(`${API_URL}/guests/${guestId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
     });
     if (!response.ok) throw new Error('Failed to update guest');
@@ -231,13 +241,13 @@ export async function updateGuest(guestId, updates) {
 }
 
 export async function getAllGuests() {
-    const response = await fetch(`${API_URL}/guests`);
+    const response = await authFetch(`${API_URL}/guests`);
     if (!response.ok) throw new Error('Failed to fetch guests');
     return await response.json();
 }
 
 export async function deleteGuest(id) {
-    const response = await fetch(`${API_URL}/guests/${id}`, {
+    const response = await authFetch(`${API_URL}/guests/${id}`, {
         method: 'DELETE'
     });
     if (!response.ok) throw new Error('Failed to delete guest');
@@ -254,9 +264,8 @@ export async function addCombination(ingredients) {
         ingredients: ingredients,
         createdAt: Date.now()
     };
-    const response = await fetch(`${API_URL}/combinations`, {
+    const response = await authFetch(`${API_URL}/combinations`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(combination)
     });
     if (!response.ok) throw new Error('Failed to add combination');
@@ -264,13 +273,13 @@ export async function addCombination(ingredients) {
 }
 
 export async function getAllCombinations() {
-    const response = await fetch(`${API_URL}/combinations`);
+    const response = await authFetch(`${API_URL}/combinations`);
     if (!response.ok) throw new Error('Failed to fetch combinations');
     return await response.json();
 }
 
 export async function deleteCombination(id) {
-    const response = await fetch(`${API_URL}/combinations/${id}`, {
+    const response = await authFetch(`${API_URL}/combinations/${id}`, {
         method: 'DELETE'
     });
     if (!response.ok) throw new Error('Failed to delete combination');
@@ -337,9 +346,8 @@ export async function createPreparation(prepData) {
         isCustom: prepData.isCustom !== undefined ? prepData.isCustom : true
     };
 
-    const response = await fetch(`${API_URL}/preparations`, {
+    const response = await authFetch(`${API_URL}/preparations`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(preparation)
     });
 
@@ -351,7 +359,7 @@ export async function createPreparation(prepData) {
  * Get all preparations
  */
 export async function getAllPreparations() {
-    const response = await fetch(`${API_URL}/preparations`);
+    const response = await authFetch(`${API_URL}/preparations`);
     if (!response.ok) throw new Error('Failed to fetch preparations');
     return await response.json();
 }
@@ -360,7 +368,7 @@ export async function getAllPreparations() {
  * Get preparation by ID
  */
 export async function getPreparationById(id) {
-    const response = await fetch(`${API_URL}/preparations/${id}`);
+    const response = await authFetch(`${API_URL}/preparations/${id}`);
     if (!response.ok) throw new Error('Failed to fetch preparation');
     return await response.json();
 }
@@ -369,9 +377,8 @@ export async function getPreparationById(id) {
  * Update preparation
  */
 export async function updatePreparation(id, updates) {
-    const response = await fetch(`${API_URL}/preparations/${id}`, {
+    const response = await authFetch(`${API_URL}/preparations/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
     });
     if (!response.ok) throw new Error('Failed to update preparation');
@@ -382,7 +389,7 @@ export async function updatePreparation(id, updates) {
  * Delete preparation
  */
 export async function deletePreparation(id) {
-    const response = await fetch(`${API_URL}/preparations/${id}`, {
+    const response = await authFetch(`${API_URL}/preparations/${id}`, {
         method: 'DELETE'
     });
     if (!response.ok) throw new Error('Failed to delete preparation');
@@ -415,25 +422,25 @@ export async function seedPreparations(preparationsConstants) {
 // ============================================
 
 export async function getAllIngredients() {
-    const response = await fetch(`${API_URL}/ingredients`);
+    const response = await authFetch(`${API_URL}/ingredients`);
     if (!response.ok) throw new Error('Failed to fetch ingredients');
     return await response.json();
 }
 
 export async function getIngredientById(id) {
-    const response = await fetch(`${API_URL}/ingredients/${id}`);
+    const response = await authFetch(`${API_URL}/ingredients/${id}`);
     if (!response.ok) throw new Error('Failed to fetch ingredient');
     return await response.json();
 }
 
 export async function getIngredientsByCategory(category) {
-    const response = await fetch(`${API_URL}/ingredients/category/${encodeURIComponent(category)}`);
+    const response = await authFetch(`${API_URL}/ingredients/category/${encodeURIComponent(category)}`);
     if (!response.ok) throw new Error('Failed to fetch ingredients by category');
     return await response.json();
 }
 
 export async function searchIngredients(query) {
-    const response = await fetch(`${API_URL}/ingredients/search?q=${encodeURIComponent(query)}`);
+    const response = await authFetch(`${API_URL}/ingredients/search?q=${encodeURIComponent(query)}`);
     if (!response.ok) throw new Error('Failed to search ingredients');
     return await response.json();
 }
@@ -456,9 +463,8 @@ export async function addIngredient(ingredientData) {
         dateAdded: Date.now()
     };
 
-    const response = await fetch(`${API_URL}/ingredients`, {
+    const response = await authFetch(`${API_URL}/ingredients`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(ingredient)
     });
 
@@ -467,9 +473,8 @@ export async function addIngredient(ingredientData) {
 }
 
 export async function updateIngredient(id, updates) {
-    const response = await fetch(`${API_URL}/ingredients/${id}`, {
+    const response = await authFetch(`${API_URL}/ingredients/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
     });
 
@@ -478,7 +483,7 @@ export async function updateIngredient(id, updates) {
 }
 
 export async function deleteIngredient(id) {
-    const response = await fetch(`${API_URL}/ingredients/${id}`, {
+    const response = await authFetch(`${API_URL}/ingredients/${id}`, {
         method: 'DELETE'
     });
 
@@ -491,13 +496,13 @@ export async function deleteIngredient(id) {
 // ============================================
 
 export async function getAllCategories() {
-    const response = await fetch(`${API_URL}/categories`);
+    const response = await authFetch(`${API_URL}/categories`);
     if (!response.ok) throw new Error('Failed to fetch categories');
     return await response.json();
 }
 
 export async function getCategoryById(id) {
-    const response = await fetch(`${API_URL}/categories/${id}`);
+    const response = await authFetch(`${API_URL}/categories/${id}`);
     if (!response.ok) throw new Error('Failed to fetch category');
     return await response.json();
 }
@@ -507,15 +512,14 @@ export async function getCategoryById(id) {
 // ============================================
 
 export async function getArchetypeWeights(userId = 'default') {
-    const response = await fetch(`${API_URL}/archetype-weights?userId=${userId}`);
+    const response = await authFetch(`${API_URL}/archetype-weights?userId=${userId}`);
     if (!response.ok) throw new Error('Failed to fetch archetype weights');
     return response.json();
 }
 
 export async function updateArchetypeWeight(archetype, weight, userId = 'default') {
-    const response = await fetch(`${API_URL}/archetype-weights/${archetype}`, {
+    const response = await authFetch(`${API_URL}/archetype-weights/${archetype}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ weight, userId })
     });
     if (!response.ok) throw new Error('Failed to update archetype weight');
@@ -523,9 +527,8 @@ export async function updateArchetypeWeight(archetype, weight, userId = 'default
 }
 
 export async function resetArchetypeWeights(userId = 'default') {
-    const response = await fetch(`${API_URL}/archetype-weights/reset`, {
+    const response = await authFetch(`${API_URL}/archetype-weights/reset`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId })
     });
     if (!response.ok) throw new Error('Failed to reset archetype weights');
