@@ -1544,6 +1544,23 @@ class DatabaseAdapter {
         return this.getUserById(id);
     }
 
+    async updateUserRole(email, role) {
+        console.log(`🔐 [DB] Promoting user ${email} to role: ${role}`);
+        const sql = 'UPDATE Users SET role = ? WHERE email = ?';
+
+        if (this.isSQLite) {
+            const stmt = this.db.prepare(sql);
+            const info = stmt.run(role, email);
+            return info.changes > 0;
+        } else {
+            const result = await this.db.execute({
+                sql: sql,
+                args: [role, email]
+            });
+            return result.rowsAffected > 0;
+        }
+    }
+
     async createUserSettings(userId) {
         const settingsId = 'settings-' + userId;
         const defaultSettings = {

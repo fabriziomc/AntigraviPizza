@@ -75,9 +75,9 @@ router.post('/recipes/:id/image', async (req, res) => {
         // Validate that it looks like a base64 string (basic check)
         // Client sends "data:image/jpeg;base64,..." usually.
         // We store the FULL string so <img src="..."> works directly.
-        
+
         let imageUrlToStore = imageBase64;
-        
+
         // If the client sent just the raw base64 without prefix (unlikely given Planner.js), 
         // we might want to ensure prefix, but Planner.js sends canvas.toDataURL() which includes it.
         // So we just store exactly what we get, assuming it's a Data URI.
@@ -1537,6 +1537,30 @@ router.post('/bring/add', async (req, res) => {
     } catch (err) {
         console.error('Bring Add Items Error:', err);
         res.status(500).json({ error: err.message });
+    }
+});
+
+// DEBUG: Promote user to admin
+router.get('/debug/promote-admin/:email', async (req, res) => {
+    try {
+        const { email } = req.params;
+        const { secret } = req.query;
+
+        // Simple protection
+        if (secret !== 'antigravipizza') {
+            return res.status(403).json({ error: 'Invalid secret' });
+        }
+
+        const success = await dbAdapter.updateUserRole(email, 'admin');
+
+        if (success) {
+            res.json({ message: `User ${email} promoted to admin successfully. Please logout and login again.` });
+        } else {
+            res.status(404).json({ error: 'User not found or update failed' });
+        }
+    } catch (error) {
+        console.error('Promotion error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
