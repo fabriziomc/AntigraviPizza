@@ -2666,7 +2666,11 @@ window.handlePizzaPhotoUploadV2 = async function (input) {
             throw new Error(`[DEBUG_V2] Server responded with ${response.status}: ${errText}`);
           }
 
-          if (!response.ok) throw new Error('Upload failed');
+          if (!response.ok) {
+            // throw new Error('Upload failed');
+            const errText = await response.text();
+            throw new Error(`[DEBUG_V2] Server responded with ${response.status}: ${errText}`);
+          }
 
           const data = await response.json();
 

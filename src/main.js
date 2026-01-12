@@ -23,7 +23,7 @@ import { requireAuth, getUser, withAuth, logout } from './modules/auth.js';
 import { renderDashboard } from './components/Dashboard.js';
 import { renderDiscovery } from './components/Discovery.js';
 import { renderLibrary } from './components/Library.js';
-import { renderPlanner } from './components/Planner.js';
+import { renderPlanner } from './components/PlannerV2.js';
 import { renderShopping } from './components/Shopping.js';
 import { renderCombinations, setupCombinationsListeners } from './components/Combinations.js';
 import { renderDoughs } from './components/Doughs.js';

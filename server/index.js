@@ -39,17 +39,30 @@ app.use('/api', (req, res, next) => {
 
     // Skip authentication for GET requests to pizza-nights (needed for guest view)
     // Guests need to view pizza night details and themes without logging in
-    if (req.method === 'GET' && req.path.match(/^\/pizza-nights(\/[^\/]+)?(\/theme)?$/)) {
-        return next();
+    if (req.method === 'GET') {
+        // Allow public access to pizza nights, themes, recipes, preparations, ingredients, and categories
+        if (req.path.match(/^\/pizza-nights(\/[^\/]+)?(\/theme)?$/) ||
+            req.path.match(/^\/recipes(\/.+)?$/) ||
+            req.path.match(/^\/preparations(\/.+)?$/) ||
+            req.path.match(/^\/ingredients(\/.+)?$/) ||
+            req.path.match(/^\/categories(\/.+)?$/)) {
+            return next();
+        }
     }
 
     // Apply authentication for all other /api routes
     authenticateToken(req, res, next);
 }, recipeRoutes);
 
+const setNoCache = (res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+};
+
 // Serve static files from public directory (for guest.html, login.html, register.html, and theme images)
 const publicPath = path.join(__dirname, '../public');
-app.use(express.static(publicPath));
+app.use(express.static(publicPath, { setHeaders: setNoCache }));
 console.log('Public path:', publicPath);
 
 // Serve static files from dist directory
@@ -59,7 +72,7 @@ const indexPath = path.join(distPath, 'index.html');
 console.log('Dist path:', distPath);
 console.log('Index.html exists:', existsSync(indexPath));
 
-app.use(express.static(distPath));
+app.use(express.static(distPath, { setHeaders: setNoCache }));
 
 // Handle SPA routing - serve index.html for all non-API, non-static routes
 app.use((req, res, next) => {

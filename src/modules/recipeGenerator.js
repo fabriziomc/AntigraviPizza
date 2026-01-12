@@ -1487,7 +1487,8 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
     } catch (error) {
         console.error('❌ Image generation failed:', error);
         // Fallback to placeholder
-        imageUrl = 'https://via.placeholder.com/800x600/667eea/ffffff?text=🍕';
+        // Use a reliable SVG placeholder
+        imageUrl = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"%3E%3Crect fill="%23333" width="800" height="600"/%3E%3Ctext fill="%23777" font-family="sans-serif" font-size="30" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3E🍕%3C/text%3E%3C/svg%3E';
     }
 
     // --- FINAL SAFETY DEDUPLICATION ---

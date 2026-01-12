@@ -271,7 +271,7 @@ function createRecipeCard(recipe) {
   return `
     <div class="recipe-card" data-recipe-id="${recipe.id}">
       <img 
-        src="${recipe.imageUrl || 'https://via.placeholder.com/400x200/667eea/ffffff?text=🍕'}" 
+        src="${recipe.imageUrl || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200"%3E%3Crect fill="%23333" width="400" height="200"/%3E%3Ctext fill="%23777" font-family="sans-serif" font-size="30" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3E🍕%3C/text%3E%3C/svg%3E'}" 
         alt="${recipe.name}"
         class="recipe-card-image"
         onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%232a2f4a%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2250%22%3E🍕%3C/text%3E%3C/svg%3E'"
@@ -425,7 +425,7 @@ async function showRecipeModal(recipeId) {
       <div style="position: relative;">
         <img 
           id="recipeModalImage"
-          src="${recipe.imageUrl || 'https://via.placeholder.com/800x300/667eea/ffffff?text=🍕'}" 
+          src="${recipe.imageUrl || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="300" viewBox="0 0 800 300"%3E%3Crect fill="%23333" width="800" height="300"/%3E%3Ctext fill="%23777" font-family="sans-serif" font-size="30" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3E🍕%3C/text%3E%3C/svg%3E'}" 
           alt="${recipe.name}"
           class="recipe-modal-image"
           onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%232a2f4a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2250%22>🍕</text></svg>'"
@@ -1203,18 +1203,39 @@ window.handleRecipePhotoUpload = async function (input, recipeId) {
         console.log(`📸 Image compressed: ${(compressedBase64.length / 1024).toFixed(2)} KB`);
 
         try {
-          // Import state if needed, assuming renderRecipes is available in scope or window
-          // But Library.js uses local 'state' variable passed to renderRecipes.
-          // We might need to access the global state or the module-level state if exported.
-          // For now, we'll try calling renderRecipes with the module-level 'state' variable which seems to be in scope.
+          // Import auth
+          const { getToken, removeToken } = await import('../modules/auth.js');
+          const token = getToken();
+
+          if (!token) {
+            alert('⚠️ Devi effettuare il login per caricare foto!');
+            if (btn) {
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+            }
+            return;
+          }
 
           const response = await fetch(`/api/recipes/${recipeId}/image`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ imageBase64: compressedBase64 })
           });
 
-          if (!response.ok) throw new Error('Upload failed');
+          if (response.status === 401 || response.status === 403) {
+            alert('⚠️ Sessione scaduta. Login necessario.');
+            removeToken();
+            window.location.href = '/login.html';
+            return;
+          }
+
+          if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`Server responded with ${response.status}: ${errText}`);
+          }
 
           const data = await response.json();
 
