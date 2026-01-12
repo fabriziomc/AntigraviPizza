@@ -251,28 +251,4 @@ router.post('/change-password', authenticateToken, async (req, res) => {
     }
 });
 
-// DEBUG: Promote user to admin
-router.get('/debug/promote-admin/:email', async (req, res) => {
-    try {
-        const { email } = req.params;
-        const { secret } = req.query;
-
-        // Simple protection
-        if (secret !== 'antigravipizza') {
-            return res.status(403).json({ error: 'Invalid secret' });
-        }
-
-        const success = await dbAdapter.updateUserRole(email, 'admin');
-
-        if (success) {
-            res.json({ message: `User ${email} promoted to admin successfully. Please logout and login again.` });
-        } else {
-            res.status(404).json({ error: 'User not found or update failed' });
-        }
-    } catch (error) {
-        console.error('Promotion error:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
 export default router;
