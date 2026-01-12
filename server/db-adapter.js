@@ -57,32 +57,35 @@ class DatabaseAdapter {
     // RECIPES
     // ==========================================
 
-    async getAllRecipes() {
+    async getAllRecipes(userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Recipes ORDER BY createdAt DESC');
-            return stmt.all().map(r => this.parseRecipe(r));
+            const stmt = this.db.prepare('SELECT * FROM Recipes WHERE userId = ? ORDER BY createdAt DESC');
+            return stmt.all(userId).map(r => this.parseRecipe(r));
         } else {
             // Turso
-            const result = await this.db.execute('SELECT * FROM Recipes ORDER BY createdAt DESC');
+            const result = await this.db.execute({
+                sql: 'SELECT * FROM Recipes WHERE userId = ? ORDER BY createdAt DESC',
+                args: [userId]
+            });
             return result.rows.map(r => this.parseRecipe(r));
         }
     }
 
-    async getRecipeById(id) {
+    async getRecipeById(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Recipes WHERE id = ?');
-            return this.parseRecipe(stmt.get(id));
+            const stmt = this.db.prepare('SELECT * FROM Recipes WHERE id = ? AND userId = ?');
+            return this.parseRecipe(stmt.get(id, userId));
         } else {
             // Turso
             const result = await this.db.execute({
-                sql: 'SELECT * FROM Recipes WHERE id = ?',
-                args: [id]
+                sql: 'SELECT * FROM Recipes WHERE id = ? AND userId = ?',
+                args: [id, userId]
             });
             return this.parseRecipe(result.rows[0]);
         }
     }
 
-    async createRecipe(recipe) {
+    async createRecipe(recipe, userId) {
         const baseIngredientsJson = JSON.stringify(recipe.baseIngredients || []);
         const toppingsDuringJson = JSON.stringify(recipe.toppingsDuringBake || []);
         const toppingsPostJson = JSON.stringify(recipe.toppingsPostBake || []);
@@ -92,8 +95,8 @@ class DatabaseAdapter {
 
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
-                INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, toppingsDuringBake, toppingsPostBake, preparations, instructions, imageUrl, dough, suggestedDough, archetype, recipeSource, archetypeUsed, createdAt, dateAdded, isFavorite, rating, tags)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, toppingsDuringBake, toppingsPostBake, preparations, instructions, imageUrl, dough, suggestedDough, archetype, recipeSource, archetypeUsed, createdAt, dateAdded, isFavorite, rating, tags, userId)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 recipe.id,
@@ -116,13 +119,14 @@ class DatabaseAdapter {
                 recipe.dateAdded || Date.now(),
                 recipe.isFavorite ? 1 : 0,
                 recipe.rating || 0,
-                tagsJson
+                tagsJson,
+                userId
             );
         } else {
             // Turso
             await this.db.execute({
-                sql: `INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, toppingsDuringBake, toppingsPostBake, preparations, instructions, imageUrl, dough, suggestedDough, archetype, recipeSource, archetypeUsed, createdAt, dateAdded, isFavorite, rating, tags)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                sql: `INSERT INTO Recipes (id, name, pizzaiolo, source, description, baseIngredients, toppingsDuringBake, toppingsPostBake, preparations, instructions, imageUrl, dough, suggestedDough, archetype, recipeSource, archetypeUsed, createdAt, dateAdded, isFavorite, rating, tags, userId)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 args: [
                     recipe.id,
                     recipe.name,
@@ -144,16 +148,17 @@ class DatabaseAdapter {
                     recipe.dateAdded || Date.now(),
                     recipe.isFavorite ? 1 : 0,
                     recipe.rating || 0,
-                    tagsJson
+                    tagsJson,
+                    userId
                 ]
             });
         }
         return recipe;
     }
 
-    async updateRecipe(id, updates) {
+    async updateRecipe(id, updates, userId) {
         // First, fetch the current recipe to merge with updates
-        const currentRecipe = await this.getRecipeById(id);
+        const currentRecipe = await this.getRecipeById(id, userId);
         if (!currentRecipe) {
             throw new Error(`Recipe with id ${id} not found`);
         }
@@ -173,7 +178,7 @@ class DatabaseAdapter {
                 UPDATE Recipes 
                 SET name=?, pizzaiolo=?, source=?, description=?, baseIngredients=?, toppingsDuringBake=?, toppingsPostBake=?, preparations=?, instructions=?, 
                     imageUrl=?, dough=?, suggestedDough=?, archetype=?, recipeSource=?, archetypeUsed=?, isFavorite=?, rating=?, tags=?
-                WHERE id = ?
+                WHERE id = ? AND userId = ?
             `);
             stmt.run(
                 recipe.name,
@@ -194,23 +199,24 @@ class DatabaseAdapter {
                 recipe.isFavorite ? 1 : 0,
                 recipe.rating || 0,
                 tagsJson,
-                id
+                id,
+                userId
             );
         } else {
             await this.db.execute({
-                sql: `UPDATE Recipes SET name=?, pizzaiolo=?, source=?, description=?, baseIngredients=?, toppingsDuringBake=?, toppingsPostBake=?, preparations=?, instructions=?, imageUrl=?, dough=?, suggestedDough=?, archetype=?, recipeSource=?, archetypeUsed=?, isFavorite=?, rating=?, tags=? WHERE id = ?`,
-                args: [recipe.name, recipe.pizzaiolo || 'Sconosciuto', recipe.source || '', recipe.description || '', baseIngredientsJson, toppingsDuringJson, toppingsPostJson, preparationsJson, instructionsJson, recipe.imageUrl || '', recipe.dough || '', recipe.suggestedDough || '', recipe.archetype || '', recipe.recipeSource || null, recipe.archetypeUsed || null, recipe.isFavorite ? 1 : 0, recipe.rating || 0, tagsJson, id]
+                sql: `UPDATE Recipes SET name=?, pizzaiolo=?, source=?, description=?, baseIngredients=?, toppingsDuringBake=?, toppingsPostBake=?, preparations=?, instructions=?, imageUrl=?, dough=?, suggestedDough=?, archetype=?, recipeSource=?, archetypeUsed=?, isFavorite=?, rating=?, tags=? WHERE id = ? AND userId = ?`,
+                args: [recipe.name, recipe.pizzaiolo || 'Sconosciuto', recipe.source || '', recipe.description || '', baseIngredientsJson, toppingsDuringJson, toppingsPostJson, preparationsJson, instructionsJson, recipe.imageUrl || '', recipe.dough || '', recipe.suggestedDough || '', recipe.archetype || '', recipe.recipeSource || null, recipe.archetypeUsed || null, recipe.isFavorite ? 1 : 0, recipe.rating || 0, tagsJson, id, userId]
             });
         }
         return recipe;
     }
 
-    async deleteRecipe(id) {
+    async deleteRecipe(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('DELETE FROM Recipes WHERE id = ?');
-            stmt.run(id);
+            const stmt = this.db.prepare('DELETE FROM Recipes WHERE id = ? AND userId = ?');
+            stmt.run(id, userId);
         } else {
-            await this.db.execute({ sql: 'DELETE FROM Recipes WHERE id = ?', args: [id] });
+            await this.db.execute({ sql: 'DELETE FROM Recipes WHERE id = ? AND userId = ?', args: [id, userId] });
         }
     }
 
@@ -218,26 +224,29 @@ class DatabaseAdapter {
     // PIZZA NIGHTS
     // ==========================================
 
-    async getAllPizzaNights() {
+    async getAllPizzaNights(userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM PizzaNights ORDER BY date DESC');
-            return stmt.all().map(r => this.parsePizzaNight(r));
+            const stmt = this.db.prepare('SELECT * FROM PizzaNights WHERE userId = ? ORDER BY date DESC');
+            return stmt.all(userId).map(r => this.parsePizzaNight(r));
         } else {
-            const result = await this.db.execute('SELECT * FROM PizzaNights ORDER BY date DESC');
+            const result = await this.db.execute({
+                sql: 'SELECT * FROM PizzaNights WHERE userId = ? ORDER BY date DESC',
+                args: [userId]
+            });
             return result.rows.map(r => this.parsePizzaNight(r));
         }
     }
 
-    async getPizzaNightById(id) {
+    async getPizzaNightById(id, userId) {
         let pizzaNight;
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM PizzaNights WHERE id = ?');
-            pizzaNight = this.parsePizzaNight(stmt.get(id));
+            const stmt = this.db.prepare('SELECT * FROM PizzaNights WHERE id = ? AND userId = ?');
+            pizzaNight = this.parsePizzaNight(stmt.get(id, userId));
         } else {
             // Turso
             const result = await this.db.execute({
-                sql: 'SELECT * FROM PizzaNights WHERE id = ?',
-                args: [id]
+                sql: 'SELECT * FROM PizzaNights WHERE id = ? AND userId = ?',
+                args: [id, userId]
             });
             if (result.rows && result.rows.length > 0) {
                 pizzaNight = this.parsePizzaNight(result.rows[0]);
@@ -251,7 +260,7 @@ class DatabaseAdapter {
         if (pizzaNight.selectedGuests && pizzaNight.selectedGuests.length > 0) {
             for (const guestId of pizzaNight.selectedGuests) {
                 try {
-                    const guest = await this.getGuestById(guestId);
+                    const guest = await this.getGuestById(guestId, userId);
                     pizzaNight.guests.push(guest || { id: guestId, name: 'Unknown' });
                 } catch (err) {
                     console.warn(`Could not resolve guest ${guestId}:`, err.message);
@@ -263,15 +272,15 @@ class DatabaseAdapter {
         return pizzaNight;
     }
 
-    async createPizzaNight(night) {
+    async createPizzaNight(night, userId) {
         const selectedPizzasJson = JSON.stringify(night.selectedPizzas || []);
         const selectedGuestsJson = JSON.stringify(night.selectedGuests || []);
         const availableIngredientsJson = JSON.stringify(night.availableIngredients || []);
 
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
-                INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt, imageUrl)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt, imageUrl, userId)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 night.id,
@@ -285,12 +294,13 @@ class DatabaseAdapter {
                 night.notes || '',
                 night.status,
                 night.createdAt,
-                night.imageUrl || ''
+                night.imageUrl || '',
+                userId
             );
         } else {
             await this.db.execute({
-                sql: `INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt, imageUrl)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                sql: `INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt, imageUrl, userId)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 args: [
                     night.id,
                     night.name,
@@ -303,17 +313,18 @@ class DatabaseAdapter {
                     night.notes || '',
                     night.status,
                     night.createdAt,
-                    night.imageUrl || ''
+                    night.imageUrl || '',
+                    userId
                 ]
             });
         }
         return night;
     }
 
-    async updatePizzaNight(id, updates) {
+    async updatePizzaNight(id, updates, userId) {
         console.log(`💾 [DB-ADAPTER] Updating pizza night ${id} with:`, JSON.stringify(updates, null, 2));
         // Fetch current night to merge with updates
-        const currentNight = await this.getPizzaNightById(id);
+        const currentNight = await this.getPizzaNightById(id, userId);
         if (!currentNight) {
             throw new Error(`Pizza night with id ${id} not found`);
         }
@@ -328,7 +339,7 @@ class DatabaseAdapter {
             const stmt = this.db.prepare(`
                 UPDATE PizzaNights 
                 SET name=?, date=?, guestCount=?, selectedDough=?, availableIngredients=?, selectedPizzas=?, selectedGuests=?, notes=?, status=?, imageUrl=?
-                WHERE id=?
+                WHERE id=? AND userId=?
             `);
             stmt.run(
                 night.name,
@@ -341,14 +352,15 @@ class DatabaseAdapter {
                 night.notes || '',
                 night.status,
                 night.imageUrl || '',
-                id
+                id,
+                userId
             );
         } else {
             await this.db.execute({
                 sql: `UPDATE PizzaNights 
                       SET name=?, date=?, guestCount=?, selectedDough=?, availableIngredients=?, 
                           selectedPizzas=?, selectedGuests=?, notes=?, status=?, imageUrl=?
-                      WHERE id=?`,
+                      WHERE id=? AND userId=?`,
                 args: [
                     night.name,
                     night.date,
@@ -360,15 +372,16 @@ class DatabaseAdapter {
                     night.notes || '',
                     night.status,
                     night.imageUrl || '',
-                    id
+                    id,
+                    userId
                 ]
             });
         }
         return night;
     }
 
-    async ratePizzaInNight(nightId, recipeId, rating) {
-        const night = await this.getPizzaNightById(nightId);
+    async ratePizzaInNight(nightId, recipeId, rating, userId) {
+        const night = await this.getPizzaNightById(nightId, userId);
         if (!night) throw new Error('Pizza night not found');
 
         const pizzas = night.selectedPizzas || [];
@@ -379,21 +392,24 @@ class DatabaseAdapter {
         if (!pizza.ratings) pizza.ratings = [];
         pizza.ratings.push(Number(rating));
 
-        const updatedNight = await this.updatePizzaNight(nightId, { selectedPizzas: pizzas });
+        const updatedNight = await this.updatePizzaNight(nightId, { selectedPizzas: pizzas }, userId);
 
         // Sync global rating for the recipe
-        await this.syncRecipeRating(recipeId);
+        await this.syncRecipeRating(recipeId, userId);
 
         return updatedNight;
     }
 
-    async syncRecipeRating(recipeId) {
+    async syncRecipeRating(recipeId, userId) {
         // Fetch all pizza nights to aggregate ratings
         let allNights;
         if (this.isSQLite) {
-            allNights = this.db.prepare('SELECT selectedPizzas FROM PizzaNights').all().map(n => this.parsePizzaNight(n));
+            allNights = this.db.prepare('SELECT selectedPizzas FROM PizzaNights WHERE userId = ?').all(userId).map(n => this.parsePizzaNight(n));
         } else {
-            const result = await this.db.execute('SELECT selectedPizzas FROM PizzaNights');
+            const result = await this.db.execute({
+                sql: 'SELECT selectedPizzas FROM PizzaNights WHERE userId = ?',
+                args: [userId]
+            });
             allNights = result.rows.map(n => this.parsePizzaNight(n));
         }
 
@@ -415,11 +431,11 @@ class DatabaseAdapter {
 
         // Update recipe table with the new average rating
         if (this.isSQLite) {
-            this.db.prepare('UPDATE Recipes SET rating = ? WHERE id = ?').run(average, recipeId);
+            this.db.prepare('UPDATE Recipes SET rating = ? WHERE id = ? AND userId = ?').run(average, recipeId, userId);
         } else {
             await this.db.execute({
-                sql: 'UPDATE Recipes SET rating = ? WHERE id = ?',
-                args: [average, recipeId]
+                sql: 'UPDATE Recipes SET rating = ? WHERE id = ? AND userId = ?',
+                args: [average, recipeId, userId]
             });
         }
         return { average, totalVotes };
@@ -438,12 +454,12 @@ class DatabaseAdapter {
         return results;
     }
 
-    async deletePizzaNight(id) {
+    async deletePizzaNight(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('DELETE FROM PizzaNights WHERE id=?');
-            stmt.run(id);
+            const stmt = this.db.prepare('DELETE FROM PizzaNights WHERE id=? AND userId=?');
+            stmt.run(id, userId);
         } else {
-            await this.db.execute({ sql: 'DELETE FROM PizzaNights WHERE id=?', args: [id] });
+            await this.db.execute({ sql: 'DELETE FROM PizzaNights WHERE id=? AND userId=?', args: [id, userId] });
         }
     }
 
@@ -451,30 +467,33 @@ class DatabaseAdapter {
     // GUESTS
     // ==========================================
 
-    async getAllGuests() {
+    async getAllGuests(userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Guests');
-            return stmt.all();
+            const stmt = this.db.prepare('SELECT * FROM Guests WHERE userId = ?');
+            return stmt.all(userId);
         } else {
-            const result = await this.db.execute('SELECT * FROM Guests');
+            const result = await this.db.execute({
+                sql: 'SELECT * FROM Guests WHERE userId = ?',
+                args: [userId]
+            });
             return result.rows;
         }
     }
 
-    async createGuest(guest) {
+    async createGuest(guest, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('INSERT INTO Guests (id, name, email, phone, createdAt) VALUES (?, ?, ?, ?, ?)');
-            stmt.run(guest.id, guest.name, guest.email || null, guest.phone || null, guest.createdAt);
+            const stmt = this.db.prepare('INSERT INTO Guests (id, name, email, phone, createdAt, userId) VALUES (?, ?, ?, ?, ?, ?)');
+            stmt.run(guest.id, guest.name, guest.email || null, guest.phone || null, guest.createdAt, userId);
         } else {
             await this.db.execute({
-                sql: 'INSERT INTO Guests (id, name, email, phone, createdAt) VALUES (?, ?, ?, ?, ?)',
-                args: [guest.id, guest.name, guest.email || null, guest.phone || null, guest.createdAt]
+                sql: 'INSERT INTO Guests (id, name, email, phone, createdAt, userId) VALUES (?, ?, ?, ?, ?, ?)',
+                args: [guest.id, guest.name, guest.email || null, guest.phone || null, guest.createdAt, userId]
             });
         }
         return guest;
     }
 
-    async updateGuest(id, updates) {
+    async updateGuest(id, updates, userId) {
         // Build dynamic UPDATE query based on provided fields
         const allowedFields = ['name', 'email', 'phone'];
         const fields = [];
@@ -492,7 +511,8 @@ class DatabaseAdapter {
         }
 
         values.push(id); // Add id for WHERE clause
-        const sql = `UPDATE Guests SET ${fields.join(', ')} WHERE id = ?`;
+        values.push(userId); // Add userId for WHERE clause
+        const sql = `UPDATE Guests SET ${fields.join(', ')} WHERE id = ? AND userId = ?`;
 
         if (this.isSQLite) {
             const stmt = this.db.prepare(sql);
@@ -501,28 +521,28 @@ class DatabaseAdapter {
             await this.db.execute({ sql, args: values });
         }
 
-        return this.getGuestById(id);
+        return this.getGuestById(id, userId);
     }
 
-    async getGuestById(id) {
+    async getGuestById(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Guests WHERE id = ?');
-            return stmt.get(id);
+            const stmt = this.db.prepare('SELECT * FROM Guests WHERE id = ? AND userId = ?');
+            return stmt.get(id, userId);
         } else {
             const result = await this.db.execute({
-                sql: 'SELECT * FROM Guests WHERE id = ?',
-                args: [id]
+                sql: 'SELECT * FROM Guests WHERE id = ? AND userId = ?',
+                args: [id, userId]
             });
             return result.rows[0] || null;
         }
     }
 
-    async deleteGuest(id) {
+    async deleteGuest(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('DELETE FROM Guests WHERE id=?');
-            stmt.run(id);
+            const stmt = this.db.prepare('DELETE FROM Guests WHERE id=? AND userId=?');
+            stmt.run(id, userId);
         } else {
-            await this.db.execute({ sql: 'DELETE FROM Guests WHERE id=?', args: [id] });
+            await this.db.execute({ sql: 'DELETE FROM Guests WHERE id=? AND userId=?', args: [id, userId] });
         }
     }
 
@@ -530,37 +550,40 @@ class DatabaseAdapter {
     // COMBINATIONS
     // ==========================================
 
-    async getAllCombinations() {
+    async getAllCombinations(userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Combinations');
-            return stmt.all().map(r => this.parseCombination(r));
+            const stmt = this.db.prepare('SELECT * FROM Combinations WHERE userId = ?');
+            return stmt.all(userId).map(r => this.parseCombination(r));
         } else {
-            const result = await this.db.execute('SELECT * FROM Combinations');
+            const result = await this.db.execute({
+                sql: 'SELECT * FROM Combinations WHERE userId = ?',
+                args: [userId]
+            });
             return result.rows.map(r => this.parseCombination(r));
         }
     }
 
-    async createCombination(combo) {
+    async createCombination(combo, userId) {
         const ingredientsJson = JSON.stringify(combo.ingredients || []);
 
         if (this.isSQLite) {
-            const stmt = this.db.prepare('INSERT INTO Combinations (id, ingredients, createdAt) VALUES (?, ?, ?)');
-            stmt.run(combo.id, ingredientsJson, combo.createdAt);
+            const stmt = this.db.prepare('INSERT INTO Combinations (id, ingredients, createdAt, userId) VALUES (?, ?, ?, ?)');
+            stmt.run(combo.id, ingredientsJson, combo.createdAt, userId);
         } else {
             await this.db.execute({
-                sql: 'INSERT INTO Combinations (id, ingredients, createdAt) VALUES (?, ?, ?)',
-                args: [combo.id, ingredientsJson, combo.createdAt]
+                sql: 'INSERT INTO Combinations (id, ingredients, createdAt, userId) VALUES (?, ?, ?, ?)',
+                args: [combo.id, ingredientsJson, combo.createdAt, userId]
             });
         }
         return combo;
     }
 
-    async deleteCombination(id) {
+    async deleteCombination(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('DELETE FROM Combinations WHERE id=?');
-            stmt.run(id);
+            const stmt = this.db.prepare('DELETE FROM Combinations WHERE id=? AND userId=?');
+            stmt.run(id, userId);
         } else {
-            await this.db.execute({ sql: 'DELETE FROM Combinations WHERE id=?', args: [id] });
+            await this.db.execute({ sql: 'DELETE FROM Combinations WHERE id=? AND userId=?', args: [id, userId] });
         }
     }
 
@@ -579,13 +602,16 @@ class DatabaseAdapter {
         };
     }
 
-    async getAllPreparations() {
+    async getAllPreparations(userId) {
         let preps;
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Preparations ORDER BY name');
-            preps = stmt.all().map(r => this.parsePreparation(r));
+            const stmt = this.db.prepare('SELECT * FROM Preparations WHERE userId = ? ORDER BY name');
+            preps = stmt.all(userId).map(r => this.parsePreparation(r));
         } else {
-            const result = await this.db.execute('SELECT * FROM Preparations ORDER BY name');
+            const result = await this.db.execute({
+                sql: 'SELECT * FROM Preparations WHERE userId = ? ORDER BY name',
+                args: [userId]
+            });
             preps = result.rows.map(r => this.parsePreparation(r));
         }
 
@@ -605,7 +631,7 @@ class DatabaseAdapter {
         let ingredientsMap = new Map();
         if (allIngredientIds.size > 0) {
             const idsArray = Array.from(allIngredientIds);
-            const fetchedIngredients = await this.batchFetchIngredients(idsArray);
+            const fetchedIngredients = await this.batchFetchIngredients(idsArray, userId);
 
             fetchedIngredients.forEach(ing => {
                 ingredientsMap.set(ing.id, {
@@ -626,7 +652,7 @@ class DatabaseAdapter {
     }
 
     // Helper to expand ingredient references - OPTIMIZED for batch queries
-    async expandIngredients(ingredients) {
+    async expandIngredients(ingredients, userId) {
         if (!ingredients || ingredients.length === 0) return [];
 
         // Collect all ingredient IDs that need to be fetched
@@ -655,9 +681,9 @@ class DatabaseAdapter {
                         SELECT i.*, c.name as categoryName, c.icon as categoryIcon
                         FROM Ingredients i
                         LEFT JOIN Categories c ON i.categoryId = c.id
-                        WHERE i.id IN (${placeholders})
+                        WHERE i.id IN (${placeholders}) AND i.userId = ?
                     `);
-                    fetchedIngredients = stmt.all(...idsToFetch);
+                    fetchedIngredients = stmt.all(...idsToFetch, userId);
                 } else {
                     // Turso - build IN clause with placeholders
                     const placeholders = idsToFetch.map(() => '?').join(',');
@@ -666,9 +692,9 @@ class DatabaseAdapter {
                             SELECT i.*, c.name as categoryName, c.icon as categoryIcon
                             FROM Ingredients i
                             LEFT JOIN Categories c ON i.categoryId = c.id
-                            WHERE i.id IN (${placeholders})
+                            WHERE i.id IN (${placeholders}) AND i.userId = ?
                         `,
-                        args: idsToFetch
+                        args: [...idsToFetch, userId]
                     });
                     fetchedIngredients = result.rows;
                 }
@@ -713,7 +739,7 @@ class DatabaseAdapter {
     }
 
     // Helper to batch fetch ingredients by IDs (used by optimized getAllPreparations)
-    async batchFetchIngredients(ids) {
+    async batchFetchIngredients(ids, userId) {
         if (ids.length === 0) return [];
 
         if (this.isSQLite) {
@@ -722,9 +748,9 @@ class DatabaseAdapter {
                 SELECT i.*, c.name as categoryName, c.icon as categoryIcon
                 FROM Ingredients i
                 LEFT JOIN Categories c ON i.categoryId = c.id
-                WHERE i.id IN (${placeholders})
+                WHERE i.id IN (${placeholders}) AND i.userId = ?
             `);
-            return stmt.all(...ids);
+            return stmt.all(...ids, userId);
         } else {
             const placeholders = ids.map(() => '?').join(',');
             const result = await this.db.execute({
@@ -732,9 +758,9 @@ class DatabaseAdapter {
                     SELECT i.*, c.name as categoryName, c.icon as categoryIcon
                     FROM Ingredients i
                     LEFT JOIN Categories c ON i.categoryId = c.id
-                    WHERE i.id IN (${placeholders})
+                    WHERE i.id IN (${placeholders}) AND i.userId = ?
                 `,
-                args: ids
+                args: [...ids, userId]
             });
             return result.rows;
         }
@@ -761,34 +787,34 @@ class DatabaseAdapter {
         });
     }
 
-    async getPreparationById(id) {
+    async getPreparationById(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Preparations WHERE id = ?');
-            const prep = this.parsePreparation(stmt.get(id));
+            const stmt = this.db.prepare('SELECT * FROM Preparations WHERE id = ? AND userId = ?');
+            const prep = this.parsePreparation(stmt.get(id, userId));
             if (prep) {
-                prep.ingredients = await this.expandIngredients(prep.ingredients);
+                prep.ingredients = await this.expandIngredients(prep.ingredients, userId);
             }
             return prep;
         } else {
             // Turso
-            const result = await this.db.execute({ sql: 'SELECT * FROM Preparations WHERE id = ?', args: [id] });
+            const result = await this.db.execute({ sql: 'SELECT * FROM Preparations WHERE id = ? AND userId = ?', args: [id, userId] });
             const prep = this.parsePreparation(result.rows[0]);
             if (prep) {
-                prep.ingredients = await this.expandIngredients(prep.ingredients);
+                prep.ingredients = await this.expandIngredients(prep.ingredients, userId);
             }
             return prep;
         }
     }
 
-    async createPreparation(prep) {
+    async createPreparation(prep, userId) {
         const ingredientsJson = JSON.stringify(prep.ingredients || []);
         const instructionsJson = JSON.stringify(prep.instructions || []);
         const tipsJson = JSON.stringify(prep.tips || []);
 
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
-                INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom, recipeUrl)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom, recipeUrl, userId)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 prep.id,
@@ -803,13 +829,14 @@ class DatabaseAdapter {
                 tipsJson,
                 prep.dateAdded || Date.now(),
                 prep.isCustom !== undefined ? (prep.isCustom ? 1 : 0) : 1,
-                prep.recipeUrl || null
+                prep.recipeUrl || null,
+                userId
             );
         } else {
             await this.db.execute({
                 sql: `
-                INSERT INTO Preparations (id, name, category, description, [yield], prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom, recipeUrl)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO Preparations (id, name, category, description, [yield], prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom, recipeUrl, userId)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `,
                 args: [
                     prep.id,
@@ -824,16 +851,17 @@ class DatabaseAdapter {
                     tipsJson,
                     prep.dateAdded || Date.now(),
                     prep.isCustom !== undefined ? (prep.isCustom ? 1 : 0) : 1,
-                    prep.recipeUrl || null
+                    prep.recipeUrl || null,
+                    userId
                 ]
             });
         }
         return prep;
     }
 
-    async updatePreparation(id, updates) {
+    async updatePreparation(id, updates, userId) {
         // Fetch current preparation to merge with updates
-        const currentPrep = await this.getPreparationById(id);
+        const currentPrep = await this.getPreparationById(id, userId);
         if (!currentPrep) {
             throw new Error(`Preparation with id ${id} not found`);
         }
@@ -849,7 +877,7 @@ class DatabaseAdapter {
                 UPDATE Preparations 
                 SET name=?, category=?, description=?, yield=?, prepTime=?, difficulty=?, 
                     ingredients=?, instructions=?, tips=?, recipeUrl=?
-                WHERE id=?
+                WHERE id=? AND userId=?
             `);
             stmt.run(
                 prep.name,
@@ -862,7 +890,8 @@ class DatabaseAdapter {
                 instructionsJson,
                 tipsJson,
                 prep.recipeUrl || null,
-                id
+                id,
+                userId
             );
         } else {
             await this.db.execute({
@@ -870,7 +899,7 @@ class DatabaseAdapter {
                 UPDATE Preparations 
                 SET name=?, category=?, description=?, [yield]=?, prepTime=?, difficulty=?, 
                     ingredients=?, instructions=?, tips=?, recipeUrl=?
-                WHERE id=?
+                WHERE id=? AND userId=?
                 `,
                 args: [
                     prep.name,
@@ -883,32 +912,33 @@ class DatabaseAdapter {
                     instructionsJson,
                     tipsJson,
                     prep.recipeUrl || null,
-                    id
+                    id,
+                    userId
                 ]
             });
         }
         return prep;
     }
 
-    async updatePreparationLink(id, url) {
+    async updatePreparationLink(id, url, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('UPDATE Preparations SET recipeUrl = ? WHERE id = ?');
-            stmt.run(url, id);
+            const stmt = this.db.prepare('UPDATE Preparations SET recipeUrl = ? WHERE id = ? AND userId = ?');
+            stmt.run(url, id, userId);
         } else {
             await this.db.execute({
-                sql: 'UPDATE Preparations SET recipeUrl = ? WHERE id = ?',
-                args: [url, id]
+                sql: 'UPDATE Preparations SET recipeUrl = ? WHERE id = ? AND userId = ?',
+                args: [url, id, userId]
             });
         }
-        return this.getPreparationById(id);
+        return this.getPreparationById(id, userId);
     }
 
-    async deletePreparation(id) {
+    async deletePreparation(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('DELETE FROM Preparations WHERE id=?');
-            stmt.run(id);
+            const stmt = this.db.prepare('DELETE FROM Preparations WHERE id=? AND userId=?');
+            stmt.run(id, userId);
         } else {
-            await this.db.execute({ sql: 'DELETE FROM Preparations WHERE id=?', args: [id] });
+            await this.db.execute({ sql: 'DELETE FROM Preparations WHERE id=? AND userId=?', args: [id, userId] });
         }
     }
 
@@ -944,27 +974,32 @@ class DatabaseAdapter {
         };
     }
 
-    async getAllIngredients() {
+    async getAllIngredients(userId) {
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
                 SELECT i.*, c.name as categoryName, c.icon as categoryIcon
                 FROM Ingredients i
                 LEFT JOIN Categories c ON i.categoryId = c.id
+                WHERE i.userId = ?
                 ORDER BY c.displayOrder, i.name
             `);
-            return stmt.all().map(r => {
+            return stmt.all(userId).map(r => {
                 const parsed = this.parseIngredient(r);
                 parsed.category = r.categoryName;
                 parsed.categoryIcon = r.categoryIcon;
                 return parsed;
             });
         } else {
-            const result = await this.db.execute(`
-                SELECT i.*, c.name as categoryName, c.icon as categoryIcon
-                FROM Ingredients i
-                LEFT JOIN Categories c ON i.categoryId = c.id
-                ORDER BY c.displayOrder, i.name
-            `);
+            const result = await this.db.execute({
+                sql: `
+                    SELECT i.*, c.name as categoryName, c.icon as categoryIcon
+                    FROM Ingredients i
+                    LEFT JOIN Categories c ON i.categoryId = c.id
+                    WHERE i.userId = ?
+                    ORDER BY c.displayOrder, i.name
+                `,
+                args: [userId]
+            });
             return result.rows.map(r => {
                 const parsed = this.parseIngredient(r);
                 parsed.category = r.categoryName;
@@ -974,40 +1009,40 @@ class DatabaseAdapter {
         }
     }
 
-    async getIngredientById(id) {
+    async getIngredientById(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE id = ?');
-            return this.parseIngredient(stmt.get(id));
+            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE id = ? AND userId = ?');
+            return this.parseIngredient(stmt.get(id, userId));
         } else {
             // Turso
-            const result = await this.db.execute({ sql: 'SELECT * FROM Ingredients WHERE id = ?', args: [id] });
+            const result = await this.db.execute({ sql: 'SELECT * FROM Ingredients WHERE id = ? AND userId = ?', args: [id, userId] });
             return this.parseIngredient(result.rows[0]);
         }
     }
 
-    async getIngredientsByCategory(category) {
+    async getIngredientsByCategory(category, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE category = ? ORDER BY name');
-            return stmt.all(category).map(r => this.parseIngredient(r));
+            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE category = ? AND userId = ? ORDER BY name');
+            return stmt.all(category, userId).map(r => this.parseIngredient(r));
         } else {
             // Turso
-            const result = await this.db.execute({ sql: 'SELECT * FROM Ingredients WHERE category = ? ORDER BY name', args: [category] });
+            const result = await this.db.execute({ sql: 'SELECT * FROM Ingredients WHERE category = ? AND userId = ? ORDER BY name', args: [category, userId] });
             return result.rows.map(r => this.parseIngredient(r));
         }
     }
 
-    async searchIngredients(searchQuery) {
+    async searchIngredients(searchQuery, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE name LIKE ? ORDER BY name');
-            return stmt.all(`%${searchQuery}%`).map(r => this.parseIngredient(r));
+            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE name LIKE ? AND userId = ? ORDER BY name');
+            return stmt.all(`%${searchQuery}%`, userId).map(r => this.parseIngredient(r));
         } else {
             // Turso
-            const result = await this.db.execute({ sql: 'SELECT * FROM Ingredients WHERE name LIKE ? ORDER BY name', args: [`%${searchQuery}%`] });
+            const result = await this.db.execute({ sql: 'SELECT * FROM Ingredients WHERE name LIKE ? AND userId = ? ORDER BY name', args: [`%${searchQuery}%`, userId] });
             return result.rows.map(r => this.parseIngredient(r));
         }
     }
 
-    async createIngredient(ingredient) {
+    async createIngredient(ingredient, userId) {
         const seasonJson = ingredient.season ? JSON.stringify(ingredient.season) : null;
         const allergensJson = JSON.stringify(ingredient.allergens || []);
         const tagsJson = JSON.stringify(ingredient.tags || []);
@@ -1032,8 +1067,8 @@ class DatabaseAdapter {
 
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
-                INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded, userId)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 ingredient.id,
@@ -1049,12 +1084,13 @@ class DatabaseAdapter {
                 allergensJson,
                 tagsJson,
                 ingredient.isCustom ? 1 : 0,
-                ingredient.dateAdded || Date.now()
+                ingredient.dateAdded || Date.now(),
+                userId
             );
         } else {
             await this.db.execute(`
-                INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded)
-                VALUES (@id, @name, @categoryId, @subcategory, @minWeight, @maxWeight, @defaultUnit, @postBake, @phase, @season, @allergens, @tags, @isCustom, @dateAdded)
+                INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded, userId)
+                VALUES (@id, @name, @categoryId, @subcategory, @minWeight, @maxWeight, @defaultUnit, @postBake, @phase, @season, @allergens, @tags, @isCustom, @dateAdded, @userId)
             `, {
                 id: ingredient.id,
                 name: ingredient.name,
@@ -1069,7 +1105,8 @@ class DatabaseAdapter {
                 allergens: allergensJson,
                 tags: tagsJson,
                 isCustom: ingredient.isCustom ? 1 : 0,
-                dateAdded: ingredient.dateAdded || Date.now()
+                dateAdded: ingredient.dateAdded || Date.now(),
+                userId: userId
             });
         }
         return ingredient;
@@ -1090,11 +1127,11 @@ class DatabaseAdapter {
         'Basi e Salse': 'e7d1ade0-f3c1-4170-9347-19d6f3b4b1f5'
     };
 
-    async updateIngredient(id, updates) {
+    async updateIngredient(id, updates, userId) {
         console.log(`[updateIngredient] id: ${id}, updates:`, JSON.stringify(updates));
 
         // Fetch existing ingredient first
-        const existing = await this.getIngredientById(id);
+        const existing = await this.getIngredientById(id, userId);
         if (!existing) {
             console.error(`[updateIngredient] Ingredient ${id} not found`);
             throw new Error(`Ingredient with id ${id} not found`);
@@ -1122,7 +1159,7 @@ class DatabaseAdapter {
             const stmt = this.db.prepare(`
                 UPDATE Ingredients 
                 SET name=?, category=?, subcategory=?, minWeight=?, maxWeight=?, defaultUnit=?, postBake=?, phase=?, season=?, allergens=?, tags=?
-                WHERE id = ?
+                WHERE id = ? AND userId = ?
             `);
             stmt.run(
                 ingredient.name,
@@ -1136,13 +1173,14 @@ class DatabaseAdapter {
                 seasonJson,
                 allergensJson,
                 tagsJson,
-                id
+                id,
+                userId
             );
         } else {
             // Turso - use positional parameters WITHOUT quotes
             console.log(`[updateIngredient] About to execute Turso UPDATE...`);
-            console.log(`[updateIngredient] SQL:`, `UPDATE Ingredients SET name=?, category=?, subcategory=?, minWeight=?, maxWeight=?, defaultUnit=?, postBake=?, phase=?, season=?, allergens=?, tags=? WHERE id=?`);
-            console.log(`[updateIngredient] Args:`, [ingredient.name, ingredient.category, ingredient.subcategory, ingredient.minWeight, ingredient.maxWeight, ingredient.defaultUnit, ingredient.postBake, ingredient.phase, 'seasonJson', 'allergensJson', 'tagsJson', id]);
+            console.log(`[updateIngredient] SQL:`, `UPDATE Ingredients SET name=?, category=?, subcategory=?, minWeight=?, maxWeight=?, defaultUnit=?, postBake=?, phase=?, season=?, allergens=?, tags=? WHERE id=? AND userId=?`);
+            console.log(`[updateIngredient] Args:`, [ingredient.name, ingredient.category, ingredient.subcategory, ingredient.minWeight, ingredient.maxWeight, ingredient.defaultUnit, ingredient.postBake, ingredient.phase, 'seasonJson', 'allergensJson', 'tagsJson', id, userId]);
 
             try {
                 // DELETE+INSERT workaround for Turso (uses categoryId UUID instead of category text)
@@ -1150,12 +1188,12 @@ class DatabaseAdapter {
                 console.log(`[updateIngredient] Converting category "${ingredient.category}" → UUID "${categoryUuid}"`);
 
                 await this.db.execute({
-                    sql: 'DELETE FROM Ingredients WHERE id = ?',
-                    args: [id]
+                    sql: 'DELETE FROM Ingredients WHERE id = ? AND userId = ?',
+                    args: [id, userId]
                 });
                 await this.db.execute({
-                    sql: `INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded)
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    sql: `INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded, userId)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     args: [
                         id,
                         ingredient.name,
@@ -1170,7 +1208,8 @@ class DatabaseAdapter {
                         allergensJson,
                         tagsJson,
                         ingredient.isCustom ? 1 : 0,
-                        ingredient.dateAdded || Date.now()
+                        ingredient.dateAdded || Date.now(),
+                        userId
                     ]
                 });
                 console.log(`[updateIngredient] DELETE+INSERT completed successfully`);
@@ -1182,12 +1221,12 @@ class DatabaseAdapter {
         return ingredient;
     }
 
-    async deleteIngredient(id) {
+    async deleteIngredient(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('DELETE FROM Ingredients WHERE id=?');
-            stmt.run(id);
+            const stmt = this.db.prepare('DELETE FROM Ingredients WHERE id=? AND userId=?');
+            stmt.run(id, userId);
         } else {
-            await this.db.execute({ sql: 'DELETE FROM Ingredients WHERE id=?', args: [id] });
+            await this.db.execute({ sql: 'DELETE FROM Ingredients WHERE id=? AND userId=?', args: [id, userId] });
         }
     }
 

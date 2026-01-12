@@ -1,6 +1,7 @@
 import express from 'express';
 import DatabaseAdapter from './db-adapter.js';
 import generateImageRoute from './routes/generate-image.js';
+import { authenticateToken } from './auth/auth-middleware.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -12,13 +13,47 @@ const router = express.Router();
 const dbAdapter = new DatabaseAdapter();
 
 // ==========================================
+// GLOBAL AUTHENTICATION MIDDLEWARE
+// ==========================================
+// Apply authentication to all routes except public GET endpoints
+// Public GET endpoints allow guest access but filter by userId if authenticated
+router.use((req, res, next) => {
+    // Public GET endpoints for guest page
+    const publicGetEndpoints = [
+        '/recipes',
+        '/preparations',
+        '/ingredients',
+        '/categories'
+    ];
+
+    const isPublicGet = req.method === 'GET' && publicGetEndpoints.some(endpoint => req.path === endpoint || req.path.startsWith(endpoint + '/'));
+
+    if (isPublicGet) {
+        // For public GET endpoints, try to authenticate but don't require it
+        authenticateToken(req, res, (err) => {
+            // Continue regardless of authentication result
+            next();
+        });
+    } else {
+        // All other routes require authentication
+        authenticateToken(req, res, next);
+    }
+});
+
+// ==========================================
 // RECIPES
 // ==========================================
 
 // GET all recipes
 router.get('/recipes', async (req, res) => {
     try {
-        const recipes = await dbAdapter.getAllRecipes();
+        // If authenticated, filter by userId; otherwise return empty array for guests
+        const userId = req.user?.id;
+        if (!userId) {
+            // Guest access - return empty array or public recipes
+            return res.json([]);
+        }
+        const recipes = await dbAdapter.getAllRecipes(userId);
         res.json(recipes);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -28,7 +63,11 @@ router.get('/recipes', async (req, res) => {
 // GET single recipe
 router.get('/recipes/:id', async (req, res) => {
     try {
-        const recipe = await dbAdapter.getRecipeById(req.params.id);
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(404).json({ message: 'Recipe not found' });
+        }
+        const recipe = await dbAdapter.getRecipeById(req.params.id, userId);
         if (!recipe) {
             return res.status(404).json({ message: 'Recipe not found' });
         }
@@ -42,7 +81,7 @@ router.get('/recipes/:id', async (req, res) => {
 router.post('/recipes', async (req, res) => {
     try {
         console.log('📥 [POST /recipes] Received recipe data:', JSON.stringify(req.body, null, 2));
-        const recipe = await dbAdapter.createRecipe(req.body);
+        const recipe = await dbAdapter.createRecipe(req.body, req.user.id);
         console.log('✅ [POST /recipes] Recipe created successfully:', recipe.id);
         res.status(201).json(recipe);
     } catch (err) {
@@ -56,14 +95,13 @@ router.post('/recipes', async (req, res) => {
 // UPDATE recipe
 router.put('/recipes/:id', async (req, res) => {
     try {
-        const recipe = await dbAdapter.updateRecipe(req.params.id, req.body);
+        const recipe = await dbAdapter.updateRecipe(req.params.id, req.body, req.user.id);
         res.json(recipe);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// UPLOAD recipe image
 // UPLOAD recipe image
 router.post('/recipes/:id/image', async (req, res) => {
     try {
@@ -72,24 +110,14 @@ router.post('/recipes/:id/image', async (req, res) => {
             return res.status(400).json({ error: 'No image data provided' });
         }
 
-        // Validate that it looks like a base64 string (basic check)
-        // Client sends "data:image/jpeg;base64,..." usually.
-        // We store the FULL string so <img src="..."> works directly.
-
         let imageUrlToStore = imageBase64;
-
-        // If the client sent just the raw base64 without prefix (unlikely given Planner.js), 
-        // we might want to ensure prefix, but Planner.js sends canvas.toDataURL() which includes it.
-        // So we just store exactly what we get, assuming it's a Data URI.
-
-        // Update recipe URL directly with the Base64 data
-        const recipe = await dbAdapter.updateRecipe(req.params.id, { imageUrl: imageUrlToStore });
+        const recipe = await dbAdapter.updateRecipe(req.params.id, { imageUrl: imageUrlToStore }, req.user.id);
 
         console.log(`📸 [POST /recipes/${req.params.id}/image] Image uploaded (Base64 length: ${imageUrlToStore.length})`);
         res.json({ imageUrl: imageUrlToStore, recipe });
     } catch (err) {
         console.error('❌ [POST /recipes/:id/image] Error:', err);
-        console.error(err.stack); // Log stack trace
+        console.error(err.stack);
         res.status(500).json({ error: err.message, stack: err.stack });
     }
 });
@@ -98,7 +126,7 @@ router.post('/recipes/:id/image', async (req, res) => {
 router.patch('/recipes/:id', async (req, res) => {
     try {
         console.log(`📝 [PATCH /recipes/${req.params.id}] Partial update:`, req.body);
-        const recipe = await dbAdapter.updateRecipe(req.params.id, req.body);
+        const recipe = await dbAdapter.updateRecipe(req.params.id, req.body, req.user.id);
         console.log(`✅ [PATCH /recipes/${req.params.id}] Updated successfully`);
         res.json(recipe);
     } catch (err) {
@@ -112,10 +140,11 @@ router.patch('/recipes/:id/components', async (req, res) => {
     try {
         console.log(`🔧 [PATCH /recipes/${req.params.id}/components] Updating components`);
         const { baseIngredients, preparations } = req.body;
+        const userId = req.user.id;
 
         // Validate ingredients exist in database
         if (baseIngredients) {
-            const allIngredients = await dbAdapter.getAllIngredients();
+            const allIngredients = await dbAdapter.getAllIngredients(userId);
             const ingredientIds = new Set(allIngredients.map(i => i.id));
 
             for (const ing of baseIngredients) {
@@ -135,7 +164,7 @@ router.patch('/recipes/:id/components', async (req, res) => {
 
         // Validate preparations exist in database
         if (preparations) {
-            const allPreparations = await dbAdapter.getAllPreparations();
+            const allPreparations = await dbAdapter.getAllPreparations(userId);
             const prepIds = new Set(allPreparations.map(p => p.id));
 
             for (const prep of preparations) {
@@ -158,7 +187,7 @@ router.patch('/recipes/:id/components', async (req, res) => {
         if (baseIngredients) updateData.baseIngredients = baseIngredients;
         if (preparations) updateData.preparations = preparations;
 
-        const recipe = await dbAdapter.updateRecipe(req.params.id, updateData);
+        const recipe = await dbAdapter.updateRecipe(req.params.id, updateData, userId);
         console.log(`✅ [PATCH /recipes/${req.params.id}/components] Updated successfully`);
         res.json(recipe);
     } catch (err) {
@@ -171,7 +200,7 @@ router.patch('/recipes/:id/components', async (req, res) => {
 // DELETE recipe
 router.delete('/recipes/:id', async (req, res) => {
     try {
-        await dbAdapter.deleteRecipe(req.params.id);
+        await dbAdapter.deleteRecipe(req.params.id, req.user.id);
         res.json({ message: 'Deleted successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -243,7 +272,7 @@ router.post('/import-recipe', async (req, res) => {
 router.get('/pizza-nights/:id', async (req, res) => {
     try {
         console.log('[ROUTE] GET /pizza-nights/:id called with ID:', req.params.id);
-        const pizzaNight = await dbAdapter.getPizzaNightById(req.params.id);
+        const pizzaNight = await dbAdapter.getPizzaNightById(req.params.id, req.user.id);
         if (!pizzaNight) {
             return res.status(404).json({ message: 'Pizza night not found' });
         }
@@ -270,7 +299,7 @@ router.post('/pizza-nights/:id/image', async (req, res) => {
         // Update database with new image URL (base64 data URI)
         const updatedNight = await dbAdapter.updatePizzaNight(id, {
             imageUrl: imageBase64
-        });
+        }, req.user.id);
 
         res.json({ success: true, imageUrl: imageBase64, night: updatedNight });
     } catch (error) {
@@ -282,42 +311,31 @@ router.post('/pizza-nights/:id/image', async (req, res) => {
 // GET theme for a pizza night
 router.get('/pizza-nights/:id/theme', async (req, res) => {
     try {
-        const pizzaNight = await dbAdapter.getPizzaNightById(req.params.id);
+        const pizzaNight = await dbAdapter.getPizzaNightById(req.params.id, req.user.id);
         if (!pizzaNight) {
             return res.status(404).json({ message: 'Pizza night not found' });
         }
 
         // Import theme modules
         const { detectTheme } = await import('./theme-detector.js');
-        const { getThemeConfig } = await import('./theme-config.js');
-        const { getThemeMessages, adjustMessagesForTime } = await import('./theme-messages.js');
+        const { generateThemePrompt } = await import('./theme-prompt-generator.js');
 
-        // Detect theme from pizza night title
-        const themeId = detectTheme(pizzaNight.name);
-        const config = getThemeConfig(themeId);
-        let messages = getThemeMessages(themeId);
+        // Detect theme from pizza night data
+        const theme = detectTheme(pizzaNight);
 
-        // Adjust messages based on event time
-        if (pizzaNight.date) {
-            messages = adjustMessagesForTime(messages, pizzaNight.date);
-        }
+        // Generate AI prompt for the theme
+        const prompt = generateThemePrompt(theme, pizzaNight);
 
-        res.json({
-            theme: themeId,
-            config,
-            messages,
-            pizzaNightName: pizzaNight.name,
-            eventTime: pizzaNight.date
-        });
+        res.json({ theme, prompt });
     } catch (err) {
-        console.error('[THEME ERROR]', err);
+        console.error('Error getting theme:', err);
         res.status(500).json({ error: err.message });
     }
 });
 
 router.get('/pizza-nights', async (req, res) => {
     try {
-        const nights = await dbAdapter.getAllPizzaNights();
+        const nights = await dbAdapter.getAllPizzaNights(req.user.id);
         res.json(nights);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -326,7 +344,7 @@ router.get('/pizza-nights', async (req, res) => {
 
 router.post('/pizza-nights', async (req, res) => {
     try {
-        const night = await dbAdapter.createPizzaNight(req.body);
+        const night = await dbAdapter.createPizzaNight(req.body, req.user.id);
         res.status(201).json(night);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -336,26 +354,25 @@ router.post('/pizza-nights', async (req, res) => {
 router.post('/pizza-nights/:id/rate-pizza', async (req, res) => {
     try {
         const { recipeId, rating } = req.body;
-        if (!recipeId || !rating) {
-            return res.status(400).json({ error: 'Missing recipeId or rating' });
-        }
+        console.log(`🍕 [RATE PIZZA] nightId=${req.params.id}, recipeId=${recipeId}, rating=${rating}`);
 
-        // Check if night is completed
-        const currentNight = await dbAdapter.getPizzaNightById(req.params.id);
+        const currentNight = await dbAdapter.getPizzaNightById(req.params.id, req.user.id);
         if (currentNight && currentNight.status === 'completed') {
             return res.status(403).json({ error: 'Cannot rate a completed night' });
         }
+        console.log(`Current night selectedPizzas:`, currentNight.selectedPizzas);
 
-        const night = await dbAdapter.ratePizzaInNight(req.params.id, recipeId, rating);
+        const night = await dbAdapter.ratePizzaInNight(req.params.id, recipeId, rating, req.user.id);
         res.json(night);
     } catch (err) {
+        console.error(`❌ [RATE PIZZA] Error:`, err.message);
         res.status(500).json({ error: err.message });
     }
 });
 
 router.put('/pizza-nights/:id', async (req, res) => {
     try {
-        const night = await dbAdapter.updatePizzaNight(req.params.id, req.body);
+        const night = await dbAdapter.updatePizzaNight(req.params.id, req.body, req.user.id);
         res.json(night);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -372,7 +389,7 @@ router.post('/pizza-nights/:id/send-invites', async (req, res) => {
         const nightId = req.params.id;
         console.log('🔵 [ROUTE /send-invites] Fetching pizza night with ID:', nightId);
 
-        const night = await dbAdapter.getPizzaNightById(nightId);
+        const night = await dbAdapter.getPizzaNightById(nightId, req.user.id);
 
         if (!night) {
             console.error('🔴 [ROUTE /send-invites] Pizza night not found');
@@ -484,7 +501,7 @@ router.post('/pizza-nights/:id/send-invites', async (req, res) => {
 
 router.delete('/pizza-nights/:id', async (req, res) => {
     try {
-        await dbAdapter.deletePizzaNight(req.params.id);
+        await dbAdapter.deletePizzaNight(req.params.id, req.user.id);
         res.json({ message: 'Deleted' });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -497,7 +514,7 @@ router.delete('/pizza-nights/:id', async (req, res) => {
 
 router.get('/guests', async (req, res) => {
     try {
-        const guests = await dbAdapter.getAllGuests();
+        const guests = await dbAdapter.getAllGuests(req.user.id);
         res.json(guests);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -515,7 +532,7 @@ router.post('/guests', async (req, res) => {
             createdAt: req.body.createdAt || Date.now()
         };
 
-        const guest = await dbAdapter.createGuest(guestData);
+        const guest = await dbAdapter.createGuest(guestData, req.user.id);
 
         // Send email invitation if email is provided and pizzaNightId is available
         if (guest.email && req.body.pizzaNightId) {
@@ -570,7 +587,7 @@ router.put('/guests/:id', async (req, res) => {
         if (req.body.email !== undefined) updates.email = req.body.email;
         if (req.body.phone !== undefined) updates.phone = req.body.phone;
 
-        const guest = await dbAdapter.updateGuest(req.params.id, updates);
+        const guest = await dbAdapter.updateGuest(req.params.id, updates, req.user.id);
         res.json(guest);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -579,7 +596,7 @@ router.put('/guests/:id', async (req, res) => {
 
 router.delete('/guests/:id', async (req, res) => {
     try {
-        await dbAdapter.deleteGuest(req.params.id);
+        await dbAdapter.deleteGuest(req.params.id, req.user.id);
         res.json({ message: 'Deleted' });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -592,7 +609,7 @@ router.delete('/guests/:id', async (req, res) => {
 
 router.get('/combinations', async (req, res) => {
     try {
-        const combos = await dbAdapter.getAllCombinations();
+        const combos = await dbAdapter.getAllCombinations(req.user.id);
         res.json(combos);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -601,7 +618,7 @@ router.get('/combinations', async (req, res) => {
 
 router.post('/combinations', async (req, res) => {
     try {
-        const combo = await dbAdapter.createCombination(req.body);
+        const combo = await dbAdapter.createCombination(req.body, req.user.id);
         res.status(201).json(combo);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -610,7 +627,7 @@ router.post('/combinations', async (req, res) => {
 
 router.delete('/combinations/:id', async (req, res) => {
     try {
-        await dbAdapter.deleteCombination(req.params.id);
+        await dbAdapter.deleteCombination(req.params.id, req.user.id);
         res.json({ message: 'Deleted' });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -628,8 +645,11 @@ router.delete('/combinations/:id', async (req, res) => {
 router.get('/preparations', async (req, res) => {
     try {
         console.time('🚀 getAllPreparations');
-        const preparations = await dbAdapter.getAllPreparations();
-        console.timeEnd('🚀 getAllPreparations');
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.json([]);
+        }
+        const preparations = await dbAdapter.getAllPreparations(userId);
         res.json(preparations);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -638,7 +658,11 @@ router.get('/preparations', async (req, res) => {
 
 router.get('/preparations/:id', async (req, res) => {
     try {
-        const preparation = await dbAdapter.getPreparationById(req.params.id);
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(404).json({ message: 'Preparation not found' });
+        }
+        const preparation = await dbAdapter.getPreparationById(req.params.id, userId);
         if (!preparation) {
             return res.status(404).json({ message: 'Preparation not found' });
         }
@@ -648,38 +672,32 @@ router.get('/preparations/:id', async (req, res) => {
     }
 });
 
-// NEW: Link GialloZafferano recipe to preparation
+// POST link GZ recipe to preparation
 router.post('/preparations/:id/link-gz', async (req, res) => {
     try {
-        console.log(`🔗 [POST /preparations/${req.params.id}/link-gz] Request received`);
         const prepId = req.params.id;
-        const prep = await dbAdapter.getPreparationById(prepId);
+        const userId = req.user.id;
+        const prep = await dbAdapter.getPreparationById(prepId, userId);
 
         if (!prep) {
             return res.status(404).json({ error: 'Preparation not found' });
         }
 
-        console.log(`🔍 Searching GZ for "${prep.name}"...`);
-        const { searchGz } = await import('./services/gz-search.js');
-        const bestUrl = await searchGz(prep.name);
+        const { searchGZ } = await import('./services/gz-search.js');
+        const results = await searchGZ(prep.name);
 
-        if (bestUrl) {
-            console.log(`✅ [GZ] Selected URL: ${bestUrl}`);
-
-            if (typeof dbAdapter.updatePreparationLink === 'function') {
-                await dbAdapter.updatePreparationLink(prepId, bestUrl);
+        if (results.length > 0) {
+            const bestUrl = results[0].url;
+            if (dbAdapter.updatePreparationLink) {
+                await dbAdapter.updatePreparationLink(prepId, bestUrl, userId);
             } else {
-                console.warn('⚠️ [GZ] updatePreparationLink method missing, falling back...');
-                await dbAdapter.updatePreparation(prepId, { recipeUrl: bestUrl });
+                await dbAdapter.updatePreparation(prepId, { recipeUrl: bestUrl }, userId);
             }
-
-            const updated = await dbAdapter.getPreparationById(prepId);
-            res.json({ success: true, url: bestUrl, preparation: updated });
-        } else {
-            console.log('❌ No URL found');
-            res.status(404).json({ error: `Nessuna ricetta trovata per "${prep.name}"` });
+            const updated = await dbAdapter.getPreparationById(prepId, userId);
+            return res.json({ success: true, url: bestUrl, preparation: updated });
         }
 
+        res.json({ success: false, message: 'Nessuna ricetta trovata' });
     } catch (err) {
         console.error('Error linking GZ:', err);
         res.status(500).json({ error: err.message });
@@ -688,7 +706,7 @@ router.post('/preparations/:id/link-gz', async (req, res) => {
 
 router.post('/preparations', async (req, res) => {
     try {
-        const preparation = await dbAdapter.createPreparation(req.body);
+        const preparation = await dbAdapter.createPreparation(req.body, req.user.id);
         res.status(201).json(preparation);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -697,7 +715,7 @@ router.post('/preparations', async (req, res) => {
 
 router.put('/preparations/:id', async (req, res) => {
     try {
-        const preparation = await dbAdapter.updatePreparation(req.params.id, req.body);
+        const preparation = await dbAdapter.updatePreparation(req.params.id, req.body, req.user.id);
         res.json(preparation);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -706,7 +724,7 @@ router.put('/preparations/:id', async (req, res) => {
 
 router.delete('/preparations/:id', async (req, res) => {
     try {
-        await dbAdapter.deletePreparation(req.params.id);
+        await dbAdapter.deletePreparation(req.params.id, req.user.id);
         res.json({ message: 'Deleted' });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -719,7 +737,11 @@ router.delete('/preparations/:id', async (req, res) => {
 
 router.get('/ingredients', async (req, res) => {
     try {
-        const ingredients = await dbAdapter.getAllIngredients();
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.json([]);
+        }
+        const ingredients = await dbAdapter.getAllIngredients(userId);
         res.json(ingredients);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -729,7 +751,7 @@ router.get('/ingredients', async (req, res) => {
 router.get('/ingredients/search', async (req, res) => {
     try {
         const query = req.query.q || '';
-        const ingredients = await dbAdapter.searchIngredients(query);
+        const ingredients = await dbAdapter.searchIngredients(query, req.user.id);
         res.json(ingredients);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -738,7 +760,7 @@ router.get('/ingredients/search', async (req, res) => {
 
 router.get('/ingredients/category/:category', async (req, res) => {
     try {
-        const ingredients = await dbAdapter.getIngredientsByCategory(req.params.category);
+        const ingredients = await dbAdapter.getIngredientsByCategory(req.params.category, req.user.id);
         res.json(ingredients);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -747,7 +769,7 @@ router.get('/ingredients/category/:category', async (req, res) => {
 
 router.get('/ingredients/:id', async (req, res) => {
     try {
-        const ingredient = await dbAdapter.getIngredientById(req.params.id);
+        const ingredient = await dbAdapter.getIngredientById(req.params.id, req.user.id);
         if (!ingredient) {
             return res.status(404).json({ error: 'Ingredient not found' });
         }
@@ -759,7 +781,7 @@ router.get('/ingredients/:id', async (req, res) => {
 
 router.post('/ingredients', async (req, res) => {
     try {
-        const ingredient = await dbAdapter.createIngredient(req.body);
+        const ingredient = await dbAdapter.createIngredient(req.body, req.user.id);
         res.json(ingredient);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -768,7 +790,7 @@ router.post('/ingredients', async (req, res) => {
 
 router.put('/ingredients/:id', async (req, res) => {
     try {
-        const ingredient = await dbAdapter.updateIngredient(req.params.id, req.body);
+        const ingredient = await dbAdapter.updateIngredient(req.params.id, req.body, req.user.id);
         res.json(ingredient);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -777,7 +799,7 @@ router.put('/ingredients/:id', async (req, res) => {
 
 router.delete('/ingredients/:id', async (req, res) => {
     try {
-        await dbAdapter.deleteIngredient(req.params.id);
+        await dbAdapter.deleteIngredient(req.params.id, req.user.id);
         res.json({ message: 'Deleted' });
     } catch (err) {
         res.status(500).json({ error: err.message });
