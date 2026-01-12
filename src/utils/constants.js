@@ -165,7 +165,8 @@ export const VIEWS = {
     SHOPPING: 'shopping',
     COMBINATIONS: 'combinations',
     ARCHETYPES: 'archetypes',
-    SETTINGS: 'settings'
+    SETTINGS: 'settings',
+    ADMIN: 'admin'
 };
 
 // Navigation items

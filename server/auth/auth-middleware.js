@@ -23,8 +23,21 @@ export function authenticateToken(req, res, next) {
         }
 
         req.user = user;
+        console.log('🛡️ AUTH DEBUG: Valid token for user:', user.email, 'Role:', user.role);
         next();
     });
+}
+
+/**
+ * Middleware to require Admin role
+ */
+export function requireAdmin(req, res, next) {
+    console.log('👑 ADMIN DEBUG: Checking admin access for:', req.user?.email, 'Role:', req.user?.role);
+    if (!req.user || req.user.role !== 'admin') {
+        console.warn('⛔ ADMIN DEBUG: Access denied. User role is:', req.user?.role);
+        return res.status(403).json({ error: 'Access denied. Admin role required.' });
+    }
+    next();
 }
 
 /**
@@ -53,7 +66,8 @@ export function generateToken(user) {
     const payload = {
         id: user.id,
         email: user.email,
-        name: user.name
+        name: user.name,
+        role: user.role || 'user'
     };
 
     return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });

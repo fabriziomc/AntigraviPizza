@@ -1464,15 +1464,28 @@ class DatabaseAdapter {
     }
 
     async getUserByEmail(email) {
-        if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Users WHERE email = ?');
-            return stmt.get(email);
-        } else {
-            const result = await this.db.execute({
-                sql: 'SELECT * FROM Users WHERE email = ?',
-                args: [email]
-            });
-            return result.rows[0] || null;
+        console.log('🔍 DB DEBUG: Fetching user by email:', email);
+        const sql = 'SELECT id, email, password, name, businessName, role, createdAt, lastLogin FROM Users WHERE email = ?';
+
+        try {
+            if (this.isSQLite) {
+                const stmt = this.db.prepare(sql);
+                const user = stmt.get(email);
+                console.log('🔍 DB DEBUG: SQLite User result:', user ? `Found (Role: ${user.role})` : 'Not found');
+                return user;
+            } else {
+                // Turso
+                const result = await this.db.execute({
+                    sql: sql,
+                    args: [email]
+                });
+                const user = result.rows[0] || null;
+                console.log('🔍 DB DEBUG: Turso User result:', user ? `Found (Role: ${user.role})` : 'Not found');
+                return user;
+            }
+        } catch (err) {
+            console.error('❌ DB DEBUG: getUserByEmail error:', err);
+            throw err;
         }
     }
 

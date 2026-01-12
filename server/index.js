@@ -30,6 +30,10 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Public authentication routes (no auth required)
 app.use('/api/auth', authRoutes);
 
+// Admin routes
+import adminRoutes from './admin-routes.js';
+app.use('/api/admin', adminRoutes);
+
 // Protected API routes (auth required) - skip /api/auth/* and guest-accessible routes
 app.use('/api', (req, res, next) => {
     // Skip authentication for /api/auth routes

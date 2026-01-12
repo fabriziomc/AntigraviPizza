@@ -32,6 +32,7 @@ import { renderIngredients } from './components/Ingredients.js';
 import { renderSettings } from './components/Settings.js';
 import { renderQRCodes } from './components/QRCodes.js';
 import { renderArchetypes } from './components/Archetypes.js';
+import { renderAdminDashboard } from './components/AdminDashboard.js';
 
 console.log('✅ All imports loaded');
 
@@ -141,14 +142,32 @@ function renderNavigation() {
     return;
   }
 
-  navMenu.innerHTML = NAV_ITEMS.map(item => `
+  const user = getUser();
+  console.log('🔍 DEBUG NAV: User:', user);
+  console.log('🔍 DEBUG NAV: Role:', user?.role);
+  console.log('🔍 DEBUG NAV: Is Admin?', user?.role === 'admin');
+
+  // Build main nav items
+  const navItemsHtml = NAV_ITEMS.map(item => `
     <li class="nav-item">
       <a href="#${item.id}" class="nav-link ${item.id === state.currentView ? 'active' : ''}" data-view="${item.id}">
         <span class="nav-icon">${item.icon}</span>
         <span>${item.label}</span>
       </a>
     </li>
-  `).join('') + `
+  `).join('');
+
+  // Build Admin item if user is admin
+  const adminItemHtml = (user && user.role === 'admin') ? `
+    <li class="nav-item">
+      <a href="#admin" class="nav-link ${state.currentView === 'admin' ? 'active' : ''}" data-view="admin">
+        <span class="nav-icon">👑</span>
+        <span>Admin</span>
+      </a>
+    </li>` : '';
+
+  // Build Logout item
+  const logoutItemHtml = `
     <li class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
       <a href="#" id="logoutBtn" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: var(--color-danger); text-decoration: none; border-radius: 0.5rem; transition: background-color 0.2s; cursor: pointer;">
         <span style="font-size: 1.25rem;">🚪</span>
@@ -156,6 +175,9 @@ function renderNavigation() {
       </a>
     </li>
   `;
+
+  // Combine properly
+  navMenu.innerHTML = navItemsHtml + adminItemHtml + logoutItemHtml;
 
   // Add logout button click handler
   const logoutBtn = document.getElementById('logoutBtn');
@@ -250,6 +272,9 @@ async function renderCurrentView() {
         break;
       case VIEWS.SETTINGS:
         await renderSettings();
+        break;
+      case VIEWS.ADMIN:
+        await renderAdminDashboard();
         break;
       case 'qrcodes':
         await renderQRCodes(state);

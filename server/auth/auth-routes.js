@@ -72,7 +72,8 @@ router.post('/register', async (req, res) => {
                 id: user.id,
                 email: user.email,
                 name: user.name,
-                businessName: user.businessName
+                businessName: user.businessName,
+                role: user.role || 'user'
             }
         });
     } catch (error) {
@@ -121,7 +122,8 @@ router.post('/login', async (req, res) => {
                 id: user.id,
                 email: user.email,
                 name: user.name,
-                businessName: user.businessName
+                businessName: user.businessName,
+                role: user.role || 'user'
             }
         });
     } catch (error) {
@@ -152,6 +154,7 @@ router.get('/me', authenticateToken, async (req, res) => {
             email: user.email,
             name: user.name,
             businessName: user.businessName,
+            role: user.role || 'user',
             createdAt: user.createdAt,
             lastLogin: user.lastLogin
         });
