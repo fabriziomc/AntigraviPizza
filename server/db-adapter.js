@@ -73,14 +73,21 @@ class DatabaseAdapter {
 
     async getRecipeById(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Recipes WHERE id = ? AND userId = ?');
-            return this.parseRecipe(stmt.get(id, userId));
+            // If userId is null, fetch without filtering (public access for guests)
+            const sql = userId
+                ? 'SELECT * FROM Recipes WHERE id = ? AND userId = ?'
+                : 'SELECT * FROM Recipes WHERE id = ?';
+            const stmt = this.db.prepare(sql);
+            return userId
+                ? this.parseRecipe(stmt.get(id, userId))
+                : this.parseRecipe(stmt.get(id));
         } else {
             // Turso
-            const result = await this.db.execute({
-                sql: 'SELECT * FROM Recipes WHERE id = ? AND userId = ?',
-                args: [id, userId]
-            });
+            const sql = userId
+                ? 'SELECT * FROM Recipes WHERE id = ? AND userId = ?'
+                : 'SELECT * FROM Recipes WHERE id = ?';
+            const args = userId ? [id, userId] : [id];
+            const result = await this.db.execute({ sql, args });
             return this.parseRecipe(result.rows[0]);
         }
     }
@@ -240,14 +247,21 @@ class DatabaseAdapter {
     async getPizzaNightById(id, userId) {
         let pizzaNight;
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM PizzaNights WHERE id = ? AND userId = ?');
-            pizzaNight = this.parsePizzaNight(stmt.get(id, userId));
+            // If userId is null, fetch without filtering (public access for guests)
+            const sql = userId
+                ? 'SELECT * FROM PizzaNights WHERE id = ? AND userId = ?'
+                : 'SELECT * FROM PizzaNights WHERE id = ?';
+            const stmt = this.db.prepare(sql);
+            pizzaNight = userId
+                ? this.parsePizzaNight(stmt.get(id, userId))
+                : this.parsePizzaNight(stmt.get(id));
         } else {
             // Turso
-            const result = await this.db.execute({
-                sql: 'SELECT * FROM PizzaNights WHERE id = ? AND userId = ?',
-                args: [id, userId]
-            });
+            const sql = userId
+                ? 'SELECT * FROM PizzaNights WHERE id = ? AND userId = ?'
+                : 'SELECT * FROM PizzaNights WHERE id = ?';
+            const args = userId ? [id, userId] : [id];
+            const result = await this.db.execute({ sql, args });
             if (result.rows && result.rows.length > 0) {
                 pizzaNight = this.parsePizzaNight(result.rows[0]);
             }
@@ -258,9 +272,11 @@ class DatabaseAdapter {
         // Resolve selectedGuests IDs to full guest objects
         pizzaNight.guests = [];
         if (pizzaNight.selectedGuests && pizzaNight.selectedGuests.length > 0) {
+            // Use the pizza night's userId to fetch guests (not the passed userId which might be null)
+            const guestUserId = pizzaNight.userId;
             for (const guestId of pizzaNight.selectedGuests) {
                 try {
-                    const guest = await this.getGuestById(guestId, userId);
+                    const guest = await this.getGuestById(guestId, guestUserId);
                     pizzaNight.guests.push(guest || { id: guestId, name: 'Unknown' });
                 } catch (err) {
                     console.warn(`Could not resolve guest ${guestId}:`, err.message);

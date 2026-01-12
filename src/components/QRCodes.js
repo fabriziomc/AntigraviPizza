@@ -1,5 +1,6 @@
 // QRCodes.js - Vanilla JS module for displaying QR codes
 import QRCode from 'qrcode';
+import { getPizzaNightById } from '../modules/database.js';
 
 /**
  * Detects the theme of a pizza night based on its title
@@ -73,13 +74,12 @@ export async function renderQRCodes(state) {
     }
 
     try {
-        // Fetch pizza night data
-        const response = await fetch(`/api/pizza-nights/${pizzaNightId}`);
-        if (!response.ok) {
+        // Fetch pizza night data using database module (handles authentication)
+        const pizzaNight = await getPizzaNightById(pizzaNightId);
+
+        if (!pizzaNight) {
             throw new Error('Serata pizza non trovata');
         }
-
-        const pizzaNight = await response.json();
 
         if (!pizzaNight.guests || pizzaNight.guests.length === 0) {
             container.innerHTML = `

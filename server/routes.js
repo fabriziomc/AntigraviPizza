@@ -15,8 +15,7 @@ const dbAdapter = new DatabaseAdapter();
 // ==========================================
 // GLOBAL AUTHENTICATION MIDDLEWARE
 // ==========================================
-// Apply authentication to all routes except public GET endpoints
-// Public GET endpoints allow guest access but filter by userId if authenticated
+// Apply authentication to all routes except public GET endpoints and guest endpoints
 router.use((req, res, next) => {
     // Public GET endpoints for guest page
     const publicGetEndpoints = [
@@ -26,7 +25,18 @@ router.use((req, res, next) => {
         '/categories'
     ];
 
+    // Guest endpoints (no authentication required)
+    const guestEndpoints = [
+        '/guest/'
+    ];
+
     const isPublicGet = req.method === 'GET' && publicGetEndpoints.some(endpoint => req.path === endpoint || req.path.startsWith(endpoint + '/'));
+    const isGuestEndpoint = guestEndpoints.some(endpoint => req.path.startsWith(endpoint));
+
+    // Debug logging
+    if (req.path.includes('guest')) {
+        console.log(`[AUTH MIDDLEWARE] path: ${req.path}, isGuestEndpoint: ${isGuestEndpoint}`);
+    }
 
     if (isPublicGet) {
         // For public GET endpoints, try to authenticate but don't require it
@@ -34,6 +44,10 @@ router.use((req, res, next) => {
             // Continue regardless of authentication result
             next();
         });
+    } else if (isGuestEndpoint) {
+        // Guest endpoints don't require authentication at all
+        console.log(`[AUTH MIDDLEWARE] Skipping auth for guest endpoint: ${req.path}`);
+        next();
     } else {
         // All other routes require authentication
         authenticateToken(req, res, next);
@@ -265,6 +279,151 @@ router.post('/import-recipe', async (req, res) => {
 });
 
 // ==========================================
+// GUEST ENDPOINTS (Public - No Authentication Required)
+// ==========================================
+// These endpoints allow guests to view pizza night data without authentication
+// Security is maintained by verifying the guest belongs to the pizza night
+
+// GET pizza night data for a specific guest
+router.get('/guest/pizza-nights/:nightId/:guestId', async (req, res) => {
+    try {
+        const { nightId, guestId } = req.params;
+        console.log(`[GUEST] Fetching pizza night ${nightId} for guest ${guestId}`);
+
+        // Fetch pizza night without userId filtering (public access)
+        const pizzaNight = await dbAdapter.getPizzaNightById(nightId, null);
+
+        if (!pizzaNight) {
+            return res.status(404).json({ error: 'Pizza night not found' });
+        }
+
+        // Verify guest belongs to this pizza night
+        const guestBelongsToNight = pizzaNight.selectedGuests &&
+            pizzaNight.selectedGuests.includes(guestId);
+
+        if (!guestBelongsToNight) {
+            return res.status(403).json({ error: 'Guest not authorized for this pizza night' });
+        }
+
+        // Fetch full guest details
+        const allGuests = await dbAdapter.getAllGuests(pizzaNight.userId);
+        const guests = allGuests.filter(g => pizzaNight.selectedGuests.includes(g.id));
+
+        // Return pizza night with guest details
+        res.json({
+            ...pizzaNight,
+            guests
+        });
+    } catch (err) {
+        console.error('[GUEST] Error fetching pizza night:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET theme data for a pizza night (guest access)
+router.get('/guest/pizza-nights/:nightId/:guestId/theme', async (req, res) => {
+    try {
+        const { nightId, guestId } = req.params;
+        console.log(`[GUEST] Fetching theme for pizza night ${nightId}, guest ${guestId}`);
+
+        // Fetch pizza night to verify guest access
+        const pizzaNight = await dbAdapter.getPizzaNightById(nightId, null);
+
+        if (!pizzaNight) {
+            return res.status(404).json({ error: 'Pizza night not found' });
+        }
+
+        // Verify guest belongs to this pizza night
+        const guestBelongsToNight = pizzaNight.selectedGuests &&
+            pizzaNight.selectedGuests.includes(guestId);
+
+        if (!guestBelongsToNight) {
+            return res.status(403).json({ error: 'Guest not authorized for this pizza night' });
+        }
+
+        // Import theme modules
+        const { detectTheme } = await import('./theme-detector.js');
+        const { getThemeConfig } = await import('./theme-config.js');
+        const { getThemeMessages } = await import('./theme-messages.js');
+
+        // Detect theme from pizza night name
+        const themeId = detectTheme(pizzaNight.name || '');
+        const config = getThemeConfig(themeId);
+        const messages = getThemeMessages(themeId);
+
+        res.json({
+            theme: themeId,
+            config,
+            messages
+        });
+    } catch (err) {
+        console.error('[GUEST] Error getting theme:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET recipe data for guest (public view)
+router.get('/guest/recipes/:recipeId', async (req, res) => {
+    try {
+        const { recipeId } = req.params;
+        console.log(`[GUEST] Fetching recipe ${recipeId}`);
+
+        // Fetch recipe without userId filtering (public view)
+        // Note: This returns the recipe regardless of owner, which is acceptable
+        // since recipes are only accessible via pizza night context
+        const recipe = await dbAdapter.getRecipeById(recipeId, null);
+
+        if (!recipe) {
+            return res.status(404).json({ error: 'Recipe not found' });
+        }
+
+        res.json(recipe);
+    } catch (err) {
+        console.error('[GUEST] Error fetching recipe:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST rating from guest
+router.post('/guest/pizza-nights/:nightId/:guestId/rate-pizza', async (req, res) => {
+    try {
+        const { nightId, guestId } = req.params;
+        const { recipeId, rating } = req.body;
+
+        console.log(`[GUEST] Rating pizza: night=${nightId}, guest=${guestId}, recipe=${recipeId}, rating=${rating}`);
+
+        // Fetch pizza night to verify guest access
+        const pizzaNight = await dbAdapter.getPizzaNightById(nightId, null);
+
+        if (!pizzaNight) {
+            return res.status(404).json({ error: 'Pizza night not found' });
+        }
+
+        // Verify guest belongs to this pizza night
+        const guestBelongsToNight = pizzaNight.selectedGuests &&
+            pizzaNight.selectedGuests.includes(guestId);
+
+        if (!guestBelongsToNight) {
+            return res.status(403).json({ error: 'Guest not authorized for this pizza night' });
+        }
+
+        // Check if night is completed
+        if (pizzaNight.status === 'completed') {
+            return res.status(403).json({ error: 'Cannot rate a completed night' });
+        }
+
+        // Submit rating using the pizza night owner's userId
+        const updatedNight = await dbAdapter.ratePizzaInNight(nightId, recipeId, rating, pizzaNight.userId);
+
+        res.json({ success: true, night: updatedNight });
+    } catch (err) {
+        console.error('[GUEST] Error rating pizza:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ==========================================
+
 // PIZZA NIGHTS
 // ==========================================
 
@@ -318,15 +477,19 @@ router.get('/pizza-nights/:id/theme', async (req, res) => {
 
         // Import theme modules
         const { detectTheme } = await import('./theme-detector.js');
-        const { generateThemePrompt } = await import('./theme-prompt-generator.js');
+        const { getThemeConfig } = await import('./theme-config.js');
+        const { getThemeMessages } = await import('./theme-messages.js');
 
-        // Detect theme from pizza night data
-        const theme = detectTheme(pizzaNight);
+        // Detect theme from pizza night name
+        const themeId = detectTheme(pizzaNight.name || '');
+        const config = getThemeConfig(themeId);
+        const messages = getThemeMessages(themeId);
 
-        // Generate AI prompt for the theme
-        const prompt = generateThemePrompt(theme, pizzaNight);
-
-        res.json({ theme, prompt });
+        res.json({
+            theme: themeId,
+            config,
+            messages
+        });
     } catch (err) {
         console.error('Error getting theme:', err);
         res.status(500).json({ error: err.message });

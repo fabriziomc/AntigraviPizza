@@ -41,6 +41,12 @@ app.use('/api', (req, res, next) => {
         return next();
     }
 
+    // Skip authentication for guest endpoints
+    if (req.path.startsWith('/guest/')) {
+        console.log(`[INDEX.JS] Skipping auth for guest endpoint: ${req.path}`);
+        return next();
+    }
+
     // Skip authentication for GET requests to pizza-nights (needed for guest view)
     // Guests need to view pizza night details and themes without logging in
     if (req.method === 'GET') {

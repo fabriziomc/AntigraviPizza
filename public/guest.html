@@ -529,10 +529,10 @@
                 const allPreps = allPrepsResponse.ok ? await allPrepsResponse.json() : [];
                 const prepsMap = new Map(allPreps.map(p => [p.id, p]));
 
-                // Fetch all pizza details
+                // Fetch all pizza details using guest endpoint
                 const pizzaPromises = pizzaNight.selectedPizzas.map(pizza => {
                     const id = typeof pizza === 'string' ? pizza : pizza.recipeId;
-                    return fetch(`/api/recipes/${id}`).then(res => res.json());
+                    return fetch(`/api/guest/recipes/${id}`).then(res => res.json());
                 });
 
                 const pizzas = await Promise.all(pizzaPromises);
@@ -643,13 +643,14 @@
             if (!rating) return;
 
             const pizzaNightId = window.location.hash.split('/')[1];
+            const guestId = window.location.hash.split('/')[2];
             const wrapper = document.getElementById(`rating-wrap-${recipeId}`);
 
             // Show optimistic feedback
             wrapper.innerHTML = '<span class="loading" style="font-size: 0.8rem;">Salvataggio...</span>';
 
             try {
-                const response = await fetch(`/api/pizza-nights/${pizzaNightId}/rate-pizza`, {
+                const response = await fetch(`/api/guest/pizza-nights/${pizzaNightId}/${guestId}/rate-pizza`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ recipeId, rating })
@@ -696,8 +697,8 @@
 
                 const [, pizzaNightId, guestId] = parts;
 
-                // Fetch pizza night data
-                const pizzaNightResponse = await fetch(`/api/pizza-nights/${pizzaNightId}`);
+                // Fetch pizza night data using guest endpoint
+                const pizzaNightResponse = await fetch(`/api/guest/pizza-nights/${pizzaNightId}/${guestId}`);
                 if (!pizzaNightResponse.ok) {
                     throw new Error('Serata pizza non trovata');
                 }
@@ -708,8 +709,8 @@
                     throw new Error('Questa serata è terminata. Grazie per aver partecipato!');
                 }
 
-                // Fetch theme data
-                const themeResponse = await fetch(`/api/pizza-nights/${pizzaNightId}/theme`);
+                // Fetch theme data using guest endpoint
+                const themeResponse = await fetch(`/api/guest/pizza-nights/${pizzaNightId}/${guestId}/theme`);
                 if (!themeResponse.ok) {
                     throw new Error('Tema non trovato');
                 }
