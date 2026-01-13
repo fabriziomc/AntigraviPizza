@@ -1246,110 +1246,6 @@ class DatabaseAdapter {
         }
     }
 
-    // ============================================
-    // CATEGORIES
-    // ============================================
-
-    async getAllCategories() {
-        if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Categories ORDER BY displayOrder');
-            return stmt.all();
-        } else {
-            const result = await this.db.execute('SELECT * FROM Categories ORDER BY displayOrder');
-            return result.rows;
-        }
-    }
-
-    async getCategoryById(id) {
-        if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Categories WHERE id = ?');
-            return stmt.get(id);
-        } else {
-            const result = await this.db.execute({ sql: 'SELECT * FROM Categories WHERE id = ?', args: [id] });
-            return result.rows[0];
-        }
-    }
-
-    // ============================================
-    // ARCHETYPE WEIGHTS
-    // ============================================
-
-    async getArchetypeWeights(userId = 'default') {
-        console.log('🔍 Backend getArchetypeWeights called with userId:', userId);
-        // console.log('🔍 Database type:', this.type); // this.type doesn't exist, use this.isSQLite/this.isTurso
-        console.log('🔍 Database instance:', this.db ? 'exists' : 'null');
-
-        if (this.isSQLite) {
-            const rows = this.db.prepare(`
-                SELECT archetype, weight, description
-                FROM ArchetypeWeights
-                WHERE userId = ?
-                ORDER BY weight DESC
-            `).all(userId);
-
-            console.log('🔍 Query returned', rows.length, 'rows');
-            console.log('🔍 Rows:', JSON.stringify(rows, null, 2));
-
-            return rows;
-        } else {
-            console.log('⚠️ SQL Server mode - not implemented');
-            // SQL Server not yet implemented
-            return [];
-        }
-    }
-
-    async updateArchetypeWeight(userId, archetype, weight) {
-        if (this.isSQLite) {
-            const stmt = this.db.prepare(`
-                UPDATE ArchetypeWeights
-                SET weight = ?, dateModified = ?
-                WHERE userId = ? AND archetype = ?
-            `);
-            stmt.run(weight, Date.now(), userId, archetype);
-            return { userId, archetype, weight };
-        } else {
-            // SQL Server not yet implemented
-            return { userId, archetype, weight };
-        }
-    }
-
-    async resetArchetypeWeights(userId = 'default') {
-        console.log('🔄 resetArchetypeWeights called with userId:', userId);
-        if (this.isSQLite) {
-            const defaults = [
-                { archetype: 'combinazioni_db', weight: 30, description: 'Combinazioni salvate nel database' },
-                { archetype: 'classica', weight: 28, description: 'Margherita, Marinara style' },
-                { archetype: 'tradizionale', weight: 21, description: 'Prosciutto, Funghi, Capricciosa' },
-                { archetype: 'terra_bosco', weight: 7, description: 'Funghi porcini, tartufo' },
-                { archetype: 'fresca_estiva', weight: 7, description: 'Verdure, pomodorini' },
-                { archetype: 'piccante_decisa', weight: 4, description: 'Nduja, peperoncino' },
-                { archetype: 'mare', weight: 2, description: 'Pesce, frutti di mare' },
-                { archetype: 'vegana', weight: 1, description: 'Solo vegetali' }
-            ];
-
-            // Use INSERT OR REPLACE to handle both initialization and reset
-            const stmt = this.db.prepare(`
-                INSERT OR REPLACE INTO ArchetypeWeights (id, userId, archetype, weight, description, dateModified)
-                VALUES (?, ?, ?, ?, ?, ?)
-            `);
-
-            const now = Date.now();
-            let updated = 0;
-            defaults.forEach(d => {
-                const id = `aw-${userId}-${d.archetype}`;
-                const result = stmt.run(id, userId, d.archetype, d.weight, d.description, now);
-                console.log(`  Updated ${d.archetype}: ${result.changes} rows`);
-                updated += result.changes;
-            });
-
-            console.log(`✅ Reset complete: ${updated} weights updated`);
-            return { success: true, userId, updated };
-        } else {
-            // SQL Server not yet implemented
-            console.log('⚠️ SQL Server mode - reset not implemented');
-            return { success: true, userId };
-        }
-    }
 
     // ==========================================
     // CATEGORIES
@@ -1624,14 +1520,17 @@ class DatabaseAdapter {
             bringEmail: null,
             bringPassword: null,
             geminiModel: 'gemini-1.5-flash',
+            maxOvenTemp: 250,
+            geminiApiKey: null,
+            segmindApiKey: null,
             defaultDough: null,
             preferences: '{}'
         };
 
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
-                INSERT INTO Settings (id, userId, bringEmail, bringPassword, geminiModel, defaultDough, preferences)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO Settings (id, userId, bringEmail, bringPassword, geminiModel, maxOvenTemp, geminiApiKey, segmindApiKey, defaultDough, preferences)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 defaultSettings.id,
@@ -1639,19 +1538,25 @@ class DatabaseAdapter {
                 defaultSettings.bringEmail,
                 defaultSettings.bringPassword,
                 defaultSettings.geminiModel,
+                defaultSettings.maxOvenTemp,
+                defaultSettings.geminiApiKey,
+                defaultSettings.segmindApiKey,
                 defaultSettings.defaultDough,
                 defaultSettings.preferences
             );
         } else {
             await this.db.execute({
-                sql: `INSERT INTO Settings (id, userId, bringEmail, bringPassword, geminiModel, defaultDough, preferences)
-                      VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                sql: `INSERT INTO Settings (id, userId, bringEmail, bringPassword, geminiModel, maxOvenTemp, geminiApiKey, segmindApiKey, defaultDough, preferences)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 args: [
                     defaultSettings.id,
                     defaultSettings.userId,
                     defaultSettings.bringEmail,
                     defaultSettings.bringPassword,
                     defaultSettings.geminiModel,
+                    defaultSettings.maxOvenTemp,
+                    defaultSettings.geminiApiKey,
+                    defaultSettings.segmindApiKey,
                     defaultSettings.defaultDough,
                     defaultSettings.preferences
                 ]
@@ -1683,7 +1588,7 @@ class DatabaseAdapter {
     }
 
     async updateUserSettings(userId, updates) {
-        const allowedFields = ['bringEmail', 'bringPassword', 'geminiModel', 'defaultDough', 'preferences'];
+        const allowedFields = ['bringEmail', 'bringPassword', 'geminiModel', 'maxOvenTemp', 'geminiApiKey', 'segmindApiKey', 'defaultDough', 'preferences'];
         const fields = [];
         const values = [];
 
@@ -1724,79 +1629,6 @@ class DatabaseAdapter {
     }
 }
 
-// ============================================
-// ARCHETYPE WEIGHTS
-// ============================================
-
-/**
- * Get archetype weights for user
- */
-export function getArchetypeWeights(userId = 'default') {
-    if (useSql) {
-        // SQL Server not yet implemented for archetype weights
-        return [];
-    } else {
-        const rows = db.prepare(`
-            SELECT archetype, weight, description
-            FROM ArchetypeWeights
-            WHERE userId = ?
-            ORDER BY weight DESC
-        `).all(userId);
-
-        return rows;
-    }
-}
-
-/**
- * Update archetype weight
- */
-export function updateArchetypeWeight(userId = 'default', archetype, weight) {
-    if (useSql) {
-        // SQL Server not yet implemented
-        return { success: false, error: 'Not implemented for SQL Server' };
-    } else {
-        const id = `aw-${userId}-${archetype}`;
-        const now = Date.now();
-
-        db.prepare(`
-            INSERT INTO ArchetypeWeights (id, userId, archetype, weight, dateModified)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT(userId, archetype) DO UPDATE SET
-                weight = excluded.weight,
-                dateModified = excluded.dateModified
-        `).run(id, userId, archetype, weight, now);
-
-        return { success: true };
-    }
-}
-
-/**
- * Reset archetype weights to default
- */
-export function resetArchetypeWeights(userId = 'default') {
-    if (useSql) {
-        // SQL Server not yet implemented
-        return { success: false, error: 'Not implemented for SQL Server' };
-    } else {
-        db.prepare(`DELETE FROM ArchetypeWeights WHERE userId = ?`).run(userId);
-
-        // Copy from default
-        db.prepare(`
-            INSERT INTO ArchetypeWeights (id, userId, archetype, weight, description, dateModified)
-            SELECT 
-                'aw-' || ? || '-' || archetype,
-                ?,
-                archetype,
-                weight,
-                description,
-                ?
-            FROM ArchetypeWeights
-            WHERE userId = 'default'
-        `).run(userId, userId, Date.now());
-
-        return { success: true };
-    }
-}
 
 export default DatabaseAdapter;
 

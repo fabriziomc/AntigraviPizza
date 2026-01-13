@@ -62,3 +62,7 @@ export const resetArchetypeWeights = activeDB.resetArchetypeWeights;
 export const getAllCategories = activeDB.getAllCategories;
 export const getCategoryById = activeDB.getCategoryById;
 
+// User Settings
+export const getUserSettings = activeDB.getUserSettings;
+export const updateUserSettings = activeDB.updateUserSettings;
+

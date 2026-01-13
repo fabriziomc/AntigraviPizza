@@ -2,7 +2,7 @@
 // SHOPPING COMPONENT
 // ============================================
 
-import { getAllPizzaNights, getPizzaNightById } from '../modules/database.js';
+import { getAllPizzaNights, getPizzaNightById, getUserSettings } from '../modules/database.js';
 import { generateShoppingList, downloadShoppingList } from '../modules/shopping.js';
 import { formatQuantity } from '../utils/helpers.js';
 import { state } from '../store.js';
@@ -391,6 +391,7 @@ window.showShoppingListModal = async (nightId) => {
 window.openBringModal = async (nightId) => {
   console.log('🛒 [Bring] Opening modal for night:', nightId);
   try {
+    const userSettings = await getUserSettings();
     const night = await getPizzaNightById(nightId);
     console.log('🛒 [Bring] Fetched night data:', night);
 
@@ -436,7 +437,7 @@ window.openBringModal = async (nightId) => {
                     <button class="btn btn-primary" style="width: 100%; justify-content: center; background-color: #e53935; border-color: #e53935;" onclick="window.loginToBring()">
                         Connetti a Bring!
                     </button>
-                    ${localStorage.getItem('bring_email') ? `<div style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: #888; cursor: pointer;" onclick="document.getElementById('bringEmail').value = localStorage.getItem('bring_email')">Usa email salvata: ${localStorage.getItem('bring_email')}</div>` : ''}
+                    ${userSettings?.bringEmail ? `<div style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: #888; cursor: pointer;" onclick="document.getElementById('bringEmail').value = '${userSettings.bringEmail}'">Usa email salvata: ${userSettings.bringEmail}</div>` : ''}
                 </div>
                 
                 <div id="bringListStep" style="display: none;">
@@ -464,12 +465,12 @@ window.openBringModal = async (nightId) => {
     `;
     document.body.appendChild(modal);
 
-    // Load saved email if any
-    const savedEmail = localStorage.getItem('bring_email');
+    // Load saved email if any from backend settings
+    const savedEmail = userSettings?.bringEmail;
     if (savedEmail) document.getElementById('bringEmail').value = savedEmail;
 
     // AUTO-LOGIN CHECK
-    const savedPassword = localStorage.getItem('bring_password');
+    const savedPassword = userSettings?.bringPassword;
     if (savedEmail && savedPassword) {
       console.log('🛒 [Bring] Auto-login credentials found');
       document.getElementById('bringEmail').value = savedEmail;
@@ -516,8 +517,6 @@ window.loginToBring = async () => {
 
     const lists = await response.json();
 
-    // Save email
-    localStorage.setItem('bring_email', email);
     // Save creds in memory for next step
     window.currentBringCreds = { email, password };
 

@@ -508,28 +508,46 @@ export async function getCategoryById(id) {
 }
 
 // ============================================
+// USER SETTINGS
+// ============================================
+
+export async function getUserSettings() {
+    const response = await authFetch(`${API_URL}/user-settings`);
+    if (!response.ok) throw new Error('Failed to fetch user settings');
+    return await response.json();
+}
+
+export async function updateUserSettings(updates) {
+    const response = await authFetch(`${API_URL}/user-settings`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates)
+    });
+    if (!response.ok) throw new Error('Failed to update user settings');
+    return await response.json();
+}
+
+// ============================================
 // ARCHETYPE WEIGHTS
 // ============================================
 
-export async function getArchetypeWeights(userId = 'default') {
-    const response = await authFetch(`${API_URL}/archetype-weights?userId=${userId}`);
+export async function getArchetypeWeights() {
+    const response = await authFetch(`${API_URL}/archetype-weights`);
     if (!response.ok) throw new Error('Failed to fetch archetype weights');
     return response.json();
 }
 
-export async function updateArchetypeWeight(archetype, weight, userId = 'default') {
+export async function updateArchetypeWeight(archetype, weight) {
     const response = await authFetch(`${API_URL}/archetype-weights/${archetype}`, {
         method: 'PUT',
-        body: JSON.stringify({ weight, userId })
+        body: JSON.stringify({ weight })
     });
     if (!response.ok) throw new Error('Failed to update archetype weight');
     return response.json();
 }
 
-export async function resetArchetypeWeights(userId = 'default') {
+export async function resetArchetypeWeights() {
     const response = await authFetch(`${API_URL}/archetype-weights/reset`, {
-        method: 'POST',
-        body: JSON.stringify({ userId })
+        method: 'POST'
     });
     if (!response.ok) throw new Error('Failed to reset archetype weights');
     return response.json();

@@ -2,7 +2,7 @@
 // SETTINGS COMPONENT
 // ============================================
 
-import { exportData, importData, clearAllData, getArchetypeWeights, updateArchetypeWeight, resetArchetypeWeights } from '../modules/database.js';
+import { exportData, importData, clearAllData, getArchetypeWeights, updateArchetypeWeight, resetArchetypeWeights, getUserSettings, updateUserSettings } from '../modules/database.js';
 import { showToast } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
 
@@ -43,8 +43,26 @@ function showConfirmModal(title, message, onConfirm) {
 export async function renderSettings() {
   const settingsView = document.getElementById('settings-view');
 
-  // Load saved oven temperature
-  const savedOvenTemp = localStorage.getItem('maxOvenTemp') || '250';
+  // Load user settings from backend
+  let userSettings = {
+    maxOvenTemp: 250,
+    geminiApiKey: '',
+    segmindApiKey: '',
+    bringEmail: '',
+    bringPassword: ''
+  };
+
+  try {
+    const fetchedSettings = await getUserSettings();
+    if (fetchedSettings) {
+      userSettings = { ...userSettings, ...fetchedSettings };
+    }
+  } catch (err) {
+    console.error('Failed to fetch settings:', err);
+    showToast('⚠️ Errore nel caricamento delle impostazioni', 'error');
+  }
+
+  const savedOvenTemp = userSettings.maxOvenTemp || '250';
 
   settingsView.innerHTML = `
     <div class="settings-container fade-in">
@@ -185,7 +203,7 @@ Perché funziona: descrizione
                 id="geminiApiKey" 
                 class="form-input" 
                 placeholder="AIza..."
-                value="${localStorage.getItem('geminiApiKey') || ''}"
+                value="${userSettings.geminiApiKey || ''}"
               >
               <small class="text-muted" style="display: block; margin-top: 0.5rem;">
                 Ottieni una chiave gratuita su <a href="https://aistudio.google.com/apikey" target="_blank" style="color: var(--color-primary);">Google AI Studio</a>
@@ -225,12 +243,12 @@ Perché funziona: descrizione
             
             <div class="form-group">
               <label for="bringEmailSetting" class="form-label">Email</label>
-              <input type="email" id="bringEmailSetting" class="form-input" value="${localStorage.getItem('bring_email') || ''}">
+              <input type="email" id="bringEmailSetting" class="form-input" value="${userSettings.bringEmail || ''}">
             </div>
 
             <div class="form-group">
               <label for="bringPasswordSetting" class="form-label">Password</label>
-              <input type="password" id="bringPasswordSetting" class="form-input" value="${localStorage.getItem('bring_password') || ''}">
+              <input type="password" id="bringPasswordSetting" class="form-input" value="${userSettings.bringPassword || ''}">
             </div>
             
             <button id="btnSaveBringSettings" class="btn btn-primary">
@@ -240,29 +258,6 @@ Perché funziona: descrizione
           </div>
         </section>
 
-        <!-- Image Management Section -->
-        <section class="settings-card">
-          <div class="card-header">
-            <span class="card-icon">🖼️</span>
-            <h2>Gestione Immagini Pizze</h2>
-          </div>
-          <div class="card-body">
-            <p class="card-description">
-              Genera automaticamente immagini per tutte le pizze che ne sono sprovviste.
-            </p>
-            
-            <div class="action-group">
-              <button id="btnRegenerateAllImages" class="btn btn-primary">
-                <span class="icon">🔄</span>
-                Rigenera Immagini Mancanti
-              </button>
-              <p class="action-help">
-                Trova tutte le pizze senza immagine e genera automaticamente immagini di alta qualità.
-                <span id="missingImagesCount" style="display:none; color: var(--color-warning); font-weight: bold;"></span>
-              </p>
-            </div>
-          </div>
-        </section>
 
 
         <!-- Password Change Section -->
@@ -376,7 +371,7 @@ Perché funziona: descrizione
  */
 function setupEventListeners() {
   // Save Oven Settings
-  document.getElementById('btnSaveOvenSettings').addEventListener('click', () => {
+  document.getElementById('btnSaveOvenSettings').addEventListener('click', async () => {
     const temp = document.getElementById('maxOvenTemp').value;
     const tempNum = parseInt(temp);
 
@@ -385,20 +380,29 @@ function setupEventListeners() {
       return;
     }
 
-    localStorage.setItem('maxOvenTemp', temp);
-    showToast('✅ Impostazioni forno salvate!', 'success');
+    try {
+      await updateUserSettings({ maxOvenTemp: tempNum });
+      showToast('✅ Impostazioni forno salvate!', 'success');
+    } catch (err) {
+      console.error('Save oven settings failed:', err);
+      showToast('❌ Errore durante il salvataggio!', 'error');
+    }
   });
 
   // Save Image Provider Settings
-  document.getElementById('btnSaveImageProviderSettings').addEventListener('click', () => {
+  document.getElementById('btnSaveImageProviderSettings').addEventListener('click', async () => {
     const geminiKey = document.getElementById('geminiApiKey').value.trim();
 
-    if (geminiKey) {
-      localStorage.setItem('geminiApiKey', geminiKey);
-      showToast('✅ Chiave Google Gemini salvata! Pronto per generare immagini.', 'success');
-    } else {
-      localStorage.removeItem('geminiApiKey');
-      showToast('ℹ️ Chiave rimossa, verrà usato AI Horde come fallback', 'info');
+    try {
+      await updateUserSettings({ geminiApiKey: geminiKey || null });
+      if (geminiKey) {
+        showToast('✅ Chiave Google Gemini salvata! Pronto per generare immagini.', 'success');
+      } else {
+        showToast('ℹ️ Chiave rimossa, verrà usato AI Horde come fallback', 'info');
+      }
+    } catch (err) {
+      console.error('Save image provider settings failed:', err);
+      showToast('❌ Errore durante il salvataggio!', 'error');
     }
   });
 
@@ -462,28 +466,26 @@ function setupEventListeners() {
   });
 
   // Save Bring! Settings
-  document.getElementById('btnSaveBringSettings').addEventListener('click', () => {
+  document.getElementById('btnSaveBringSettings').addEventListener('click', async () => {
     const email = document.getElementById('bringEmailSetting').value.trim();
     const password = document.getElementById('bringPasswordSetting').value.trim();
 
-    if (email) {
-      localStorage.setItem('bring_email', email);
-    } else {
-      localStorage.removeItem('bring_email');
-    }
+    try {
+      await updateUserSettings({
+        bringEmail: email || null,
+        bringPassword: password || null
+      });
 
-    if (password) {
-      localStorage.setItem('bring_password', password);
-    } else {
-      localStorage.removeItem('bring_password');
-    }
-
-    if (email && password) {
-      showToast('✅ Credenziali Bring! salvate!', 'success');
-    } else if (!email && !password) {
-      showToast('ℹ️ Credenziali Bring! rimosse', 'info');
-    } else {
-      showToast('⚠️ Inserisci sia email che password per l\'autologin', 'warning');
+      if (email && password) {
+        showToast('✅ Credenziali Bring! salvate!', 'success');
+      } else if (!email && !password) {
+        showToast('ℹ️ Credenziali Bring! rimosse', 'info');
+      } else {
+        showToast('⚠️ Inserisci sia email che password per l\'autologin', 'warning');
+      }
+    } catch (err) {
+      console.error('Save bring settings failed:', err);
+      showToast('❌ Errore durante il salvataggio!', 'error');
     }
   });
 
@@ -641,135 +643,6 @@ function setupEventListeners() {
     fileInputDB.value = '';
   });
 
-  // Bulk Regenerate Images
-  document.getElementById('btnRegenerateAllImages').addEventListener('click', async () => {
-    try {
-      const btn = document.getElementById('btnRegenerateAllImages');
-      btn.disabled = true;
-      btn.innerHTML = '<span class="icon">⏳</span> Caricamento...';
-
-      // Fetch all recipes
-      const response = await fetch('/api/recipes');
-      if (!response.ok) throw new Error('Failed to fetch recipes');
-      const recipes = await response.json();
-
-      // Filter recipes without images or with broken/old images
-      const recipesWithoutImages = recipes.filter(r => {
-        // Check for various "no image" conditions
-        if (!r.imageUrl) return true; // null or undefined
-        if (r.imageUrl.trim() === '') return true; // empty string
-        if (r.imageUrl.includes('placeholder')) return true; // placeholder image
-        if (r.imageUrl.includes('default')) return true; // default image
-
-        // NEW: Regenerate old pollinations URLs without turbo model (broken because flux is down)
-        if (r.imageUrl.includes('pollinations.ai') && !r.imageUrl.includes('model=turbo')) {
-          return true; // Old URL without turbo model
-        }
-
-        return false;
-      });
-
-      console.log(`Found ${recipesWithoutImages.length} recipes without images out of ${recipes.length} total`);
-
-      if (recipesWithoutImages.length === 0) {
-        showToast('✅ Tutte le pizze hanno già un\'immagine!', 'success');
-        btn.disabled = false;
-        btn.innerHTML = '<span class="icon">🔄</span> Rigenera Immagini Mancanti';
-        return;
-      }
-
-      // Confirm action
-      const confirmed = confirm(
-        `🖼️ Trovate ${recipesWithoutImages.length} pizze senza immagine.\n\n` +
-        `Vuoi generare le immagini per tutte?\n` +
-        `(Questa operazione potrebbe richiedere alcuni minuti)`
-      );
-
-      if (!confirmed) {
-        btn.disabled = false;
-        btn.innerHTML = '<span class="icon">🔄</span> Rigenera Immagini Mancanti';
-        return;
-      }
-
-      // Generate images sequentially
-      let successCount = 0;
-      let errorCount = 0;
-
-      for (let i = 0; i < recipesWithoutImages.length; i++) {
-        const recipe = recipesWithoutImages[i];
-        const progress = i + 1;
-
-        // Update button with progress
-        btn.innerHTML = `<span class="icon">⏳</span> Generando ${progress}/${recipesWithoutImages.length}...`;
-
-        try {
-          // Generate image using multi-provider system
-          const toppingIngredients = recipe.baseIngredients?.filter(ing =>
-            ing.phase === 'topping' || ing.category !== 'Impasto'
-          ) || [];
-          const mainIngredients = toppingIngredients.slice(0, 3).map(i => i.name || 'condimento');
-
-          // Detect if pizza has tomato base
-          const hasTomato = recipe.baseIngredients?.some(ing =>
-            ing.name.toLowerCase().includes('pomodor') ||
-            ing.name.toLowerCase().includes('salsa') ||
-            ing.name.toLowerCase().includes('passata')
-          ) || false;
-
-          // Import image provider
-          const { generatePizzaImage } = await import('../utils/imageProviders.js');
-
-          const result = await generatePizzaImage(recipe.name, mainIngredients, {
-            hasTomato,
-            seed: Date.now() + i // Unique seed for each
-          });
-
-          // Update recipe via API
-          const updateResponse = await fetch(`/api/recipes/${recipe.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ imageUrl: result.imageUrl })
-          });
-
-          if (!updateResponse.ok) throw new Error('API update failed');
-
-          successCount++;
-          console.log(`✅ Generated image for: ${recipe.name} using ${result.provider}`);
-
-          // Small delay to avoid overwhelming the image service
-          await new Promise(resolve => setTimeout(resolve, 500));
-
-        } catch (error) {
-          console.error(`❌ Failed to generate image for ${recipe.name}:`, error);
-          errorCount++;
-        }
-      }
-
-      // Final feedback
-      btn.disabled = false;
-      btn.innerHTML = '<span class="icon">🔄</span> Rigenera Immagini Mancanti';
-
-      if (successCount > 0) {
-        showToast(
-          `✅ Generazione completata! ${successCount} immagini create` +
-          (errorCount > 0 ? `, ${errorCount} errori` : ''),
-          errorCount > 0 ? 'warning' : 'success'
-        );
-      } else {
-        showToast('❌ Nessuna immagine generata', 'error');
-      }
-
-    } catch (error) {
-      console.error('Bulk regeneration failed:', error);
-      showToast('❌ Errore durante la rigenerazione: ' + error.message, 'error');
-
-      const btn = document.getElementById('btnRegenerateAllImages');
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = '<span class="icon">🔄</span> Rigenera Immagini Mancanti';
-      }
-    }
-  });
 
 
 
@@ -1058,7 +931,7 @@ async function populateArchetypeWeights() {
   if (!container) return;
 
   try {
-    const weights = await getArchetypeWeights('default');
+    const weights = await getArchetypeWeights();
     console.log('🔍 Archetype weights received:', weights);
     console.log('🔍 Weights length:', weights.length);
 
@@ -1082,7 +955,7 @@ async function populateArchetypeWeights() {
             showToast('🌱 Inizializzazione pesi in corso...', 'info');
 
             // Call the reset endpoint which will create the default weights
-            const result = await resetArchetypeWeights('default');
+            const result = await resetArchetypeWeights();
             console.log('📥 Init result:', result);
 
             showToast('✅ Pesi archetipi inizializzati!', 'success');
@@ -1154,7 +1027,7 @@ function setupArchetypeWeightsListeners() {
         for (const slider of sliders) {
           const archetype = slider.dataset.archetype;
           const weight = parseInt(slider.value);
-          await updateArchetypeWeight(archetype, weight, 'default');
+          await updateArchetypeWeight(archetype, weight);
         }
 
         showToast('✅ Pesi archetipi salvati con successo!', 'success');
@@ -1175,7 +1048,7 @@ function setupArchetypeWeightsListeners() {
         console.log('✅ User confirmed reset');
         try {
           console.log('📡 Calling resetArchetypeWeights...');
-          const result = await resetArchetypeWeights('default');
+          const result = await resetArchetypeWeights();
           console.log('📥 Reset result:', result);
           showToast('✅ Pesi ripristinati ai valori predefiniti', 'success');
 

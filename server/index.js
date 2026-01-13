@@ -41,6 +41,12 @@ app.use('/api', (req, res, next) => {
         return next();
     }
 
+    // Skip authentication for Bring! integration endpoints
+    if (req.path.startsWith('/bring/')) {
+        console.log(`[INDEX.JS] Skipping auth for Bring! endpoint: ${req.path}`);
+        return next();
+    }
+
     // Skip authentication for guest endpoints
     if (req.path.startsWith('/guest/')) {
         console.log(`[INDEX.JS] Skipping auth for guest endpoint: ${req.path}`);

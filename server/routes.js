@@ -27,14 +27,15 @@ router.use((req, res, next) => {
 
     // Guest endpoints (no authentication required)
     const guestEndpoints = [
-        '/guest/'
+        '/guest/',
+        '/bring/'  // Bring! integration endpoints
     ];
 
     const isPublicGet = req.method === 'GET' && publicGetEndpoints.some(endpoint => req.path === endpoint || req.path.startsWith(endpoint + '/'));
     const isGuestEndpoint = guestEndpoints.some(endpoint => req.path.startsWith(endpoint));
 
     // Debug logging
-    if (req.path.includes('guest')) {
+    if (req.path.includes('guest') || req.path.includes('bring')) {
         console.log(`[AUTH MIDDLEWARE] path: ${req.path}, isGuestEndpoint: ${isGuestEndpoint}`);
     }
 
@@ -46,7 +47,7 @@ router.use((req, res, next) => {
         });
     } else if (isGuestEndpoint) {
         // Guest endpoints don't require authentication at all
-        console.log(`[AUTH MIDDLEWARE] Skipping auth for guest endpoint: ${req.path}`);
+        console.log(`[AUTH MIDDLEWARE] Skipping auth for guest/bring endpoint: ${req.path}`);
         next();
     } else {
         // All other routes require authentication
@@ -1066,6 +1067,32 @@ router.post('/seed', async (req, res) => {
 });
 
 
+// ==========================================
+// USER SETTINGS
+// ==========================================
+
+// GET user settings
+router.get('/user-settings', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const settings = await dbAdapter.getUserSettings(userId);
+        res.json(settings);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PATCH user settings
+router.patch('/user-settings', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const settings = await dbAdapter.updateUserSettings(userId, req.body);
+        res.json(settings);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ============================================
 // ARCHETYPE WEIGHTS ENDPOINTS
 // ============================================
@@ -1073,7 +1100,7 @@ router.post('/seed', async (req, res) => {
 // Get archetype weights
 router.get('/archetype-weights', async (req, res) => {
     try {
-        const userId = req.query.userId || 'default';
+        const userId = req.user?.id || 'default';
         const weights = await dbAdapter.getArchetypeWeights(userId);
         res.json(weights);
     } catch (err) {
@@ -1085,7 +1112,8 @@ router.get('/archetype-weights', async (req, res) => {
 router.put('/archetype-weights/:archetype', async (req, res) => {
     try {
         const { archetype } = req.params;
-        const { weight, userId = 'default' } = req.body;
+        const { weight } = req.body;
+        const userId = req.user.id;
 
         if (weight < 0 || weight > 100) {
             return res.status(400).json({ error: 'Weight must be between 0 and 100' });
@@ -1101,7 +1129,7 @@ router.put('/archetype-weights/:archetype', async (req, res) => {
 // Reset to defaults
 router.post('/archetype-weights/reset', async (req, res) => {
     try {
-        const { userId = 'default' } = req.body;
+        const userId = req.user.id;
         const result = await dbAdapter.resetArchetypeWeights(userId);
         res.json(result);
     } catch (err) {

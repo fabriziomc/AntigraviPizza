@@ -720,39 +720,67 @@ export async function seedPreparations(preparationsConstants) {
 }
 
 // ============================================
+// USER SETTINGS (Stub functions for IndexedDB mode)
+// ============================================
+
+export async function getUserSettings() {
+    console.warn('User settings not supported in IndexedDB mode');
+    return {
+        maxOvenTemp: localStorage.getItem('maxOvenTemp') || 250,
+        geminiApiKey: localStorage.getItem('geminiApiKey') || '',
+        segmindApiKey: localStorage.getItem('segmindApiKey') || '',
+        bringEmail: localStorage.getItem('bring_email') || '',
+        bringPassword: localStorage.getItem('bring_password') || '',
+        geminiModel: localStorage.getItem('geminiModel') || 'gemini-1.5-flash',
+        preferences: {}
+    };
+}
+
+export async function updateUserSettings(updates) {
+    console.warn('User settings not supported in IndexedDB mode');
+    for (const [key, value] of Object.entries(updates)) {
+        // Map to legacy localStorage keys
+        if (key === 'bringEmail') localStorage.setItem('bring_email', value);
+        else if (key === 'bringPassword') localStorage.setItem('bring_password', value);
+        else localStorage.setItem(key, value);
+    }
+    return await getUserSettings();
+}
+
+// ============================================
 // ARCHETYPE WEIGHTS (Stub functions for IndexedDB mode)
 // ============================================
 
 /**
  * Get archetype weights (stub - not supported in IndexedDB mode)
  */
-export async function getArchetypeWeights(userId = 'default') {
+export async function getArchetypeWeights() {
     console.warn('Archetype weights not supported in IndexedDB mode');
     // Return default weights
     return [
-        { archetype: 'combinazioni_db', weight: 30, userId },
-        { archetype: 'classica', weight: 28, userId },
-        { archetype: 'tradizionale', weight: 21, userId },
-        { archetype: 'terra_bosco', weight: 7, userId },
-        { archetype: 'fresca_estiva', weight: 7, userId },
-        { archetype: 'piccante_decisa', weight: 4, userId },
-        { archetype: 'mare', weight: 2, userId },
-        { archetype: 'vegana', weight: 1, userId }
+        { archetype: 'combinazioni_db', weight: 30 },
+        { archetype: 'classica', weight: 28 },
+        { archetype: 'tradizionale', weight: 21 },
+        { archetype: 'terra_bosco', weight: 7 },
+        { archetype: 'fresca_estiva', weight: 7 },
+        { archetype: 'piccante_decisa', weight: 4 },
+        { archetype: 'mare', weight: 2 },
+        { archetype: 'vegana', weight: 1 }
     ];
 }
 
 /**
  * Update archetype weight (stub - not supported in IndexedDB mode)
  */
-export async function updateArchetypeWeight(archetype, weight, userId = 'default') {
+export async function updateArchetypeWeight(archetype, weight) {
     console.warn('Archetype weights not supported in IndexedDB mode');
-    return { archetype, weight, userId };
+    return { archetype, weight };
 }
 
 /**
  * Reset archetype weights (stub - not supported in IndexedDB mode)
  */
-export async function resetArchetypeWeights(userId = 'default') {
+export async function resetArchetypeWeights() {
     console.warn('Archetype weights not supported in IndexedDB mode');
     return { success: true };
 }

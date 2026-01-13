@@ -1,7 +1,6 @@
 // ============================================
-// IMAGE PROVIDERS MODULE
-// Multi-provider image generation with automatic fallback
-// ============================================
+
+import { getUserSettings } from '../modules/database.js';
 
 /**
  * Provider configuration
@@ -43,8 +42,8 @@ function sleep(ms) {
  * Generate image using Google Gemini API (50 free images/day)
  */
 async function generateWithGemini(prompt, options = {}) {
-    // Get API key from localStorage
-    const apiKey = localStorage.getItem('geminiApiKey');
+    // Get API key from options or localStorage (fallback)
+    const apiKey = options.geminiApiKey || localStorage.getItem('geminiApiKey');
     if (!apiKey) {
         throw new Error('Google Gemini API key not configured. Please add it in Settings.');
     }
@@ -98,8 +97,8 @@ async function generateWithSegmind(prompt, options = {}) {
     const seed = options.seed || Date.now();
     const apiUrl = 'https://api.segmind.com/v1/fast-flux-schnell';
 
-    // Get API key from localStorage
-    const apiKey = localStorage.getItem('segmindApiKey');
+    // Get API key from options or localStorage (fallback)
+    const apiKey = options.segmindApiKey || localStorage.getItem('segmindApiKey');
     if (!apiKey) {
         throw new Error('Segmind API key not configured. Please add it in Settings.');
     }
@@ -352,6 +351,17 @@ async function tryProvider(provider, prompt, options) {
  * @returns {Promise<{imageUrl: string, provider: string}>}
  */
 export async function generatePizzaImage(pizzaName, ingredients = [], options = {}) {
+    // Fetch user settings to get API keys
+    try {
+        const settings = await getUserSettings();
+        if (settings) {
+            options.geminiApiKey = settings.geminiApiKey || options.geminiApiKey;
+            options.segmindApiKey = settings.segmindApiKey || options.segmindApiKey;
+        }
+    } catch (err) {
+        console.warn('Failed to fetch user settings for image generation, falling back to localStorage if available:', err);
+    }
+
     // Build the prompt
     const pizzaStyle = options.hasTomato
         ? 'pizza with red tomato sauce base'

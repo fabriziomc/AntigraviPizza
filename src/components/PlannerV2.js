@@ -2,7 +2,7 @@
 // PLANNER COMPONENT
 // ============================================
 
-import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, getAllRecipes, getAllGuests, addGuest, updateGuest, deleteGuest, getRecipeById, getPizzaNightById } from '../modules/database.js';
+import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, getAllRecipes, getAllGuests, addGuest, updateGuest, deleteGuest, getRecipeById, getPizzaNightById, getUserSettings } from '../modules/database.js';
 import { formatDate, formatDateForInput, getNextSaturdayEvening, confirm, formatQuantity, showToast } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
 import { getCookingInstructions } from '../utils/cookingCalculator.js';
@@ -2793,11 +2793,17 @@ async function startLiveMode(nightId) {
     }
 
     // Calculate cooking instructions based on oven temp and dough type
-    const maxOvenTemp = parseInt(localStorage.getItem('maxOvenTemp') || '250');
+    let maxOvenTemp = 250;
+    try {
+      const userSettings = await getUserSettings();
+      maxOvenTemp = parseInt(userSettings?.maxOvenTemp || '250');
+    } catch (err) {
+      console.warn('Failed to fetch user settings for cooking calculation:', err);
+    }
     const doughType = night.selectedDough || 'default';
 
     console.log('🔥 Cooking calculation:');
-    console.log('  - maxOvenTemp from localStorage:', maxOvenTemp);
+    console.log('  - maxOvenTemp:', maxOvenTemp);
     console.log('  - doughType from night:', doughType);
     console.log('  - night.selectedDough:', night.selectedDough);
 
