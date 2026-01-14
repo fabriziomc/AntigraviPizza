@@ -1588,6 +1588,15 @@ class DatabaseAdapter {
     }
 
     async updateUserSettings(userId, updates) {
+        // First, check if settings exist for this user
+        let existing = await this.getUserSettings(userId);
+
+        // If no settings exist, create them first
+        if (!existing) {
+            console.log(`📝 Creating new settings record for user ${userId}`);
+            existing = await this.createUserSettings(userId);
+        }
+
         const allowedFields = ['bringEmail', 'bringPassword', 'geminiModel', 'maxOvenTemp', 'geminiApiKey', 'segmindApiKey', 'defaultDough', 'preferences'];
         const fields = [];
         const values = [];
