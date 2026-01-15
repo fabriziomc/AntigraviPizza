@@ -28,7 +28,8 @@ router.use((req, res, next) => {
     // Guest endpoints (no authentication required)
     const guestEndpoints = [
         '/guest/',
-        '/bring/'  // Bring! integration endpoints
+        '/bring/',  // Bring! integration endpoints
+        '/health'   // Health check endpoint for keep-alive
     ];
 
     const isPublicGet = req.method === 'GET' && publicGetEndpoints.some(endpoint => req.path === endpoint || req.path.startsWith(endpoint + '/'));
