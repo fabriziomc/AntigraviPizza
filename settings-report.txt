@@ -1,0 +1,19 @@
+USERS: 6
+  admin@antigravipizza.local
+  fporciani@gmail.com
+  test@test.com
+  isolation_test_a@example.com
+  isolation_test_b@example.com
+  mario@pizzeria.com
+
+SETTINGS: 5
+  User: user-1768242369244-zklvul2fl
+    Temp: 250, Gemini: NULL, Bring: NULL
+  User: user-1768247332381-klyqf22ze
+    Temp: 280, Gemini: SET, Bring: dummy@example.com
+  User: user-1768282203549-o2o3nadmw
+    Temp: 250, Gemini: NULL, Bring: NULL
+  User: user-1768282347305-77jmm8a0u
+    Temp: 250, Gemini: NULL, Bring: NULL
+  User: user-1768287493552-ey884sfnk
+    Temp: 250, Gemini: NULL, Bring: fabrizz@example.com

@@ -1,0 +1,50 @@
+TOTAL SETTINGS RECORDS: 5
+
+[1] Settings Record:
+    ID: settings-user-1768242369244-zklvul2fl
+    userId: user-1768242369244-zklvul2fl
+    maxOvenTemp: 250
+    geminiApiKey: NULL
+    bringEmail: NULL
+    bringPassword: NULL
+
+[2] Settings Record:
+    ID: settings-user-1768247332381-klyqf22ze
+    userId: user-1768247332381-klyqf22ze
+    maxOvenTemp: 280
+    geminiApiKey: dummy-gemini-key...
+    bringEmail: dummy@example.com
+    bringPassword: ***SET***
+
+[3] Settings Record:
+    ID: settings-user-1768282203549-o2o3nadmw
+    userId: user-1768282203549-o2o3nadmw
+    maxOvenTemp: 250
+    geminiApiKey: NULL
+    bringEmail: NULL
+    bringPassword: NULL
+
+[4] Settings Record:
+    ID: settings-user-1768282347305-77jmm8a0u
+    userId: user-1768282347305-77jmm8a0u
+    maxOvenTemp: 250
+    geminiApiKey: NULL
+    bringEmail: NULL
+    bringPassword: NULL
+
+[5] Settings Record:
+    ID: settings-user-1768287493552-ey884sfnk
+    userId: user-1768287493552-ey884sfnk
+    maxOvenTemp: 250
+    geminiApiKey: NULL
+    bringEmail: fabrizz@example.com
+    bringPassword: ***SET***
+
+
+USERS (6):
+  admin@antigravipizza.local → NO SETTINGS
+  fporciani@gmail.com → maxOvenTemp: 250
+  isolation_test_a@example.com → maxOvenTemp: 250
+  isolation_test_b@example.com → maxOvenTemp: 250
+  mario@pizzeria.com → maxOvenTemp: 250
+  test@test.com → maxOvenTemp: 280

@@ -72,6 +72,19 @@ export async function renderSettings() {
       </div>
 
       <div class="settings-grid">
+        <!-- ============================================ -->
+        <!-- SECTION: IMPOSTAZIONI UTENTE -->
+        <!-- ============================================ -->
+        <div style="grid-column: 1 / -1; margin-top: 1rem;">
+          <h2 class="settings-section-header" data-section="user-settings" style="font-size: 1.25rem; color: var(--color-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
+            <span class="section-toggle">▶</span>
+            <span>👤</span> Impostazioni Utente
+          </h2>
+          <div style="height: 2px; background: linear-gradient(to right, var(--color-primary), transparent); margin-bottom: 1.5rem;"></div>
+        </div>
+
+        <div id="section-user-settings" class="settings-section-content" style="grid-column: 1 / -1; display: none;">
+
         <!-- Oven Settings Section -->
         <section class="settings-card">
           <div class="card-header">
@@ -99,88 +112,56 @@ export async function renderSettings() {
           </div>
         </section>
 
-        <!-- Data Management Section -->
+        <!-- Password Change Section -->
         <section class="settings-card">
           <div class="card-header">
-            <span class="card-icon">💾</span>
-            <h2>Gestione Dati</h2>
+            <span class="card-icon">🔐</span>
+            <h2>Cambio Password</h2>
           </div>
           <div class="card-body">
             <p class="card-description">
-              Esporta e importa il database completo (ricette, serate, ospiti).
-            </p>
-            
-            <div class="action-group">
-              <button id="btnExportDB" class="btn btn-primary">
-                <span class="icon">⬇️</span>
-                Esporta Database
-              </button>
-              <p class="action-help">Scarica un backup completo del database sul tuo PC. Fai questo PRIMA di ogni deploy per salvare i tuoi dati.</p>
-            </div>
-
-            <div class="action-group">
-              <input type="file" id="fileImportDB" accept=".json" style="display: none;">
-              <button id="btnImportDB" class="btn btn-secondary">
-                <span class="icon">⬆️</span>
-                Importa Database
-              </button>
-              <p class="action-help">Ripristina il database da un file di backup precedente. Sostituirà tutti i dati attuali.</p>
-            </div>
-
-
-          </div>
-        </section>
-
-        <!-- Recipe Import Section -->
-        <section class="settings-card">
-          <div class="card-header">
-            <span class="card-icon">📝</span>
-            <h2>Importa Ricette</h2>
-          </div>
-          <div class="card-body">
-            <p class="card-description">
-              Importa ricette da testo in italiano. Il sistema riconoscerà automaticamente ingredienti e preparazioni.
+              Cambia la password del tuo account. La password deve essere di almeno 8 caratteri.
             </p>
             
             <div class="form-group">
-              <label for="recipeTextInput" class="form-label">Incolla il testo delle ricette</label>
-              <textarea 
-                id="recipeTextInput" 
-                class="form-input" 
-                rows="10" 
-                placeholder="1. Nome Pizza
-Base: ingredienti base
-Top (In cottura): ingredienti in cottura
-Top (Post-cottura): ingredienti post cottura
-Perché funziona: descrizione
+              <label for="currentPassword" class="form-label">Password Attuale</label>
+              <input type="password" id="currentPassword" class="form-input" autocomplete="current-password">
+            </div>
 
-2. Altra Pizza
-..."
-                style="font-family: monospace; font-size: 0.9rem;"
-              ></textarea>
+            <div class="form-group">
+              <label for="newPassword" class="form-label">Nuova Password</label>
+              <input type="password" id="newPassword" class="form-input" autocomplete="new-password">
               <small class="text-muted" style="display: block; margin-top: 0.5rem;">
-                Formato: ricette numerate con sezioni Base, Top (In cottura), Top (Post-cottura), Perché funziona
+                Minimo 8 caratteri
               </small>
             </div>
 
-            <div class="action-group">
-              <input type="file" id="fileImportRecipe" accept=".txt" style="display: none;">
-              <button id="btnImportRecipeFile" class="btn btn-secondary">
-                <span class="icon">📁</span>
-                Carica da File
-              </button>
-              <button id="btnImportRecipeText" class="btn btn-primary">
-                <span class="icon">🚀</span>
-                Importa Ricette
-              </button>
+            <div class="form-group">
+              <label for="confirmPassword" class="form-label">Conferma Nuova Password</label>
+              <input type="password" id="confirmPassword" class="form-input" autocomplete="new-password">
             </div>
-
-            <div id="importRecipeResult" style="margin-top: 1rem; display: none;">
-              <!-- Import results will appear here -->
-            </div>
+            
+            <button id="btnChangePassword" class="btn btn-primary">
+              <span class="icon">🔑</span>
+              Cambia Password
+            </button>
           </div>
         </section>
 
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION: INTEGRAZIONI -->
+        <!-- ============================================ -->
+        <div style="grid-column: 1 / -1; margin-top: 2rem;">
+          <h2 class="settings-section-header" data-section="integrations" style="font-size: 1.25rem; color: var(--color-accent); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
+            <span class="section-toggle">▶</span>
+            <span>🔌</span> Integrazioni
+          </h2>
+          <div style="height: 2px; background: linear-gradient(to right, var(--color-accent), transparent); margin-bottom: 1.5rem;"></div>
+        </div>
+
+        <div id="section-integrations" class="settings-section-content" style="grid-column: 1 / -1; display: none;">
 
         <!-- Image Provider Configuration Section -->
         <section class="settings-card">
@@ -258,44 +239,70 @@ Perché funziona: descrizione
           </div>
         </section>
 
+        </div>
 
+        <!-- ============================================ -->
+        <!-- SECTION: GESTIONE RICETTE -->
+        <!-- ============================================ -->
+        <div style="grid-column: 1 / -1; margin-top: 2rem;">
+          <h2 class="settings-section-header" data-section="recipe-management" style="font-size: 1.25rem; color: var(--color-success); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
+            <span class="section-toggle">▶</span>
+            <span>📚</span> Gestione Ricette
+          </h2>
+          <div style="height: 2px; background: linear-gradient(to right, var(--color-success), transparent); margin-bottom: 1.5rem;"></div>
+        </div>
 
-        <!-- Password Change Section -->
+        <div id="section-recipe-management" class="settings-section-content" style="grid-column: 1 / -1; display: none;">
+
+        <!-- Recipe Import Section -->
         <section class="settings-card">
           <div class="card-header">
-            <span class="card-icon">🔐</span>
-            <h2>Cambio Password</h2>
+            <span class="card-icon">📝</span>
+            <h2>Importa Ricette</h2>
           </div>
           <div class="card-body">
             <p class="card-description">
-              Cambia la password del tuo account. La password deve essere di almeno 8 caratteri.
+              Importa ricette da testo in italiano. Il sistema riconoscerà automaticamente ingredienti e preparazioni.
             </p>
             
             <div class="form-group">
-              <label for="currentPassword" class="form-label">Password Attuale</label>
-              <input type="password" id="currentPassword" class="form-input" autocomplete="current-password">
-            </div>
+              <label for="recipeTextInput" class="form-label">Incolla il testo delle ricette</label>
+              <textarea 
+                id="recipeTextInput" 
+                class="form-input" 
+                rows="10" 
+                placeholder="1. Nome Pizza
+Base: ingredienti base
+Top (In cottura): ingredienti in cottura
+Top (Post-cottura): ingredienti post cottura
+Perché funziona: descrizione
 
-            <div class="form-group">
-              <label for="newPassword" class="form-label">Nuova Password</label>
-              <input type="password" id="newPassword" class="form-input" autocomplete="new-password">
+2. Altra Pizza
+..."
+                style="font-family: monospace; font-size: 0.9rem;"
+              ></textarea>
               <small class="text-muted" style="display: block; margin-top: 0.5rem;">
-                Minimo 8 caratteri
+                Formato: ricette numerate con sezioni Base, Top (In cottura), Top (Post-cottura), Perché funziona
               </small>
             </div>
 
-            <div class="form-group">
-              <label for="confirmPassword" class="form-label">Conferma Nuova Password</label>
-              <input type="password" id="confirmPassword" class="form-input" autocomplete="new-password">
+            <div class="action-group">
+              <input type="file" id="fileImportRecipe" accept=".txt" style="display: none;">
+              <button id="btnImportRecipeFile" class="btn btn-secondary">
+                <span class="icon">📁</span>
+                Carica da File
+              </button>
+              <button id="btnImportRecipeText" class="btn btn-primary">
+                <span class="icon">🚀</span>
+                Importa Ricette
+              </button>
             </div>
-            
-            <button id="btnChangePassword" class="btn btn-primary">
-              <span class="icon">🔑</span>
-              Cambia Password
-            </button>
+
+            <div id="importRecipeResult" style="margin-top: 1rem; display: none;">
+              <!-- Import results will appear here -->
+            </div>
           </div>
         </section>
-
 
         <!-- Archetype Weights Section -->
         <section class="settings-card">
@@ -325,6 +332,52 @@ Perché funziona: descrizione
                 💾 Salva Modifiche
               </button>
             </div>
+          </div>
+        </section>
+
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION: GESTIONE DATI -->
+        <!-- ============================================ -->
+        <div style="grid-column: 1 / -1; margin-top: 2rem;">
+          <h2 class="settings-section-header" data-section="data-management" style="font-size: 1.25rem; color: var(--color-info); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
+            <span class="section-toggle">▶</span>
+            <span>💾</span> Gestione Dati
+          </h2>
+          <div style="height: 2px; background: linear-gradient(to right, var(--color-info), transparent); margin-bottom: 1.5rem;"></div>
+        </div>
+
+        <div id="section-data-management" class="settings-section-content" style="grid-column: 1 / -1; display: none;">
+
+        <!-- Data Management Section -->
+        <section class="settings-card">
+          <div class="card-header">
+            <span class="card-icon">💾</span>
+            <h2>Backup e Ripristino</h2>
+          </div>
+          <div class="card-body">
+            <p class="card-description">
+              Esporta e importa il database completo (ricette, serate, ospiti).
+            </p>
+            
+            <div class="action-group">
+              <button id="btnExportDB" class="btn btn-primary">
+                <span class="icon">⬇️</span>
+                Esporta Database
+              </button>
+              <p class="action-help">Scarica un backup completo del database sul tuo PC. Fai questo PRIMA di ogni deploy per salvare i tuoi dati.</p>
+            </div>
+
+            <div class="action-group">
+              <input type="file" id="fileImportDB" accept=".json" style="display: none;">
+              <button id="btnImportDB" class="btn btn-secondary">
+                <span class="icon">⬆️</span>
+                Importa Database
+              </button>
+              <p class="action-help">Ripristina il database da un file di backup precedente. Sostituirà tutti i dati attuali.</p>
+            </div>
+
           </div>
         </section>
 
@@ -358,6 +411,7 @@ Perché funziona: descrizione
             </div>
           </div>
         </section>
+        </div>
       </div>
     </div>
   `;
@@ -370,6 +424,33 @@ Perché funziona: descrizione
  * Setup event listeners for Settings view
  */
 function setupEventListeners() {
+  // Setup collapsible sections
+  const sectionHeaders = document.querySelectorAll('.settings-section-header');
+  sectionHeaders.forEach(header => {
+    header.addEventListener('click', () => {
+      const sectionId = header.getAttribute('data-section');
+      const sectionContent = document.getElementById(`section-${sectionId}`);
+      const toggleIcon = header.querySelector('.section-toggle');
+
+      if (sectionContent) {
+        const isCollapsed = sectionContent.style.display === 'none';
+
+        if (isCollapsed) {
+          // Expand
+          sectionContent.style.display = 'contents';
+          toggleIcon.textContent = '▼';
+          toggleIcon.style.transform = 'rotate(0deg)';
+        } else {
+          // Collapse
+          sectionContent.style.display = 'none';
+          toggleIcon.textContent = '▶';
+          toggleIcon.style.transform = 'rotate(-90deg)';
+        }
+      }
+    });
+  });
+
+
   // Save Oven Settings
   document.getElementById('btnSaveOvenSettings').addEventListener('click', async () => {
     const temp = document.getElementById('maxOvenTemp').value;

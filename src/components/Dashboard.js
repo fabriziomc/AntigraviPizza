@@ -4,8 +4,19 @@
 
 import { getAllRecipes, getAllPizzaNights, getUpcomingPizzaNights, getFavoriteRecipes } from '../modules/database.js';
 import { formatDateShort } from '../utils/helpers.js';
+import { getUser } from '../modules/auth.js';
 
 export async function renderDashboard(state) {
+  // Get current user
+  const user = getUser();
+  const userName = user?.name || 'Utente';
+  
+  // Update welcome message
+  const pageDescription = document.querySelector('#dashboard-view .page-description');
+  if (pageDescription) {
+    pageDescription.textContent = `Benvenuto, ${userName}! 🍕`;
+  }
+
   // Render stats
   await renderStats();
 

@@ -54,6 +54,9 @@ async function initApp() {
   const currentUser = getUser();
   console.log('👤 Logged in as:', currentUser?.name);
 
+  // Show loading notification
+  showToast('⏳ Caricamento dati in corso...', 'info');
+
   try {
     // Initialize database
     await initDB();
@@ -110,9 +113,31 @@ async function initApp() {
     }
 
     console.log('✅ AntigraviPizza initialized successfully!');
+
+    // Hide loading overlay
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+      loadingOverlay.style.opacity = '0';
+      setTimeout(() => {
+        loadingOverlay.style.display = 'none';
+      }, 300); // Wait for fade-out transition
+    }
+
+    // Show success notification
+    showToast('✅ Applicazione pronta!', 'success');
   } catch (error) {
     console.error('❌ Failed to initialize app:', error);
-    showToast('Errore nell\'inizializzazione dell\'app', 'error');
+
+    // Hide loading overlay even on error
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+      loadingOverlay.style.opacity = '0';
+      setTimeout(() => {
+        loadingOverlay.style.display = 'none';
+      }, 300);
+    }
+
+    showToast('❌ Errore nell\'inizializzazione dell\'app', 'error');
   }
 }
 

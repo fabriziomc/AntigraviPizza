@@ -1,0 +1,32 @@
+USERS (6):
+  admin@antigravipizza.local | ID: admin-1768198822844
+  fporciani@gmail.com | ID: user-1768242369244-zklvul2fl
+  test@test.com | ID: user-1768247332381-klyqf22ze
+  isolation_test_a@example.com | ID: user-1768282203549-o2o3nadmw
+  isolation_test_b@example.com | ID: user-1768282347305-77jmm8a0u
+  mario@pizzeria.com | ID: user-1768287493552-ey884sfnk
+
+SETTINGS (5):
+  Settings ID: settings-user-1768242369244-zklvul2fl
+    userId: user-1768242369244-zklvul2fl
+    Temp: 250, Gemini: NULL, Bring: NULL
+  Settings ID: settings-user-1768247332381-klyqf22ze
+    userId: user-1768247332381-klyqf22ze
+    Temp: 280, Gemini: SET, Bring: dummy@example.com
+  Settings ID: settings-user-1768282203549-o2o3nadmw
+    userId: user-1768282203549-o2o3nadmw
+    Temp: 250, Gemini: NULL, Bring: NULL
+  Settings ID: settings-user-1768282347305-77jmm8a0u
+    userId: user-1768282347305-77jmm8a0u
+    Temp: 250, Gemini: NULL, Bring: NULL
+  Settings ID: settings-user-1768287493552-ey884sfnk
+    userId: user-1768287493552-ey884sfnk
+    Temp: 250, Gemini: NULL, Bring: fabrizz@example.com
+
+CROSS-REFERENCE:
+  ✗ admin@antigravipizza.local MISSING settings (user.id = admin-1768198822844)
+  ✓ fporciani@gmail.com HAS settings
+  ✓ test@test.com HAS settings
+  ✓ isolation_test_a@example.com HAS settings
+  ✓ isolation_test_b@example.com HAS settings
+  ✓ mario@pizzeria.com HAS settings
