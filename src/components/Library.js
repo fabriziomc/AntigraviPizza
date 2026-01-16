@@ -10,8 +10,12 @@ import { state } from '../store.js';
 import { openModal, closeModal } from '../modules/ui.js';
 
 export async function renderLibrary(appState) {
-  const recipes = await getAllRecipes();
-  await renderFilters(recipes);
+  // Only fetch if not already loaded or empty
+  if (!state.recipes || state.recipes.length === 0) {
+    state.recipes = await getAllRecipes();
+  }
+
+  await renderFilters(state.recipes);
   await renderRecipes(appState);
   setupLibraryListeners();
 }
@@ -165,7 +169,7 @@ async function renderFilters(recipes) {
 
 async function renderRecipes(state) {
   const grid = document.getElementById('recipesGrid');
-  let recipes = await getAllRecipes();
+  let recipes = [...state.recipes];
 
   // Apply search filter
   if (state.searchTerm) {
@@ -377,6 +381,13 @@ async function handleFilterChange(tag) {
 async function handleToggleFavorite(recipeId) {
   try {
     await toggleFavorite(recipeId);
+
+    // Update local state
+    const recipeIndex = state.recipes.findIndex(r => r.id === recipeId);
+    if (recipeIndex !== -1) {
+      state.recipes[recipeIndex].isFavorite = !state.recipes[recipeIndex].isFavorite;
+    }
+
     await renderRecipes(state);
     showToast('Preferiti aggiornati', 'success');
   } catch (error) {
@@ -690,6 +701,9 @@ async function showRecipeModal(recipeId) {
           await deleteRecipe(recipe.id);
           closeModal();
 
+          // Update local state
+          state.recipes = state.recipes.filter(r => r.id !== recipe.id);
+
           // Refresh data
           await renderRecipes(state);
           showToast('Ricetta eliminata con successo', 'success');
@@ -759,6 +773,12 @@ async function handleRegenerateImage(recipe) {
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error || 'Failed to update recipe');
+    }
+
+    // Update local state
+    const recipeIndex = state.recipes.findIndex(r => r.id === recipe.id);
+    if (recipeIndex !== -1) {
+      state.recipes[recipeIndex].imageUrl = newImageUrl;
     }
 
     console.log('Recipe updated successfully via API');
@@ -1027,6 +1047,13 @@ async function saveRecipeChanges(recipeId) {
       throw new Error(error.error || 'Failed to save changes');
     }
 
+    // Update local state with the returned recipe
+    const updatedRecipe = await response.json();
+    const recipeIndex = state.recipes.findIndex(r => r.id === recipeId);
+    if (recipeIndex !== -1) {
+      state.recipes[recipeIndex] = updatedRecipe;
+    }
+
     // Success!
     showToast('Modifiche salvate con successo!', 'success');
     await renderRecipes(state);
@@ -1245,6 +1272,12 @@ window.handleRecipePhotoUpload = async function (input, recipeId) {
             recipeImg.src = compressedBase64;
           }
 
+          // Update local state
+          const recipeIndex = state.recipes.findIndex(r => r.id === recipeId);
+          if (recipeIndex !== -1) {
+            state.recipes[recipeIndex].imageUrl = compressedBase64;
+          }
+
           // We need to refresh the grid. renderRecipes relies on 'state' var in Library.js 
           if (typeof renderRecipes === 'function' && typeof state !== 'undefined') {
             await renderRecipes(state);
@@ -1290,6 +1323,12 @@ window.handleDeleteRecipeImage = async function (recipeId) {
     if (recipeImg) {
       // Set to placeholder or let onerror handle it
       recipeImg.src = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%232a2f4a%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2250%22>🍕</text></svg>';
+    }
+
+    // Update local state
+    const recipeIndex = state.recipes.findIndex(r => r.id === recipeId);
+    if (recipeIndex !== -1) {
+      state.recipes[recipeIndex].imageUrl = null;
     }
 
     // Refresh grid
