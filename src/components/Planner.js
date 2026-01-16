@@ -1820,8 +1820,15 @@ async function submitNewPizzaNight() {
 }
 
 async function viewPizzaNightDetails(nightId) {
-  const night = await import('../modules/database.js').then(m => m.getPizzaNightById(nightId));
+  const [night, allRecipes] = await Promise.all([
+    import('../modules/database.js').then(m => m.getPizzaNightById(nightId)),
+    import('../modules/database.js').then(m => m.getAllRecipes())
+  ]);
+
   if (!night) return;
+
+  // Create a map for faster recipe lookup
+  const recipeMap = new Map(allRecipes.map(r => [r.id, r]));
 
   let guestNames = [];
   let guestsWithEmail = [];
@@ -1844,10 +1851,10 @@ async function viewPizzaNightDetails(nightId) {
       .filter(g => g && g.phone);
   }
 
-  // Calculate ingredient counts
+  // Calculate ingredient counts (using cached recipes)
   const availableIngredients = night.availableIngredients || [];
-  const fullIngredientsList = await generateShoppingList(night.selectedPizzas, night.selectedDough, []);
-  const toBuyIngredientsList = await generateShoppingList(night.selectedPizzas, night.selectedDough, availableIngredients);
+  const fullIngredientsList = await generateShoppingList(night.selectedPizzas, night.selectedDough, [], recipeMap);
+  const toBuyIngredientsList = await generateShoppingList(night.selectedPizzas, night.selectedDough, availableIngredients, recipeMap);
 
   const totalIngredientsCount = Object.values(fullIngredientsList).reduce((sum, list) => sum + list.length, 0);
   const toBuyCount = Object.values(toBuyIngredientsList).reduce((sum, list) => sum + list.length, 0);
@@ -1935,9 +1942,9 @@ async function viewPizzaNightDetails(nightId) {
             <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">🍕 Pizze Selezionate</h4>
             ${night.selectedPizzas.length > 0 ? `
             <ul style="list-style: none; padding: 0;">
-              ${await Promise.all(night.selectedPizzas.map(async (pizza, index) => {
-      // Fetch recipe to get favorite status
-      const recipe = await import('../modules/database.js').then(m => m.getRecipeById(pizza.recipeId)).catch(() => null);
+              ${night.selectedPizzas.map((pizza, index) => {
+      // Use cached recipe from map
+      const recipe = recipeMap.get(pizza.recipeId);
       const isFavorite = recipe ? recipe.isFavorite : false;
       const isFirst = index === 0;
       const isLast = index === night.selectedPizzas.length - 1;
@@ -1974,7 +1981,7 @@ async function viewPizzaNightDetails(nightId) {
                   <span style="color: var(--color-accent-light); font-weight: 700;">×${pizza.quantity}</span>
                 </li>
               `;
-    })).then(results => results.join(''))}
+    }).join('')}
             </ul>
           ` : '<p class="text-muted">Nessuna pizza selezionata</p>'}
           </div>

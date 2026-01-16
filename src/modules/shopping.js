@@ -11,9 +11,10 @@ import { DOUGH_RECIPES } from '../utils/constants.js';
  * @param {Array} selectedPizzas - Array of { recipeId, quantity }
  * @param {String} selectedDough - Type of dough selected for the night
  * @param {Array} availableIngredients - Array of ingredient names already available
+ * @param {Object|Map} cachedRecipes - Optional map/object of pre-fetched recipes {id: recipe}
  * @returns {Object} Grouped shopping list by category
  */
-export async function generateShoppingList(selectedPizzas, selectedDough = null, availableIngredients = []) {
+export async function generateShoppingList(selectedPizzas, selectedDough = null, availableIngredients = [], cachedRecipes = null) {
     if (!selectedPizzas || selectedPizzas.length === 0) {
         return {};
     }
@@ -53,9 +54,24 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
         return ing;
     };
 
-    // Fetch all recipes
+    // Fetch all recipes (or use cache)
     const recipes = await Promise.all(
-        selectedPizzas.map(item => getRecipeById(item.recipeId))
+        selectedPizzas.map(async (item) => {
+            // Check cache first
+            if (cachedRecipes) {
+                // Handle both Map and Object
+                if (cachedRecipes instanceof Map && cachedRecipes.has(item.recipeId)) {
+                    return cachedRecipes.get(item.recipeId);
+                } else if (cachedRecipes[item.recipeId]) {
+                    return cachedRecipes[item.recipeId];
+                } else if (Array.isArray(cachedRecipes)) {
+                    const found = cachedRecipes.find(r => r.id === item.recipeId);
+                    if (found) return found;
+                }
+            }
+            // Fallback to fetch
+            return await getRecipeById(item.recipeId);
+        })
     );
 
     // Get quantities

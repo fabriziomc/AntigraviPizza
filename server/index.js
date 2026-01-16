@@ -47,6 +47,11 @@ app.use('/api', (req, res, next) => {
         return next();
     }
 
+    // Skip authentication for health endpoint
+    if (req.path === '/health') {
+        return next();
+    }
+
     // Skip authentication for guest endpoints
     if (req.path.startsWith('/guest/')) {
         console.log(`[INDEX.JS] Skipping auth for guest endpoint: ${req.path}`);

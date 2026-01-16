@@ -2,7 +2,7 @@
 // DASHBOARD COMPONENT
 // ============================================
 
-import { getAllRecipes, getAllPizzaNights, getUpcomingPizzaNights, getFavoriteRecipes } from '../modules/database.js';
+import { getAllRecipes, getAllPizzaNights } from '../modules/database.js';
 import { formatDateShort } from '../utils/helpers.js';
 import { getUser } from '../modules/auth.js';
 
@@ -10,30 +10,40 @@ export async function renderDashboard(state) {
   // Get current user
   const user = getUser();
   const userName = user?.name || 'Utente';
-  
+
   // Update welcome message
   const pageDescription = document.querySelector('#dashboard-view .page-description');
   if (pageDescription) {
     pageDescription.textContent = `Benvenuto, ${userName}! 🍕`;
   }
 
-  // Render stats
-  await renderStats();
+  try {
+    // Optimization: Fetch data once
+    const [recipes, pizzaNights] = await Promise.all([
+      getAllRecipes(),
+      getAllPizzaNights()
+    ]);
 
-  // Render recent recipes
-  await renderRecentRecipes();
+    // Render stats
+    renderStats(recipes, pizzaNights);
 
-  // Render upcoming nights
-  await renderUpcomingNights();
+    // Render recent recipes
+    renderRecentRecipes(recipes);
+
+    // Render upcoming nights
+    renderUpcomingNights(pizzaNights);
+  } catch (error) {
+    console.error('Error loading dashboard data:', error);
+  }
 }
 
-async function renderStats() {
+function renderStats(recipes, pizzaNights) {
   const statsGrid = document.getElementById('statsGrid');
 
-  const recipes = await getAllRecipes();
-  const pizzaNights = await getAllPizzaNights();
-  const favorites = await getFavoriteRecipes();
-  const upcoming = await getUpcomingPizzaNights();
+  // Calculate derived stats locally to avoid extra API calls
+  const favorites = recipes.filter(r => r.isFavorite);
+  const now = Date.now();
+  const upcoming = pizzaNights.filter(night => night.date >= now && night.status === 'planned');
 
   statsGrid.innerHTML = `
     <div class="stat-card">
@@ -59,12 +69,11 @@ async function renderStats() {
   `;
 }
 
-async function renderRecentRecipes() {
+function renderRecentRecipes(recipes) {
   const container = document.getElementById('recentRecipes');
-  const recipes = await getAllRecipes();
 
   // Sort by date added, most recent first
-  const recent = recipes
+  const recent = [...recipes]
     .sort((a, b) => b.dateAdded - a.dateAdded)
     .slice(0, 5);
 
@@ -91,9 +100,13 @@ async function renderRecentRecipes() {
   `;
 }
 
-async function renderUpcomingNights() {
+function renderUpcomingNights(pizzaNights) {
   const container = document.getElementById('upcomingNights');
-  const upcoming = await getUpcomingPizzaNights();
+
+  const now = Date.now();
+  const upcoming = pizzaNights
+    .filter(night => night.date >= now && night.status === 'planned')
+    .sort((a, b) => a.date - b.date);
 
   if (upcoming.length === 0) {
     container.innerHTML = `
