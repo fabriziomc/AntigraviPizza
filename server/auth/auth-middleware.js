@@ -12,7 +12,11 @@ export function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
+    console.log(`🛡️ [AuthMiddleware] Checking auth for: ${req.method} ${req.path}`);
+    console.log(`🛡️ [AuthMiddleware] Auth header present: ${!!authHeader}, Token present: ${!!token}`);
+
     if (!token) {
+        console.warn(`⛔ [AuthMiddleware] No token found for ${req.path}`);
         return res.status(401).json({ error: 'Access token required' });
     }
 

@@ -624,20 +624,25 @@ function setupEventListeners() {
 
 
   // Export Database (download backup from server)
+  // Export Database (download backup from server)
   document.getElementById('btnExportDB').addEventListener('click', async () => {
+    // Check authentication first
+    const { isAuthenticated } = await import('../modules/auth.js');
+    if (!isAuthenticated()) {
+      showToast('⚠️ Devi effettuare il login per esportare i dati', 'warning');
+      return;
+    }
+
     try {
       showToast('💾 Creazione backup in corso...', 'info');
 
-      const response = await fetch('/api/backup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
+      // Use client-side export wrapper which handles authentication correctly
+      // This ensures we only export data for the logged-in user
+      const backupData = await exportData();
 
-      const result = await response.json();
-
-      if (result.success && result.backup) {
+      if (backupData && backupData.data) {
         // Download the backup data
-        const blob = new Blob([JSON.stringify(result.backup, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -646,14 +651,14 @@ function setupEventListeners() {
         a.click();
         document.body.removeChild(a);
 
-        // NOTE: We intentionally do NOT revoke the blob URL.
-        // Revoking too early causes empty/corrupted downloads.
-        // The browser will automatically clean up when the page is closed.
-        // This is the recommended approach for download operations.
+        const counts = {
+          recipes: backupData.data.recipes ? backupData.data.recipes.length : 0,
+          pizzaNights: backupData.data.pizzaNights ? backupData.data.pizzaNights.length : 0
+        };
 
-        showToast(`✅ Backup scaricato! ${result.counts.recipes} ricette, ${result.counts.pizzaNights} serate`, 'success');
+        showToast(`✅ Backup scaricato! ${counts.recipes} ricette, ${counts.pizzaNights} serate`, 'success');
       } else {
-        throw new Error(result.error || 'Backup failed');
+        throw new Error('Backup failed: No data returned');
       }
     } catch (error) {
       console.error('Export failed:', error);
@@ -690,28 +695,32 @@ function setupEventListeners() {
         try {
           const backupData = JSON.parse(event.target.result);
 
-          // Send backup data to server for restore
-          const response = await fetch('/api/restore', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(backupData)
-          });
+          // Use client-side import wrapper which handles authentication correctly
+          // This ensures we import data for the logged-in user and preserve structure
+          const { importData } = await import('../modules/database.js');
+          const result = await importData(backupData);
 
-          const result = await response.json();
+          // Calculate total successes
+          const successCount = (result.recipes || 0) + (result.pizzaNights || 0);
 
-          if (result.success) {
-            showToast(`✅ Database ripristinato! ${result.counts.recipes} ricette, ${result.counts.pizzaNights} serate`, 'success');
+          if (successCount >= 0) { // Check if it ran (even with 0 if empty)
+            showToast(`✅ Database ripristinato! ${result.recipes} ricette, ${result.pizzaNights} serate`, 'success');
+
+            if (result.errors && result.errors.length > 0) {
+              console.warn('Import errors:', result.errors);
+              showToast(`⚠️ ${result.errors.length} errori durante l'import (vedi console)`, 'warning');
+            }
 
             // Refresh app data
             setTimeout(() => {
               window.location.reload();
             }, 1500);
           } else {
-            throw new Error(result.error || 'Restore failed');
+            throw new Error('Restore returned invalid results');
           }
         } catch (err) {
-          console.error('Import parse error:', err);
-          showToast('❌ File di backup non valido o corrotto', 'error');
+          console.error('Import process error:', err);
+          showToast('❌ Errore durante l\'import: ' + err.message, 'error');
         }
       };
       reader.readAsText(file);
@@ -761,14 +770,10 @@ function setupEventListeners() {
 
           showToast(`✅ Reset completato: ${recipes.length} ricette e ${nights.length} serate eliminate`, 'success');
 
-          // Use unified seed endpoint
+          // Use unified seed endpoint via authenticated wrapper
+          const { seedDatabase } = await import('../modules/database.js');
           showToast('🌱 Ripopolamento dati base in corso...', 'info');
-          const response = await fetch('/api/seed', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-          });
-
-          const result = await response.json();
+          const result = await seedDatabase();
 
           if (result.success) {
             showToast(
@@ -805,16 +810,14 @@ function setupEventListeners() {
         try {
           showToast('🌱 Ripristino dati base in corso...', 'info');
 
-          const response = await fetch('/api/seed', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-          });
+          // Use authenticated seed function
+          const { seedDatabase } = await import('../modules/database.js');
+          const result = await seedDatabase();
 
-          const result = await response.json();
-
-          if (result.success) {
+          if (result && (result.success || result.results)) { // Handle various success shapes
+            const stats = result.results || result;
             showToast(
-              `✅ Dati base ripristinati! ${result.results.categories} categorie, ${result.results.ingredients} ingredienti, ${result.results.preparations} preparazioni`,
+              `✅ Dati base ripristinati! ${stats.categories || '?'} categorie, ${stats.ingredients || '?'} ingredienti, ${stats.preparations || '?'} preparazioni`,
               'success'
             );
 
@@ -823,13 +826,13 @@ function setupEventListeners() {
               window.location.reload();
             }, 2000);
           } else {
-            throw new Error(result.error || 'Reseed failed');
+            throw new Error(result.error || 'Seed failed');
           }
         } catch (error) {
           console.error('Reseed failed:', error);
           showToast('❌ Errore durante il ripristino: ' + error.message, 'error');
         }
-      })
+      });
   });
 
 

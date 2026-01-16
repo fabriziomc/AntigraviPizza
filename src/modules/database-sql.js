@@ -13,6 +13,7 @@ const API_URL = '/api';
  */
 function authFetch(url, options = {}) {
     const token = getToken();
+    console.log(`📡 [authFetch] Requesting: ${url}, Token present: ${!!token}, Token length: ${token ? token.length : 0}`);
     return fetch(url, {
         ...options,
         headers: {
@@ -302,25 +303,315 @@ export async function initCombinations(defaultCombinations) {
 export async function exportData() {
     const recipes = await getAllRecipes();
     const pizzaNights = await getAllPizzaNights();
+    const guests = await getAllGuests();
+    const preparations = await getAllPreparations();
+    const ingredients = await getAllIngredients();
+    const combinations = await getAllCombinations();
+    const categories = await getAllCategories();
+
     return {
-        version: 1,
-        exportDate: Date.now(),
-        recipes,
-        pizzaNights
+        version: '2.0',
+        timestamp: new Date().toISOString(),
+        data: {
+            recipes,
+            pizzaNights,
+            guests,
+            preparations: preparations.filter(p => p.isCustom), // Only export custom preparations
+            ingredients: ingredients.filter(i => i.isCustom),   // Only export custom ingredients
+            combinations,
+            categories
+        }
     };
 }
 
-export async function importData(data) {
-    // Implement import logic similar to local DB
-    // Loop and POST
-    // For brevity, leaving as TODO or simple loop
-    return { recipesImported: 0, pizzaNightsImported: 0, errors: [] };
+export async function importData(backupData) {
+    if (!backupData || !backupData.data) {
+        throw new Error('Invalid backup data format');
+    }
+
+    const { recipes, pizzaNights, guests, preparations, ingredients, combinations } = backupData.data;
+    const results = {
+        recipes: 0,
+        pizzaNights: 0,
+        guests: 0,
+        preparations: 0,
+        ingredients: 0,
+        errors: []
+    };
+
+    try {
+        // 1. Clear existing data
+        console.log('🧹 [importData] Clearing existing data...');
+        await clearAllData();
+
+        // Map to store oldId -> newId mappings
+        const idMap = {
+            guests: {},
+            recipes: {},
+            ingredients: {},
+            preparations: {}
+        };
+
+        // 2. Import Custom Ingredients (Regenerate IDs)
+        if (ingredients && Array.isArray(ingredients)) {
+            for (const item of ingredients) {
+                if (item.isCustom) {
+                    const oldId = item.id;
+                    const newId = generateUUID();
+                    idMap.ingredients[oldId] = newId;
+
+                    const newItem = { ...item, id: newId };
+
+                    try {
+                        await authFetch(`${API_URL}/ingredients`, {
+                            method: 'POST',
+                            body: JSON.stringify(newItem)
+                        });
+                        results.ingredients++;
+                    } catch (e) {
+                        // console.warn('Skipping ingredient:', item.name);
+                    }
+                }
+            }
+        }
+
+        // 3. Import Custom Preparations (Regenerate IDs)
+        // Note: Preparations might use Ingredients. We should update those references too.
+        if (preparations && Array.isArray(preparations)) {
+            for (const item of preparations) {
+                if (item.isCustom) {
+                    const oldId = item.id;
+                    const newId = generateUUID();
+                    idMap.preparations[oldId] = newId;
+
+                    // Update ingredients inside preparation
+                    let updatedIngredients = item.ingredients || [];
+                    if (Array.isArray(updatedIngredients)) {
+                        updatedIngredients = updatedIngredients.map(ing => ({
+                            ...ing,
+                            id: idMap.ingredients[ing.id] || ing.id
+                        }));
+                    }
+
+                    const newItem = {
+                        ...item,
+                        id: newId,
+                        ingredients: updatedIngredients
+                    };
+
+                    try {
+                        await authFetch(`${API_URL}/preparations`, {
+                            method: 'POST',
+                            body: JSON.stringify(newItem)
+                        });
+                        results.preparations++;
+                    } catch (e) {
+                        // console.warn('Skipping preparation:', item.name);
+                    }
+                }
+            }
+        }
+
+        // 4. Import Guests (Regenerate IDs)
+        if (guests && Array.isArray(guests)) {
+            for (const item of guests) {
+                const oldId = item.id;
+                const newId = generateUUID(); // Generate new ID
+                idMap.guests[oldId] = newId;
+
+                const newItem = { ...item, id: newId };
+
+                try {
+                    await authFetch(`${API_URL}/guests`, {
+                        method: 'POST',
+                        body: JSON.stringify(newItem)
+                    });
+                    results.guests++;
+                } catch (e) {
+                    console.warn('Failed to import guest:', item.name, e);
+                    results.errors.push(`Guest: ${item.name} (${e.message})`);
+                }
+            }
+        }
+
+        // 5. Import Recipes (Regenerate IDs & Update internal refs)
+        if (recipes && Array.isArray(recipes)) {
+            for (const item of recipes) {
+                const oldId = item.id;
+                const newId = generateUUID();
+                idMap.recipes[oldId] = newId;
+
+                // Update Base Ingredients
+                let updatedBaseIngredients = item.baseIngredients || [];
+                if (Array.isArray(updatedBaseIngredients)) {
+                    updatedBaseIngredients = updatedBaseIngredients.map(ing => ({
+                        ...ing,
+                        id: idMap.ingredients[ing.id] || ing.id
+                    }));
+                }
+
+                // Update Preparations references
+                let updatedPreparations = item.preparations || [];
+                if (Array.isArray(updatedPreparations)) {
+                    updatedPreparations = updatedPreparations.map(prep => ({
+                        ...prep,
+                        id: idMap.preparations[prep.id] || prep.id
+                    }));
+                }
+
+                // Update Toppings (During Bake)
+                let updatedToppingsDuring = item.toppingsDuringBake || [];
+                if (Array.isArray(updatedToppingsDuring)) {
+                    updatedToppingsDuring = updatedToppingsDuring.map(ing => ({
+                        ...ing,
+                        id: idMap.ingredients[ing.id] || ing.id
+                    }));
+                }
+
+                // Update Toppings (Post Bake)
+                let updatedToppingsPost = item.toppingsPostBake || [];
+                if (Array.isArray(updatedToppingsPost)) {
+                    updatedToppingsPost = updatedToppingsPost.map(ing => ({
+                        ...ing,
+                        id: idMap.ingredients[ing.id] || ing.id
+                    }));
+                }
+
+                const newItem = {
+                    ...item,
+                    id: newId,
+                    baseIngredients: updatedBaseIngredients,
+                    preparations: updatedPreparations,
+                    toppingsDuringBake: updatedToppingsDuring,
+                    toppingsPostBake: updatedToppingsPost
+                };
+
+                try {
+                    await authFetch(`${API_URL}/recipes`, {
+                        method: 'POST',
+                        body: JSON.stringify(newItem)
+                    });
+                    results.recipes++;
+                } catch (e) {
+                    console.warn('Failed to import recipe:', item.name, e);
+                    results.errors.push(`Recipe: ${item.name} (${e.message})`);
+                }
+            }
+        }
+
+        // 6. Import Pizza Nights (Regenerate IDs & Update Refs)
+        if (pizzaNights && Array.isArray(pizzaNights)) {
+            for (const item of pizzaNights) {
+                // Update Selected Pizzas (Recipe IDs)
+                let updatedPizzas = [];
+                if (item.selectedPizzas && Array.isArray(item.selectedPizzas)) {
+                    updatedPizzas = item.selectedPizzas.map(pid => idMap.recipes[pid] || pid);
+                }
+
+                // Update Selected Guests (Guest IDs)
+                let updatedGuests = [];
+                if (item.selectedGuests && Array.isArray(item.selectedGuests)) {
+                    updatedGuests = item.selectedGuests.map(gid => idMap.guests[gid] || gid);
+                }
+
+                // Update Available Ingredients in Pizza Night (if stored by ID)
+                // Assuming it's a list of IDs? Check schema.
+                // db-adapter parsePizzaNight: JSON.parse(record.availableIngredients || '[]')
+                // Usually it's a list of IDs selected for the night.
+                let updatedAvailableIngredients = item.availableIngredients || [];
+                if (Array.isArray(updatedAvailableIngredients)) {
+                    // Check if it's strings (IDs) or objects
+                    if (updatedAvailableIngredients.length > 0 && typeof updatedAvailableIngredients[0] === 'string') {
+                        updatedAvailableIngredients = updatedAvailableIngredients.map(iid => idMap.ingredients[iid] || iid);
+                    } else if (updatedAvailableIngredients.length > 0 && typeof updatedAvailableIngredients[0] === 'object') {
+                        updatedAvailableIngredients = updatedAvailableIngredients.map(ing => ({
+                            ...ing,
+                            id: idMap.ingredients[ing.id] || ing.id
+                        }));
+                    }
+                }
+
+                const newItem = {
+                    ...item,
+                    id: generateUUID(), // New ID for Night
+                    selectedPizzas: updatedPizzas,
+                    selectedGuests: updatedGuests,
+                    availableIngredients: updatedAvailableIngredients
+                };
+
+                try {
+                    await authFetch(`${API_URL}/pizza-nights`, {
+                        method: 'POST',
+                        body: JSON.stringify(newItem)
+                    });
+                    results.pizzaNights++;
+                } catch (e) {
+                    console.warn('Failed to import pizza night:', item.name, e);
+                    results.errors.push(`Pizza Night: ${item.name} (${e.message})`);
+                }
+            }
+        }
+
+        // 7. Import Combinations (Regenerate IDs just in case)
+        if (combinations && Array.isArray(combinations)) {
+            for (const item of combinations) {
+                try {
+                    const newItem = { ...item, id: generateUUID() };
+                    await authFetch(`${API_URL}/combinations`, {
+                        method: 'POST',
+                        body: JSON.stringify(newItem)
+                    });
+                } catch (e) {
+                    // Ignore combination errors
+                }
+            }
+        }
+
+        return results;
+
+    } catch (error) {
+        console.error('Import failed:', error);
+        throw error;
+    }
 }
 
 export async function clearAllData() {
-    // Not implemented for safety in SQL mode
-    console.warn('Clear all data not implemented for SQL mode');
-    return false;
+    console.log('⚠️ [clearAllData] Starting wipe of user data...');
+    try {
+        // Delete Pizza Nights
+        const nights = await getAllPizzaNights();
+        for (const night of nights) {
+            await deletePizzaNight(night.id);
+        }
+
+        // Delete Recipes
+        const recipes = await getAllRecipes();
+        for (const recipe of recipes) {
+            await deleteRecipe(recipe.id);
+        }
+
+        // Delete Guests
+        const guests = await getAllGuests();
+        for (const guest of guests) {
+            await deleteGuest(guest.id);
+        }
+
+        // Delete Combinations
+        const combinations = await getAllCombinations();
+        for (const combo of combinations) {
+            await deleteCombination(combo.id);
+        }
+
+        // Note: We don't delete Ingredients/Preparations individually to avoid deleting system ones accidentally
+        // or because filtering "custom only" is safer via import.
+        // If we want to clean custom ones, we'd need to fetch and filter.
+
+        console.log('✅ [clearAllData] Wipe complete.');
+        return true;
+    } catch (error) {
+        console.error('Failed to clear data:', error);
+        throw new Error('Failed to clear existing data before import');
+    }
 }
 
 // ============================================
@@ -551,5 +842,13 @@ export async function resetArchetypeWeights() {
     });
     if (!response.ok) throw new Error('Failed to reset archetype weights');
     return response.json();
+}
+
+export async function seedDatabase() {
+    const response = await authFetch(`${API_URL}/seed`, {
+        method: 'POST'
+    });
+    if (!response.ok) throw new Error('Failed to seed database');
+    return await response.json();
 }
 

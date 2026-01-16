@@ -1820,14 +1820,27 @@ async function submitNewPizzaNight() {
 }
 
 async function viewPizzaNightDetails(nightId) {
-  const night = await import('../modules/database.js').then(m => m.getPizzaNightById(nightId));
+  // Use Promise.all to fetch independent data in parallel
+  const [night, allGuests] = await Promise.all([
+    import('../modules/database.js').then(m => m.getPizzaNightById(nightId)),
+    getAllGuests()
+  ]);
+
   if (!night) return;
+
+  // Ensure recipes are loaded in state for synchronous lookup
+  if (!state.recipes || state.recipes.length === 0) {
+    state.recipes = await getAllRecipes();
+  }
+
+  // Create a map for O(1) access to recipes
+  const recipeMap = new Map(state.recipes.map(r => [r.id, r]));
 
   let guestNames = [];
   let guestsWithEmail = [];
   let guestsWithPhone = [];
+
   if (night.selectedGuests && night.selectedGuests.length > 0) {
-    const allGuests = await getAllGuests();
     guestNames = night.selectedGuests.map(guestId => {
       const guest = allGuests.find(g => g.id === guestId);
       return guest ? guest.name : 'Ospite rimosso';
@@ -1844,10 +1857,13 @@ async function viewPizzaNightDetails(nightId) {
       .filter(g => g && g.phone);
   }
 
-  // Calculate ingredient counts
+  // Calculate ingredient counts - these can run in parallel too
   const availableIngredients = night.availableIngredients || [];
-  const fullIngredientsList = await generateShoppingList(night.selectedPizzas, night.selectedDough, []);
-  const toBuyIngredientsList = await generateShoppingList(night.selectedPizzas, night.selectedDough, availableIngredients);
+
+  const [fullIngredientsList, toBuyIngredientsList] = await Promise.all([
+    generateShoppingList(night.selectedPizzas, night.selectedDough, [], recipeMap),
+    generateShoppingList(night.selectedPizzas, night.selectedDough, availableIngredients, recipeMap)
+  ]);
 
   const totalIngredientsCount = Object.values(fullIngredientsList).reduce((sum, list) => sum + list.length, 0);
   const toBuyCount = Object.values(toBuyIngredientsList).reduce((sum, list) => sum + list.length, 0);
@@ -1935,9 +1951,9 @@ async function viewPizzaNightDetails(nightId) {
             <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">🍕 Pizze Selezionate</h4>
             ${night.selectedPizzas.length > 0 ? `
             <ul style="list-style: none; padding: 0;">
-              ${await Promise.all(night.selectedPizzas.map(async (pizza, index) => {
-      // Fetch recipe to get favorite status
-      const recipe = await import('../modules/database.js').then(m => m.getRecipeById(pizza.recipeId)).catch(() => null);
+              ${night.selectedPizzas.map((pizza, index) => {
+      // Use synchronous lookup from state.recipes map
+      const recipe = recipeMap.get(pizza.recipeId);
       const isFavorite = recipe ? recipe.isFavorite : false;
       const isFirst = index === 0;
       const isLast = index === night.selectedPizzas.length - 1;
@@ -1974,7 +1990,7 @@ async function viewPizzaNightDetails(nightId) {
                   <span style="color: var(--color-accent-light); font-weight: 700;">×${pizza.quantity}</span>
                 </li>
               `;
-    })).then(results => results.join(''))}
+    }).join('')}
             </ul>
           ` : '<p class="text-muted">Nessuna pizza selezionata</p>'}
           </div>
@@ -2074,6 +2090,13 @@ async function viewPizzaNightDetails(nightId) {
           try {
             const db = await import('../modules/database.js');
             await db.toggleFavorite(rid);
+
+            // Check if we need to update our cached recipes to reflect the change
+            const recipeIndex = state.recipes.findIndex(r => r.id === rid);
+            if (recipeIndex >= 0) {
+              state.recipes[recipeIndex].isFavorite = !state.recipes[recipeIndex].isFavorite;
+            }
+
             // Re-render details to show updated star
             await viewPizzaNightDetails(nid);
           } catch (error) {

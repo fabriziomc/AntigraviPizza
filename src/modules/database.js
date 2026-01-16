@@ -43,6 +43,7 @@ export const getPreparationById = activeDB.getPreparationById;
 export const updatePreparation = activeDB.updatePreparation;
 export const deletePreparation = activeDB.deletePreparation;
 export const seedPreparations = activeDB.seedPreparations;
+export const seedDatabase = activeDB.seedDatabase;
 
 // Ingredients
 export const getAllIngredients = activeDB.getAllIngredients;
