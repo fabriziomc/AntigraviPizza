@@ -8,6 +8,7 @@ import { getRecipeDoughType } from '../utils/doughHelper.js';
 import { debounce, showToast } from '../utils/helpers.js';
 import { state } from '../store.js';
 import { openModal, closeModal } from '../modules/ui.js';
+import { getToken } from '../modules/auth.js';
 
 export async function renderLibrary(appState) {
   // Only fetch if not already loaded or empty
@@ -766,7 +767,10 @@ async function handleRegenerateImage(recipe) {
     console.log('Updating recipe in database via API...');
     const response = await fetch(`/api/recipes/${recipe.id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`
+      },
       body: JSON.stringify({ imageUrl: newImageUrl })
     });
 
@@ -1247,7 +1251,7 @@ window.handleRecipePhotoUpload = async function (input, recipeId) {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
+              'Authorization': `Bearer ${getToken()}`
             },
             body: JSON.stringify({ imageBase64: compressedBase64 })
           });
@@ -1312,7 +1316,10 @@ window.handleDeleteRecipeImage = async function (recipeId) {
     // We update with imageUrl = null to reset it
     const response = await fetch(`/api/recipes/${recipeId}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`
+      },
       body: JSON.stringify({ imageUrl: null })
     });
 

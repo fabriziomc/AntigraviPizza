@@ -3,6 +3,8 @@
 // This avoids CORS issues and keeps API tokens secure on the server
 
 import fetch from 'node-fetch';
+import express from 'express';
+
 
 /**
  * Generate image using Hugging Face API (server-side)
@@ -42,6 +44,13 @@ async function generateWithHuggingFace(prompt, token) {
     return `data:image/png;base64,${base64Image}`;
 }
 
+
+
+/**
+ * Generate image using AI Horde (server-side)
+ */
+
+
 /**
  * POST /api/generate-image
  * Generate pizza image using AI providers
@@ -64,6 +73,8 @@ export default async function generateImageRoute(req, res) {
                 imageUrl = await generateWithHuggingFace(prompt, token);
                 break;
 
+
+
             default:
                 return res.status(400).json({ error: 'Invalid provider' });
         }
@@ -74,7 +85,7 @@ export default async function generateImageRoute(req, res) {
         console.error('Image generation error:', error);
         res.status(500).json({
             error: 'Image generation failed',
-            message: error.message
+            message: error.message.includes('timed out') ? 'Generation timed out (Service is busy)' : error.message
         });
     }
 }

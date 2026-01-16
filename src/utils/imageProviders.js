@@ -1,21 +1,20 @@
 // ============================================
 
 import { getUserSettings } from '../modules/database.js';
+import { getToken } from '../modules/auth.js';
 
 /**
  * Provider configuration
- * Priority order: Segmind > DeepAI > AI Horde > Pollinations
+ * Priority order: Segmind > DeepAI > AI Horde
  */
 const PROVIDERS = {
-    GEMINI: 'gemini',           // Google Gemini - 50 free images/day
-    AI_HORDE: 'ai_horde',        // Community-powered - free but slow
+    GEMINI: 'gemini',           // Google Gemini - 15 RPM (free)
     SEGMIND: 'segmind',          // Not free anymore
     DEEPAI: 'deepai',            // Not free
-    POLLINATIONS: 'pollinations'  // Not free anymore
 };
 
 const PROVIDER_CONFIG = {
-    timeout: 60000, // 60 seconds for Pollinations
+    timeout: 60000, // 60 seconds
     maxRetries: 3,
     retryDelay: 2000 // 2 seconds between retries
 };
@@ -25,10 +24,8 @@ const PROVIDER_CONFIG = {
  */
 const providerStatus = {
     [PROVIDERS.GEMINI]: { available: true, lastError: null, failCount: 0 },
-    [PROVIDERS.AI_HORDE]: { available: true, lastError: null, failCount: 0 },
     [PROVIDERS.SEGMIND]: { available: true, lastError: null, failCount: 0 },
     [PROVIDERS.DEEPAI]: { available: true, lastError: null, failCount: 0 },
-    [PROVIDERS.POLLINATIONS]: { available: true, lastError: null, failCount: 0 }
 };
 
 /**
@@ -48,8 +45,8 @@ async function generateWithGemini(prompt, options = {}) {
         throw new Error('Google Gemini API key not configured. Please add it in Settings.');
     }
 
-    // Using Gemini 2.5 Flash Image: 100 free images/day, 2-5 requests/min
-    const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
+    // Using Imagen 3.0 Generate 002 as requested by user specs
+    const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict';
 
     const response = await fetch(apiUrl, {
         method: 'POST',
@@ -58,13 +55,15 @@ async function generateWithGemini(prompt, options = {}) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            contents: [{
-                parts: [{
-                    text: prompt
-                }]
-            }],
-            generationConfig: {
-                responseModalities: ["IMAGE"]  // Required for image generation
+            instances: [
+                {
+                    prompt: prompt
+                }
+            ],
+            parameters: {
+                sampleCount: 1,
+                aspectRatio: "1:1",
+                outputMimeType: "image/jpeg"
             }
         }),
         signal: AbortSignal.timeout(PROVIDER_CONFIG.timeout)
@@ -72,22 +71,32 @@ async function generateWithGemini(prompt, options = {}) {
 
     if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Google Gemini API error: ${response.status} - ${errorText}`);
+        if (response.status === 429) {
+            throw new Error(`Google Gemini/Imagen API error: 429 - Quota Exceeded (Non-Retriable)`);
+        }
+        throw new Error(`Google Gemini/Imagen API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
 
-    // Extract base64 image from response
-    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
-        const imagePart = data.candidates[0].content.parts.find(part => part.inlineData);
-        if (imagePart && imagePart.inlineData) {
-            const mimeType = imagePart.inlineData.mimeType || 'image/png';
-            const base64Data = imagePart.inlineData.data;
-            return `data:${mimeType};base64,${base64Data}`;
+    // Extract base64 image from Imagen response
+    if (data.predictions && data.predictions[0]) {
+        // Imagen usually returns bytesBase64Encoded or similar
+        const prediction = data.predictions[0];
+        const base64Data = prediction.bytesBase64Encoded;
+
+        if (base64Data) {
+            return `data:image/png;base64,${base64Data}`;
+        }
+
+        // Fallback for different response structures
+        if (prediction.mimeType && prediction.bytesBase64Encoded) {
+            return `data:${prediction.mimeType};base64,${prediction.bytesBase64Encoded}`;
         }
     }
 
-    throw new Error('No image data in Gemini response');
+    console.error('Unexpected Imagen response structure:', data);
+    throw new Error('No image data in Imagen response');
 }
 
 /**
@@ -161,115 +170,8 @@ async function generateWithDeepAI(prompt, options = {}) {
  * Generate image using AI Horde (free, community-powered)
  * No API key required
  */
-async function generateWithAIHorde(prompt, options = {}) {
-    const seed = options.seed || Date.now();
 
-    // Step 1: Submit generation request
-    const submitResponse = await fetch('https://stablehorde.net/api/v2/generate/async', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'apikey': '0000000000' // Anonymous key
-        },
-        body: JSON.stringify({
-            prompt: prompt,
-            params: {
-                cfg_scale: 7.5,
-                denoising_strength: 1.0,
-                seed: seed.toString(),
-                height: 576,  // Must be multiple of 64 for AI Horde
-                width: 768,   // Must be multiple of 64 for AI Horde
-                steps: 30,
-                n: 1
-            },
-            nsfw: false,
-            trusted_workers: false,
-            models: ['stable_diffusion']
-        }),
-        signal: AbortSignal.timeout(PROVIDER_CONFIG.timeout)
-    });
 
-    if (!submitResponse.ok) {
-        throw new Error(`AI Horde submit failed: ${submitResponse.status}`);
-    }
-
-    const submitData = await submitResponse.json();
-    const requestId = submitData.id;
-
-    // Step 2: Poll for completion (max 90 seconds for community queue)
-    const maxPolls = 90;  // Increased timeout for community-powered generation
-    const pollInterval = 1000; // 1 second
-
-    for (let i = 0; i < maxPolls; i++) {
-        await sleep(pollInterval);
-
-        const checkResponse = await fetch(`https://stablehorde.net/api/v2/generate/check/${requestId}`, {
-            signal: AbortSignal.timeout(5000)
-        });
-
-        if (!checkResponse.ok) continue;
-
-        const checkData = await checkResponse.json();
-
-        if (checkData.done) {
-            // Get the final result
-            const statusResponse = await fetch(`https://stablehorde.net/api/v2/generate/status/${requestId}`, {
-                signal: AbortSignal.timeout(5000)
-            });
-
-            if (!statusResponse.ok) {
-                throw new Error('AI Horde status check failed');
-            }
-
-            const statusData = await statusResponse.json();
-
-            if (statusData.generations && statusData.generations.length > 0) {
-                // Return the image URL directly (AI Horde provides a temporary URL)
-                return statusData.generations[0].img;
-            }
-        }
-    }
-
-    throw new Error('AI Horde generation timeout');
-}
-
-/**
- * Generate image using Pollinations.ai
- * Current provider, used as fallback
- */
-async function generateWithPollinations(prompt, options = {}) {
-    const seed = options.seed || Date.now();
-    const encodedPrompt = encodeURIComponent(prompt);
-
-    // Use turbo model since flux is down
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=turbo&width=800&height=600&nologo=true&seed=${seed}`;
-
-    // Verify the image content is not a rate-limit placeholder
-    const response = await fetch(imageUrl, {
-        method: 'GET',
-        signal: AbortSignal.timeout(15000)
-    });
-
-    if (!response.ok) {
-        throw new Error(`Pollinations image not accessible: ${response.status}`);
-    }
-
-    const blob = await response.blob();
-
-    // Check for the "RATE LIMITS" placeholder signature (identified as 1,396,239 bytes)
-    const PLATEHOLDER_SIZE = 1396239;
-    if (blob.size === PLATEHOLDER_SIZE) {
-        throw new Error('Pollinations rate limit reached (returned placeholder image)');
-    }
-
-    // Convert to Data URL to persist the actual image and avoid reloading issues
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-    });
-}
 
 /**
  * Mark provider as failed and update status
@@ -313,17 +215,12 @@ async function tryProvider(provider, prompt, options) {
             case PROVIDERS.GEMINI:
                 imageUrl = await generateWithGemini(prompt, options);
                 break;
-            case PROVIDERS.AI_HORDE:
-                imageUrl = await generateWithAIHorde(prompt, options);
-                break;
+
             case PROVIDERS.SEGMIND:
                 imageUrl = await generateWithSegmind(prompt, options);
                 break;
             case PROVIDERS.DEEPAI:
                 imageUrl = await generateWithDeepAI(prompt, options);
-                break;
-            case PROVIDERS.POLLINATIONS:
-                imageUrl = await generateWithPollinations(prompt, options);
                 break;
             default:
                 throw new Error(`Unknown provider: ${provider}`);
@@ -379,8 +276,7 @@ export async function generatePizzaImage(pizzaName, ingredients = [], options = 
     // Define provider priority order
     // Using Google Gemini (50 free images/day) + AI Horde (free but slower)
     const providerOrder = [
-        PROVIDERS.GEMINI,       // Primary - 50 free images/day (fast & high quality)
-        PROVIDERS.AI_HORDE      // Backup - unlimited free (slower, community-powered)
+        PROVIDERS.GEMINI,       // Primary - 15 RPM
     ];
 
     const errors = [];
@@ -400,6 +296,12 @@ export async function generatePizzaImage(pizzaName, ingredients = [], options = 
                 return result;
             } catch (error) {
                 errors.push({ provider, attempt, error: error.message });
+
+                // Fail fast on quota exceeded or explicit non-retriable errors
+                if (error.message.includes('Quota Exceeded') || error.message.includes('Non-Retriable')) {
+                    console.log(`⛔ ${provider} failed with non-retriable error: ${error.message}`);
+                    break; // Stop retrying this provider
+                }
 
                 if (attempt < PROVIDER_CONFIG.maxRetries) {
                     const delay = PROVIDER_CONFIG.retryDelay * attempt;

@@ -56,6 +56,9 @@ router.use((req, res, next) => {
     }
 });
 
+// Generate Image Proxy Route
+router.post('/generate-image', generateImageRoute);
+
 // ==========================================
 // RECIPES
 // ==========================================
