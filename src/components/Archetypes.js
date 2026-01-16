@@ -4,6 +4,7 @@
 
 import { getAllRecipes } from '../modules/database.js';
 import { ARCHETYPES } from '../utils/constants.js';
+import { state } from '../store.js';
 
 
 // Criteri di selezione ingredienti per archetipo
@@ -103,10 +104,9 @@ const ARCHETYPE_TAG_CRITERIA = {
 
 /**
  * Get statistics for each archetype
+ * @param {Array} recipes - List of recipes
  */
-async function getArchetypeStats() {
-    const recipes = await getAllRecipes();
-
+function getArchetypeStats(recipes) {
     const stats = {};
 
     // Initialize stats for all archetypes
@@ -135,9 +135,15 @@ async function getArchetypeStats() {
 export async function renderArchetypes() {
     const archetypesView = document.getElementById('archetypes-view');
 
-    const stats = await getArchetypeStats();
-    const totalRecipes = await getAllRecipes();
-    const totalArchetypeRecipes = totalRecipes.filter(r => r.recipeSource === 'archetype' || r.recipeSource === 'combination').length;
+    // Only fetch if not already loaded or empty
+    if (!state.recipes || state.recipes.length === 0) {
+        state.recipes = await getAllRecipes();
+    }
+    const recipes = state.recipes;
+
+    const stats = getArchetypeStats(recipes);
+    const totalRecipes = recipes.length;
+    const totalArchetypeRecipes = recipes.filter(r => r.recipeSource === 'archetype' || r.recipeSource === 'combination').length;
 
     archetypesView.innerHTML = `
         <div class="archetypes-container fade-in">
@@ -227,7 +233,11 @@ export async function renderArchetypes() {
  * View recipes for a specific archetype
  */
 window.viewArchetypeRecipes = async function (archetypeKey) {
-    const recipes = await getAllRecipes();
+    // Only fetch if not already loaded or empty
+    if (!state.recipes || state.recipes.length === 0) {
+        state.recipes = await getAllRecipes();
+    }
+    const recipes = state.recipes;
     const archetypeRecipes = recipes.filter(r => r.archetypeUsed === archetypeKey);
     const archetype = ARCHETYPES[archetypeKey];
 
