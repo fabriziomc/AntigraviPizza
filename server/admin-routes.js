@@ -106,4 +106,55 @@ router.put('/users/:id/role', authenticateToken, requireAdmin, async (req, res) 
     }
 });
 
+/**
+ * DELETE /api/admin/users/:id
+ * Delete user and all associated data
+ */
+router.delete('/users/:id', authenticateToken, requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    console.log(`🗑️ [ADMIN ROUTE] DELETE /users/${id} called by ${req.user?.email}`);
+
+    try {
+        // Prevent deleting self
+        if (req.user.id === id) {
+            console.warn(`   Self-deletion attempt by ${req.user.email}`);
+            return res.status(403).json({ error: 'Cannot delete your own account from the admin dashboard' });
+        }
+
+        // Fetch user to check role (to prevent deleting other admins if desired, or at least log it)
+        let targetUser;
+        if (isTurso) {
+            const result = await adapter.db.execute({
+                sql: "SELECT role FROM Users WHERE id = ?",
+                args: [id]
+            });
+            targetUser = result.rows[0];
+        } else {
+            targetUser = adapter.db.prepare("SELECT role FROM Users WHERE id = ?").get(id);
+        }
+
+        if (!targetUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Policy: Cannot delete other admins from here (use DB manually for that if needed)
+        // This is a safety measure requested by the user ("eliminare un utente (non admin)")
+        if (targetUser.role === 'admin') {
+            console.warn(`   Attempt to delete admin user ${id} restricted`);
+            return res.status(403).json({ error: 'Cannot delete other admin users' });
+        }
+
+        const result = await adapter.deleteUserWithData(id);
+
+        if (result.success) {
+            res.json({ success: true, message: 'User and all associated data deleted successfully' });
+        } else {
+            res.status(500).json({ error: 'Failed to delete user' });
+        }
+    } catch (error) {
+        console.error('❌ Delete user error:', error);
+        res.status(500).json({ error: 'Internal server error during user deletion' });
+    }
+});
+
 export default router;

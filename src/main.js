@@ -12,7 +12,7 @@ import './styles/live-mode.css';
 import './styles/settings-append.css';
 import './styles/archetypes.css';
 
-import { initDB, getAllRecipes, getAllPizzaNights, initCombinations, initSeedData, seedPreparations } from './modules/database.js';
+import { initDB, getAllRecipes, getAllPizzaNights, initCombinations, initSeedData, seedPreparations, getUserSettings, updateUserSettings } from './modules/database.js';
 import { NAV_ITEMS, VIEWS, FLAVOR_COMBINATIONS, PREPARATIONS } from './utils/constants.js';
 import { showToast } from './utils/helpers.js';
 import { state } from './store.js';
@@ -33,6 +33,7 @@ import { renderSettings } from './components/Settings.js';
 import { renderQRCodes } from './components/QRCodes.js';
 import { renderArchetypes } from './components/Archetypes.js';
 import { renderAdminDashboard } from './components/AdminDashboard.js';
+import { renderIntroduction } from './components/Introduction.js';
 
 console.log('✅ All imports loaded');
 
@@ -114,6 +115,19 @@ async function initApp() {
 
     console.log('✅ AntigraviPizza initialized successfully!');
 
+    // Check onboarding status
+    try {
+      const settings = await getUserSettings();
+      if (settings && settings.hasSeenOnboarding === 0) {
+        console.log('🍕 Showing onboarding for new user...');
+        setTimeout(() => {
+          renderIntroduction();
+        }, 1000); // Small delay for better UX after loading
+      }
+    } catch (onboardingError) {
+      console.warn('⚠️ Could not check onboarding status:', onboardingError.message);
+    }
+
     // Hide loading overlay
     const loadingOverlay = document.getElementById('loadingOverlay');
     if (loadingOverlay) {
@@ -194,6 +208,12 @@ function renderNavigation() {
   // Build Logout item
   const logoutItemHtml = `
     <li class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+      <a href="#" id="onboardingBtn" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: #94a3b8; text-decoration: none; border-radius: 0.5rem; transition: background-color 0.2s; cursor: pointer;">
+        <span style="font-size: 1.25rem;">📖</span>
+        <span>Guida</span>
+      </a>
+    </li>
+    <li class="nav-item">
       <a href="#" id="logoutBtn" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: var(--color-danger); text-decoration: none; border-radius: 0.5rem; transition: background-color 0.2s; cursor: pointer;">
         <span style="font-size: 1.25rem;">🚪</span>
         <span>Logout</span>
@@ -213,6 +233,15 @@ function renderNavigation() {
       if (confirm('Sei sicuro di voler uscire?')) {
         logout();
       }
+    });
+  }
+
+  // Add onboarding button click handler
+  const onboardingBtn = document.getElementById('onboardingBtn');
+  if (onboardingBtn) {
+    onboardingBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      renderIntroduction();
     });
   }
 }

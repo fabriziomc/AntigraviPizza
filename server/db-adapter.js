@@ -1590,14 +1590,15 @@ class DatabaseAdapter {
             geminiApiKey: null,
             segmindApiKey: null,
             defaultDough: null,
+            hasSeenOnboarding: 0,
             preferences: '{}'
         };
 
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
-                INSERT INTO Settings (id, userId, bringEmail, bringPassword, geminiModel, maxOvenTemp, geminiApiKey, segmindApiKey, defaultDough, preferences)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `);
+                    INSERT INTO Settings (id, userId, bringEmail, bringPassword, geminiModel, maxOvenTemp, geminiApiKey, segmindApiKey, defaultDough, hasSeenOnboarding, preferences)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `);
             stmt.run(
                 defaultSettings.id,
                 defaultSettings.userId,
@@ -1608,12 +1609,13 @@ class DatabaseAdapter {
                 defaultSettings.geminiApiKey,
                 defaultSettings.segmindApiKey,
                 defaultSettings.defaultDough,
+                defaultSettings.hasSeenOnboarding,
                 defaultSettings.preferences
             );
         } else {
             await this.db.execute({
-                sql: `INSERT INTO Settings (id, userId, bringEmail, bringPassword, geminiModel, maxOvenTemp, geminiApiKey, segmindApiKey, defaultDough, preferences)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                sql: `INSERT INTO Settings (id, userId, bringEmail, bringPassword, geminiModel, maxOvenTemp, geminiApiKey, segmindApiKey, defaultDough, hasSeenOnboarding, preferences)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 args: [
                     defaultSettings.id,
                     defaultSettings.userId,
@@ -1624,6 +1626,7 @@ class DatabaseAdapter {
                     defaultSettings.geminiApiKey,
                     defaultSettings.segmindApiKey,
                     defaultSettings.defaultDough,
+                    defaultSettings.hasSeenOnboarding,
                     defaultSettings.preferences
                 ]
             });
@@ -1663,7 +1666,7 @@ class DatabaseAdapter {
             existing = await this.createUserSettings(userId);
         }
 
-        const allowedFields = ['bringEmail', 'bringPassword', 'geminiModel', 'maxOvenTemp', 'geminiApiKey', 'segmindApiKey', 'defaultDough', 'preferences'];
+        const allowedFields = ['bringEmail', 'bringPassword', 'geminiModel', 'maxOvenTemp', 'geminiApiKey', 'segmindApiKey', 'defaultDough', 'hasSeenOnboarding', 'preferences'];
         const fields = [];
         const values = [];
 
@@ -1690,6 +1693,47 @@ class DatabaseAdapter {
         }
 
         return this.getUserSettings(userId);
+    }
+
+    async deleteUserWithData(userId) {
+        console.log(`🗑️ [DB] Performing full data cleanup for user: ${userId}`);
+
+        const tables = [
+            'Settings',
+            'Recipes',
+            'PizzaNights',
+            'Guests',
+            'Combinations',
+            'Preparations',
+            'Ingredients',
+            'Categories',
+            'ArchetypeWeights'
+        ];
+
+        if (this.isSQLite) {
+            // Use a transaction for SQLite
+            const deleteTx = this.db.transaction((id) => {
+                for (const table of tables) {
+                    this.db.prepare(`DELETE FROM ${table} WHERE userId = ?`).run(id);
+                }
+                this.db.prepare('DELETE FROM Users WHERE id = ?').run(id);
+            });
+            deleteTx(userId);
+        } else {
+            // Turso - use batch for atomicity
+            const batch = tables.map(table => ({
+                sql: `DELETE FROM ${table} WHERE userId = ?`,
+                args: [userId]
+            }));
+            batch.push({
+                sql: 'DELETE FROM Users WHERE id = ?',
+                args: [userId]
+            });
+            await this.db.batch(batch, "write");
+        }
+
+        console.log(`✅ Full cleanup completed for user: ${userId}`);
+        return { success: true };
     }
 
     async initializeUserDefaults(userId) {

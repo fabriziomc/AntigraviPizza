@@ -122,6 +122,16 @@ export async function renderAdminDashboard() {
                   >
                     🔄
                   </button>
+                  ${u.role !== 'admin' ? `
+                    <button 
+                      class="btn btn-ghost btn-sm" 
+                      style="padding: 0.2rem 0.4rem; font-size: 0.8rem; color: var(--color-error);"
+                      onclick="deleteUser('${u.id}', '${u.name}')"
+                      title="Elimina utente e dati"
+                    >
+                      🗑️
+                    </button>
+                  ` : ''}
                 ` : ''}
               </div>
             </td>
@@ -168,6 +178,36 @@ export async function renderAdminDashboard() {
         }
       } catch (error) {
         console.error('❌ Toggle role network error:', error);
+        alert(`Errore di rete: ${error.message}`);
+      }
+    };
+
+    window.deleteUser = async (userId, userName) => {
+      const confirmMsg = `⚠️ ATTENZIONE: Sei sicuro di voler eliminare l'utente "${userName}" e TUTTI i suoi dati (ricette, serate, ospiti, ecc..)?\n\nQuesta azione è IRREVERSIBILE.`;
+
+      if (!confirm(confirmMsg)) return;
+
+      const token = getToken();
+      console.log(`🗑️ [ADMIN] Deleting user ${userId} (${userName})`);
+
+      try {
+        const res = await fetch(`/api/admin/users/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (res.ok) {
+          alert(`Utente "${userName}" eliminato con successo.`);
+          renderAdminDashboard();
+        } else {
+          const err = await res.json().catch(() => ({}));
+          console.error('❌ User deletion failed:', err);
+          alert(`Errore nell'eliminazione: ${err.error || 'Operazione fallita'}`);
+        }
+      } catch (error) {
+        console.error('❌ Delete user network error:', error);
         alert(`Errore di rete: ${error.message}`);
       }
     };

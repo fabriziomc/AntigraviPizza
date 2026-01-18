@@ -769,6 +769,151 @@ a:hover {
   }
 }
 
+/* === ONBOARDING / INTRODUCTION === */
+.onboarding-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  z-index: 10000;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  animation: fadeInOnboarding 0.5s forwards;
+}
+
+.onboarding-overlay.closing {
+  animation: fadeOutOnboarding 0.5s forwards;
+}
+
+.onboarding-card {
+  background: rgba(255, 255, 255, 0.98);
+  width: 500px;
+  max-width: 90%;
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  position: relative;
+  transform: translateY(20px);
+  animation: slideUpOnboarding 0.5s 0.1s forwards;
+  color: var(--color-gray-900);
+}
+
+.onboarding-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 30px;
+}
+
+.progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  transition: all 0.3s;
+}
+
+.progress-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background: var(--color-accent);
+}
+
+.onboarding-icon {
+  font-size: 48px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 30px;
+}
+
+.onboarding-title {
+  font-size: 24px;
+  color: #111827;
+  margin-bottom: 16px;
+  font-weight: 700;
+  font-family: var(--font-heading);
+}
+
+.onboarding-text {
+  font-size: 16px;
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 35px;
+}
+
+.onboarding-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+  gap: 15px;
+}
+
+.btn-onboarding {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  flex: 1;
+}
+
+.btn-onboarding.primary {
+  background: var(--color-accent);
+  color: white;
+}
+
+.btn-onboarding.secondary {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.btn-onboarding:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+.onboarding-skip {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.onboarding-skip:hover {
+  color: #6b7280;
+  text-decoration: underline;
+}
+
+@keyframes fadeInOnboarding {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOutOnboarding {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideUpOnboarding {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 /* Utility Classes */
 .text-center {
   text-align: center;
