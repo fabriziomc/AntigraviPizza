@@ -74,7 +74,10 @@ export async function addRecipe(recipeData) {
         body: JSON.stringify(recipe)
     });
 
-    if (!response.ok) throw new Error('Failed to add recipe');
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to add recipe');
+    }
     return await response.json();
 }
 

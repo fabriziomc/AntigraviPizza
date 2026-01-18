@@ -5,6 +5,7 @@
 import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, getAllRecipes, getAllGuests, addGuest, updateGuest, deleteGuest, getRecipeById, getPizzaNightById, getUserSettings } from '../modules/database.js';
 import { formatDate, formatDateForInput, getNextSaturdayEvening, confirm, formatQuantity, showToast } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
+import { getUser } from '../modules/auth.js';
 import { getCookingInstructions } from '../utils/cookingCalculator.js';
 import { DOUGH_TYPES, DOUGH_RECIPES, PREPARATIONS, RECIPE_TAGS } from '../utils/constants.js';
 import { getRecipeDoughType } from '../utils/doughHelper.js';
@@ -1452,9 +1453,11 @@ function createPizzaNightCard(night) {
             Ripristina
           </button>
         `}
+          ${getUser()?.role === 'admin' ? `
           <button class="btn btn-ghost btn-sm btn-delete" data-night-id="${night.id}">
             <span>🗑️</span>
           </button>
+          ` : ''}
         </div>
       </div>
       `;

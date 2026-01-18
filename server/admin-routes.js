@@ -69,4 +69,41 @@ router.get('/users', authenticateToken, requireAdmin, async (req, res) => {
     }
 });
 
+/**
+ * PUT /api/admin/users/:id/role
+ * Update user role
+ */
+router.put('/users/:id/role', authenticateToken, requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    const { role } = req.body;
+    console.log(`🔐 [ADMIN ROUTE] PUT /users/${id}/role called by ${req.user?.email} (ID: ${req.user?.id})`);
+    try {
+        console.log(`   Requested Role: ${role}`);
+
+        if (!role || !['admin', 'user'].includes(role)) {
+            console.warn(`   Invalid role: ${role}`);
+            return res.status(400).json({ error: 'Invalid role' });
+        }
+
+        // Prevent self-demotion
+        if (req.user.id === id) {
+            console.warn(`   Self-demotion attempt by ${req.user.email} (ID: ${req.user.id} matches target ID: ${id})`);
+            return res.status(403).json({ error: 'Cannot change your own role' });
+        }
+
+        const success = await adapter.updateUserRoleById(id, role);
+        console.log(`   Update result for user ${id}: ${success}`);
+
+        if (success) {
+            res.json({ success: true, message: `User role updated to ${role}` });
+        } else {
+            console.warn(`   User with ID ${id} not found for update`);
+            res.status(404).json({ error: 'User not found' });
+        }
+    } catch (error) {
+        console.error('❌ Update role error:', error);
+        res.status(500).json({ error: 'Failed to update user role' });
+    }
+});
+
 export default router;

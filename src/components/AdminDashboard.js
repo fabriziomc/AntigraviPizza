@@ -102,15 +102,28 @@ export async function renderAdminDashboard() {
             </td>
             <td style="padding: 1rem;">${u.email}</td>
             <td style="padding: 1rem;">
-              <span style="
-                padding: 0.25rem 0.5rem; 
-                border-radius: 4px; 
-                font-size: 0.75rem; 
-                background: ${u.role === 'admin' ? 'var(--color-accent)' : 'rgba(255,255,255,0.1)'};
-                color: ${u.role === 'admin' ? '#fff' : 'var(--color-text)'};
-              ">
-                ${u.role || 'user'}
-              </span>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="
+                  padding: 0.25rem 0.5rem; 
+                  border-radius: 4px; 
+                  font-size: 0.75rem; 
+                  background: ${u.role === 'admin' ? 'var(--color-accent)' : 'rgba(255,255,255,0.1)'};
+                  color: ${u.role === 'admin' ? '#fff' : 'var(--color-text)'};
+                ">
+                  ${u.role || 'user'}
+                </span>
+                
+                ${u.id !== user.id ? `
+                  <button 
+                    class="btn btn-ghost btn-sm" 
+                    style="padding: 0.2rem 0.4rem; font-size: 0.8rem;"
+                    onclick="toggleUserRole('${u.id}', '${u.role}')"
+                    title="Cambia ruolo"
+                  >
+                    🔄
+                  </button>
+                ` : ''}
+              </div>
             </td>
             <td style="padding: 1rem; font-family: monospace; color: var(--color-gray-400);">
               ${new Date(u.createdAt).toLocaleDateString()}
@@ -122,6 +135,42 @@ export async function renderAdminDashboard() {
         `).join('');
       })
       .catch(err => console.error('Failed to load users', err));
+
+    window.toggleUserRole = async (userId, currentRole) => {
+      const newRole = currentRole === 'admin' ? 'user' : 'admin';
+      const confirmMsg = `Sei sicuro di voler cambiare il ruolo a ${newRole}?`;
+
+      if (!confirm(confirmMsg)) return;
+
+      const token = getToken();
+      console.log(`🌐 [ADMIN] Toggling role for ${userId}: ${currentRole} -> ${newRole}`);
+      console.log(`📡 URL: /api/admin/users/${userId}/role`);
+
+      try {
+        const res = await fetch(`/api/admin/users/${userId}/role`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ role: newRole })
+        });
+
+        console.log(`📥 Response status: ${res.status}`);
+
+        if (res.ok) {
+          renderAdminDashboard();
+        } else {
+          const err = await res.json().catch(() => ({}));
+          console.error('❌ Role toggle failed:', err);
+          const errText = JSON.stringify(err) === '{}' ? 'Errore 403 (Accesso Negato o Sessione Scaduta)' : (err.error || 'Operazione fallita');
+          alert(`Errore: ${errText}`);
+        }
+      } catch (error) {
+        console.error('❌ Toggle role network error:', error);
+        alert(`Errore di rete: ${error.message}`);
+      }
+    };
 
   } catch (error) {
     console.error('Dashboard error:', error);

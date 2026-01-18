@@ -87,6 +87,7 @@ export async function importSampleRecipes() {
     // Generate the requested number of recipes
     const newRecipes = await generateMultipleRecipes(numRecipes, suggestedIngredients);
     let imported = 0;
+    let lastError = null;
 
     for (const recipe of newRecipes) {
         try {
@@ -94,13 +95,16 @@ export async function importSampleRecipes() {
             imported++;
         } catch (error) {
             console.error('Failed to import generated recipe:', recipe.name, error);
+            lastError = error.message;
+            if (error.message.includes('licenza free')) break;
         }
     }
 
     if (imported > 0) {
         showToast(`${imported} nuove ricette gourmet generate! 🍕`, 'success');
     } else {
-        showToast('Nessuna ricetta generata', 'error');
+        const errorMsg = lastError || 'Nessuna ricetta generata';
+        showToast(errorMsg, 'error');
     }
 
     return imported;

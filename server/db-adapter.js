@@ -1512,6 +1512,72 @@ class DatabaseAdapter {
         }
     }
 
+    async updateUserRoleById(id, role) {
+        console.log(`🔐 [DB] Updating user ID ${id} to role: ${role}`);
+        const sql = 'UPDATE Users SET role = ? WHERE id = ?';
+
+        if (this.isSQLite) {
+            const stmt = this.db.prepare(sql);
+            const info = stmt.run(role, id);
+            return info.changes > 0;
+        } else {
+            const result = await this.db.execute({
+                sql: sql,
+                args: [role, id]
+            });
+            return result.rowsAffected > 0;
+        }
+    }
+
+    async setUserResetToken(email, token, expires) {
+        console.log(`🔐 [DB] Setting reset token for ${email}`);
+        const sql = 'UPDATE Users SET resetToken = ?, resetExpires = ? WHERE email = ?';
+
+        if (this.isSQLite) {
+            const stmt = this.db.prepare(sql);
+            const info = stmt.run(token, expires, email);
+            return info.changes > 0;
+        } else {
+            const result = await this.db.execute({
+                sql: sql,
+                args: [token, expires, email]
+            });
+            return result.rowsAffected > 0;
+        }
+    }
+
+    async getUserByResetToken(token) {
+        const sql = 'SELECT * FROM Users WHERE resetToken = ?';
+
+        if (this.isSQLite) {
+            const record = this.db.prepare(sql).get(token);
+            return record || null;
+        } else {
+            const result = await this.db.execute({
+                sql: sql,
+                args: [token]
+            });
+            return result.rows.length > 0 ? result.rows[0] : null;
+        }
+    }
+
+    async clearUserResetToken(userId) {
+        console.log(`🔐 [DB] Clearing reset token for user ${userId}`);
+        const sql = 'UPDATE Users SET resetToken = NULL, resetExpires = NULL WHERE id = ?';
+
+        if (this.isSQLite) {
+            const stmt = this.db.prepare(sql);
+            const info = stmt.run(userId);
+            return info.changes > 0;
+        } else {
+            const result = await this.db.execute({
+                sql: sql,
+                args: [userId]
+            });
+            return result.rowsAffected > 0;
+        }
+    }
+
     async createUserSettings(userId) {
         const settingsId = 'settings-' + userId;
         const defaultSettings = {
