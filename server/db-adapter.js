@@ -621,11 +621,11 @@ class DatabaseAdapter {
     async getAllPreparations(userId) {
         let preps;
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Preparations WHERE userId = ? ORDER BY name');
+            const stmt = this.db.prepare('SELECT * FROM Preparations WHERE (userId = ? OR userId IS NULL) ORDER BY name');
             preps = stmt.all(userId).map(r => this.parsePreparation(r));
         } else {
             const result = await this.db.execute({
-                sql: 'SELECT * FROM Preparations WHERE userId = ? ORDER BY name',
+                sql: 'SELECT * FROM Preparations WHERE (userId = ? OR userId IS NULL) ORDER BY name',
                 args: [userId]
             });
             preps = result.rows.map(r => this.parsePreparation(r));
@@ -805,7 +805,7 @@ class DatabaseAdapter {
 
     async getPreparationById(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Preparations WHERE id = ? AND userId = ?');
+            const stmt = this.db.prepare('SELECT * FROM Preparations WHERE id = ? AND (userId = ? OR userId IS NULL)');
             const prep = this.parsePreparation(stmt.get(id, userId));
             if (prep) {
                 prep.ingredients = await this.expandIngredients(prep.ingredients, userId);
@@ -813,7 +813,7 @@ class DatabaseAdapter {
             return prep;
         } else {
             // Turso
-            const result = await this.db.execute({ sql: 'SELECT * FROM Preparations WHERE id = ? AND userId = ?', args: [id, userId] });
+            const result = await this.db.execute({ sql: 'SELECT * FROM Preparations WHERE id = ? AND (userId = ? OR userId IS NULL)', args: [id, userId] });
             const prep = this.parsePreparation(result.rows[0]);
             if (prep) {
                 prep.ingredients = await this.expandIngredients(prep.ingredients, userId);
@@ -996,7 +996,7 @@ class DatabaseAdapter {
                 SELECT i.*, c.name as categoryName, c.icon as categoryIcon
                 FROM Ingredients i
                 LEFT JOIN Categories c ON i.categoryId = c.id
-                WHERE i.userId = ?
+                WHERE (i.userId = ? OR i.userId IS NULL)
                 ORDER BY c.displayOrder, i.name
             `);
             return stmt.all(userId).map(r => {
@@ -1011,7 +1011,7 @@ class DatabaseAdapter {
                     SELECT i.*, c.name as categoryName, c.icon as categoryIcon
                     FROM Ingredients i
                     LEFT JOIN Categories c ON i.categoryId = c.id
-                    WHERE i.userId = ?
+                    WHERE (i.userId = ? OR i.userId IS NULL)
                     ORDER BY c.displayOrder, i.name
                 `,
                 args: [userId]
@@ -1027,33 +1027,33 @@ class DatabaseAdapter {
 
     async getIngredientById(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE id = ? AND userId = ?');
+            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE id = ? AND (userId = ? OR userId IS NULL)');
             return this.parseIngredient(stmt.get(id, userId));
         } else {
             // Turso
-            const result = await this.db.execute({ sql: 'SELECT * FROM Ingredients WHERE id = ? AND userId = ?', args: [id, userId] });
+            const result = await this.db.execute({ sql: 'SELECT * FROM Ingredients WHERE id = ? AND (userId = ? OR userId IS NULL)', args: [id, userId] });
             return this.parseIngredient(result.rows[0]);
         }
     }
 
     async getIngredientsByCategory(category, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE category = ? AND userId = ? ORDER BY name');
+            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE category = ? AND (userId = ? OR userId IS NULL) ORDER BY name');
             return stmt.all(category, userId).map(r => this.parseIngredient(r));
         } else {
             // Turso
-            const result = await this.db.execute({ sql: 'SELECT * FROM Ingredients WHERE category = ? AND userId = ? ORDER BY name', args: [category, userId] });
+            const result = await this.db.execute({ sql: 'SELECT * FROM Ingredients WHERE category = ? AND (userId = ? OR userId IS NULL) ORDER BY name', args: [category, userId] });
             return result.rows.map(r => this.parseIngredient(r));
         }
     }
 
     async searchIngredients(searchQuery, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE name LIKE ? AND userId = ? ORDER BY name');
+            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE name LIKE ? AND (userId = ? OR userId IS NULL) ORDER BY name');
             return stmt.all(`%${searchQuery}%`, userId).map(r => this.parseIngredient(r));
         } else {
             // Turso
-            const result = await this.db.execute({ sql: 'SELECT * FROM Ingredients WHERE name LIKE ? AND userId = ? ORDER BY name', args: [`%${searchQuery}%`, userId] });
+            const result = await this.db.execute({ sql: 'SELECT * FROM Ingredients WHERE name LIKE ? AND (userId = ? OR userId IS NULL) ORDER BY name', args: [`%${searchQuery}%`, userId] });
             return result.rows.map(r => this.parseIngredient(r));
         }
     }
