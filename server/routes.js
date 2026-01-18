@@ -99,14 +99,25 @@ router.get('/recipes/:id', async (req, res) => {
 // CREATE recipe
 router.post('/recipes', async (req, res) => {
     try {
+        const userId = req.user.id;
+        const isAdmin = req.user.role === 'admin';
+
+        // Check recipe limit for non-admin users
+        if (!isAdmin) {
+            const currentRecipes = await dbAdapter.getAllRecipes(userId);
+            if (currentRecipes.length >= 100) {
+                return res.status(403).json({
+                    error: 'raggiunto limite massimo pizze per licenza free'
+                });
+            }
+        }
+
         console.log('📥 [POST /recipes] Received recipe data:', JSON.stringify(req.body, null, 2));
-        const recipe = await dbAdapter.createRecipe(req.body, req.user.id);
+        const recipe = await dbAdapter.createRecipe(req.body, userId);
         console.log('✅ [POST /recipes] Recipe created successfully:', recipe.id);
         res.status(201).json(recipe);
     } catch (err) {
         console.error('❌ [POST /recipes] Error creating recipe:', err);
-        console.error('❌ [POST /recipes] Error message:', err.message);
-        console.error('❌ [POST /recipes] Error stack:', err.stack);
         res.status(500).json({ error: err.message });
     }
 });
@@ -260,6 +271,18 @@ router.post('/import-recipe', async (req, res) => {
                 error: 'No recipes found in text',
                 hint: 'Make sure recipes are numbered (e.g., "1. Pizza Name")'
             });
+        }
+
+        // Check recipe limit for non-admin users
+        const userId = req.user.id;
+        const isAdmin = req.user.role === 'admin';
+        if (!isAdmin) {
+            const currentRecipes = await dbAdapter.getAllRecipes(userId);
+            if (currentRecipes.length + parsedRecipes.length > 100) {
+                return res.status(403).json({
+                    error: 'raggiunto limite massimo pizze per licenza free'
+                });
+            }
         }
 
         // Import all parsed recipes
@@ -512,7 +535,20 @@ router.get('/pizza-nights', async (req, res) => {
 
 router.post('/pizza-nights', async (req, res) => {
     try {
-        const night = await dbAdapter.createPizzaNight(req.body, req.user.id);
+        const userId = req.user.id;
+        const isAdmin = req.user.role === 'admin';
+
+        // Check pizza night limit for non-admin users
+        if (!isAdmin) {
+            const currentNights = await dbAdapter.getAllPizzaNights(userId);
+            if (currentNights.length >= 5) {
+                return res.status(403).json({
+                    error: 'Pizza night limit reached (max 5). Non-admin users cannot create more than 5 pizza nights.'
+                });
+            }
+        }
+
+        const night = await dbAdapter.createPizzaNight(req.body, userId);
         res.status(201).json(night);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -568,8 +604,7 @@ router.post('/pizza-nights/:id/send-invites', async (req, res) => {
 
         // Log environment configuration
         console.log('📧 Email Service Configuration:');
-        console.log('  - SMTP_USER:', process.env.SMTP_USER ? '✓ Set' : '✗ Missing');
-        console.log('  - SMTP_PASS:', process.env.SMTP_PASS ? '✓ Set' : '✗ Missing');
+        console.log('  - RESEND_API_KEY:', process.env.RESEND_API_KEY ? '✓ Set' : '✗ Missing');
         console.log('  - APP_URL:', process.env.APP_URL || 'Not set (using fallback)');
 
         console.log('🔵 [ROUTE /send-invites] Importing email-service.js...');
@@ -669,7 +704,17 @@ router.post('/pizza-nights/:id/send-invites', async (req, res) => {
 
 router.delete('/pizza-nights/:id', async (req, res) => {
     try {
-        await dbAdapter.deletePizzaNight(req.params.id, req.user.id);
+        const userId = req.user.id;
+        const isAdmin = req.user.role === 'admin';
+
+        // Prevent deletion for non-admin users
+        if (!isAdmin) {
+            return res.status(403).json({
+                error: 'Access denied. Only administrators can delete pizza nights.'
+            });
+        }
+
+        await dbAdapter.deletePizzaNight(req.params.id, userId);
         res.json({ message: 'Deleted' });
     } catch (err) {
         res.status(500).json({ error: err.message });

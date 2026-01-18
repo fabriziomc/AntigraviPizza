@@ -14,6 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set('trust proxy', 1); // For Render/Proxies
 const PORT = process.env.PORT || 3000;
 
 console.log('🔍 DEBUG INFO:');
@@ -103,7 +104,7 @@ app.use((req, res, next) => {
     }
 
     // Public routes that don't require authentication
-    const publicRoutes = ['/login.html', '/register.html', '/guest.html'];
+    const publicRoutes = ['/login.html', '/register.html', '/guest.html', '/forgot-password.html', '/reset-password.html'];
     if (publicRoutes.some(route => req.path.startsWith(route))) {
         return next();
     }

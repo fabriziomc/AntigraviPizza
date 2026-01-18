@@ -1,7 +1,9 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import { generateToken, authenticateToken } from './auth-middleware.js';
 import DatabaseAdapter from '../db-adapter.js';
+import { sendPasswordResetEmail, sendWelcomeEmail } from '../email-service.js';
 
 const router = express.Router();
 const dbAdapter = new DatabaseAdapter();
@@ -65,6 +67,12 @@ router.post('/register', async (req, res) => {
         const token = generateToken(user);
 
         console.log(`✅ New user registered: ${email}`);
+
+        // Send welcome email asynchronously
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        sendWelcomeEmail(user.email, user.name, baseUrl).catch(err => {
+            console.error('Failed to send welcome email:', err);
+        });
 
         res.status(201).json({
             token,
@@ -248,6 +256,73 @@ router.post('/change-password', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('Change password error:', error);
         res.status(500).json({ error: 'Failed to change password' });
+    }
+});
+
+/**
+ * POST /api/auth/forgot-password
+ * Request password reset
+ */
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ error: 'Email is required' });
+        }
+
+        const user = await dbAdapter.getUserByEmail(email.toLowerCase());
+        if (!user) {
+            // Return 200 even if user not found for security
+            return res.json({ message: 'Se l\'email è registrata, riceverai un link di reset.' });
+        }
+
+        const token = crypto.randomBytes(32).toString('hex');
+        const expires = Date.now() + 3600000; // 1 hour
+
+        await dbAdapter.setUserResetToken(user.email, token, expires);
+
+        const resetUrl = `${req.protocol}://${req.get('host')}/reset-password.html?token=${token}`;
+        await sendPasswordResetEmail(user.email, user.name, resetUrl);
+
+        res.json({ message: 'Se l\'email è registrata, riceverai un link di reset.' });
+    } catch (error) {
+        console.error('❌ Forgot password error:', error);
+
+        if (error.response) {
+            console.error('🔴 Resend error response:', await error.response.json());
+        }
+        res.status(500).json({ error: 'Operazione fallita: ' + error.message });
+    }
+});
+
+/**
+ * POST /api/auth/reset-password
+ * Reset password using token
+ */
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { token, password } = req.body;
+        if (!token || !password) {
+            return res.status(400).json({ error: 'Token and new password are required' });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({ error: 'La password deve essere di almeno 8 caratteri' });
+        }
+
+        const user = await dbAdapter.getUserByResetToken(token);
+        if (!user || user.resetExpires < Date.now()) {
+            return res.status(400).json({ error: 'Token non valido o scaduto' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await dbAdapter.updateUser(user.id, { password: hashedPassword });
+        await dbAdapter.clearUserResetToken(user.id);
+
+        res.json({ message: 'Password aggiornata con successo!' });
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({ error: 'Reset fallito' });
     }
 });
 
