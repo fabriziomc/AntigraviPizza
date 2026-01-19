@@ -272,9 +272,8 @@ export async function renderSettings() {
                 class="form-input" 
                 rows="10" 
                 placeholder="1. Nome Pizza
-Base: ingredienti base
-Top (In cottura): ingredienti in cottura
-Top (Post-cottura): ingredienti post cottura
+In cottura: ingredienti che vanno in forno
+Post-cottura: ingredienti aggiunti a crudo
 Perché funziona: descrizione
 
 2. Altra Pizza
@@ -282,7 +281,7 @@ Perché funziona: descrizione
                 style="font-family: monospace; font-size: 0.9rem;"
               ></textarea>
               <small class="text-muted" style="display: block; margin-top: 0.5rem;">
-                Formato: ricette numerate con sezioni Base, Top (In cottura), Top (Post-cottura), Perché funziona
+                Formato: ricette numerate con sezioni In cottura, Post-cottura, Perché funziona
               </small>
             </div>
 
