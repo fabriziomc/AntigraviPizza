@@ -152,6 +152,7 @@
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
 }
 
 /* Ingredient Form */
@@ -255,22 +256,40 @@
 /* Responsive */
 @media (max-width: 768px) {
   .ingredients-container {
-    padding: 1rem;
+    padding: 1rem 0.75rem;
   }
 
   .ingredients-list {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
   .filter-buttons {
-    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.75rem;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -0.5rem;
+    padding: 0 0.5rem 0.75rem 0.5rem;
   }
 
   .filter-btn {
-    width: 100%;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .ingredient-card {
+    padding: 1rem;
   }
 
   .form-row {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .ingredient-actions .btn {
+    flex: 1;
+    min-width: 120px;
   }
 }

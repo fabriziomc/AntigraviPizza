@@ -403,6 +403,13 @@
     margin-bottom: var(--space-8);
 }
 
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+}
+
 .stat-card {
     background: rgba(26, 31, 58, 0.6);
     backdrop-filter: blur(10px);
@@ -751,6 +758,26 @@
 
 .preparation-card-footer {
     margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.preparation-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+@media (max-width: 480px) {
+    .preparation-card {
+        padding: var(--space-4);
+    }
+
+    .preparation-card-actions .btn {
+        flex: 1;
+        min-width: 120px;
+    }
 }
 
 /* === PREPARATION MODAL === */

@@ -326,12 +326,16 @@ a:hover {
   margin-left: 280px;
   padding: var(--space-8);
   max-width: 1400px;
+  min-width: 0;
+  /* Critical for flex overflow */
 }
 
 /* View Container */
 .view {
   display: none;
   animation: fadeIn var(--transition-base);
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .view.active {
@@ -900,18 +904,35 @@ a:hover {
 }
 
 @keyframes fadeInOnboarding {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeOutOnboarding {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes slideUpOnboarding {
-  from { transform: translateY(40px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Utility Classes */
@@ -1023,6 +1044,8 @@ a:hover {
     margin-left: 0;
     padding: var(--space-4);
     padding-top: calc(var(--mobile-nav-height) + 1rem);
+    width: 100%;
+    overflow-x: hidden;
   }
 
   .grid-2,
@@ -1111,6 +1134,109 @@ a:hover {
   .page-title {
     font-size: var(--text-3xl);
   }
+}
+
+/* Admin Dashboard Styles - Applied on tablet and mobile */
+@media (max-width: 992px) {
+  #admin-view .admin-table {
+    min-width: 600px;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  /* Hide columns on mobile */
+  .admin-table th:nth-child(4),
+  .admin-table td:nth-child(4),
+  .admin-table th:nth-child(5),
+  .admin-table td:nth-child(5) {
+    display: none;
+  }
+
+  #admin-view .admin-table {
+    min-width: unset;
+  }
+
+  #admin-view .content-card {
+    padding: 1rem;
+  }
+}
+
+/* General Admin Classes (Always available) */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table th {
+  padding: 1rem;
+  color: var(--color-gray-400);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.user-name {
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.user-business {
+  font-size: 0.8rem;
+  color: var(--color-gray-500);
+}
+
+.user-role-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.role-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-gray-300);
+  font-weight: 600;
+}
+
+.role-badge.admin {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.btn-icon {
+  padding: 0.2rem 0.4rem !important;
+  font-size: 0.8rem !important;
+}
+
+.user-date {
+  font-family: monospace;
+  color: var(--color-gray-400);
 }
 
 /* Scrollbar Styling */

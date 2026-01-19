@@ -24,39 +24,39 @@ export async function renderAdminDashboard() {
     </div>
 
     <!-- Stats Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-      <div class="stat-card" style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 1rem; text-align: center;">
-        <div style="font-size: 2rem; margin-bottom: 0.5rem;">👥</div>
-        <div style="font-size: 2rem; font-weight: bold; color: var(--color-primary-light);" id="statUsers">-</div>
-        <div style="color: var(--color-gray-400);">Utenti Registrati</div>
+    <div class="stats-grid admin-stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value" id="statUsers">-</div>
+        <div class="stat-label">Utenti Registrati</div>
       </div>
-      <div class="stat-card" style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 1rem; text-align: center;">
-        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🍕</div>
-        <div style="font-size: 2rem; font-weight: bold; color: var(--color-accent-light);" id="statPizzas">-</div>
-        <div style="color: var(--color-gray-400);">Serate Pizza</div>
+      <div class="stat-card">
+        <div class="stat-icon">🍕</div>
+        <div class="stat-value" id="statPizzas">-</div>
+        <div class="stat-label">Serate Pizza</div>
       </div>
-      <div class="stat-card" style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 1rem; text-align: center;">
-        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📖</div>
-        <div style="font-size: 2rem; font-weight: bold; color: var(--color-success);" id="statRecipes">-</div>
-        <div style="color: var(--color-gray-400);">Ricette Totali</div>
+      <div class="stat-card">
+        <div class="stat-icon">📖</div>
+        <div class="stat-value" id="statRecipes">-</div>
+        <div class="stat-label">Ricette Totali</div>
       </div>
     </div>
 
     <!-- Users Table -->
     <div class="content-card">
-      <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+      <h2 class="mb-6 flex items-center gap-2">
         <span>📜</span> Lista Utenti
       </h2>
       
-      <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+      <div class="table-responsive">
+        <table class="admin-table">
           <thead>
-            <tr style="border-bottom: 2px solid rgba(255, 255, 255, 0.1);">
-              <th style="padding: 1rem; color: var(--color-gray-400);">Nome / Business</th>
-              <th style="padding: 1rem; color: var(--color-gray-400);">Email</th>
-              <th style="padding: 1rem; color: var(--color-gray-400);">Ruolo</th>
-              <th style="padding: 1rem; color: var(--color-gray-400);">Data Registrazione</th>
-              <th style="padding: 1rem; color: var(--color-gray-400);">Ultimo Login</th>
+            <tr>
+              <th>Nome / Business</th>
+              <th>Email</th>
+              <th>Ruolo</th>
+              <th>Data Registrazione</th>
+              <th>Ultimo Login</th>
             </tr>
           </thead>
           <tbody id="usersTableBody">
@@ -95,28 +95,21 @@ export async function renderAdminDashboard() {
         }
         const tbody = document.getElementById('usersTableBody');
         tbody.innerHTML = users.map(u => `
-          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-            <td style="padding: 1rem;">
-              <div style="font-weight: 600;">${u.name}</div>
-              ${u.businessName ? `<div style="font-size: 0.8rem; color: var(--color-gray-500);">${u.businessName}</div>` : ''}
+          <tr>
+            <td>
+              <div class="user-name">${u.name}</div>
+              ${u.businessName ? `<div class="user-business">${u.businessName}</div>` : ''}
             </td>
-            <td style="padding: 1rem;">${u.email}</td>
-            <td style="padding: 1rem;">
-              <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <span style="
-                  padding: 0.25rem 0.5rem; 
-                  border-radius: 4px; 
-                  font-size: 0.75rem; 
-                  background: ${u.role === 'admin' ? 'var(--color-accent)' : 'rgba(255,255,255,0.1)'};
-                  color: ${u.role === 'admin' ? '#fff' : 'var(--color-text)'};
-                ">
+            <td>${u.email}</td>
+            <td>
+              <div class="user-role-container">
+                <span class="role-badge ${u.role === 'admin' ? 'admin' : ''}">
                   ${u.role || 'user'}
                 </span>
                 
                 ${u.id !== user.id ? `
                   <button 
-                    class="btn btn-ghost btn-sm" 
-                    style="padding: 0.2rem 0.4rem; font-size: 0.8rem;"
+                    class="btn btn-ghost btn-sm btn-icon" 
                     onclick="toggleUserRole('${u.id}', '${u.role}')"
                     title="Cambia ruolo"
                   >
@@ -124,8 +117,7 @@ export async function renderAdminDashboard() {
                   </button>
                   ${u.role !== 'admin' ? `
                     <button 
-                      class="btn btn-ghost btn-sm" 
-                      style="padding: 0.2rem 0.4rem; font-size: 0.8rem; color: var(--color-error);"
+                      class="btn btn-ghost btn-sm btn-icon text-error" 
                       onclick="deleteUser('${u.id}', '${u.name}')"
                       title="Elimina utente e dati"
                     >
@@ -135,10 +127,10 @@ export async function renderAdminDashboard() {
                 ` : ''}
               </div>
             </td>
-            <td style="padding: 1rem; font-family: monospace; color: var(--color-gray-400);">
+            <td class="user-date">
               ${new Date(u.createdAt).toLocaleDateString()}
             </td>
-            <td style="padding: 1rem; font-family: monospace; color: var(--color-gray-400);">
+            <td class="user-date">
               ${u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : '-'}
             </td>
           </tr>
