@@ -31,9 +31,8 @@ export async function importRecipe(parsedRecipe, dbAdapter) {
     try {
         // Collect all ingredients from all sections
         const allIngredients = [
-            ...parsedRecipe.baseIngredients,
-            ...parsedRecipe.toppingsDuringBake,
-            ...parsedRecipe.toppingsPostBake
+            ...(parsedRecipe.ingredientiCottura || []),
+            ...(parsedRecipe.ingredientiPostCottura || [])
         ];
 
         // Process each ingredient

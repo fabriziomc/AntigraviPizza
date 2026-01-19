@@ -4,9 +4,8 @@
  * 
  * Expected format:
  * 1. Nome Pizza
- * Base: ingredienti base
- * Top (In cottura): ingredienti in cottura (optional)
- * Top (Post-cottura): ingredienti post cottura
+ * In cottura: ingredienti che vanno in forno
+ * Post-cottura: ingredienti aggiunti a crudo dopo la cottura
  * Perché funziona: descrizione
  */
 
@@ -51,18 +50,17 @@ function parseRecipeBlock(block) {
     const recipe = {
         name: '',
         description: '',
-        baseIngredients: [],
-        toppingsDuringBake: [],
-        toppingsPostBake: [],
+        ingredientiCottura: [],      // Ingredients that go in the oven (merged Base + In cottura)
+        ingredientiPostCottura: [],  // Ingredients added after baking
         instructions: [],
-        archetype: 'gourmet', // Default archetype
-        dough: 'nero', // Default for carbone vegetale recipes
+        archetype: 'gourmet',
+        dough: 'nero',
         tags: ['gourmet']
     };
 
     // Parse first line for name (format: "1. Nome Pizza" or just "Nome Pizza")
     const firstLine = lines[0];
-    const nameMatch = firstLine.match(/^\d+\.\s*(.+?)(?:\s*-\s*Base:|$)/);
+    const nameMatch = firstLine.match(/^\d+\.\s*(.+?)(?:\s*-\s*In cottura:|$)/);
     if (nameMatch) {
         recipe.name = nameMatch[1].trim();
     } else {
@@ -76,23 +74,18 @@ function parseRecipeBlock(block) {
         const line = lines[i];
 
         // Check for section headers
-        if (line.startsWith('Base:')) {
-            currentSection = 'base';
-            const content = line.replace('Base:', '').trim();
+        // Accept both "In cottura:" and "Top (In cottura):" for backward compatibility
+        if (line.match(/^(In cottura:|Top\s*\(In cottura\):)/i)) {
+            currentSection = 'cottura';
+            const content = line.replace(/^(In cottura:|Top\s*\(In cottura\):)/i, '').trim();
             if (content) {
-                recipe.baseIngredients = parseIngredientList(content);
+                recipe.ingredientiCottura = parseIngredientList(content);
             }
-        } else if (line.match(/Top\s*\(In cottura\):/i)) {
-            currentSection = 'during';
-            const content = line.replace(/Top\s*\(In cottura\):/i, '').trim();
-            if (content) {
-                recipe.toppingsDuringBake = parseIngredientList(content);
-            }
-        } else if (line.match(/Top\s*\(Post-cottura\):|Dopo\s+cottura:/i)) {
+        } else if (line.match(/^(Post-cottura:|Top\s*\(Post-cottura\):|Dopo\s+cottura:)/i)) {
             currentSection = 'post';
-            const content = line.replace(/Top\s*\(Post-cottura\):|Dopo\s+cottura:/i, '').trim();
+            const content = line.replace(/^(Post-cottura:|Top\s*\(Post-cottura\):|Dopo\s+cottura:)/i, '').trim();
             if (content) {
-                recipe.toppingsPostBake = parseIngredientList(content);
+                recipe.ingredientiPostCottura = parseIngredientList(content);
             }
         } else if (line.match(/Perché funziona:/i)) {
             currentSection = 'description';
@@ -236,20 +229,15 @@ function generateInstructions(recipe) {
 
     instructions.push('Stendere l\'impasto nero al carbone vegetale');
 
-    if (recipe.baseIngredients.length > 0) {
-        const baseNames = recipe.baseIngredients.map(i => i.originalName).join(', ');
-        instructions.push(`Distribuire sulla base: ${baseNames}`);
-    }
-
-    if (recipe.toppingsDuringBake.length > 0) {
-        const duringNames = recipe.toppingsDuringBake.map(i => i.originalName).join(', ');
-        instructions.push(`Aggiungere prima della cottura: ${duringNames}`);
+    if (recipe.ingredientiCottura && recipe.ingredientiCottura.length > 0) {
+        const cotturaNames = recipe.ingredientiCottura.map(i => i.originalName).join(', ');
+        instructions.push(`Distribuire sulla base: ${cotturaNames}`);
     }
 
     instructions.push('Infornare a 450°C per 90 secondi (o secondo il proprio forno)');
 
-    if (recipe.toppingsPostBake.length > 0) {
-        const postNames = recipe.toppingsPostBake.map(i => i.originalName).join(', ');
+    if (recipe.ingredientiPostCottura && recipe.ingredientiPostCottura.length > 0) {
+        const postNames = recipe.ingredientiPostCottura.map(i => i.originalName).join(', ');
         instructions.push(`Guarnire dopo la cottura con: ${postNames}`);
     }
 
