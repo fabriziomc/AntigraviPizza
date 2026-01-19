@@ -144,7 +144,7 @@ async function showNewPizzaNightModal() {
         
         <div class="form-group">
           <label class="form-label">Numero Ospiti *</label>
-          <input type="number" class="form-input" name="guestCount" required value="${DEFAULT_GUEST_COUNT}" min="1">
+          <input type="number" class="form-input" name="guestCount" id="guestCountInput" required value="0" min="0">
         </div>
 
         <div class="form-group">
@@ -500,18 +500,21 @@ function setupGuestCountListener() {
 
 /**
  * Update dough calculator visibility and calculation
- * Shows calculator when both dough type and pizzas are selected
+ * Shows calculator when dough type is selected AND (pizzas selected OR guest count > 0)
  */
 function updateDoughCalculator() {
   const doughSelect = document.getElementById('selectedDoughType');
   const doughCalculator = document.getElementById('doughCalculator');
+  const guestCountInput = document.getElementById('guestCountInput');
 
   if (!doughSelect || !doughCalculator) return;
 
   const selectedDoughType = doughSelect.value;
   const selectedPizzas = getSelectedPizzasCount();
+  const guestCount = guestCountInput ? parseInt(guestCountInput.value) || 0 : 0;
 
-  if (selectedDoughType && selectedPizzas > 0) {
+  // Show calculator if dough selected AND (pizzas selected OR guests entered)
+  if (selectedDoughType && (selectedPizzas > 0 || guestCount > 0)) {
     doughCalculator.style.display = 'block';
     calculateAndRenderDough();
   } else {
@@ -613,6 +616,7 @@ function setupDoughCalculatorListeners() {
   const weightInput = document.getElementById('doughWeightPerPizza');
   const extraBallsInput = document.getElementById('doughExtraBalls');
   const pizzaSelection = document.getElementById('pizzaSelection');
+  const guestCountInput = document.getElementById('guestCountInput');
 
   // Update on weight change
   if (weightInput) {
@@ -634,6 +638,13 @@ function setupDoughCalculatorListeners() {
       if (e.target.type === 'checkbox') {
         updateDoughCalculator();
       }
+    });
+  }
+
+  // Update when guest count changes
+  if (guestCountInput) {
+    guestCountInput.addEventListener('input', () => {
+      updateDoughCalculator();
     });
   }
 }
