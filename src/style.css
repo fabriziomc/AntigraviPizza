@@ -235,16 +235,38 @@ button:focus-visible {
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .onboarding-content {
-    max-height: 300px;
+    max-height: 250px;
   }
-  
+
+  .onboarding-card {
+    padding: 24px;
+    max-height: 85vh;
+  }
+
+  .onboarding-icon {
+    width: 70px;
+    height: 70px;
+    font-size: 36px;
+    margin-bottom: 20px;
+  }
+
+  .onboarding-title {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
   .section-subtitle {
     font-size: 0.9rem;
   }
-  
+
   .section-points li,
   .section-description,
   .onboarding-tip {
     font-size: 0.8125rem;
+  }
+
+  .btn-onboarding {
+    padding: 10px 18px;
+    font-size: 14px;
   }
 }
