@@ -1121,6 +1121,17 @@ a:hover {
     width: 100%;
   }
 
+  /* Preparations responsive fixes */
+  .preparations-grid,
+  .preparation-card {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .preparation-card {
+    padding: var(--space-3);
+  }
+
   /* Modal responsive fixes */
   .modal,
   .modal-content {

@@ -254,55 +254,6 @@ export async function renderSettings() {
 
         <div id="section-recipe-management" class="settings-section-content" style="grid-column: 1 / -1; display: none;">
 
-        <!-- Recipe Import Section -->
-        <section class="settings-card">
-          <div class="card-header">
-            <span class="card-icon">📝</span>
-            <h2>Importa Ricette</h2>
-          </div>
-          <div class="card-body">
-            <p class="card-description">
-              Importa ricette da testo in italiano. Il sistema riconoscerà automaticamente ingredienti e preparazioni.
-            </p>
-            
-            <div class="form-group">
-              <label for="recipeTextInput" class="form-label">Incolla il testo delle ricette</label>
-              <textarea 
-                id="recipeTextInput" 
-                class="form-input" 
-                rows="10" 
-                placeholder="1. Nome Pizza
-In cottura: ingredienti che vanno in forno
-Post-cottura: ingredienti aggiunti a crudo
-Perché funziona: descrizione
-
-2. Altra Pizza
-..."
-                style="font-family: monospace; font-size: 0.9rem;"
-              ></textarea>
-              <small class="text-muted" style="display: block; margin-top: 0.5rem;">
-                Formato: ricette numerate con sezioni In cottura, Post-cottura, Perché funziona
-              </small>
-            </div>
-
-            <div class="action-group">
-              <input type="file" id="fileImportRecipe" accept=".txt" style="display: none;">
-              <button id="btnImportRecipeFile" class="btn btn-secondary">
-                <span class="icon">📁</span>
-                Carica da File
-              </button>
-              <button id="btnImportRecipeText" class="btn btn-primary">
-                <span class="icon">🚀</span>
-                Importa Ricette
-              </button>
-            </div>
-
-            <div id="importRecipeResult" style="margin-top: 1rem; display: none;">
-              <!-- Import results will appear here -->
-            </div>
-          </div>
-        </section>
-
         <!-- Archetype Weights Section -->
         <section class="settings-card">
           <div class="card-header">

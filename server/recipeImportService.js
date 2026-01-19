@@ -198,8 +198,9 @@ function buildRecipeData(parsedRecipe, processedIngredients) {
         quantity: pi.ingredient.minWeight || 50,
         unit: pi.ingredient.defaultUnit || 'g',
         // Mark post-bake ingredients
-        postBake: processedIngredients.indexOf(pi) >=
-            (parsedRecipe.baseIngredients.length + parsedRecipe.toppingsDuringBake.length) ? 1 : 0
+        postBake: (parsedRecipe.ingredientiPostCottura || []).some(t =>
+            t.name.toLowerCase() === pi.ingredient.name.toLowerCase()
+        ) ? 1 : 0
     }));
 
     // NOTE: Do NOT use JSON.stringify here - the db-adapter will handle it

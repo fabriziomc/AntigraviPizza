@@ -81,6 +81,34 @@ function setupDiscoveryListeners() {
 
     // Populate Auto Ingredients Selector
     populateAutoIngredientsSelector();
+
+    // Text Import - Import Recipe File
+    const fileImportRecipe = document.getElementById('fileImportRecipe');
+    const btnImportRecipeFile = document.getElementById('btnImportRecipeFile');
+    if (btnImportRecipeFile && fileImportRecipe) {
+        btnImportRecipeFile.addEventListener('click', () => {
+            fileImportRecipe.click();
+        });
+
+        fileImportRecipe.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                document.getElementById('recipeTextInput').value = event.target.result;
+                showToast('📄 File caricato! Clicca "Importa Ricette" per procedere.', 'info');
+            };
+            reader.readAsText(file);
+            fileImportRecipe.value = ''; // Reset
+        });
+    }
+
+    // Text Import - Import Recipe Text
+    const btnImportRecipeText = document.getElementById('btnImportRecipeText');
+    if (btnImportRecipeText) {
+        btnImportRecipeText.addEventListener('click', handleTextImport);
+    }
 }
 
 /**
@@ -598,9 +626,85 @@ async function handleManualImport(e) {
         showToast('Ricetta importata con successo!', 'success');
     } catch (error) {
         console.error('Failed to import recipe:', error);
-        showToast('Errore nell\'importazione della ricetta', 'error');
+        showToast('❌ Errore durante l\'importazione: ' + error.message, 'error');
     }
 }
+
+/**
+ * Handle text import of recipes
+ */
+async function handleTextImport() {
+    const textInput = document.getElementById('recipeTextInput');
+    const resultDiv = document.getElementById('importRecipeResult');
+    const btn = document.getElementById('btnImportRecipeText');
+
+    const text = textInput.value.trim();
+    if (!text) {
+        showToast('⚠️ Inserisci il testo delle ricette', 'warning');
+        return;
+    }
+
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="icon">⏳</span> Importazione in corso...';
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<p style="color: var(--color-gray-400);">🔍 Parsing ricette...</p>';
+
+        // Call backend API to parse and import recipes
+        const response = await fetch('/api/recipes/import-text', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ text })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Import failed');
+        }
+
+        const result = await response.json();
+
+        // Display results
+        const successCount = result.imported || 0;
+        const errorCount = result.errors ? result.errors.length : 0;
+
+        let html = `<div style="margin-top: 1rem;">`;
+        if (successCount > 0) {
+            html += `<p style="color: var(--color-success);">✅ ${successCount} ricette importate con successo!</p>`;
+        }
+        if (errorCount > 0) {
+            html += `<p style="color: var(--color-warning);">⚠️ ${errorCount} ricette con errori</p>`;
+            html += `<details style="margin-top: 0.5rem;"><summary style="cursor: pointer; color: var(--color-gray-400);">Mostra errori</summary><ul style="margin-top: 0.5rem; padding-left: 1.5rem;">`;
+            result.errors.forEach(err => {
+                html += `<li style="color: var(--color-error); font-size: 0.875rem;">${err}</li>`;
+            });
+            html += `</ul></details>`;
+        }
+        html += `</div>`;
+
+        resultDiv.innerHTML = html;
+
+        if (successCount > 0) {
+            showToast(`✅ ${successCount} ricette importate!`, 'success');
+            textInput.value = ''; // Clear input
+            await refreshData(); // Refresh recipe list
+        } else {
+            showToast('⚠️ Nessuna ricetta importata', 'warning');
+        }
+
+    } catch (error) {
+        console.error('Text import error:', error);
+        resultDiv.innerHTML = `<p style="color: var(--color-error);">❌ Errore: ${error.message}</p>`;
+        showToast('❌ Errore durante l\'importazione', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="icon">🚀</span> Importa Ricette';
+    }
+}
+
 
 async function handleImportSamples() {
     console.log('handleImportSamples called'); // DEBUG

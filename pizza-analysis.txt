@@ -1,0 +1,126 @@
+﻿[dotenv@17.2.3] injecting env (5) from .env -- tip: ­ƒöæ add access controls to secrets: https://dotenvx.com/ops
+­ƒöì Checking for admin user and their pizzas...
+
+Ô£à Admin user found: {
+  id: 'admin-1768198822844',
+  email: 'admin@antigravipizza.local',
+  name: 'Admin'
+}
+
+­ƒôï Fetching last 5 recipes for admin user...
+
+Found 5 recipes
+
+
+================================================================================
+RECIPE 1: Fusione Nduja e Cipolla
+================================================================================
+ID: abc7c6af-3e99-49d2-b8b7-9c90de7ad497
+Created: 19/01/2026, 16:24:41
+
+Description:
+Una napoletana classica con nduja calabrese e cipolla rossa e miele di castagno, creata secondo la tradizione.
+
+Base Ingredients (raw):
+[{"name":"Pomodoro San Marzano","quantity":80,"unit":"g","category":"Basi e Salse","phase":"topping","postBake":false},{"name":"Fior di latte","quantity":100,"unit":"g","category":"Formaggi","phase":"topping","postBake":false},{"id":"cbed9b4b-53a1-4514-ab64-857e21721818","name":"Nduja calabrese","categoryId":"ca899f64-0f6f-43a0-8d88-821b54be31a4","subcategory":null,"minWeight":30,"maxWeight":50,"defaultUnit":"g","postBake":false,"phase":"topping","season":null,"allergens":[],"tags":["meat_spicy"],"isCustom":false,"dateAdded":1766212224805,"userId":null,"categoryName":"Carni e Salumi","categoryIcon":"­ƒÑô","category":"Carni e Salumi","quantity":60,"unit":"g"},{"id":"f308ad53-8281-4cf1-b93d-47304b315c02","name":"Cipolla rossa","categoryId":"6d6d0249-55a7-4340-a6bf-419c9326a1f0","subcategory":null,"minWeight":50,"maxWeight":80,"defaultUnit":"g","postBake":false,"phase":"topping","season":null,"allergens":[],"tags":["vegetable_onions"],"isCustom":false,"dateAdded":1766212225011,"userId":null,"categoryName":"Verdure e Ortaggi","categoryIcon":"­ƒÑ¼","category":"Verdure e Ortaggi","quantity":50,"unit":"g"},{"id":"d70a8009-9ae5-4d8b-b5a5-9f7ee3ea2949","name":"Miele di castagno","categoryId":"32b1230e-f71b-4cfd-832c-05c9e411d143","subcategory":null,"minWeight":15,"maxWeight":30,"defaultUnit":"g","postBake":true,"phase":"topping","season":null,"allergens":[],"tags":["finish_sweet"],"isCustom":false,"dateAdded":1766212225171,"userId":null,"categoryName":"Frutta e Frutta Secca","categoryIcon":"­ƒÑ£","category":"Frutta e Frutta Secca","quantity":50,"unit":"g"}]
+
+Parsed Ingredients (5 total):
+  1. Pomodoro San Marzano (ID: undefined) - 80g - PostBake: 0
+  2. Fior di latte (ID: undefined) - 100g - PostBake: 0
+  3. Nduja calabrese (ID: cbed9b4b-53a1-4514-ab64-857e21721818) - 60g - PostBake: 0
+  4. Cipolla rossa (ID: f308ad53-8281-4cf1-b93d-47304b315c02) - 50g - PostBake: 0
+  5. Miele di castagno (ID: d70a8009-9ae5-4d8b-b5a5-9f7ee3ea2949) - 50g - PostBake: true
+
+ÔÜá´©Å  Ingredients mentioned in name but not in list: fusione
+
+Preparations (raw):
+[]
+
+================================================================================
+RECIPE 2: Profumi di Pomodorini
+================================================================================
+ID: 73b81baf-9957-4489-82aa-c85a4c0f3ae6
+Created: 19/01/2026, 16:24:41
+
+Description:
+Una alta idratazione con 6f5daac7-b9e5-43ee-a463-0a459f5f8042 e crema-gorgonzola e pomodorini ciliegino, creata secondo la tradizione.
+
+Base Ingredients (raw):
+[{"id":"836333c2-267b-471e-8383-ebb9fb242422","name":"Pomodorini ciliegino","categoryId":"6d6d0249-55a7-4340-a6bf-419c9326a1f0","subcategory":null,"minWeight":100,"maxWeight":150,"defaultUnit":"g","postBake":false,"phase":"topping","season":["estate","autunno"],"allergens":[],"tags":["vegetable_tomato_fresh"],"isCustom":false,"dateAdded":1766212225079,"userId":null,"categoryName":"Verdure e Ortaggi","categoryIcon":"­ƒÑ¼","category":"Verdure e Ortaggi","quantity":50,"unit":"g"},{"id":"11bf901e-7648-40b1-8490-feccf5622455","name":"Fior di latte","categoryId":"3dbbfdeb-b431-426b-8651-4420c3516631","subcategory":null,"minWeight":120,"maxWeight":180,"defaultUnit":"g","postBake":true,"phase":"topping","season":null,"allergens":["lattosio"],"tags":["cheese_fresh"],"isCustom":false,"dateAdded":1766212224662,"userId":null,"categoryName":"Formaggi","categoryIcon":"­ƒºÇ","category":"Formaggi","quantity":120,"unit":"g"},{"id":"101d18c2-d0a6-48c4-b892-6e48d7f9c068","name":"Bresaola","categoryId":"ca899f64-0f6f-43a0-8d88-821b54be31a4","subcategory":null,"minWeight":40,"maxWeight":60,"defaultUnit":"g","postBake":true,"phase":"topping","season":null,"allergens":[],"tags":["meat_cured_delicate"],"isCustom":false,"dateAdded":1766212224764,"userId":null,"categoryName":"Carni e Salumi","categoryIcon":"­ƒÑô","category":"Carni e Salumi","quantity":70,"unit":"g"}]
+
+Parsed Ingredients (3 total):
+  1. Pomodorini ciliegino (ID: 836333c2-267b-471e-8383-ebb9fb242422) - 50g - PostBake: 0
+  2. Fior di latte (ID: 11bf901e-7648-40b1-8490-feccf5622455) - 120g - PostBake: true
+  3. Bresaola (ID: 101d18c2-d0a6-48c4-b892-6e48d7f9c068) - 70g - PostBake: true
+
+ÔÜá´©Å  Ingredients mentioned in name but not in list: profumi
+
+Preparations (raw):
+[{"id":"6f5daac7-b9e5-43ee-a463-0a459f5f8042","quantity":94,"unit":"g","timing":"before"},{"id":"crema-gorgonzola","quantity":38,"unit":"g","timing":"after"}]
+
+================================================================================
+RECIPE 3: Fusione Nduja e Melanzane
+================================================================================
+ID: f4b591d1-0fb8-47bb-b03c-fa4c7146b6ac
+Created: 19/01/2026, 16:24:40
+
+Description:
+Una napoletana classica con nduja calabrese e melanzane grigliate e mozzarella di bufala, creata secondo la tradizione.
+
+Base Ingredients (raw):
+[{"name":"Pomodoro San Marzano","quantity":80,"unit":"g","category":"Basi e Salse","phase":"topping","postBake":false},{"name":"Fior di latte","quantity":100,"unit":"g","category":"Formaggi","phase":"topping","postBake":false},{"id":"cbed9b4b-53a1-4514-ab64-857e21721818","name":"Nduja calabrese","categoryId":"ca899f64-0f6f-43a0-8d88-821b54be31a4","subcategory":null,"minWeight":30,"maxWeight":50,"defaultUnit":"g","postBake":false,"phase":"topping","season":null,"allergens":[],"tags":["meat_spicy"],"isCustom":false,"dateAdded":1766212224805,"userId":null,"categoryName":"Carni e Salumi","categoryIcon":"­ƒÑô","category":"Carni e Salumi","quantity":60,"unit":"g"},{"id":"1d131dba-7921-4671-9b30-ed7e11c3dc08","name":"Melanzane grigliate","categoryId":"6d6d0249-55a7-4340-a6bf-419c9326a1f0","subcategory":null,"minWeight":80,"maxWeight":120,"defaultUnit":"g","postBake":false,"phase":"topping","season":["estate","autunno"],"allergens":[],"tags":["vegetable_grilled"],"isCustom":false,"dateAdded":1766212225037,"userId":null,"categoryName":"Verdure e Ortaggi","categoryIcon":"­ƒÑ¼","category":"Verdure e Ortaggi","quantity":50,"unit":"g"},{"id":"a701dc08-2570-4d29-935a-54fcf202cea8","name":"Mozzarella di bufala","categoryId":"3dbbfdeb-b431-426b-8651-4420c3516631","subcategory":null,"minWeight":150,"maxWeight":200,"defaultUnit":"g","postBake":false,"phase":"topping","season":null,"allergens":["lattosio"],"tags":["cheese_fresh"],"isCustom":false,"dateAdded":1766212224688,"userId":null,"categoryName":"Formaggi","categoryIcon":"­ƒºÇ","category":"Formaggi","quantity":50,"unit":"g"}]
+
+Parsed Ingredients (5 total):
+  1. Pomodoro San Marzano (ID: undefined) - 80g - PostBake: 0
+  2. Fior di latte (ID: undefined) - 100g - PostBake: 0
+  3. Nduja calabrese (ID: cbed9b4b-53a1-4514-ab64-857e21721818) - 60g - PostBake: 0
+  4. Melanzane grigliate (ID: 1d131dba-7921-4671-9b30-ed7e11c3dc08) - 50g - PostBake: 0
+  5. Mozzarella di bufala (ID: a701dc08-2570-4d29-935a-54fcf202cea8) - 50g - PostBake: 0
+
+ÔÜá´©Å  Ingredients mentioned in name but not in list: fusione
+
+Preparations (raw):
+[]
+
+================================================================================
+RECIPE 4: Pizza Culatello di Zibello
+================================================================================
+ID: 68bec1fd-f35d-4bd2-bc8e-24e92904a476
+Created: 19/01/2026, 16:20:33
+
+Description:
+Una napoletana classica con ba3b74c8-b0e2-4305-8895-d285ef4435f3, creata secondo la tradizione.
+
+Base Ingredients (raw):
+[]
+
+Parsed Ingredients (0 total):
+
+ÔÜá´©Å  Ingredients mentioned in name but not in list: pizza, culatello, zibello
+
+Preparations (raw):
+[{"id":"ba3b74c8-b0e2-4305-8895-d285ef4435f3","quantity":86,"unit":"g","timing":"before"}]
+
+================================================================================
+RECIPE 5: Crescenza al Bresaola
+================================================================================
+ID: 0152057e-7357-458e-8ab7-23c8594863ef
+Created: 19/01/2026, 16:18:24
+
+Description:
+Una contemporanea con 97363209-ba45-4de0-a20e-f6856d9a2dad e crescenza e bresaola, creata secondo la tradizione.
+
+Base Ingredients (raw):
+[{"id":"e7f55b69-7e25-41d7-b8af-7be1547430d8","name":"Crescenza","categoryId":"3dbbfdeb-b431-426b-8651-4420c3516631","subcategory":null,"minWeight":80,"maxWeight":120,"defaultUnit":"g","postBake":false,"phase":"topping","season":null,"allergens":[],"tags":["cheese_soft"],"isCustom":false,"dateAdded":1766212224648,"userId":null,"categoryName":"Formaggi","categoryIcon":"­ƒºÇ","category":"Formaggi","quantity":100,"unit":"g"},{"id":"101d18c2-d0a6-48c4-b892-6e48d7f9c068","name":"Bresaola","categoryId":"ca899f64-0f6f-43a0-8d88-821b54be31a4","subcategory":null,"minWeight":40,"maxWeight":60,"defaultUnit":"g","postBake":true,"phase":"topping","season":null,"allergens":[],"tags":["meat_cured_delicate"],"isCustom":false,"dateAdded":1766212224764,"userId":null,"categoryName":"Carni e Salumi","categoryIcon":"­ƒÑô","category":"Carni e Salumi","quantity":70,"unit":"g"},{"id":"915e07c8-9448-4e92-8ae3-1331d52ece6c","name":"Broccoli","categoryId":"6d6d0249-55a7-4340-a6bf-419c9326a1f0","subcategory":null,"minWeight":80,"maxWeight":120,"defaultUnit":"g","postBake":false,"phase":"topping","season":null,"allergens":[],"tags":["vegetable_cruciferous"],"isCustom":false,"dateAdded":1766212224971,"userId":null,"categoryName":"Verdure e Ortaggi","categoryIcon":"­ƒÑ¼","category":"Verdure e Ortaggi","quantity":80,"unit":"g"},{"id":"d70a8009-9ae5-4d8b-b5a5-9f7ee3ea2949","name":"Miele di castagno","categoryId":"32b1230e-f71b-4cfd-832c-05c9e411d143","subcategory":null,"minWeight":15,"maxWeight":30,"defaultUnit":"g","postBake":true,"phase":"topping","season":null,"allergens":[],"tags":["finish_sweet"],"isCustom":false,"dateAdded":1766212225171,"userId":null,"categoryName":"Frutta e Frutta Secca","categoryIcon":"­ƒÑ£","category":"Altro","quantity":20,"unit":"g"}]
+
+Parsed Ingredients (4 total):
+  1. Crescenza (ID: e7f55b69-7e25-41d7-b8af-7be1547430d8) - 100g - PostBake: 0
+  2. Bresaola (ID: 101d18c2-d0a6-48c4-b892-6e48d7f9c068) - 70g - PostBake: true
+  3. Broccoli (ID: 915e07c8-9448-4e92-8ae3-1331d52ece6c) - 80g - PostBake: 0
+  4. Miele di castagno (ID: d70a8009-9ae5-4d8b-b5a5-9f7ee3ea2949) - 20g - PostBake: true
+
+Preparations (raw):
+[{"id":"97363209-ba45-4de0-a20e-f6856d9a2dad","quantity":81,"unit":"g","timing":"before"}]
+
+
+Ô£à Analysis complete
