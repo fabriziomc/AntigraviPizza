@@ -542,11 +542,19 @@ function calculateAndRenderDough() {
   if (!doughSelect || !weightInput || !extraBallsInput || !resultDiv) return;
 
   const selectedDoughType = doughSelect.value;
-  const numPizzas = getSelectedPizzasCount();
+  let numPizzas = getSelectedPizzasCount();
+  const guestCountInput = document.getElementById('guestCountInput');
+  const manualGuestCount = guestCountInput ? parseInt(guestCountInput.value) || 0 : 0;
+
+  // Use manual guest count as fallback if no specific pizzas are checked
+  if (numPizzas === 0) {
+    numPizzas = manualGuestCount;
+  }
+
   const weightPerPizza = parseInt(weightInput.value) || 250;
   const extraBalls = parseInt(extraBallsInput.value) || 0;
 
-  if (!selectedDoughType || numPizzas === 0) {
+  if (!selectedDoughType || numPizzas <= 0) {
     resultDiv.style.display = 'none';
     return;
   }
