@@ -113,14 +113,6 @@ function showDoughModal(doughId) {
           <div class="info-value">${dough.fermentation}</div>
         </div>
         <div class="info-box">
-          <div class="info-label">🍕 Resa</div>
-          <div class="info-value">${dough.yield} pizze</div>
-        </div>
-        <div class="info-box">
-          <div class="info-label">⚖️ Peso/Pizza</div>
-          <div class="info-value">${dough.weightPerPizza}g</div>
-        </div>
-        <div class="info-box">
           <div class="info-label">📊 Difficoltà</div>
           <div class="info-value">${dough.difficulty}</div>
         </div>
