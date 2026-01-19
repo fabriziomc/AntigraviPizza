@@ -22,14 +22,17 @@ export function calculateDoughIngredients(doughRecipe, numPizzas, weightPerPizza
     // Calcola il numero totale di pizze (inclusi i panetti di scorta)
     const totalPizzas = numPizzas + extraDoughBalls;
 
-    // Trova l'ingrediente base (farina) per calcolare il fattore di scala
-    const flourIngredient = doughRecipe.ingredients.find(ing =>
-        ing.name.toLowerCase().includes('farina')
-    ) || doughRecipe.ingredients[0];
+    // Usa il peso totale per pizza della ricetta base (non solo la farina!)
+    // Se non disponibile, calcola dalla somma degli ingredienti
+    let baseWeightPerPizza = doughRecipe.weightPerPizza;
 
-    const baseWeightPerPizza = flourIngredient.perPizza;
+    if (!baseWeightPerPizza) {
+        // Fallback: calcola dalla somma degli ingredienti
+        const totalRecipeWeight = doughRecipe.ingredients.reduce((sum, ing) => sum + ing.quantity, 0);
+        baseWeightPerPizza = totalRecipeWeight / doughRecipe.yield;
+    }
 
-    // Calcola il fattore di scala basato sul peso desiderato per pizza
+    // Calcola il fattore di scala basato sul peso TOTALE desiderato per pizza
     const scaleFactor = (totalPizzas * weightPerPizza) / (doughRecipe.yield * baseWeightPerPizza);
 
     // Ricalcola tutti gli ingredienti
