@@ -6,29 +6,29 @@ import { DOUGH_RECIPES } from '../utils/constants.js';
 import { openModal, closeModal } from '../modules/ui.js';
 
 export async function renderDoughs() {
-    renderDoughsGrid();
-    setupDoughsListeners();
+  renderDoughsGrid();
+  setupDoughsListeners();
 }
 
 function renderDoughsGrid() {
-    const grid = document.getElementById('doughsGrid');
+  const grid = document.getElementById('doughsGrid');
 
-    if (!grid) {
-        console.error('Doughs grid not found');
-        return;
-    }
+  if (!grid) {
+    console.error('Doughs grid not found');
+    return;
+  }
 
-    grid.innerHTML = DOUGH_RECIPES.map(dough => createDoughCard(dough)).join('');
+  grid.innerHTML = DOUGH_RECIPES.map(dough => createDoughCard(dough)).join('');
 }
 
 function createDoughCard(dough) {
-    const difficultyColors = {
-        'Media': 'var(--color-success)',
-        'Alta': 'var(--color-warning)',
-        'Molto Alta': 'var(--color-error)'
-    };
+  const difficultyColors = {
+    'Media': 'var(--color-success)',
+    'Alta': 'var(--color-warning)',
+    'Molto Alta': 'var(--color-error)'
+  };
 
-    return `
+  return `
     <div class="dough-card" data-dough-id="${dough.id}">
       <div class="dough-card-header">
         <h3 class="dough-card-title">${dough.type}</h3>
@@ -74,24 +74,24 @@ function createDoughCard(dough) {
 }
 
 function setupDoughsListeners() {
-    const grid = document.getElementById('doughsGrid');
+  const grid = document.getElementById('doughsGrid');
 
-    if (!grid) return;
+  if (!grid) return;
 
-    grid.addEventListener('click', (e) => {
-        const viewBtn = e.target.closest('.view-dough-btn');
-        if (viewBtn) {
-            const doughId = viewBtn.dataset.doughId;
-            showDoughModal(doughId);
-        }
-    });
+  grid.addEventListener('click', (e) => {
+    const viewBtn = e.target.closest('.view-dough-btn');
+    if (viewBtn) {
+      const doughId = viewBtn.dataset.doughId;
+      showDoughModal(doughId);
+    }
+  });
 }
 
 function showDoughModal(doughId) {
-    const dough = DOUGH_RECIPES.find(d => d.id === doughId);
-    if (!dough) return;
+  const dough = DOUGH_RECIPES.find(d => d.id === doughId);
+  if (!dough) return;
 
-    const modalContent = `
+  const modalContent = `
     <div class="modal-header">
       <h2 class="modal-title">${dough.type}</h2>
       <button class="modal-close" onclick="window.closeModal()">×</button>
@@ -99,7 +99,7 @@ function showDoughModal(doughId) {
     <div class="modal-body">
       <p style="font-size: 1.1rem; margin-bottom: 2rem; color: var(--color-gray-300);">${dough.description}</p>
       
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
         <div class="info-box">
           <div class="info-label">💧 Idratazione</div>
           <div class="info-value">${dough.hydration}%</div>
@@ -126,7 +126,7 @@ function showDoughModal(doughId) {
         </div>
       </div>
       
-      <div class="recipe-modal-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+      <div class="recipe-modal-grid" style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-bottom: 2rem;">
         <div>
           <h3 class="recipe-modal-section-title" style="border-bottom: 2px solid var(--color-primary); padding-bottom: 0.5rem; margin-bottom: 1rem;">
             🥣 Ingredienti
@@ -176,16 +176,16 @@ function showDoughModal(doughId) {
     </div>
   `;
 
-    openModal(modalContent);
+  openModal(modalContent);
 }
 
 function printDoughRecipe(doughId) {
-    const dough = DOUGH_RECIPES.find(d => d.id === doughId);
-    if (!dough) return;
+  const dough = DOUGH_RECIPES.find(d => d.id === doughId);
+  if (!dough) return;
 
-    // Create a printable version
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
+  // Create a printable version
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
     <!DOCTYPE html>
     <html>
     <head>
@@ -259,8 +259,8 @@ function printDoughRecipe(doughId) {
     </body>
     </html>
   `);
-    printWindow.document.close();
-    printWindow.print();
+  printWindow.document.close();
+  printWindow.print();
 }
 
 // Global functions

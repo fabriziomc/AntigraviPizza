@@ -174,11 +174,11 @@ export const NAV_ITEMS = [
     { id: VIEWS.DASHBOARD, label: 'Dashboard', icon: '🏠' },
     { id: VIEWS.DISCOVERY, label: 'Genera Ricette', icon: '🔍' },
     { id: VIEWS.LIBRARY, label: 'Pizze', icon: '🍕' },
+    { id: VIEWS.DOUGHS, label: 'Impasti', icon: '🥣' },
     { id: VIEWS.COMBINATIONS, label: 'Abbinamenti', icon: '🧪' },
     { id: VIEWS.ARCHETYPES, label: 'Archetipi', icon: '🎨' },
-    { id: VIEWS.DOUGHS, label: 'Impasti', icon: '🥣' },
-    { id: VIEWS.PREPARATIONS, label: 'Preparazioni', icon: '🥫' },
     { id: VIEWS.INGREDIENTS, label: 'Ingredienti', icon: '🥗' },
+    { id: VIEWS.PREPARATIONS, label: 'Preparazioni', icon: '🥫' },
     { id: VIEWS.PLANNER, label: 'Pianifica Serata', icon: '🎉' },
     { id: VIEWS.SHOPPING, label: 'Lista Spesa', icon: '🛒' },
     { id: VIEWS.SETTINGS, label: 'Impostazioni', icon: '⚙️' }
@@ -469,14 +469,14 @@ export const DOUGH_RECIPES = [
         temperature: '20-22°C',
         fermentation: '6-8 ore a temperatura ambiente',
         restTime: '1 ora fuori frigo prima dell\'uso',
-        yield: 2,
+        yield: 4,
         difficulty: 'Bassa',
         ingredients: [
-            { name: 'Farina tipo 0', quantity: 500, unit: 'g', perPizza: 250, category: 'Impasto' },
-            { name: 'Acqua', quantity: 275, unit: 'ml', perPizza: 137.5, category: 'Impasto' },
-            { name: 'Sale fino', quantity: 12, unit: 'g', perPizza: 6, category: 'Impasto' },
-            { name: 'Lievito di birra fresco', quantity: 5, unit: 'g', perPizza: 2.5, category: 'Impasto' },
-            { name: 'Olio extravergine d\'oliva toscano', quantity: 30, unit: 'ml', perPizza: 15, category: 'Impasto' }
+            { name: 'Farina tipo 0', quantity: 1000, unit: 'g', perPizza: 250, category: 'Impasto' },
+            { name: 'Acqua', quantity: 550, unit: 'ml', perPizza: 137.5, category: 'Impasto' },
+            { name: 'Sale fino', quantity: 24, unit: 'g', perPizza: 6, category: 'Impasto' },
+            { name: 'Lievito di birra fresco', quantity: 10, unit: 'g', perPizza: 2.5, category: 'Impasto' },
+            { name: 'Olio extravergine d\'oliva toscano', quantity: 60, unit: 'ml', perPizza: 15, category: 'Impasto' }
         ],
         instructions: [
             'Sciogliere il lievito in acqua tiepida (25°C)',
@@ -487,7 +487,7 @@ export const DOUGH_RECIPES = [
             'Impastare energicamente per 10-12 minuti',
             'L\'impasto deve risultare liscio, compatto e poco appiccicoso',
             'Formare una palla e lasciar riposare coperto per 1 ora',
-            'Dividere in 2 panetti da 400g (per pale grandi)',
+            'Dividere in 4 panetti da 250g',
             'Lasciar lievitare 6-8 ore a temperatura ambiente',
             'Prima dell\'uso, stendere direttamente sulla pala infarinata',
             'Stendere molto sottile (3-4mm) in forma rettangolare allungata'

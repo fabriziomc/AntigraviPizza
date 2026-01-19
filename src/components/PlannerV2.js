@@ -13,6 +13,8 @@ console.log('🚀 Planner.js module loaded! V2');
 import { state } from '../store.js';
 import { generateShoppingList, downloadShoppingList } from '../modules/shopping.js';
 import { DEFAULT_GUEST_COUNT } from '../utils/constants.js';
+import { calculateDoughIngredients, copyDoughRecipeToClipboard } from '../utils/doughCalculator.js';
+
 
 export async function renderPlanner(appState) {
   await renderPizzaNights();
@@ -121,7 +123,6 @@ function resetPlannerState() {
 
 async function showNewPizzaNightModal() {
   resetPlannerState();
-  const recipes = await getAllRecipes(); // Store all recipes
 
   const modalContent = `
     <div class="modal-header">
@@ -151,7 +152,7 @@ async function showNewPizzaNightModal() {
           <p style="font-size: 0.875rem; color: var(--color-gray-400); margin-bottom: 0.5rem;">Seleziona gli ospiti da invitare. Potrai inviare email dopo aver creato la serata.</p>
           <div id="guestSelection" style="max-height: 150px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 0.5rem; padding: 0.25rem;">
             <!-- Guests will be loaded here -->
-            <p class="text-muted text-sm">Caricamento ospiti...</p>
+            <p class="text-muted text-sm">⏳ Caricamento ospiti...</p>
           </div>
         </div>
         
@@ -173,6 +174,32 @@ async function showNewPizzaNightModal() {
           </select>
           <div id="doughInfo" style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; display: none;">
             <!-- Dough info will be shown here -->
+          </div>
+          
+          <!-- DOUGH CALCULATOR -->
+          <div id="doughCalculator" style="margin-top: 1.5rem; padding: 1.5rem; background: rgba(34, 197, 94, 0.1); border: 2px solid rgba(34, 197, 94, 0.3); border-radius: 0.75rem; display: none;">
+            <h4 style="margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.5rem; color: var(--color-success);">
+              <span>📊</span>
+              <span>Calcolo Impasto</span>
+            </h4>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+              <div>
+                <label class="form-label" style="font-size: 0.875rem;">Peso per pizza (g)</label>
+                <input type="number" id="doughWeightPerPizza" class="form-input" value="250" min="150" max="350" step="10" style="padding: 0.5rem;">
+                <small style="color: var(--color-gray-400); font-size: 0.75rem;">Consigliato: 200-280g</small>
+              </div>
+              
+              <div>
+                <label class="form-label" style="font-size: 0.875rem;">Panetti di scorta</label>
+                <input type="number" id="doughExtraBalls" class="form-input" value="0" min="0" max="5" step="1" style="padding: 0.5rem;">
+                <small style="color: var(--color-gray-400); font-size: 0.75rem;">Opzionale (0-5)</small>
+              </div>
+            </div>
+            
+            <div id="doughCalculationResult" style="background: rgba(255,255,255,0.05); border-radius: 0.5rem; padding: 1rem; display: none;">
+              <!-- Calculation results will be shown here -->
+            </div>
           </div>
         </div>
         
@@ -293,6 +320,7 @@ async function showNewPizzaNightModal() {
 
           <div id="pizzaSelection" style="max-height: 300px; overflow-y: auto;">
              <!-- Pizza list populated via JS -->
+             <p class="text-muted">⏳ Caricamento pizze...</p>
           </div>
         </div>
         
@@ -311,6 +339,7 @@ async function showNewPizzaNightModal() {
     </div>
 `;
 
+  // SHOW MODAL IMMEDIATELY - This is the key optimization!
   openModal(modalContent);
 
   // Reset filter state
@@ -318,65 +347,18 @@ async function showNewPizzaNightModal() {
   plannerFilterState.selectedIngredient = 'all';
   plannerFilterState.sortBy = 'az';
 
-  // Setup filters
-  populatePlannerIngredientFilter(recipes);
-  renderPlannerTagFilters();
+  // Setup mode selection listeners (synchronous, no data needed)
+  setupModeListeners();
 
-  // Initial render with filters
-  const filtered = filterAndSortPlannerRecipes(recipes);
-  renderPizzaSelectionList(filtered);
+  // Setup dough selection listener (synchronous, uses DOUGH_RECIPES constant)
+  setupDoughSelectionListener();
 
-  // Setup filter event listeners
-  const tagFiltersContainer = document.getElementById('plannerTagFilters');
-  if (tagFiltersContainer) {
-    tagFiltersContainer.addEventListener('click', (e) => {
-      if (e.target.classList.contains('filter-chip')) {
-        const tag = e.target.dataset.tag;
-        plannerFilterState.selectedTag =
-          plannerFilterState.selectedTag === tag ? null : tag;
-        renderPlannerTagFilters();
-        const filtered = filterAndSortPlannerRecipes(recipes);
-        renderPizzaSelectionList(filtered);
-      }
-    });
-  }
+  // Load all data asynchronously in background
+  loadModalDataAsync();
+}
 
-  const ingredientFilter = document.getElementById('plannerIngredientFilter');
-  if (ingredientFilter) {
-    ingredientFilter.addEventListener('change', (e) => {
-      plannerFilterState.selectedIngredient = e.target.value;
-      const filtered = filterAndSortPlannerRecipes(recipes);
-      renderPizzaSelectionList(filtered);
-    });
-  }
-
-  const sortSelect = document.getElementById('plannerRecipeSort');
-  if (sortSelect) {
-    sortSelect.addEventListener('change', (e) => {
-      plannerFilterState.sortBy = e.target.value;
-      const filtered = filterAndSortPlannerRecipes(recipes);
-      renderPizzaSelectionList(filtered);
-    });
-  }
-
-  // Load guests into the selection area
-  // ... existing guest loading logic ...
-  const guests = await getAllGuests();
-  const guestSelection = document.getElementById('guestSelection');
-  if (guestSelection) {
-    if (guests.length > 0) {
-      guestSelection.innerHTML = guests.map(guest => `
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-    <input type="checkbox" name="selectedGuests" value="${guest.id}" id="guest_${guest.id}">
-      <label for="guest_${guest.id}" style="cursor: pointer;">${guest.name}</label>
-    </div>
-`).join('');
-    } else {
-      guestSelection.innerHTML = '<p class="text-muted text-sm">Nessun ospite salvato. <a href="#" onclick="window.closeModal(); window.showManageGuestsModal(); return false;">Gestisci ospiti</a></p>';
-    }
-  }
-
-  // Setup dough selection listener to show info
+// NEW: Setup dough selection listener
+function setupDoughSelectionListener() {
   const doughSelect = document.getElementById('selectedDoughType');
   if (doughSelect) {
     doughSelect.addEventListener('change', (e) => {
@@ -414,19 +396,86 @@ async function showNewPizzaNightModal() {
       } else if (doughInfoDiv) {
         doughInfoDiv.style.display = 'none';
       }
+
+      // Update dough calculator visibility
+      updateDoughCalculator();
+    });
+  }
+}
+
+// NEW: Load all modal data asynchronously
+async function loadModalDataAsync() {
+  try {
+    // Load recipes first (most important)
+    const recipes = await getAllRecipes();
+
+    // Update pizza selection UI
+    populatePlannerIngredientFilter(recipes);
+    renderPlannerTagFilters();
+    const filtered = filterAndSortPlannerRecipes(recipes);
+    renderPizzaSelectionList(filtered);
+
+    // Setup filter event listeners
+    setupFilterListeners(recipes);
+
+    // Populate suggested ingredients selector
+    populatePlannerIngredientsSelector(recipes);
+
+    // Load guests (can happen in parallel, less critical)
+    await loadGuestsIntoModal();
+
+    // Setup guest count auto-update
+    setupGuestCountListener();
+
+    // Setup dough calculator listeners
+    setupDoughCalculatorListeners();
+
+  } catch (error) {
+    console.error('Error loading modal data:', error);
+    const pizzaSelection = document.getElementById('pizzaSelection');
+    if (pizzaSelection) {
+      pizzaSelection.innerHTML = '<p style="color: var(--color-error);">❌ Errore nel caricamento dati</p>';
+    }
+  }
+}
+
+// NEW: Setup filter event listeners
+function setupFilterListeners(recipes) {
+  const tagFiltersContainer = document.getElementById('plannerTagFilters');
+  if (tagFiltersContainer) {
+    tagFiltersContainer.addEventListener('click', (e) => {
+      if (e.target.classList.contains('filter-chip')) {
+        const tag = e.target.dataset.tag;
+        plannerFilterState.selectedTag =
+          plannerFilterState.selectedTag === tag ? null : tag;
+        renderPlannerTagFilters();
+        const filtered = filterAndSortPlannerRecipes(recipes);
+        renderPizzaSelectionList(filtered);
+      }
     });
   }
 
-  // Setup mode selection listeners
-  setupModeListeners();
+  const ingredientFilter = document.getElementById('plannerIngredientFilter');
+  if (ingredientFilter) {
+    ingredientFilter.addEventListener('change', (e) => {
+      plannerFilterState.selectedIngredient = e.target.value;
+      const filtered = filterAndSortPlannerRecipes(recipes);
+      renderPizzaSelectionList(filtered);
+    });
+  }
 
-  // Populate suggested ingredients selector
-  populatePlannerIngredientsSelector(recipes);
+  const sortSelect = document.getElementById('plannerRecipeSort');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      plannerFilterState.sortBy = e.target.value;
+      const filtered = filterAndSortPlannerRecipes(recipes);
+      renderPizzaSelectionList(filtered);
+    });
+  }
+}
 
-  // Load guests after modal is rendered  
-  loadGuestsIntoModal();
-
-  // Add listener to update guest count automatically based on selection
+// NEW: Setup guest count auto-update listener
+function setupGuestCountListener() {
   const guestSelectionContainer = document.getElementById('guestSelection');
   const guestCountInput = document.querySelector('input[name="guestCount"]');
   if (guestSelectionContainer && guestCountInput) {
@@ -444,6 +493,181 @@ async function showNewPizzaNightModal() {
     });
   }
 }
+
+// ============================================
+// DOUGH CALCULATOR
+// ============================================
+
+/**
+ * Update dough calculator visibility and calculation
+ * Shows calculator when both dough type and pizzas are selected
+ */
+function updateDoughCalculator() {
+  const doughSelect = document.getElementById('selectedDoughType');
+  const doughCalculator = document.getElementById('doughCalculator');
+
+  if (!doughSelect || !doughCalculator) return;
+
+  const selectedDoughType = doughSelect.value;
+  const selectedPizzas = getSelectedPizzasCount();
+
+  if (selectedDoughType && selectedPizzas > 0) {
+    doughCalculator.style.display = 'block';
+    calculateAndRenderDough();
+  } else {
+    doughCalculator.style.display = 'none';
+  }
+}
+
+/**
+ * Get count of selected pizzas
+ */
+function getSelectedPizzasCount() {
+  const checkedBoxes = document.querySelectorAll('#pizzaSelection input[type="checkbox"]:checked');
+  return checkedBoxes.length;
+}
+
+/**
+ * Calculate and render dough ingredients
+ */
+function calculateAndRenderDough() {
+  const doughSelect = document.getElementById('selectedDoughType');
+  const weightInput = document.getElementById('doughWeightPerPizza');
+  const extraBallsInput = document.getElementById('doughExtraBalls');
+  const resultDiv = document.getElementById('doughCalculationResult');
+
+  if (!doughSelect || !weightInput || !extraBallsInput || !resultDiv) return;
+
+  const selectedDoughType = doughSelect.value;
+  const numPizzas = getSelectedPizzasCount();
+  const weightPerPizza = parseInt(weightInput.value) || 250;
+  const extraBalls = parseInt(extraBallsInput.value) || 0;
+
+  if (!selectedDoughType || numPizzas === 0) {
+    resultDiv.style.display = 'none';
+    return;
+  }
+
+  // Find the dough recipe
+  const doughRecipe = DOUGH_RECIPES.find(d => d.type === selectedDoughType);
+  if (!doughRecipe) return;
+
+  // Calculate ingredients
+  const calculation = calculateDoughIngredients(doughRecipe, numPizzas, weightPerPizza, extraBalls);
+
+  if (!calculation) {
+    resultDiv.style.display = 'none';
+    return;
+  }
+
+  // Render results
+  renderDoughCalculationResults(calculation, resultDiv);
+}
+
+/**
+ * Render dough calculation results
+ */
+function renderDoughCalculationResults(calculation, container) {
+  container.innerHTML = `
+    <div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <strong style="color: var(--color-success);">
+          ${calculation.requestedPizzas} pizze${calculation.extraDoughBalls > 0 ? ` + ${calculation.extraDoughBalls} di scorta` : ''}
+        </strong>
+        <span style="color: var(--color-gray-400); font-size: 0.875rem;">
+          ${calculation.weightPerPizza}g/pizza
+        </span>
+      </div>
+      <div style="color: var(--color-gray-300); font-size: 0.875rem;">
+        Peso totale impasto: <strong>${calculation.totalWeight}g</strong>
+      </div>
+    </div>
+    
+    <div style="margin-bottom: 1rem;">
+      <h5 style="margin: 0 0 0.75rem 0; font-size: 0.9375rem; color: var(--color-primary-light);">
+        🧾 Ingredienti Necessari:
+      </h5>
+      <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem;">
+        ${calculation.ingredients.map(ing => `
+          <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(255,255,255,0.03); border-radius: 0.375rem;">
+            <span style="color: var(--color-gray-200);">${ing.name}</span>
+            <strong style="color: var(--color-white);">${ing.calculatedQuantity} ${ing.unit}</strong>
+          </li>
+        `).join('')}
+      </ul>
+    </div>
+    
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <button type="button" class="btn btn-sm btn-secondary" onclick="window.copyDoughRecipe()" style="flex: 1; min-width: 120px;">
+        📋 Copia Ricetta
+      </button>
+    </div>
+  `;
+  container.style.display = 'block';
+}
+
+/**
+ * Setup dough calculator event listeners
+ */
+function setupDoughCalculatorListeners() {
+  const weightInput = document.getElementById('doughWeightPerPizza');
+  const extraBallsInput = document.getElementById('doughExtraBalls');
+  const pizzaSelection = document.getElementById('pizzaSelection');
+
+  // Update on weight change
+  if (weightInput) {
+    weightInput.addEventListener('input', () => {
+      calculateAndRenderDough();
+    });
+  }
+
+  // Update on extra balls change
+  if (extraBallsInput) {
+    extraBallsInput.addEventListener('input', () => {
+      calculateAndRenderDough();
+    });
+  }
+
+  // Update when pizzas are selected/deselected
+  if (pizzaSelection) {
+    pizzaSelection.addEventListener('change', (e) => {
+      if (e.target.type === 'checkbox') {
+        updateDoughCalculator();
+      }
+    });
+  }
+}
+
+/**
+ * Global function to copy dough recipe to clipboard
+ */
+window.copyDoughRecipe = async function () {
+  const doughSelect = document.getElementById('selectedDoughType');
+  const weightInput = document.getElementById('doughWeightPerPizza');
+  const extraBallsInput = document.getElementById('doughExtraBalls');
+
+  if (!doughSelect) return;
+
+  const selectedDoughType = doughSelect.value;
+  const numPizzas = getSelectedPizzasCount();
+  const weightPerPizza = parseInt(weightInput?.value) || 250;
+  const extraBalls = parseInt(extraBallsInput?.value) || 0;
+
+  const doughRecipe = DOUGH_RECIPES.find(d => d.type === selectedDoughType);
+  if (!doughRecipe) return;
+
+  const calculation = calculateDoughIngredients(doughRecipe, numPizzas, weightPerPizza, extraBalls);
+
+  if (calculation) {
+    const success = await copyDoughRecipeToClipboard(calculation);
+    if (success) {
+      showToast('Ricetta copiata negli appunti!', 'success');
+    } else {
+      showToast('Errore nella copia', 'error');
+    }
+  }
+};
+
 
 // Setup listeners for selection mode radio buttons
 function setupModeListeners() {
