@@ -1073,8 +1073,8 @@ a:hover {
 
   /* Prevent page header overlap with mobile menu button */
   .page-header {
-    padding-top: 2rem;
-    /* Increased from 1rem to prevent overlap */
+    padding-top: 3rem;
+    /* Increased to 3rem for more breathing room */
   }
 
   /* Settings responsive fixes */
