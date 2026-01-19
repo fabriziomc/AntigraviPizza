@@ -137,9 +137,6 @@ function showDoughModal(doughId) {
               </li>
             `).join('')}
           </ul>
-          <p style="font-size: 0.875rem; color: var(--color-gray-400); margin-top: 1rem;">
-            <em>Peso totale impasto: ${dough.totalWeight}g (${dough.weightPerPizza}g per pizza)</em>
-          </p>
         </div>
         
         <div>
