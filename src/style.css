@@ -128,3 +128,123 @@ button:focus-visible {
     transform: rotate(360deg);
   }
 }
+
+/* ==========================================
+   ONBOARDING TUTORIAL STYLES
+   ========================================== */
+
+/* Onboarding Content Container */
+.onboarding-content {
+  max-height: 400px;
+  overflow-y: auto;
+  margin: 1.5rem 0;
+  padding-right: 0.5rem;
+}
+
+/* Custom scrollbar for onboarding content */
+.onboarding-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.onboarding-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.onboarding-content::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.5);
+  border-radius: 3px;
+}
+
+.onboarding-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.7);
+}
+
+/* Section Container */
+.onboarding-section {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.onboarding-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Section Subtitle */
+.section-subtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary, #6366f1);
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-subtitle::before {
+  content: '▸';
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+
+/* Section Description */
+.section-description {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, rgba(255, 255, 255, 0.7));
+  margin: 0 0 0.75rem 0;
+  line-height: 1.5;
+}
+
+/* Section Points List */
+.section-points {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.section-points li {
+  font-size: 0.875rem;
+  color: var(--color-text, rgba(255, 255, 255, 0.87));
+  padding: 0.5rem 0 0.5rem 1.5rem;
+  position: relative;
+  line-height: 1.4;
+}
+
+.section-points li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--color-success, #10b981);
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+/* Onboarding Tip */
+.onboarding-tip {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border-left: 3px solid var(--color-primary, #6366f1);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0 1rem 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, rgba(255, 255, 255, 0.7));
+  line-height: 1.5;
+  text-align: left;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .onboarding-content {
+    max-height: 300px;
+  }
+  
+  .section-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .section-points li,
+  .section-description,
+  .onboarding-tip {
+    font-size: 0.8125rem;
+  }
+}

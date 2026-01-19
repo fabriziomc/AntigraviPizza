@@ -1493,23 +1493,37 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
 
     // --- FINAL SAFETY DEDUPLICATION ---
     // Ensure baseIngredients and preparations are internally and mutually unique
+    // Enhanced to check for ingredients that are part of preparations
     const seenNames = new Set();
+    const seenIngredientIds = new Set();
 
     // 1. Process preparations first (they are usually more specific/important)
     const uniquePreparations = [];
     finalPreparations.forEach(prep => {
-        const name = (prep.name || prep.id || '').toLowerCase().trim();
+        const name = (prep.name || '').toLowerCase().trim();
         if (name && !seenNames.has(name)) {
             seenNames.add(name);
             uniquePreparations.push(prep);
+
+            // Track ingredient IDs from this preparation to avoid duplicates
+            if (prep.ingredients && Array.isArray(prep.ingredients)) {
+                prep.ingredients.forEach(ing => {
+                    if (ing.id) seenIngredientIds.add(ing.id);
+                    // Also track by name for safety
+                    if (ing.name) seenNames.add(ing.name.toLowerCase().trim());
+                });
+            }
         }
     });
 
-    // 2. Process baseIngredients, removing anything already seen in preparations or duplicates within itself
+    // 2. Process baseIngredients, removing duplicates and ingredients already in preparations
     const uniqueBaseIngredients = [];
     finalIngredients.forEach(ing => {
         const name = (ing.name || '').toLowerCase().trim();
-        if (name && !seenNames.has(name)) {
+        const id = ing.id;
+
+        // Skip if name already seen OR if this ingredient ID is part of a preparation
+        if (name && !seenNames.has(name) && !seenIngredientIds.has(id)) {
             seenNames.add(name);
             uniqueBaseIngredients.push(ing);
         }
@@ -1517,8 +1531,9 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
 
     // --- DESCRIPTION FINALIZATION ---
     // Generate description based on FINAL ingredients list after truncation and deduplication
+    // FIX: Never use preparation IDs in descriptions - only include preparations with names
     const finalAllNames = [
-        ...uniquePreparations.map(p => p.name || p.id),
+        ...uniquePreparations.filter(p => p.name).map(p => p.name),
         ...uniqueBaseIngredients.filter(i => !['Fior di latte', 'Provola affumicata', 'Mozzarella', 'Pomodoro San Marzano'].includes(i.name)).map(i => i.name)
     ].slice(0, 3);
 
@@ -1530,6 +1545,21 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
     } else {
         // For archetypes, we regenerate the description to ensure only final ingredients are mentioned
         description = generateArchetypeDescription(archetypeUsed, uniqueBaseIngredients, uniquePreparations, suggestedDough);
+    }
+
+    // --- VALIDATION ---
+    // Ensure recipe has at least some ingredients
+    if (uniqueBaseIngredients.length === 0 && uniquePreparations.length === 0) {
+        console.warn('⚠️ Generated recipe has no ingredients! Adding fallback base ingredient.');
+        // Add a fallback base ingredient
+        uniqueBaseIngredients.push({
+            name: 'Fior di latte',
+            quantity: 100,
+            unit: 'g',
+            category: 'Formaggi',
+            phase: 'topping',
+            postBake: false
+        });
     }
 
     // --- INSTRUCTIONS GENERATION ---
@@ -1564,7 +1594,11 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
  */
 function generateArchetypeDescription(archetype, ingredients, preparations, doughType) {
     const all = [...preparations, ...ingredients];
-    const getNames = (count = 2) => all.filter(i => !['Fior di latte', 'Provola affumicata', 'Mozzarella', 'Pomodoro San Marzano'].includes(i.name)).map(i => i.name).slice(0, count);
+    // FIX: Only include items with names (no IDs)
+    const getNames = (count = 2) => all
+        .filter(i => i.name && !['Fior di latte', 'Provola affumicata', 'Mozzarella', 'Pomodoro San Marzano'].includes(i.name))
+        .map(i => i.name)
+        .slice(0, count);
 
     const names = getNames(3);
     const ingredientsStr = names.length > 1

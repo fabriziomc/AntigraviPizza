@@ -7,39 +7,133 @@ import { updateUserSettings } from '../modules/database.js';
 
 const SLIDES = [
     {
-        id: 'welcome',
-        title: 'Benvenuto su AntigraviPizza! 🍕',
-        description: 'La tua stazione di comando definitiva per la creazione di pizze gourmet. Gestisci ricette, pianifica serate e stupisci i tuoi ospiti.',
-        icon: '🚀',
-        color: '#f59e0b'
+        id: 'ingredients',
+        title: 'Gestisci il tuo Arsenale Pizzaiolo',
+        icon: '🧑‍🍳',
+        color: '#f59e0b',
+        sections: [
+            {
+                subtitle: 'Ingredienti',
+                points: [
+                    'Aggiungi ingredienti base (formaggi, salumi, verdure, spezie)',
+                    'Definisci quantità minime e massime per ogni ingrediente',
+                    'Organizza per categorie e stagionalità',
+                    'Gestisci allergeni e tag (vegano, piccante, premium, ecc.)'
+                ]
+            },
+            {
+                subtitle: 'Preparazioni',
+                points: [
+                    'Crea preparazioni complesse (creme, salse, condimenti speciali)',
+                    'Combina più ingredienti in una singola preparazione',
+                    'Specifica tempi di preparazione e difficoltà',
+                    'Aggiungi link a ricette esterne per riferimento'
+                ]
+            }
+        ],
+        tip: '💡 Inizia importando gli ingredienti base dal database predefinito, poi personalizza con i tuoi ingredienti preferiti!'
     },
     {
-        id: 'recipes',
-        title: 'Le Tue Ricette Gourmet 📖',
-        description: 'Crea e organizza le tue ricette. Usa gli Archetipi per calcolare automaticamente le dosi perfette in base al peso del panetto o alla dimensione della teglia.',
-        icon: '🧪',
-        color: '#10b981'
+        id: 'generation',
+        title: 'Crea Pizze Straordinarie con l\'AI',
+        icon: '🤖',
+        color: '#10b981',
+        sections: [
+            {
+                subtitle: 'Archetipi',
+                description: 'Gli archetipi sono "stili" di pizza che guidano la generazione:',
+                points: [
+                    'Classica: Napoletana tradizionale con ingredienti iconici',
+                    'Terra e Bosco: Funghi, tartufi e sapori autunnali',
+                    'Fresca Estiva: Ingredienti a crudo e leggeri',
+                    'Piccante Decisa: Per chi ama il carattere forte',
+                    'Mare: Pesce e frutti di mare',
+                    'Vegana: 100% vegetale'
+                ]
+            },
+            {
+                subtitle: 'Generazione Automatica',
+                points: [
+                    'Clicca "Genera Pizza" per creare ricette uniche',
+                    'L\'AI seleziona ingredienti compatibili e bilanciati',
+                    'Ogni pizza è accompagnata da descrizione e immagine',
+                    'Personalizza il risultato a tuo piacimento'
+                ]
+            }
+        ],
+        tip: '🎨 Genera più pizze e salva le tue preferite per le serate!'
     },
     {
-        id: 'planner',
-        title: 'Serate Pizza Perfette 🗓️',
-        description: 'Pianifica i tuoi eventi, invita gli ospiti e genera la lista della spesa. Il sistema calcola tutto: dagli impasti alle preparazioni necessarie.',
+        id: 'planning',
+        title: 'Organizza Serate Pizza Indimenticabili',
         icon: '📅',
-        color: '#3b82f6'
-    },
-    {
-        id: 'guests',
-        title: 'Ospiti e Temi 🎨',
-        description: 'Condividi un link unico con i tuoi ospiti. Potranno vedere il menu, scegliere i gusti (se lo desiderano) e immergersi nel tema che hai scelto.',
-        icon: '✨',
-        color: '#8b5cf6'
+        color: '#3b82f6',
+        sections: [
+            {
+                subtitle: 'Crea una Serata',
+                points: [
+                    'Scegli data, ora e numero di ospiti',
+                    'Seleziona le pizze dal tuo ricettario',
+                    'Definisci l\'impasto e le quantità',
+                    'Aggiungi note e temi speciali'
+                ]
+            },
+            {
+                subtitle: 'Gestione Ospiti',
+                points: [
+                    'Crea la tua rubrica ospiti con nome, email e telefono',
+                    'Invita gli ospiti tramite email con link personalizzato',
+                    'Tieni traccia di allergie e preferenze',
+                    'Gli ospiti possono vedere il menu in anteprima'
+                ]
+            },
+            {
+                subtitle: 'Lista della Spesa',
+                points: [
+                    'Genera automaticamente la lista ingredienti',
+                    'Esporta su Bring! per la spesa condivisa',
+                    'Calcola le quantità in base al numero di ospiti'
+                ]
+            }
+        ],
+        tip: '📧 Invia gli inviti con anticipo! Gli ospiti riceveranno un link per vedere il menu e votare le pizze preferite.'
     },
     {
         id: 'live',
-        title: 'Modalità Live ⏱️',
-        description: 'Durante la serata, usa la Modalità Live per tenere traccia delle pizze sfornate, gestire i tempi di cottura e ricevere i feedback in tempo reale dagli ospiti.',
+        title: 'Gestisci la Serata in Tempo Reale',
         icon: '🔥',
-        color: '#ef4444'
+        color: '#ef4444',
+        sections: [
+            {
+                subtitle: 'Modalità Live',
+                points: [
+                    'Visualizza le pizze in ordine di preparazione',
+                    'Segna le pizze come "In preparazione" o "Servita"',
+                    'Vedi le istruzioni di cottura per ogni pizza',
+                    'Timer e promemoria per la gestione del forno'
+                ]
+            },
+            {
+                subtitle: 'Votazioni in Tempo Reale',
+                points: [
+                    'Gli ospiti votano le pizze dal loro smartphone',
+                    'Vedi i voti in diretta sulla dashboard',
+                    'Classifica automatica delle pizze più apprezzate',
+                    'Statistiche e feedback immediati'
+                ]
+            },
+            {
+                subtitle: 'Pagina Ospite',
+                description: 'Gli ospiti accedono tramite QR code o link e possono:',
+                points: [
+                    'Vedere il menu completo con foto',
+                    'Votare le pizze (da 1 a 5 stelle)',
+                    'Visualizzare ingredienti e allergeni',
+                    'Seguire l\'andamento della serata'
+                ]
+            }
+        ],
+        tip: '🍕 Proietta la dashboard su uno schermo per coinvolgere tutti gli ospiti!'
     }
 ];
 
@@ -61,6 +155,17 @@ export async function renderIntroduction() {
         const slide = SLIDES[currentSlide];
         const isLast = currentSlide === SLIDES.length - 1;
 
+        // Build sections HTML
+        const sectionsHTML = slide.sections.map(section => `
+            <div class="onboarding-section">
+                <h3 class="section-subtitle">${section.subtitle}</h3>
+                ${section.description ? `<p class="section-description">${section.description}</p>` : ''}
+                <ul class="section-points">
+                    ${section.points.map(point => `<li>${point}</li>`).join('')}
+                </ul>
+            </div>
+        `).join('');
+
         overlay.innerHTML = `
             <div class="onboarding-card">
                 <div class="onboarding-progress">
@@ -72,7 +177,12 @@ export async function renderIntroduction() {
                 </div>
                 
                 <h2 class="onboarding-title">${slide.title}</h2>
-                <p class="onboarding-text">${slide.description}</p>
+                
+                <div class="onboarding-content">
+                    ${sectionsHTML}
+                </div>
+                
+                ${slide.tip ? `<div class="onboarding-tip">${slide.tip}</div>` : ''}
                 
                 <div class="onboarding-actions">
                     ${currentSlide > 0 ? `<button class="btn-onboarding secondary" id="prevOnboarding">Indietro</button>` : '<div></div>'}
