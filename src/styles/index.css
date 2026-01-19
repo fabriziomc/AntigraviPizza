@@ -1071,6 +1071,11 @@ a:hover {
     font-size: var(--text-2xl);
   }
 
+  /* Prevent page header overlap with mobile menu button */
+  .page-header {
+    padding-top: 1rem;
+  }
+
   /* Modal responsive fixes */
   .modal,
   .modal-content {
