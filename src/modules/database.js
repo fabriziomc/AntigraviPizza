@@ -67,3 +67,21 @@ export const getCategoryById = activeDB.getCategoryById;
 export const getUserSettings = activeDB.getUserSettings;
 export const updateUserSettings = activeDB.updateUserSettings;
 
+/**
+ * Update only the image URL of a recipe (helper for background image generation)
+ * @param {string} recipeId - Recipe ID
+ * @param {string} imageUrl - New image URL
+ */
+export async function updateRecipeImage(recipeId, imageUrl) {
+    const recipe = await activeDB.getRecipeById(recipeId);
+    if (!recipe) {
+        throw new Error(`Recipe ${recipeId} not found`);
+    }
+
+    // Update only the image URL, keep everything else the same
+    return await activeDB.updateRecipe(recipeId, {
+        ...recipe,
+        imageUrl,
+        imageGenerationPending: false  // Clear the pending flag
+    });
+}

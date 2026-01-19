@@ -1473,23 +1473,9 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
         ? 'pizza with red tomato sauce base'
         : 'pizza bianca, white pizza with NO tomato sauce, white base with olive oil';
 
-    // Generate image using multi-provider system with automatic fallback
-    const { generatePizzaImage } = await import('../utils/imageProviders.js');
-
-    let imageUrl = '';
-    try {
-        const result = await generatePizzaImage(pizzaName, mainIngredientNames, {
-            hasTomato,
-            seed: Date.now()
-        });
-        imageUrl = result.imageUrl;
-        console.log(`✅ Image generated using provider: ${result.provider}`);
-    } catch (error) {
-        console.error('❌ Image generation failed:', error);
-        // Fallback to placeholder
-        // Use a reliable SVG placeholder
-        imageUrl = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"%3E%3Crect fill="%23333" width="800" height="600"/%3E%3Ctext fill="%23777" font-family="sans-serif" font-size="30" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3E🍕%3C/text%3E%3C/svg%3E';
-    }
+    // Use placeholder image immediately - images will be generated in background
+    // This makes recipe generation instant instead of waiting 3-5 seconds per image
+    const imageUrl = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"%3E%3Crect fill="%23333" width="800" height="600"/%3E%3Ctext fill="%23777" font-family="sans-serif" font-size="30" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3E🍕%3C/text%3E%3C/svg%3E';
 
     // --- FINAL SAFETY DEDUPLICATION ---
     // Ensure baseIngredients and preparations are internally and mutually unique
@@ -1581,6 +1567,12 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
         preparations: uniquePreparations,
         instructions,
         imageUrl,
+        imageGenerationPending: true,  // Flag to indicate image needs to be generated
+        imageGenerationData: {  // Data needed for background image generation
+            pizzaName,
+            mainIngredientNames,
+            hasTomato
+        },
         suggestedDough,
         tags,
         recipeSource,

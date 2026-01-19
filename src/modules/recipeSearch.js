@@ -84,15 +84,24 @@ export async function importSampleRecipes() {
     // Import the recipe generator dynamically
     const { generateMultipleRecipes } = await import('./recipeGenerator.js');
 
-    // Generate the requested number of recipes
+    // Generate the requested number of recipes (with placeholder images)
     const newRecipes = await generateMultipleRecipes(numRecipes, suggestedIngredients);
     let imported = 0;
     let lastError = null;
+    const importedRecipes = [];
 
     for (const recipe of newRecipes) {
         try {
-            await addRecipe(recipe);
+            const recipeId = await addRecipe(recipe);
             imported++;
+
+            // Track imported recipes with their IDs for background image generation
+            if (recipe.imageGenerationPending && recipe.imageGenerationData) {
+                importedRecipes.push({
+                    id: recipeId,
+                    ...recipe.imageGenerationData
+                });
+            }
         } catch (error) {
             console.error('Failed to import generated recipe:', recipe.name, error);
             lastError = error.message;
@@ -102,10 +111,75 @@ export async function importSampleRecipes() {
 
     if (imported > 0) {
         showToast(`${imported} nuove ricette gourmet generate! 🍕`, 'success');
+
+        // Generate images in background (parallel, non-blocking)
+        if (importedRecipes.length > 0) {
+            showToast(`Generazione immagini in corso...`, 'info');
+            generateImagesInBackground(importedRecipes);
+        }
     } else {
         const errorMsg = lastError || 'Nessuna ricetta generata';
         showToast(errorMsg, 'error');
     }
 
     return imported;
+}
+
+/**
+ * Generate images for recipes in background (parallel)
+ * @param {Array} recipes - Array of {id, pizzaName, mainIngredientNames, hasTomato}
+ */
+async function generateImagesInBackground(recipes) {
+    console.log(`🎨 Starting background image generation for ${recipes.length} recipes...`);
+
+    const { generatePizzaImage } = await import('../utils/imageProviders.js');
+    const { updateRecipeImage } = await import('./database.js');
+
+    let successCount = 0;
+    let failCount = 0;
+
+    // Generate all images in parallel with small delays to avoid rate limiting
+    const imagePromises = recipes.map(async (recipe, index) => {
+        // Add small delay between requests to avoid hitting rate limits (15 RPM for Gemini)
+        // Delay: 0ms, 500ms, 1000ms, 1500ms, etc.
+        await new Promise(resolve => setTimeout(resolve, index * 500));
+
+        try {
+            console.log(`🖼️ Generating image for: ${recipe.pizzaName}`);
+
+            const result = await generatePizzaImage(
+                recipe.pizzaName,
+                recipe.mainIngredientNames,
+                {
+                    hasTomato: recipe.hasTomato,
+                    seed: Date.now() + index
+                }
+            );
+
+            // Update recipe image in database
+            await updateRecipeImage(recipe.id, result.imageUrl);
+
+            successCount++;
+            console.log(`✅ Image generated for ${recipe.pizzaName} using ${result.provider}`);
+
+            // Refresh UI to show the new image
+            if (window.refreshData) {
+                await window.refreshData();
+            }
+
+        } catch (error) {
+            failCount++;
+            console.error(`❌ Failed to generate image for ${recipe.pizzaName}:`, error.message);
+            // Don't throw - let other images continue generating
+        }
+    });
+
+    // Wait for all images to complete
+    await Promise.all(imagePromises);
+
+    console.log(`🎨 Background image generation complete: ${successCount} success, ${failCount} failed`);
+
+    if (successCount > 0) {
+        showToast(`${successCount} immagini generate! 🖼️`, 'success');
+    }
 }
