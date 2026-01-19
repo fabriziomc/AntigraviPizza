@@ -92,13 +92,14 @@ export async function importSampleRecipes() {
 
     for (const recipe of newRecipes) {
         try {
-            const recipeId = await addRecipe(recipe);
+            const addedRecipe = await addRecipe(recipe);
             imported++;
 
             // Track imported recipes with their IDs for background image generation
+            // addRecipe returns the full recipe object, extract the ID
             if (recipe.imageGenerationPending && recipe.imageGenerationData) {
                 importedRecipes.push({
-                    id: recipeId,
+                    id: addedRecipe.id,  // Extract ID from returned recipe object
                     ...recipe.imageGenerationData
                 });
             }
