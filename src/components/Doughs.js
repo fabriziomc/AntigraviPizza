@@ -117,13 +117,19 @@ function showDoughModal(doughId) {
           <div class="info-value">${dough.yield} pizze</div>
         </div>
         <div class="info-box">
+          <div class="info-label">⚖️ Peso/Pizza</div>
+          <div class="info-value">${dough.weightPerPizza}g</div>
+        </div>
+        <div class="info-box">
           <div class="info-label">📊 Difficoltà</div>
           <div class="info-value">${dough.difficulty}</div>
         </div>
+        ${dough.requiresRefrigeration ? `
         <div class="info-box">
           <div class="info-label">⏰ Riposo</div>
           <div class="info-value">${dough.restTime}</div>
         </div>
+        ` : ''}
       </div>
       
       <div class="recipe-modal-grid" style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-bottom: 2rem;">
@@ -140,7 +146,7 @@ function showDoughModal(doughId) {
             `).join('')}
           </ul>
           <p style="font-size: 0.875rem; color: var(--color-gray-400); margin-top: 1rem;">
-            <em>Per pizza: ${dough.ingredients[0].perPizza}g farina, ${dough.ingredients[1].perPizza}ml acqua</em>
+            <em>Peso totale impasto: ${dough.totalWeight}g (${dough.weightPerPizza}g per pizza)</em>
           </p>
         </div>
         

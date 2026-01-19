@@ -279,9 +279,12 @@ export const DOUGH_RECIPES = [
         hydration: 65,
         temperature: '20-22°C',
         fermentation: '24 ore a temperatura ambiente',
-        restTime: '2 ore fuori frigo prima dell\'uso',
+        restTime: 'Non necessario (lievitazione a temperatura ambiente)',
+        requiresRefrigeration: false,
         yield: 4,
         difficulty: 'Media',
+        totalWeight: 1677, // Peso totale impasto in grammi
+        weightPerPizza: 419.25, // Peso per pizza in grammi
         ingredients: [
             { name: 'Farina tipo 00', quantity: 1000, unit: 'g', perPizza: 250, category: 'Impasto' },
             { name: 'Acqua', quantity: 650, unit: 'ml', perPizza: 162.5, category: 'Impasto' },
@@ -316,8 +319,11 @@ export const DOUGH_RECIPES = [
         temperature: '4°C (frigo)',
         fermentation: '48 ore in frigorifero',
         restTime: '3 ore fuori frigo prima dell\'uso',
+        requiresRefrigeration: true,
         yield: 4,
         difficulty: 'Alta',
+        totalWeight: 1774, // Peso totale impasto in grammi
+        weightPerPizza: 443.5, // Peso per pizza in grammi
         ingredients: [
             { name: 'Farina tipo 0', quantity: 700, unit: 'g', perPizza: 175, category: 'Impasto' },
             { name: 'Farina tipo 1', quantity: 300, unit: 'g', perPizza: 75, category: 'Impasto' },
@@ -354,8 +360,11 @@ export const DOUGH_RECIPES = [
         temperature: '18-20°C',
         fermentation: '36 ore (12h ambiente + 24h frigo)',
         restTime: '2-3 ore fuori frigo prima dell\'uso',
+        requiresRefrigeration: true,
         yield: 4,
         difficulty: 'Alta',
+        totalWeight: 1885, // Peso totale impasto in grammi
+        weightPerPizza: 471.25, // Peso per pizza in grammi
         ingredients: [
             { name: 'Farina tipo 1 macinata a pietra', quantity: 1000, unit: 'g', perPizza: 250, category: 'Impasto' },
             { name: 'Acqua', quantity: 750, unit: 'ml', perPizza: 187.5, category: 'Impasto' },
@@ -390,8 +399,11 @@ export const DOUGH_RECIPES = [
         temperature: '16-18°C',
         fermentation: '48 ore (24h biga + 24h impasto)',
         restTime: '4 ore fuori frigo prima dell\'uso',
+        requiresRefrigeration: true,
         yield: 4,
         difficulty: 'Molto Alta',
+        totalWeight: 2359, // Peso totale impasto in grammi
+        weightPerPizza: 589.75, // Peso per pizza in grammi
         ingredients: [
             { name: 'Farina Cuor di cereali', quantity: 500, unit: 'g', perPizza: 125, category: 'Impasto' },
             { name: 'Farina tipo 1', quantity: 500, unit: 'g', perPizza: 125, category: 'Impasto' },
@@ -429,9 +441,12 @@ export const DOUGH_RECIPES = [
         hydration: 70,
         temperature: '22-24°C',
         fermentation: '24 ore a temperatura controllata',
-        restTime: '2 ore fuori frigo prima dell\'uso',
+        restTime: 'Non necessario (lievitazione a temperatura ambiente)',
+        requiresRefrigeration: false,
         yield: 4,
         difficulty: 'Media',
+        totalWeight: 1935, // Peso totale impasto in grammi
+        weightPerPizza: 483.75, // Peso per pizza in grammi
         ingredients: [
             { name: 'Farina integrale di grano tenero', quantity: 1000, unit: 'g', perPizza: 250, category: 'Impasto' },
             { name: 'Acqua', quantity: 700, unit: 'ml', perPizza: 175, category: 'Impasto' },
@@ -468,9 +483,12 @@ export const DOUGH_RECIPES = [
         hydration: 55,
         temperature: '20-22°C',
         fermentation: '6-8 ore a temperatura ambiente',
-        restTime: '1 ora fuori frigo prima dell\'uso',
+        restTime: 'Non necessario (lievitazione a temperatura ambiente)',
+        requiresRefrigeration: false,
         yield: 4,
         difficulty: 'Bassa',
+        totalWeight: 1644, // Peso totale impasto in grammi
+        weightPerPizza: 411, // Peso per pizza in grammi
         ingredients: [
             { name: 'Farina tipo 0', quantity: 1000, unit: 'g', perPizza: 250, category: 'Impasto' },
             { name: 'Acqua', quantity: 550, unit: 'ml', perPizza: 137.5, category: 'Impasto' },
