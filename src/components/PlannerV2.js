@@ -2286,7 +2286,6 @@ async function viewPizzaNightDetails(nightId) {
         </div>
       </div>
       <div class="modal-footer" style="flex-direction: column; align-items: stretch; gap: 0.75rem;">
-        <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
         ${guestsWithEmail.length > 0 ? `
         <button class="btn btn-success" onclick="window.sendGuestInvites('${night.id}')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
           <span>📧</span>
@@ -2308,7 +2307,7 @@ async function viewPizzaNightDetails(nightId) {
         ${night.selectedPizzas.length > 0 ? `
         <button class="btn btn-secondary" onclick="window.closeModal(); setTimeout(() => window.manageAvailableIngredients('${night.id}'), 100);">
           <span>✓</span>
-          Ingredienti Disponibili
+          Ingredienti
         </button>
         <button class="btn btn-secondary" onclick="window.closeModal(); setTimeout(() => window.viewPizzaNightPreparations('${night.id}'), 100);">
           <span>🧪</span>
@@ -2319,6 +2318,7 @@ async function viewPizzaNightDetails(nightId) {
           Lista Spesa
         </button>
       ` : ''}
+        <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
       </div>
       `;
 
