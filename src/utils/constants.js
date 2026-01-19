@@ -148,7 +148,7 @@ export const PIZZA_NIGHT_STATUS = {
 };
 
 // Default guest count
-export const DEFAULT_GUEST_COUNT = 6;
+export const DEFAULT_GUEST_COUNT = 0;
 
 // Pizzas per person (average)
 export const PIZZAS_PER_PERSON = 0.75;
