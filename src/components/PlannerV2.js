@@ -2313,6 +2313,8 @@ async function viewPizzaNightDetails(nightId) {
           <span>🧪</span>
           Preparazioni
         </button>
+      ` : ''}
+        ${night.selectedPizzas.length > 0 ? `
         <button class="btn btn-primary" onclick="window.closeModal(); setTimeout(() => window.viewShoppingListForNight('${night.id}'), 100);">
           <span>🛒</span>
           Lista Spesa
