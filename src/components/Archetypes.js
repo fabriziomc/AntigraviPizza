@@ -3,7 +3,7 @@
 // ============================================
 
 import { getAllRecipes } from '../modules/database.js';
-import { ARCHETYPES } from '../utils/constants.js';
+import { ARCHETYPES, PREPARATIONS } from '../utils/constants.js';
 import { state } from '../store.js';
 
 
@@ -269,15 +269,41 @@ window.viewArchetypeRecipes = async function (archetypeKey) {
                     
                     <h3 class="mb-4">Pizze Generate (${archetypeRecipes.length})</h3>
                     <div class="archetype-recipes-grid">
-                        ${archetypeRecipes.map(recipe => `
+                        ${archetypeRecipes.map(recipe => {
+        // Helper to extract names
+        const baseIng = typeof recipe.baseIngredients === 'string'
+            ? JSON.parse(recipe.baseIngredients || '[]')
+            : (recipe.baseIngredients || []);
+
+        const recipePreps = typeof recipe.preparations === 'string'
+            ? JSON.parse(recipe.preparations || '[]')
+            : (recipe.preparations || []);
+
+        const ingredientNames = baseIng
+            .filter(i => i.category !== 'Impasto' && i.phase !== 'dough')
+            .map(i => i.name);
+
+        const preparationNames = recipePreps
+            .map(p => {
+                const prepData = PREPARATIONS.find(pd => pd.id === p.id);
+                return prepData ? prepData.name : null;
+            })
+            .filter(Boolean);
+
+        const allItems = [...ingredientNames, ...preparationNames].join(', ');
+
+        return `
                             <div class="recipe-mini-card" onclick="window.openRecipeDetail('${recipe.id}')">
                                 <img src="${recipe.imageUrl}" alt="${recipe.name}" class="recipe-mini-img">
                                 <div class="recipe-mini-info">
                                     <h4>${recipe.name}</h4>
-                                    <p class="text-muted text-sm">${recipe.pizzaiolo}</p>
+                                    <p class="text-muted text-sm" style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                        ${allItems || 'Nessun condimento'}
+                                    </p>
                                 </div>
                             </div>
-                        `).join('')}
+                        `;
+    }).join('')}
                     </div>
                 </div>
                 <div class="modal-footer">
