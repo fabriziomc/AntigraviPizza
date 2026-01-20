@@ -1880,9 +1880,15 @@ async function sendGuestInvites(nightId) {
   try {
     console.log('🔵 [sendGuestInvites] Attempting to send POST request to:', `/api/pizza-nights/${nightId}/send-invites`);
 
+    const token = localStorage.getItem('authToken');
+    console.log('🔵 [sendGuestInvites] Token exists:', !!token, 'Length:', token?.length || 0);
+
     const response = await fetch(`/api/pizza-nights/${nightId}/send-invites`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
     });
 
     console.log('🔵 [sendGuestInvites] Response received:', {
@@ -2114,6 +2120,8 @@ async function viewPizzaNightDetails(nightId) {
   const totalIngredientsCount = Object.values(fullIngredientsList).reduce((sum, list) => sum + list.length, 0);
   const toBuyCount = Object.values(toBuyIngredientsList).reduce((sum, list) => sum + list.length, 0);
 
+  console.log('🔧 [DEBUG] Rendering modal with UPDATED button order - Lista Spesa before Chiudi');
+
   const modalContent = `
       <div class="modal-header">
         <h2 class="modal-title">${night.name}</h2>
@@ -2313,8 +2321,6 @@ async function viewPizzaNightDetails(nightId) {
           <span>🧪</span>
           Preparazioni
         </button>
-      ` : ''}
-        ${night.selectedPizzas.length > 0 ? `
         <button class="btn btn-primary" onclick="window.closeModal(); setTimeout(() => window.viewShoppingListForNight('${night.id}'), 100);">
           <span>🛒</span>
           Lista Spesa
@@ -2323,6 +2329,13 @@ async function viewPizzaNightDetails(nightId) {
         <button class="btn btn-secondary" onclick="window.closeModal()">Chiudi</button>
       </div>
       `;
+
+  console.log('🔍 [DEBUG] Modal footer buttons order check:');
+  console.log('  - Email button:', guestsWithEmail.length > 0 ? 'YES' : 'NO');
+  console.log('  - WhatsApp button:', guestsWithPhone.length > 0 ? 'YES' : 'NO');
+  console.log('  - Avvia Serata button:', (night.selectedPizzas.length > 0 && night.status === 'planned') ? 'YES' : 'NO');
+  console.log('  - Ingredienti/Preparazioni/Lista Spesa buttons:', night.selectedPizzas.length > 0 ? 'YES (all 3 together)' : 'NO');
+  console.log('  - Chiudi button: ALWAYS YES');
 
   openModal(modalContent);
 

@@ -638,7 +638,7 @@ router.post('/pizza-nights/:id/send-invites', async (req, res) => {
         }
 
         console.log('🔵 [ROUTE /send-invites] Fetching all guests...');
-        const allGuests = await dbAdapter.getAllGuests();
+        const allGuests = await dbAdapter.getAllGuests(req.user.id);
         console.log(`🔵 [ROUTE /send-invites] Total guests in database: ${allGuests.length}`);
 
         const guestsWithEmail = night.selectedGuests
