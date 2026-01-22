@@ -348,7 +348,7 @@ export async function renderSettings() {
                   <span class="icon">🔄</span>
                   Reset Archivi
                 </button>
-                <p class="action-help">Cancella tutte le ricette e serate pizza, poi ripopola ingredienti base (192) e preparazioni base (64).</p>
+                <p class="action-help">Cancella tutte le ricette e serate pizza, poi ripopola ingredienti base (277) e preparazioni base (62).</p>
               </div>
               
               <div class="action-group">
@@ -356,7 +356,7 @@ export async function renderSettings() {
                   <span class="icon">🌱</span>
                   Ripristina Dati Base
                 </button>
-                <p class="action-help">Ripopola il database con 192 ingredienti base e 64 preparazioni base. Utile dopo un deploy su Render.</p>
+                <p class="action-help">Ripopola il database con 277 ingredienti base e 62 preparazioni base. Utile dopo un deploy su Render.</p>
               </div>
             </div>
           </div>
@@ -695,8 +695,8 @@ function setupEventListeners() {
       'Questa azione:<br>' +
       '• Cancellerà TUTTE le ricette<br>' +
       '• Cancellerà TUTTE le serate pizza<br>' +
-      '• Ripopolerà gli ingredienti base (192)<br>' +
-      '• Ripopolerà le preparazioni base (64)<br>' +
+      '• Ripopolerà gli ingredienti base (277)<br>' +
+      '• Ripopolerà le preparazioni base (62)<br>' +
       '• Ripopolerà le categorie (10)<br><br>' +
       '<strong>Non può essere annullata.</strong>',
       async () => {
@@ -751,8 +751,8 @@ function setupEventListeners() {
     showConfirmModal(
       '🌱 RIPRISTINA DATI BASE?',
       'Questa azione ripopolerà il database con:<br>' +
-      '• 192 ingredienti base<br>' +
-      '• 64 preparazioni base<br>' +
+      '• 277 ingredienti base<br>' +
+      '• 62 preparazioni base<br>' +
       '• 10 categorie standard<br><br>' +
       'I tuoi dati custom e ricette NON saranno toccati.',
       async () => {
