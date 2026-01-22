@@ -54,6 +54,47 @@ class DatabaseAdapter {
     }
 
     // ==========================================
+    // DATA NORMALIZATION HELPERS
+    // ==========================================
+
+    /**
+     * Remove embedded ingredient data, keeping only ID references
+     * This ensures database normalization - ingredient details are fetched via JOIN
+     */
+    stripEmbeddedIngredientData(ingredients) {
+        if (!ingredients || !Array.isArray(ingredients)) return [];
+
+        return ingredients.map(ing => {
+            const cleaned = { ...ing };
+
+            // Remove embedded data that should come from Ingredients table
+            const fieldsToRemove = ['name', 'category', 'categoryName', 'categoryIcon', 'defaultUnit'];
+            fieldsToRemove.forEach(field => delete cleaned[field]);
+
+            return cleaned;
+        });
+    }
+
+    /**
+     * Remove embedded preparation data, keeping only ID references
+     * This ensures database normalization - preparation details are fetched via JOIN
+     */
+    stripEmbeddedPreparationData(preparations) {
+        if (!preparations || !Array.isArray(preparations)) return [];
+
+        return preparations.map(prep => {
+            const cleaned = { ...prep };
+
+            // Remove embedded data that should come from Preparations table
+            const fieldsToRemove = ['name', 'category', 'description', 'ingredients', 'instructions', 'tips', 'yield', 'prepTime', 'difficulty'];
+            fieldsToRemove.forEach(field => delete cleaned[field]);
+
+            return cleaned;
+        });
+    }
+
+
+    // ==========================================
     // RECIPES
     // ==========================================
 
@@ -93,10 +134,16 @@ class DatabaseAdapter {
     }
 
     async createRecipe(recipe, userId) {
-        const baseIngredientsJson = JSON.stringify(recipe.baseIngredients || []);
-        const toppingsDuringJson = JSON.stringify(recipe.toppingsDuringBake || []);
-        const toppingsPostJson = JSON.stringify(recipe.toppingsPostBake || []);
-        const preparationsJson = JSON.stringify(recipe.preparations || []);
+        // Strip embedded data to maintain normalization
+        const cleanedBaseIngredients = this.stripEmbeddedIngredientData(recipe.baseIngredients || []);
+        const cleanedToppingsDuring = this.stripEmbeddedIngredientData(recipe.toppingsDuringBake || []);
+        const cleanedToppingsPost = this.stripEmbeddedIngredientData(recipe.toppingsPostBake || []);
+        const cleanedPreparations = this.stripEmbeddedPreparationData(recipe.preparations || []);
+
+        const baseIngredientsJson = JSON.stringify(cleanedBaseIngredients);
+        const toppingsDuringJson = JSON.stringify(cleanedToppingsDuring);
+        const toppingsPostJson = JSON.stringify(cleanedToppingsPost);
+        const preparationsJson = JSON.stringify(cleanedPreparations);
         const instructionsJson = JSON.stringify(recipe.instructions || []);
         const tagsJson = JSON.stringify(recipe.tags || []);
 
@@ -173,10 +220,16 @@ class DatabaseAdapter {
         // Merge updates with current recipe
         const recipe = { ...currentRecipe, ...updates };
 
-        const baseIngredientsJson = JSON.stringify(recipe.baseIngredients || []);
-        const toppingsDuringJson = JSON.stringify(recipe.toppingsDuringBake || []);
-        const toppingsPostJson = JSON.stringify(recipe.toppingsPostBake || []);
-        const preparationsJson = JSON.stringify(recipe.preparations || []);
+        // Strip embedded data to maintain normalization
+        const cleanedBaseIngredients = this.stripEmbeddedIngredientData(recipe.baseIngredients || []);
+        const cleanedToppingsDuring = this.stripEmbeddedIngredientData(recipe.toppingsDuringBake || []);
+        const cleanedToppingsPost = this.stripEmbeddedIngredientData(recipe.toppingsPostBake || []);
+        const cleanedPreparations = this.stripEmbeddedPreparationData(recipe.preparations || []);
+
+        const baseIngredientsJson = JSON.stringify(cleanedBaseIngredients);
+        const toppingsDuringJson = JSON.stringify(cleanedToppingsDuring);
+        const toppingsPostJson = JSON.stringify(cleanedToppingsPost);
+        const preparationsJson = JSON.stringify(cleanedPreparations);
         const instructionsJson = JSON.stringify(recipe.instructions || []);
         const tagsJson = JSON.stringify(recipe.tags || []);
 
@@ -831,7 +884,9 @@ class DatabaseAdapter {
     }
 
     async createPreparation(prep, userId) {
-        const ingredientsJson = JSON.stringify(prep.ingredients || []);
+        // Strip embedded ingredient data to maintain normalization
+        const cleanedIngredients = this.stripEmbeddedIngredientData(prep.ingredients || []);
+        const ingredientsJson = JSON.stringify(cleanedIngredients);
         const instructionsJson = JSON.stringify(prep.instructions || []);
         const tipsJson = JSON.stringify(prep.tips || []);
 
@@ -892,7 +947,9 @@ class DatabaseAdapter {
 
         const prep = { ...currentPrep, ...updates };
 
-        const ingredientsJson = JSON.stringify(prep.ingredients || []);
+        // Strip embedded ingredient data to maintain normalization
+        const cleanedIngredients = this.stripEmbeddedIngredientData(prep.ingredients || []);
+        const ingredientsJson = JSON.stringify(cleanedIngredients);
         const instructionsJson = JSON.stringify(prep.instructions || []);
         const tipsJson = JSON.stringify(prep.tips || []);
 
