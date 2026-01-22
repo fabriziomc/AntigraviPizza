@@ -81,12 +81,13 @@ export async function seedAll() {
                 categoryMap[cat.name] = cat.id;
             });
 
-            // Get existing ingredients
-            const existingIngredients = await dbAdapter.getAllIngredients();
-            const existingIngredientNames = new Set(existingIngredients.map(i => i.name));
+            // Get existing ingredients (pass null to get only base data where userId IS NULL)
+            const existingIngredients = await dbAdapter.getAllIngredients(null);
+            // Use lowercase names for case-insensitive comparison
+            const existingIngredientNames = new Set(existingIngredients.map(i => i.name.toLowerCase()));
 
             for (const ing of seedData.ingredients) {
-                if (!existingIngredientNames.has(ing.name)) {
+                if (!existingIngredientNames.has(ing.name.toLowerCase())) {
                     const categoryId = categoryMap[ing.category];
                     if (categoryId) {
                         const ingredientData = {
@@ -107,13 +108,13 @@ export async function seedAll() {
                         };
 
                         if (dbAdapter.isSQLite) {
-                            const stmt = dbAdapter.db.prepare('INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-                            stmt.run(ingredientData.id, ingredientData.name, ingredientData.categoryId, ingredientData.subcategory, ingredientData.minWeight, ingredientData.maxWeight, ingredientData.defaultUnit, ingredientData.postBake, ingredientData.phase, ingredientData.season, ingredientData.allergens, ingredientData.tags, ingredientData.isCustom, ingredientData.dateAdded);
+                            const stmt = dbAdapter.db.prepare('INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+                            stmt.run(ingredientData.id, ingredientData.name, ingredientData.categoryId, ingredientData.subcategory, ingredientData.minWeight, ingredientData.maxWeight, ingredientData.defaultUnit, ingredientData.postBake, ingredientData.phase, ingredientData.season, ingredientData.allergens, ingredientData.tags, ingredientData.isCustom, ingredientData.dateAdded, null);
                         } else {
                             // Turso
                             await dbAdapter.db.execute({
-                                sql: 'INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                                args: [ingredientData.id, ingredientData.name, ingredientData.categoryId, ingredientData.subcategory, ingredientData.minWeight, ingredientData.maxWeight, ingredientData.defaultUnit, ingredientData.postBake, ingredientData.phase, ingredientData.season, ingredientData.allergens, ingredientData.tags, ingredientData.isCustom, ingredientData.dateAdded]
+                                sql: 'INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                                args: [ingredientData.id, ingredientData.name, ingredientData.categoryId, ingredientData.subcategory, ingredientData.minWeight, ingredientData.maxWeight, ingredientData.defaultUnit, ingredientData.postBake, ingredientData.phase, ingredientData.season, ingredientData.allergens, ingredientData.tags, ingredientData.isCustom, ingredientData.dateAdded, null]
                             });
                         }
                         results.ingredients++;
@@ -129,12 +130,13 @@ export async function seedAll() {
         if (fs.existsSync(preparationsFile)) {
             const seedData = JSON.parse(fs.readFileSync(preparationsFile, 'utf8'));
 
-            // Get existing preparations
-            const existingPreparations = await dbAdapter.getAllPreparations();
-            const existingPreparationNames = new Set(existingPreparations.map(p => p.name));
+            // Get existing preparations (pass null to get only base data where userId IS NULL)
+            const existingPreparations = await dbAdapter.getAllPreparations(null);
+            // Use lowercase names for case-insensitive comparison
+            const existingPreparationNames = new Set(existingPreparations.map(p => p.name.toLowerCase()));
 
             for (const prep of seedData.preparations) {
-                if (!existingPreparationNames.has(prep.name)) {
+                if (!existingPreparationNames.has(prep.name.toLowerCase())) {
                     const preparationData = {
                         id: randomUUID(),
                         name: prep.name,
@@ -151,13 +153,13 @@ export async function seedAll() {
                     };
 
                     if (dbAdapter.isSQLite) {
-                        const stmt = dbAdapter.db.prepare('INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-                        stmt.run(preparationData.id, preparationData.name, preparationData.category, preparationData.description, preparationData.yield, preparationData.prepTime, preparationData.difficulty, preparationData.ingredients, preparationData.instructions, preparationData.tips, preparationData.dateAdded, preparationData.isCustom);
+                        const stmt = dbAdapter.db.prepare('INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+                        stmt.run(preparationData.id, preparationData.name, preparationData.category, preparationData.description, preparationData.yield, preparationData.prepTime, preparationData.difficulty, preparationData.ingredients, preparationData.instructions, preparationData.tips, preparationData.dateAdded, preparationData.isCustom, null);
                     } else {
                         // Turso
                         await dbAdapter.db.execute({
-                            sql: 'INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                            args: [preparationData.id, preparationData.name, preparationData.category, preparationData.description, preparationData.yield, preparationData.prepTime, preparationData.difficulty, preparationData.ingredients, preparationData.instructions, preparationData.tips, preparationData.dateAdded, preparationData.isCustom]
+                            sql: 'INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                            args: [preparationData.id, preparationData.name, preparationData.category, preparationData.description, preparationData.yield, preparationData.prepTime, preparationData.difficulty, preparationData.ingredients, preparationData.instructions, preparationData.tips, preparationData.dateAdded, preparationData.isCustom, null]
                         });
                     }
                     results.preparations++;

@@ -621,13 +621,21 @@ class DatabaseAdapter {
     async getAllPreparations(userId) {
         let preps;
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Preparations WHERE (userId = ? OR userId IS NULL) ORDER BY name');
-            preps = stmt.all(userId).map(r => this.parsePreparation(r));
+            // If userId is null, only get base preparations (userId IS NULL)
+            // Otherwise, get both user-specific and base preparations
+            const sql = userId === null
+                ? 'SELECT * FROM Preparations WHERE userId IS NULL ORDER BY name'
+                : 'SELECT * FROM Preparations WHERE (userId = ? OR userId IS NULL) ORDER BY name';
+            const stmt = this.db.prepare(sql);
+            preps = (userId === null ? stmt.all() : stmt.all(userId)).map(r => this.parsePreparation(r));
         } else {
-            const result = await this.db.execute({
-                sql: 'SELECT * FROM Preparations WHERE (userId = ? OR userId IS NULL) ORDER BY name',
-                args: [userId]
-            });
+            // Turso - same logic
+            const sql = userId === null
+                ? 'SELECT * FROM Preparations WHERE userId IS NULL ORDER BY name'
+                : 'SELECT * FROM Preparations WHERE (userId = ? OR userId IS NULL) ORDER BY name';
+            const result = userId === null
+                ? await this.db.execute({ sql })
+                : await this.db.execute({ sql, args: [userId] });
             preps = result.rows.map(r => this.parsePreparation(r));
         }
 
@@ -992,30 +1000,42 @@ class DatabaseAdapter {
 
     async getAllIngredients(userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare(`
-                SELECT i.*, c.name as categoryName, c.icon as categoryIcon
-                FROM Ingredients i
-                LEFT JOIN Categories c ON i.categoryId = c.id
-                WHERE (i.userId = ? OR i.userId IS NULL)
-                ORDER BY c.displayOrder, i.name
-            `);
-            return stmt.all(userId).map(r => {
+            // If userId is null, only get base ingredients (userId IS NULL)
+            // Otherwise, get both user-specific and base ingredients
+            const sql = userId === null
+                ? `SELECT i.*, c.name as categoryName, c.icon as categoryIcon
+                   FROM Ingredients i
+                   LEFT JOIN Categories c ON i.categoryId = c.id
+                   WHERE i.userId IS NULL
+                   ORDER BY c.displayOrder, i.name`
+                : `SELECT i.*, c.name as categoryName, c.icon as categoryIcon
+                   FROM Ingredients i
+                   LEFT JOIN Categories c ON i.categoryId = c.id
+                   WHERE (i.userId = ? OR i.userId IS NULL)
+                   ORDER BY c.displayOrder, i.name`;
+            const stmt = this.db.prepare(sql);
+            return (userId === null ? stmt.all() : stmt.all(userId)).map(r => {
                 const parsed = this.parseIngredient(r);
                 parsed.category = r.categoryName;
                 parsed.categoryIcon = r.categoryIcon;
                 return parsed;
             });
         } else {
-            const result = await this.db.execute({
-                sql: `
-                    SELECT i.*, c.name as categoryName, c.icon as categoryIcon
-                    FROM Ingredients i
-                    LEFT JOIN Categories c ON i.categoryId = c.id
-                    WHERE (i.userId = ? OR i.userId IS NULL)
-                    ORDER BY c.displayOrder, i.name
-                `,
-                args: [userId]
-            });
+            // Turso - same logic
+            const sql = userId === null
+                ? `SELECT i.*, c.name as categoryName, c.icon as categoryIcon
+                   FROM Ingredients i
+                   LEFT JOIN Categories c ON i.categoryId = c.id
+                   WHERE i.userId IS NULL
+                   ORDER BY c.displayOrder, i.name`
+                : `SELECT i.*, c.name as categoryName, c.icon as categoryIcon
+                   FROM Ingredients i
+                   LEFT JOIN Categories c ON i.categoryId = c.id
+                   WHERE (i.userId = ? OR i.userId IS NULL)
+                   ORDER BY c.displayOrder, i.name`;
+            const result = userId === null
+                ? await this.db.execute({ sql })
+                : await this.db.execute({ sql, args: [userId] });
             return result.rows.map(r => {
                 const parsed = this.parseIngredient(r);
                 parsed.category = r.categoryName;
@@ -1737,14 +1757,22 @@ class DatabaseAdapter {
     }
 
     async initializeUserDefaults(userId) {
-        // This method will be called when a new user registers
-        // It should copy default categories and ingredients to the new user
+        // This method is called when a new user registers
+        // It seeds base categories, ingredients, and preparations for the new user
+        try {
+            console.log(`🌱 Initializing defaults for user ${userId}...`);
 
-        // For now, we'll assume categories and ingredients are shared
-        // If you want user-specific categories/ingredients, implement copying logic here
+            // Import and run the seed service to populate base data
+            // This ensures new users get base categories, ingredients, and preparations
+            const { seedAll } = await import('./seed-service.js');
+            const results = await seedAll();
 
-        console.log(`✅ Initialized defaults for user ${userId}`);
-        return { success: true };
+            console.log(`✅ Initialized defaults for user ${userId}:`, results);
+            return results;
+        } catch (error) {
+            console.error(`❌ Failed to initialize defaults for user ${userId}:`, error);
+            return { success: false, error: error.message };
+        }
     }
 }
 

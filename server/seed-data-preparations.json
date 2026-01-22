@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "exportDate": "2025-12-17T14:27:20.326Z",
-  "count": 66,
+  "count": 62,
   "preparations": [
     {
       "name": "Ananas caramellato",
@@ -85,18 +85,6 @@
       "ingredients": "[{\"ingredientId\":\"69df2cbf-1c1c-4c77-87e3-b5542aa3cdf1\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5},{\"ingredientId\":\"105a5da3-d980-4ff3-9648-ba4759d72452\",\"quantity\":40,\"unit\":\"ml\",\"perPortion\":10},{\"ingredientId\":\"d3148992-99fe-4998-835f-0b21df6cd5a1\",\"quantity\":30,\"unit\":\"g\",\"perPortion\":7.5}]",
       "instructions": "[\"Affettare finemente le cipolle\",\"Rosolare nel burro a fuoco basso\",\"Cuocere 30 minuti mescolando spesso\",\"Aggiungere zucchero e aceto\",\"Cuocere altri 10 minuti fino a caramellatura\"]",
       "tips": "[\"Pazienza: cuocere a fuoco basso\",\"Non far bruciare\",\"Si conserva 5 giorni in frigo\"]",
-      "isCustom": 0
-    },
-    {
-      "name": "Cipolla caramellata",
-      "category": "Verdure",
-      "description": "https://www.google.com/amp/s/www.cucchiaio.it/ricetta/cipolle-rosse-caramellate.amp.html",
-      "yield": 4,
-      "prepTime": "15-20 min",
-      "difficulty": "Facile",
-      "ingredients": "[{\"ingredientId\":\"69df2cbf-1c1c-4c77-87e3-b5542aa3cdf1\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
-      "instructions": null,
-      "tips": null,
       "isCustom": 0
     },
     {
@@ -263,18 +251,6 @@
       "prepTime": "20-25 min",
       "difficulty": "Facile",
       "ingredients": "[{\"ingredientId\":\"b1f6a840-420d-4037-932b-537c999b0962\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
-      "instructions": null,
-      "tips": null,
-      "isCustom": 0
-    },
-    {
-      "name": "Crema di patate",
-      "category": "Creme",
-      "description": "Soffriggere nell'olio il sedano, la carota e la cipolla, unire le patate a pasta gialla e cuocere fino a quando diventano tenere",
-      "yield": 4,
-      "prepTime": "20-25 min",
-      "difficulty": "Facile",
-      "ingredients": "[{\"ingredientId\":\"6104a0f8-e297-48d1-ad42-d515259c07b7\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"8b7ed48c-8dd4-4ed6-94aa-bf2b63c77a9d\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": null,
       "tips": null,
       "isCustom": 0
@@ -448,18 +424,6 @@
       "isCustom": 0
     },
     {
-      "name": "Melanzane grigliate",
-      "category": "Verdure",
-      "description": "Grigliare a fette verticali sottili",
-      "yield": 4,
-      "prepTime": "15-20 min",
-      "difficulty": "Facile",
-      "ingredients": "[]",
-      "instructions": null,
-      "tips": null,
-      "isCustom": 0
-    },
-    {
       "name": "Patate in crosta",
       "category": "Verdure",
       "description": "https://blog.giallozafferano.it/allacciateilgrembiule/patate-a-fette-in-padella/",
@@ -529,18 +493,6 @@
       "ingredients": "[{\"ingredientId\":\"31ba229b-b839-4b9b-9d94-0e898c953c61\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"6407abe0-9e0b-495a-8ce1-29c92435f529\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"d66d8c76-c871-44e4-9850-27d6f64f9511\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"628f22a0-5c1b-4e9a-a700-be054dca547c\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
       "instructions": "[\"Lavare e asciugare la rucola\",\"Frullare rucola, noci e pecorino\",\"Aggiungere olio a filo\",\"Frullare fino a consistenza cremosa\"]",
       "tips": "[\"La rucola deve essere freschissima\",\"Usa subito per evitare ossidazione\",\"Ottimo anche per pasta\"]",
-      "isCustom": 0
-    },
-    {
-      "name": "Pesto di rucola",
-      "category": "Salse",
-      "description": "https://ricette.giallozafferano.it/Pesto-di-rucola.html",
-      "yield": 4,
-      "prepTime": "10-15 min",
-      "difficulty": "Facile",
-      "ingredients": "[{\"ingredientId\":\"31ba229b-b839-4b9b-9d94-0e898c953c61\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25},{\"ingredientId\":\"6407abe0-9e0b-495a-8ce1-29c92435f529\",\"quantity\":100,\"unit\":\"g\",\"perPortion\":25}]",
-      "instructions": null,
-      "tips": null,
       "isCustom": 0
     },
     {
