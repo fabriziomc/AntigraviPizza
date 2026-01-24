@@ -645,6 +645,10 @@ export async function generateRandomRecipe_legacy() {
     return await generateRandomRecipe([]);
 }
 
+/**
+ * Find ingredient by name and return normalized structure
+ * FIXED: Now returns ingredientId for proper normalization
+ */
 function findIngredientByName(name, INGREDIENTS_DB) {
     const allIngredients = [
         ...(INGREDIENTS_DB.cheeses || []),
@@ -657,20 +661,24 @@ function findIngredientByName(name, INGREDIENTS_DB) {
 
     const found = allIngredients.find(ing => ing.name === name);
     if (found) {
+        // 🔧 FIXED: Return normalized structure with ingredientId
         return {
-            ...found,
+            ingredientId: found.id,  // ✅ Use ingredientId for normalization
             quantity: found.minWeight && found.maxWeight
                 ? Math.round(found.minWeight + Math.random() * (found.maxWeight - found.minWeight))
                 : 50,
             unit: found.defaultUnit || 'g',
-            phase: found.phase || 'topping'
+            phase: found.phase || 'topping',
+            postBake: found.postBake || false
         };
     }
     return null;
 }
 
+
 /**
  * Trova un ingrediente per ID nel database locale
+ * FIXED: Now returns ingredientId for proper normalization
  */
 function findIngredientById(id, INGREDIENTS_DB) {
     const allIngredients = [
@@ -684,17 +692,20 @@ function findIngredientById(id, INGREDIENTS_DB) {
 
     const found = allIngredients.find(ing => ing.id === id);
     if (found) {
+        // 🔧 FIXED: Return normalized structure with ingredientId
         return {
-            ...found,
+            ingredientId: found.id,  // ✅ Use ingredientId for normalization
             quantity: found.minWeight && found.maxWeight
                 ? Math.round(found.minWeight + Math.random() * (found.maxWeight - found.minWeight))
                 : 50,
             unit: found.defaultUnit || 'g',
-            phase: found.phase || 'topping'
+            phase: found.phase || 'topping',
+            postBake: found.postBake || false
         };
     }
     return null;
 }
+
 
 /**
  * Categorizza un ingrediente
@@ -822,7 +833,7 @@ async function selectPreparationsForPizza(ingredients, tags) {
     // Helper function per rimuovere ingrediente base quando si aggiunge preparazione
     const addPreparationAndRemoveBase = (prep, quantity, timing, baseIngredientKeyword) => {
         preparations.push({
-            id: prep.id,
+            preparationId: prep.id,  // ✅ Use preparationId for normalization
             quantity,
             unit: 'g',
             timing
@@ -909,7 +920,7 @@ async function selectPreparationsForPizza(ingredients, tags) {
             if (sauceOptions.length > 0) {
                 const selected = sauceOptions[Math.floor(Math.random() * sauceOptions.length)];
                 preparations.push({
-                    id: selected.id,
+                    preparationId: selected.id,  // ✅ Use preparationId for normalization
                     quantity: Math.floor(50 + Math.random() * 30), // 50-80g
                     unit: 'g',
                     timing: Math.random() > 0.5 ? 'before' : 'after'
@@ -928,7 +939,7 @@ async function selectPreparationsForPizza(ingredients, tags) {
             if (pestoOptions.length > 0) {
                 const selected = pestoOptions[Math.floor(Math.random() * pestoOptions.length)];
                 preparations.push({
-                    id: selected.id,
+                    preparationId: selected.id,  // ✅ Use preparationId for normalization
                     quantity: Math.floor(40 + Math.random() * 30), // 40-70g
                     unit: 'g',
                     timing: 'after' // Pesti meglio a crudo

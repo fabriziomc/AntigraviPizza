@@ -64,8 +64,15 @@ class DatabaseAdapter {
     stripEmbeddedIngredientData(ingredients) {
         if (!ingredients || !Array.isArray(ingredients)) return [];
 
-        return ingredients.map(ing => {
+        return ingredients.map((ing, index) => {
             const cleaned = { ...ing };
+
+            // ⚠️ VALIDATION: Ensure ingredientId is present
+            if (!cleaned.ingredientId) {
+                console.warn(`⚠️  WARNING: Ingredient at index ${index} missing 'ingredientId'. This will cause display issues!`, ing);
+                // Don't save recipes without proper IDs - this prevents corrupt data
+                throw new Error(`Ingredient at index ${index} is missing 'ingredientId'. Cannot save unnormalized recipe data.`);
+            }
 
             // Remove embedded data that should come from Ingredients table
             const fieldsToRemove = ['name', 'category', 'categoryName', 'categoryIcon', 'defaultUnit'];
@@ -82,8 +89,20 @@ class DatabaseAdapter {
     stripEmbeddedPreparationData(preparations) {
         if (!preparations || !Array.isArray(preparations)) return [];
 
-        return preparations.map(prep => {
+        return preparations.map((prep, index) => {
             const cleaned = { ...prep };
+
+            // ⚠️ VALIDATION: Ensure preparationId is present
+            if (!cleaned.preparationId && !cleaned.id) {
+                console.warn(`⚠️  WARNING: Preparation at index ${index} missing 'preparationId'. This will cause display issues!`, prep);
+                throw new Error(`Preparation at index ${index} is missing 'preparationId'. Cannot save unnormalized recipe data.`);
+            }
+
+            // Normalize: if using 'id', convert to 'preparationId'
+            if (cleaned.id && !cleaned.preparationId) {
+                cleaned.preparationId = cleaned.id;
+                delete cleaned.id;
+            }
 
             // Remove embedded data that should come from Preparations table
             const fieldsToRemove = ['name', 'category', 'description', 'ingredients', 'instructions', 'tips', 'yield', 'prepTime', 'difficulty'];
@@ -99,27 +118,95 @@ class DatabaseAdapter {
     // ==========================================
 
     async getAllRecipes(userId) {
+        let recipes;
         if (this.isSQLite) {
             const stmt = this.db.prepare('SELECT * FROM Recipes WHERE userId = ? ORDER BY createdAt DESC');
-            return stmt.all(userId).map(r => this.parseRecipe(r));
+            recipes = stmt.all(userId).map(r => this.parseRecipe(r));
         } else {
             // Turso
             const result = await this.db.execute({
                 sql: 'SELECT * FROM Recipes WHERE userId = ? ORDER BY createdAt DESC',
                 args: [userId]
             });
-            return result.rows.map(r => this.parseRecipe(r));
+            recipes = result.rows.map(r => this.parseRecipe(r));
         }
+
+        // 🚀 OPTIMIZATION: Batch-expand all ingredients and preparations
+        // Collect all unique ingredient and preparation IDs
+        const allIngredientIds = new Set();
+        const allPreparationIds = new Set();
+
+        for (const recipe of recipes) {
+            // Collect ingredient IDs from baseIngredients, toppingsDuringBake, toppingsPostBake
+            [recipe.baseIngredients, recipe.toppingsDuringBake, recipe.toppingsPostBake].forEach(ingList => {
+                if (ingList && Array.isArray(ingList)) {
+                    ingList.forEach(ing => {
+                        if (ing.ingredientId && !ing.name) {
+                            allIngredientIds.add(ing.ingredientId);
+                        }
+                    });
+                }
+            });
+
+            // Collect preparation IDs
+            if (recipe.preparations && Array.isArray(recipe.preparations)) {
+                recipe.preparations.forEach(prep => {
+                    if ((prep.preparationId || prep.id) && !prep.name) {
+                        allPreparationIds.add(prep.preparationId || prep.id);
+                    }
+                });
+            }
+        }
+
+        // Batch fetch all ingredients in one query
+        let ingredientsMap = new Map();
+        if (allIngredientIds.size > 0) {
+            const idsArray = Array.from(allIngredientIds);
+            const fetchedIngredients = await this.batchFetchIngredients(idsArray, userId);
+            fetchedIngredients.forEach(ing => {
+                ingredientsMap.set(ing.id, {
+                    name: ing.name,
+                    category: ing.categoryName,
+                    categoryIcon: ing.categoryIcon,
+                    defaultUnit: ing.defaultUnit
+                });
+            });
+        }
+
+        // Batch fetch all preparations in one query
+        let preparationsMap = new Map();
+        if (allPreparationIds.size > 0) {
+            const idsArray = Array.from(allPreparationIds);
+            const fetchedPreparations = await this.batchFetchPreparations(idsArray, userId);
+            fetchedPreparations.forEach(prep => {
+                preparationsMap.set(prep.id, {
+                    name: prep.name,
+                    category: prep.category,
+                    description: prep.description
+                });
+            });
+        }
+
+        // Expand data for all recipes
+        for (const recipe of recipes) {
+            recipe.baseIngredients = this.expandIngredientsFromMap(recipe.baseIngredients || [], ingredientsMap);
+            recipe.toppingsDuringBake = this.expandIngredientsFromMap(recipe.toppingsDuringBake || [], ingredientsMap);
+            recipe.toppingsPostBake = this.expandIngredientsFromMap(recipe.toppingsPostBake || [], ingredientsMap);
+            recipe.preparations = this.expandPreparationsFromMap(recipe.preparations || [], preparationsMap);
+        }
+
+        return recipes;
     }
 
     async getRecipeById(id, userId) {
+        let recipe;
         if (this.isSQLite) {
             // If userId is null, fetch without filtering (public access for guests)
             const sql = userId
                 ? 'SELECT * FROM Recipes WHERE id = ? AND userId = ?'
                 : 'SELECT * FROM Recipes WHERE id = ?';
             const stmt = this.db.prepare(sql);
-            return userId
+            recipe = userId
                 ? this.parseRecipe(stmt.get(id, userId))
                 : this.parseRecipe(stmt.get(id));
         } else {
@@ -129,8 +216,18 @@ class DatabaseAdapter {
                 : 'SELECT * FROM Recipes WHERE id = ?';
             const args = userId ? [id, userId] : [id];
             const result = await this.db.execute({ sql, args });
-            return this.parseRecipe(result.rows[0]);
+            recipe = this.parseRecipe(result.rows[0]);
         }
+
+        if (!recipe) return null;
+
+        // Expand ingredients and preparations
+        recipe.baseIngredients = await this.expandIngredients(recipe.baseIngredients || [], userId);
+        recipe.toppingsDuringBake = await this.expandIngredients(recipe.toppingsDuringBake || [], userId);
+        recipe.toppingsPostBake = await this.expandIngredients(recipe.toppingsPostBake || [], userId);
+        recipe.preparations = await this.expandPreparations(recipe.preparations || [], userId);
+
+        return recipe;
     }
 
     async createRecipe(recipe, userId) {
@@ -758,7 +855,7 @@ class DatabaseAdapter {
                         SELECT i.*, c.name as categoryName, c.icon as categoryIcon
                         FROM Ingredients i
                         LEFT JOIN Categories c ON i.categoryId = c.id
-                        WHERE i.id IN (${placeholders}) AND i.userId = ?
+                        WHERE i.id IN (${placeholders}) AND (i.userId = ? OR i.userId IS NULL)
                     `);
                     fetchedIngredients = stmt.all(...idsToFetch, userId);
                 } else {
@@ -769,7 +866,7 @@ class DatabaseAdapter {
                             SELECT i.*, c.name as categoryName, c.icon as categoryIcon
                             FROM Ingredients i
                             LEFT JOIN Categories c ON i.categoryId = c.id
-                            WHERE i.id IN (${placeholders}) AND i.userId = ?
+                            WHERE i.id IN (${placeholders}) AND (i.userId = ? OR i.userId IS NULL)
                         `,
                         args: [...idsToFetch, userId]
                     });
@@ -819,15 +916,20 @@ class DatabaseAdapter {
     async batchFetchIngredients(ids, userId) {
         if (ids.length === 0) return [];
 
+        console.log(`🔍 [batchFetchIngredients] Fetching ${ids.length} ingredients for userId=${userId}`);
+        console.log(`🔍 [batchFetchIngredients] IDs: ${ids.join(', ')}`);
+
         if (this.isSQLite) {
             const placeholders = ids.map(() => '?').join(',');
             const stmt = this.db.prepare(`
                 SELECT i.*, c.name as categoryName, c.icon as categoryIcon
                 FROM Ingredients i
                 LEFT JOIN Categories c ON i.categoryId = c.id
-                WHERE i.id IN (${placeholders}) AND i.userId = ?
+                WHERE i.id IN (${placeholders}) AND (i.userId = ? OR i.userId IS NULL)
             `);
-            return stmt.all(...ids, userId);
+            const results = stmt.all(...ids, userId);
+            console.log(`🔍 [batchFetchIngredients] Found ${results.length} ingredients`);
+            return results;
         } else {
             const placeholders = ids.map(() => '?').join(',');
             const result = await this.db.execute({
@@ -835,10 +937,14 @@ class DatabaseAdapter {
                     SELECT i.*, c.name as categoryName, c.icon as categoryIcon
                     FROM Ingredients i
                     LEFT JOIN Categories c ON i.categoryId = c.id
-                    WHERE i.id IN (${placeholders}) AND i.userId = ?
+                    WHERE i.id IN (${placeholders}) AND (i.userId = ? OR i.userId IS NULL)
                 `,
                 args: [...ids, userId]
             });
+            console.log(`🔍 [batchFetchIngredients] Found ${result.rows.length} ingredients`);
+            if (result.rows.length > 0) {
+                console.log(`🔍 [batchFetchIngredients] Sample: ${result.rows[0].name}`);
+            }
             return result.rows;
         }
     }
@@ -863,6 +969,79 @@ class DatabaseAdapter {
             return ing;
         });
     }
+
+    // Helper to batch fetch preparations by IDs
+    async batchFetchPreparations(ids, userId) {
+        if (ids.length === 0) return [];
+
+        if (this.isSQLite) {
+            const placeholders = ids.map(() => '?').join(',');
+            const stmt = this.db.prepare(`
+                SELECT * FROM Preparations
+                WHERE id IN (${placeholders}) AND (userId = ? OR userId IS NULL)
+            `);
+            return stmt.all(...ids, userId).map(p => this.parsePreparation(p));
+        } else {
+            const placeholders = ids.map(() => '?').join(',');
+            const result = await this.db.execute({
+                sql: `
+                    SELECT * FROM Preparations
+                    WHERE id IN (${placeholders}) AND (userId = ? OR userId IS NULL)
+                `,
+                args: [...ids, userId]
+            });
+            return result.rows.map(p => this.parsePreparation(p));
+        }
+    }
+
+    // Helper to expand preparations from a pre-loaded map
+    expandPreparationsFromMap(preparations, preparationsMap) {
+        if (!preparations || preparations.length === 0) return [];
+
+        return preparations.map(prep => {
+            if (prep.name) {
+                // Already expanded
+                return prep;
+            } else if (prep.preparationId || prep.id) {
+                const prepId = prep.preparationId || prep.id;
+                const preparationData = preparationsMap.get(prepId);
+                if (preparationData) {
+                    return { ...prep, ...preparationData };
+                } else {
+                    console.warn(`Preparation not found: ${prepId}`);
+                    return prep;
+                }
+            }
+            return prep;
+        });
+    }
+
+    // Helper to expand preparations (non-batch version)
+    async expandPreparations(preparations, userId) {
+        if (!preparations || preparations.length === 0) return [];
+
+        const idsToFetch = [];
+        for (const prep of preparations) {
+            if (!prep.name && (prep.preparationId || prep.id)) {
+                idsToFetch.push(prep.preparationId || prep.id);
+            }
+        }
+
+        if (idsToFetch.length === 0) return preparations;
+
+        const fetchedPreparations = await this.batchFetchPreparations(idsToFetch, userId);
+        const preparationsMap = new Map();
+        fetchedPreparations.forEach(prep => {
+            preparationsMap.set(prep.id, {
+                name: prep.name,
+                category: prep.category,
+                description: prep.description
+            });
+        });
+
+        return this.expandPreparationsFromMap(preparations, preparationsMap);
+    }
+
 
     async getPreparationById(id, userId) {
         if (this.isSQLite) {
