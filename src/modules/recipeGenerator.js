@@ -721,36 +721,61 @@ function categorizeIngredient(name, INGREDIENTS_DB) {
 /**
  * Genera istruzioni di cottura basate sugli ingredienti
  */
-function generateCookingInstructions(ingredients) {
+function generateCookingInstructions(ingredients, preparations = []) {
     const instructions = [];
 
-    const hasBase = ingredients.some(i => i.category === 'Salsa');
-    if (hasBase) {
-        const base = ingredients.find(i => i.category === 'Salsa');
-        instructions.push(`Distribuire ${base.name.toLowerCase()} sulla base`);
+    // 1. BASI: Salse base o Creme "before"
+    const baseIngredients = ingredients.filter(i => (i.category === 'Salsa' || i.category === 'Basi e Salse') && !i.postBake && i.name);
+    const basePreparations = preparations.filter(p => (p.category === 'Salse' || p.category === 'Creme' || p.category === 'Basi') && p.timing === 'before' && p.name);
+
+    if (baseIngredients.length > 0 || basePreparations.length > 0) {
+        const baseNames = [
+            ...baseIngredients.map(i => i.name.toLowerCase()),
+            ...basePreparations.map(p => p.name.toLowerCase())
+        ];
+        instructions.push(`Distribuire ${baseNames.join(' e ')} sulla base`);
     }
 
-    // Ingredienti da cuocere (non postBake)
-    const cookableCheeses = ingredients.filter(i => i.category === 'Formaggi' && !i.postBake);
+    // 2. TOPPINGS DA CUOCERE (non postBake o prima cottura)
+    const cookableCheeses = ingredients.filter(i => (i.category === 'Formaggi' || i.category === 'Latticini') && !i.postBake && i.name);
     if (cookableCheeses.length > 0) {
         instructions.push(`Aggiungere ${cookableCheeses.map(c => c.name.toLowerCase()).join(', ')} a pezzetti`);
     }
 
-    const cookableToppings = ingredients.filter(i =>
+    const otherCookableToppings = ingredients.filter(i =>
         i.category !== 'Formaggi' &&
         i.category !== 'Latticini' &&
         i.category !== 'Salsa' &&
         i.category !== 'Basi e Salse' &&
-        !i.postBake
+        !i.postBake &&
+        i.name
     );
-    if (cookableToppings.length > 0) {
-        instructions.push(`Distribuire ${cookableToppings.map(t => t.name.toLowerCase()).join(', ')}`);
+    const cookablePreparations = preparations.filter(p =>
+        p.timing === 'before' &&
+        p.category !== 'Salse' &&
+        p.category !== 'Creme' &&
+        p.category !== 'Basi' &&
+        p.name
+    );
+
+    if (otherCookableToppings.length > 0 || cookablePreparations.length > 0) {
+        const items = [
+            ...otherCookableToppings.map(t => t.name.toLowerCase()),
+            ...cookablePreparations.map(p => p.name.toLowerCase())
+        ];
+        instructions.push(`Distribuire ${items.join(', ')}`);
     }
 
-    // Ingredienti in uscita (postBake)
-    const postBakeIngredients = ingredients.filter(i => i.postBake);
-    if (postBakeIngredients.length > 0) {
-        instructions.push(`All'uscita dal forno, aggiungere: ${postBakeIngredients.map(i => i.name.toLowerCase()).join(', ')}`);
+    // 3. INGREDIENTI IN USCITA (postBake o after)
+    const postBakeIngredients = ingredients.filter(i => i.postBake && i.name);
+    const postBakePreparations = preparations.filter(p => p.timing === 'after' && p.name);
+
+    if (postBakeIngredients.length > 0 || postBakePreparations.length > 0) {
+        const finalItems = [
+            ...postBakeIngredients.map(i => i.name.toLowerCase()),
+            ...postBakePreparations.map(p => p.name.toLowerCase())
+        ];
+        instructions.push(`All'uscita dal forno, aggiungere: ${finalItems.join(', ')}`);
     }
 
     return instructions;
@@ -763,15 +788,18 @@ function determineTags(ingredients, doughType, archetypeUsed = null) {
     const tags = [];
 
     // Tag basato sul tipo di impasto
-    if (doughType.type.includes('Napoletana')) tags.push('Napoletana');
-    if (doughType.type.includes('Romana')) tags.push('Romana');
-    if (doughType.type.includes('Contemporanea')) tags.push('Contemporanea');
+    if (doughType && doughType.type) {
+        if (doughType.type.includes('Napoletana')) tags.push('Napoletana');
+        if (doughType.type.includes('Romana')) tags.push('Romana');
+        if (doughType.type.includes('Contemporanea')) tags.push('Contemporanea');
+    }
 
     // Tag basato sugli ingredienti
-    const hasMeat = ingredients.some(i => i.category === 'Carne' || i.category === 'Carni e Salumi');
-    const hasDairy = ingredients.some(i => i.category === 'Formaggi' || i.category === 'Latticini');
-    const hasPremium = ingredients.some(i => ['Tartufo', 'Salmone', 'Caviale', 'Foie gras'].some(p => i.name.includes(p)));
+    const hasMeat = ingredients.some(i => i && (i.category === 'Carne' || i.category === 'Carni e Salumi'));
+    const hasDairy = ingredients.some(i => i && (i.category === 'Formaggi' || i.category === 'Latticini'));
+    const hasPremium = ingredients.some(i => i && i.name && ['Tartufo', 'Salmone', 'Caviale', 'Foie gras'].some(p => i.name.includes(p)));
     const hasBase = ingredients.some(i =>
+        i && i.name &&
         (i.category === 'Salsa' || i.category === 'Basi e Salse') &&
         (i.name.includes('Pomodoro') || i.name.includes('pomodoro'))
     );
@@ -821,26 +849,28 @@ async function selectPreparationsForPizza(ingredients, tags) {
     const preparations = [];
     let cleanedIngredients = [...ingredients]; // Copia per non modificare l'originale
 
-    const hasTomato = ingredients.some(i => i.name.toLowerCase().includes('pomodoro'));
-    const hasMeat = ingredients.some(i => i.category === 'Carne');
-    const hasVegetables = ingredients.some(i => i.category === 'Verdure');
+    const hasTomato = ingredients.some(i => i.name && i.name.toLowerCase().includes('pomodoro'));
+    const hasMeat = ingredients.some(i => i && (i.category === 'Carne' || i.category === 'Carni e Salumi'));
+    const hasVegetables = ingredients.some(i => i && (i.category === 'Verdure' || i.category === 'Verdure e Ortaggi'));
     const isPremium = tags.includes('Premium') || tags.includes('Gourmet');
     const isVegetarian = tags.includes('Vegetariana');
 
     // Estrai nomi ingredienti per matching
-    const ingredientNames = ingredients.map(i => i.name.toLowerCase());
+    const ingredientNames = ingredients.filter(i => i && i.name).map(i => i.name.toLowerCase());
 
     // Helper function per rimuovere ingrediente base quando si aggiunge preparazione
     const addPreparationAndRemoveBase = (prep, quantity, timing, baseIngredientKeyword) => {
         preparations.push({
-            preparationId: prep.id,  // ✅ Use preparationId for normalization
+            preparationId: prep.id,  // ✅ Standardized ID
+            name: prep.name,         // ✅ Preserve name for instructions
+            category: prep.category, // ✅ Preserve category
             quantity,
             unit: 'g',
             timing
         });
         // Rimuovi l'ingrediente base che contiene la keyword
         cleanedIngredients = cleanedIngredients.filter(ing =>
-            !ing.name.toLowerCase().includes(baseIngredientKeyword)
+            ing && ing.name && !ing.name.toLowerCase().includes(baseIngredientKeyword)
         );
     };
 
@@ -901,7 +931,9 @@ async function selectPreparationsForPizza(ingredients, tags) {
             if (creamOptions.length > 0) {
                 const selected = creamOptions[Math.floor(Math.random() * creamOptions.length)];
                 preparations.push({
-                    id: selected.id,
+                    preparationId: selected.id,
+                    name: selected.name,
+                    category: selected.category,
                     quantity: Math.floor(80 + Math.random() * 40), // 80-120g
                     unit: 'g',
                     timing: 'before'
@@ -920,7 +952,9 @@ async function selectPreparationsForPizza(ingredients, tags) {
             if (sauceOptions.length > 0) {
                 const selected = sauceOptions[Math.floor(Math.random() * sauceOptions.length)];
                 preparations.push({
-                    preparationId: selected.id,  // ✅ Use preparationId for normalization
+                    preparationId: selected.id,
+                    name: selected.name,
+                    category: selected.category,
                     quantity: Math.floor(50 + Math.random() * 30), // 50-80g
                     unit: 'g',
                     timing: Math.random() > 0.5 ? 'before' : 'after'
@@ -939,7 +973,9 @@ async function selectPreparationsForPizza(ingredients, tags) {
             if (pestoOptions.length > 0) {
                 const selected = pestoOptions[Math.floor(Math.random() * pestoOptions.length)];
                 preparations.push({
-                    preparationId: selected.id,  // ✅ Use preparationId for normalization
+                    preparationId: selected.id,
+                    name: selected.name,
+                    category: selected.category,
                     quantity: Math.floor(40 + Math.random() * 30), // 40-70g
                     unit: 'g',
                     timing: 'after' // Pesti meglio a crudo
@@ -960,7 +996,9 @@ async function selectPreparationsForPizza(ingredients, tags) {
             if (premiumOptions.length > 0) {
                 const selected = premiumOptions[Math.floor(Math.random() * premiumOptions.length)];
                 preparations.push({
-                    id: selected.id,
+                    preparationId: selected.id,
+                    name: selected.name,
+                    category: selected.category,
                     quantity: Math.floor(30 + Math.random() * 30), // 30-60g
                     unit: 'g',
                     timing: 'after'
@@ -1075,19 +1113,30 @@ export async function generateRandomRecipe(additionalNames = [], suggestedIngred
 function addIngredientUniquely(list, namesList, ingredient, options = {}) {
     if (!ingredient) return false;
 
-    const normalizedName = ingredient.name.toLowerCase().trim();
+    // 🔧 IMPROVED: If ID is missing, try to resolve it from the cache by name
+    if (!ingredient.id && !ingredient.ingredientId && ingredient.name && INGREDIENTS_CACHE) {
+        const all = Object.values(INGREDIENTS_CACHE).flat();
+        const found = all.find(i => i.name && i.name.toLowerCase() === ingredient.name.toLowerCase());
+        if (found) {
+            ingredient.id = found.id;
+        }
+    }
+
+    const normalizedName = (ingredient.name || '').toLowerCase().trim();
 
     // Controlla se è già presente per ID o Nome (case-insensitive)
     const isDuplicate = list.some(item =>
-        (item.id && ingredient.id && item.id === ingredient.id) ||
-        (item.name && item.name.toLowerCase().trim() === normalizedName)
+        (item.ingredientId && ingredient.id && item.ingredientId === ingredient.id) ||
+        (item.ingredientId && ingredient.ingredientId && item.ingredientId === ingredient.ingredientId) ||
+        (normalizedName && item.name && item.name.toLowerCase().trim() === normalizedName)
     );
 
     if (isDuplicate) return false;
 
-    // Prepara l'oggetto finale
+    // Prepara l'oggetto finale assicurando l'ID
     const entry = {
         ...ingredient,
+        ingredientId: ingredient.ingredientId || ingredient.id,
         quantity: options.quantity !== undefined ? options.quantity : (ingredient.quantity || 50),
         unit: options.unit || ingredient.unit || 'g',
         phase: options.phase || ingredient.phase || 'topping',
@@ -1096,13 +1145,12 @@ function addIngredientUniquely(list, namesList, ingredient, options = {}) {
 
     if (options.category) entry.category = options.category;
 
-    list.push(entry);
-
-    // Aggiungi ai nomi principali se non presente
-    if (namesList && namesList.includes && !namesList.some(name => name.toLowerCase().trim() === normalizedName)) {
+    // Add name to namesList for title generation
+    if (ingredient.name && namesList) {
         namesList.push(ingredient.name);
     }
 
+    list.push(entry);
     return true;
 }
 
@@ -1442,7 +1490,7 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
     ingredients = ingredients.map(ing => ({
         ...ing,
         quantity: Math.round(ing.quantity),
-        unit: ing.unit || (['Olio', 'Aceto', 'Riduzione'].some(x => ing.name.includes(x)) ? 'ml' : 'g')
+        unit: ing.unit || (ing.name && ['Olio', 'Aceto', 'Riduzione'].some(x => ing.name.includes(x)) ? 'ml' : 'g')
     }));
 
     if (!pizzaName) pizzaName = await generatePizzaName(mainIngredientNames, existingNames);
@@ -1475,9 +1523,11 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
 
     // Detect if pizza is white (no tomato) or red (with tomato)
     const hasTomato = ingredients.some(ing =>
-        ing.name.toLowerCase().includes('pomodor') ||
-        ing.name.toLowerCase().includes('salsa') ||
-        ing.name.toLowerCase().includes('passata')
+        ing && ing.name && (
+            ing.name.toLowerCase().includes('pomodor') ||
+            ing.name.toLowerCase().includes('salsa') ||
+            ing.name.toLowerCase().includes('passata')
+        )
     );
 
     const pizzaStyle = hasTomato
@@ -1548,8 +1598,8 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
     // Ensure recipe has at least some ingredients
     if (uniqueBaseIngredients.length === 0 && uniquePreparations.length === 0) {
         console.warn('⚠️ Generated recipe has no ingredients! Adding fallback base ingredient.');
-        // Add a fallback base ingredient
-        uniqueBaseIngredients.push({
+        // 🔧 FIXED: Use addIngredientUniquely to ensure it gets an ID from the cache
+        addIngredientUniquely(uniqueBaseIngredients, null, {
             name: 'Fior di latte',
             quantity: 100,
             unit: 'g',
@@ -1563,18 +1613,24 @@ export async function generateRecipe(selectedArchetype, combinations = [], INGRE
     // Generate instructions based on FINAL ingredients after deduplication
     const instructions = {
         topping: [
-            ...generateCookingInstructions(uniqueBaseIngredients),
+            ...generateCookingInstructions(uniqueBaseIngredients, uniquePreparations),
             `Infornare a ${Math.floor(400 + Math.random() * 80)}°C per ${Math.floor(90 + Math.random() * 90)} secondi`,
             `Servire immediatamente ben calda`
         ]
     };
+
+    // 🔧 FIXED: Separate ingredients into toppingsDuringBake and toppingsPostBake
+    const toppingsDuringBake = uniqueBaseIngredients.filter(ing => !ing.postBake);
+    const toppingsPostBake = uniqueBaseIngredients.filter(ing => ing.postBake);
 
     return {
         name: pizzaName,
         pizzaiolo,
         source: 'Generata da AntigraviPizza',
         description,
-        baseIngredients: uniqueBaseIngredients,
+        baseIngredients: uniqueBaseIngredients,  // Keep for backward compatibility
+        toppingsDuringBake,  // ✅ New: ingredients during baking
+        toppingsPostBake,    // ✅ New: ingredients after baking
         preparations: uniquePreparations,
         instructions,
         imageUrl,
@@ -1610,11 +1666,11 @@ function generateArchetypeDescription(archetype, ingredients, preparations, doug
 
     switch (archetype) {
         case 'dolce_salato':
-            return `Un perfetto equilibrio tra sapidità e dolcezza con ${ingredientsStr.toLowerCase()}, su base ${doughType.toLowerCase()}.`;
+            return `Un perfetto equilibrio tra sapidità e dolcezza con ${ingredientsStr.toLowerCase()}, su base ${doughType ? doughType.toLowerCase() : 'classica'}.`;
         case 'terra_bosco':
-            return `I profumi del bosco e della terra con ${ingredientsStr.toLowerCase()}, su una base rustica di tipo ${doughType.toLowerCase()}.`;
+            return `I profumi del bosco e della terra con ${ingredientsStr.toLowerCase()}, su una base rustica di tipo ${doughType ? doughType.toLowerCase() : 'integrale'}.`;
         case 'fresca_estiva':
-            return `Freschezza assoluta con ${ingredientsStr.toLowerCase()} aggiunti a crudo su una ${doughType.toLowerCase()}.`;
+            return `Freschezza assoluta con ${ingredientsStr.toLowerCase()} aggiunti a crudo su una ${doughType ? doughType.toLowerCase() : 'pizza'}.`;
         case 'piccante_decisa':
             return `Il carattere deciso e piccante di ${ingredientsStr.toLowerCase()} bilanciato con cura.`;
         case 'mare':

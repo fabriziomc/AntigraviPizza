@@ -248,10 +248,12 @@ router.post('/recipes/sync-ratings', async (req, res) => {
 });
 
 // Import recipe from text
-router.post('/import-recipe', async (req, res) => {
+// Supporting both /import-recipe and /recipes/import-text for compatibility
+router.post(['/import-recipe', '/recipes/import-text'], async (req, res) => {
     try {
-        console.log('📥 [POST /import-recipe] Received import request');
-        const { recipeText } = req.body;
+        console.log(`📥 [POST ${req.path}] Received import request`);
+        // Support both "text" and "recipeText" keys
+        const recipeText = req.body.recipeText || req.body.text;
 
         if (!recipeText || typeof recipeText !== 'string') {
             return res.status(400).json({ error: 'recipeText is required and must be a string' });
@@ -263,8 +265,9 @@ router.post('/import-recipe', async (req, res) => {
 
         // Parse recipes from text
         console.log('🔍 Parsing recipe text...');
+        console.log(`📝 RAW TEXT RECEIVED:\n${recipeText.substring(0, 500)}${recipeText.length > 500 ? '...' : ''}`);
         const parsedRecipes = parseRecipeFile(recipeText);
-        console.log(`✅ Parsed ${parsedRecipes.length} recipe(s)`);
+        console.log(`✅ Parsed ${parsedRecipes.length} recipe(s):`, JSON.stringify(parsedRecipes, null, 2));
 
         if (parsedRecipes.length === 0) {
             return res.status(400).json({
@@ -287,7 +290,7 @@ router.post('/import-recipe', async (req, res) => {
 
         // Import all parsed recipes
         console.log('💾 Importing recipes into database...');
-        const results = await importMultipleRecipes(parsedRecipes, dbAdapter);
+        const results = await importMultipleRecipes(parsedRecipes, dbAdapter, userId);
 
         console.log(`✅ Import complete: ${results.success.length} succeeded, ${results.failed.length} failed`);
 

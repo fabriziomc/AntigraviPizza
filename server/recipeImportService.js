@@ -11,7 +11,7 @@ import { suggestIngredientCategory, validateRecipeData } from './recipeParser.js
  * @param {DatabaseAdapter} dbAdapter - Database adapter instance
  * @returns {Promise<Object>} Import result with created entities
  */
-export async function importRecipe(parsedRecipe, dbAdapter) {
+export async function importRecipe(parsedRecipe, dbAdapter, userId) {
     // Validate recipe data
     const validation = validateRecipeData(parsedRecipe);
     if (!validation.valid) {
@@ -38,7 +38,7 @@ export async function importRecipe(parsedRecipe, dbAdapter) {
         // Process each ingredient
         const processedIngredients = [];
         for (const ingredient of allIngredients) {
-            const processed = await findOrCreateIngredient(ingredient, dbAdapter);
+            const processed = await findOrCreateIngredient(ingredient, dbAdapter, userId);
             processedIngredients.push(processed);
 
             if (processed.created) {
@@ -50,7 +50,7 @@ export async function importRecipe(parsedRecipe, dbAdapter) {
         const recipeData = buildRecipeData(parsedRecipe, processedIngredients);
 
         // Create the recipe
-        const createdRecipe = await dbAdapter.createRecipe(recipeData);
+        const createdRecipe = await dbAdapter.createRecipe(recipeData, userId);
         result.recipe = createdRecipe;
         result.success = true;
 
@@ -58,7 +58,8 @@ export async function importRecipe(parsedRecipe, dbAdapter) {
         console.log(`   - Created ${result.created.ingredients.length} new ingredients`);
 
     } catch (error) {
-        console.error('❌ Error importing recipe:', error);
+        console.error(`❌ [importRecipe] Error importing recipe "${parsedRecipe.name}":`, error.message);
+        console.error(error.stack);
         throw error;
     }
 
@@ -71,14 +72,14 @@ export async function importRecipe(parsedRecipe, dbAdapter) {
  * @param {DatabaseAdapter} dbAdapter - Database adapter
  * @returns {Promise<Object>} Result with ingredient and created flag
  */
-async function findOrCreateIngredient(ingredientData, dbAdapter) {
+async function findOrCreateIngredient(ingredientData, dbAdapter, userId) {
     const result = {
         ingredient: null,
         created: false
     };
 
     // Try to find existing ingredient
-    const existing = await findIngredientByName(ingredientData.name, dbAdapter);
+    const existing = await findIngredientByName(ingredientData.name, dbAdapter, userId);
 
     if (existing) {
         result.ingredient = existing;
@@ -125,9 +126,14 @@ async function findOrCreateIngredient(ingredientData, dbAdapter) {
         dateAdded: Date.now()
     };
 
-    const created = await dbAdapter.createIngredient(newIngredient);
-    result.ingredient = created;
-    result.created = true;
+    try {
+        const created = await dbAdapter.createIngredient(newIngredient, userId);
+        result.ingredient = created;
+        result.created = true;
+    } catch (err) {
+        console.error(`❌ [findOrCreateIngredient] Error creating ingredient "${newIngredient.name}":`, err.message);
+        throw err;
+    }
 
     return result;
 }
@@ -138,8 +144,8 @@ async function findOrCreateIngredient(ingredientData, dbAdapter) {
  * @param {DatabaseAdapter} dbAdapter - Database adapter
  * @returns {Promise<Object|null>} Found ingredient or null
  */
-async function findIngredientByName(name, dbAdapter) {
-    const allIngredients = await dbAdapter.getAllIngredients();
+async function findIngredientByName(name, dbAdapter, userId) {
+    const allIngredients = await dbAdapter.getAllIngredients(userId);
     const normalizedSearch = name.toLowerCase().trim();
 
     // Try exact match first
@@ -182,49 +188,57 @@ async function findIngredientByName(name, dbAdapter) {
     return null;
 }
 
-/**
- * Build complete recipe data object for database
- * @param {Object} parsedRecipe - Parsed recipe from parser
- * @param {Array} processedIngredients - Processed ingredients with DB references
- * @returns {Object} Recipe data ready for database
- */
 function buildRecipeData(parsedRecipe, processedIngredients) {
-    // Map ALL ingredients (base + during bake + post bake) to baseIngredients format
-    // This ensures all ingredients appear in the recipe card
-    const allIngredients = processedIngredients.map(pi => ({
-        id: pi.ingredient.id,
-        name: pi.ingredient.name,
-        // Use ingredient's minWeight if available, otherwise default to 50
-        quantity: pi.ingredient.minWeight || 50,
-        unit: pi.ingredient.defaultUnit || 'g',
-        // Mark post-bake ingredients
-        postBake: (parsedRecipe.ingredientiPostCottura || []).some(t =>
-            t.name.toLowerCase() === pi.ingredient.name.toLowerCase()
-        ) ? 1 : 0
-    }));
+    // Map ALL ingredients (base + during bake + post bake) to separate arrays
+    // baseIngredients for backward compatibility, and the new separated arrays
+    const baseIngredients = [];
+    const toppingsDuringBake = [];
+    const toppingsPostBake = [];
 
-    // NOTE: Do NOT use JSON.stringify here - the db-adapter will handle it
-    // Passing already-stringified data causes double-stringify bug
+    processedIngredients.forEach(pi => {
+        const isPostBake = (parsedRecipe.ingredientiPostCottura || []).some(t =>
+            t.name.toLowerCase() === pi.ingredient.name.toLowerCase()
+        );
+
+        const ingredientRef = {
+            ingredientId: pi.ingredient.id,
+            name: pi.ingredient.name,
+            quantity: pi.ingredient.minWeight || 50,
+            unit: pi.ingredient.defaultUnit || 'g',
+            postBake: isPostBake ? 1 : 0
+        };
+
+        // Populate all relevant arrays
+        baseIngredients.push(ingredientRef);
+        if (isPostBake) {
+            toppingsPostBake.push(ingredientRef);
+        } else {
+            toppingsDuringBake.push(ingredientRef);
+        }
+    });
+
     return {
         id: `recipe-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         name: parsedRecipe.name,
         description: parsedRecipe.description || '',
         pizzaiolo: 'Import',
         source: 'Imported Recipe',
-        baseIngredients: allIngredients,  // Include ALL ingredients
-        preparations: [],  // Pass as array, not JSON string
-        instructions: parsedRecipe.instructions,  // Pass as array, not JSON string
-        imageUrl: '', // Will be generated later
+        baseIngredients,
+        toppingsDuringBake,
+        toppingsPostBake,
+        preparations: [],
+        instructions: parsedRecipe.instructions,
+        imageUrl: '',
         dough: parsedRecipe.dough || 'nero',
         suggestedDough: parsedRecipe.dough || 'nero',
-        archetype: parsedRecipe.archetype || 'fusion',  // Use 'fusion' for creative imported recipes
-        recipeSource: 'manual',  // Mark as manually imported
-        archetypeUsed: parsedRecipe.archetype || 'fusion',  // For UI display
+        archetype: parsedRecipe.archetype || 'fusion',
+        recipeSource: 'manual',
+        archetypeUsed: parsedRecipe.archetype || 'fusion',
         createdAt: Date.now(),
         dateAdded: Date.now(),
         isFavorite: 0,
         rating: 0,
-        tags: parsedRecipe.tags || ['Gourmet', 'import']  // Pass as array, not JSON string
+        tags: parsedRecipe.tags || ['Gourmet', 'import']
     };
 }
 
@@ -289,7 +303,7 @@ function guessTags(name) {
  * @param {DatabaseAdapter} dbAdapter - Database adapter
  * @returns {Promise<Object>} Batch import result
  */
-export async function importMultipleRecipes(parsedRecipes, dbAdapter) {
+export async function importMultipleRecipes(parsedRecipes, dbAdapter, userId) {
     const results = {
         success: [],
         failed: [],
@@ -299,7 +313,7 @@ export async function importMultipleRecipes(parsedRecipes, dbAdapter) {
 
     for (const parsedRecipe of parsedRecipes) {
         try {
-            const result = await importRecipe(parsedRecipe, dbAdapter);
+            const result = await importRecipe(parsedRecipe, dbAdapter, userId);
             results.success.push(result);
             results.totalCreatedIngredients += result.created.ingredients.length;
             results.totalCreatedPreparations += result.created.preparations.length;

@@ -510,19 +510,34 @@ async function showRecipeModal(recipeId) {
       // Combine all ingredients with timing info
       const allIngredients = [];
 
-      // Add base ingredients
-      toppingIngredients.forEach(ing => {
-        allIngredients.push({
-          type: 'ingredient',
-          timing: ing.postBake ? 'after' : 'before',
-          data: ing
+      // Add ingredients from toppingsDuringBake (before cooking)
+      if (recipe.toppingsDuringBake && recipe.toppingsDuringBake.length > 0) {
+        recipe.toppingsDuringBake.forEach(ing => {
+          allIngredients.push({
+            type: 'ingredient',
+            timing: 'before',
+            data: ing
+          });
         });
-      });
+      }
+
+      // Add ingredients from toppingsPostBake (after cooking)
+      if (recipe.toppingsPostBake && recipe.toppingsPostBake.length > 0) {
+        recipe.toppingsPostBake.forEach(ing => {
+          allIngredients.push({
+            type: 'ingredient',
+            timing: 'after',
+            data: ing
+          });
+        });
+      }
 
       // Add preparations
       if (recipe.preparations && recipe.preparations.length > 0) {
         recipe.preparations.forEach(prep => {
-          const prepData = allPreparations.find(p => p.id === prep.id);
+          // Look for preparation by preparationId (normalized) or id (legacy)
+          const prepId = prep.preparationId || prep.id;
+          const prepData = allPreparations.find(p => p.id === prepId);
           if (prepData) {
             // Determine timing: use prep.timing if set, otherwise fall back to prepData.postCooking
             let timing = 'before'; // default
@@ -551,14 +566,15 @@ async function showRecipeModal(recipeId) {
       return allIngredients.map(item => {
         if (item.type === 'ingredient') {
           const ing = item.data;
+          const isPostBake = item.timing === 'after';
           return `
-                    <li class="ingredient-item" style="${ing.postBake ? 'border-left: 3px solid var(--color-accent);' : ''}">
+                    <li class="ingredient-item" style="${isPostBake ? 'border-left: 3px solid var(--color-accent);' : ''}">
                     <div style="display: flex; flex-direction: column; width: 100%;">
                         <div style="display: flex; justify-content: space-between; width: 100%;">
                             <span class="ingredient-name">${ing.name}</span>
                             <span class="ingredient-quantity">${ing.quantity} ${ing.unit}</span>
                         </div>
-                        ${ing.postBake ? '<span style="font-size: 0.75rem; color: var(--color-accent); margin-top: 2px;">📤 In uscita</span>' : ''}
+                        ${isPostBake ? '<span style="font-size: 0.75rem; color: var(--color-accent); margin-top: 2px;">📤 In uscita</span>' : ''}
                     </div>
                     </li>
                 `;

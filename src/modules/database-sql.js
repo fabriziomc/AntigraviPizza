@@ -56,6 +56,8 @@ export async function addRecipe(recipeData) {
         source: recipeData.source || '',
         description: recipeData.description || '',
         baseIngredients: recipeData.baseIngredients || [],
+        toppingsDuringBake: recipeData.toppingsDuringBake || [],  // ✅ New field
+        toppingsPostBake: recipeData.toppingsPostBake || [],      // ✅ New field
         preparations: recipeData.preparations || [],
         instructions: recipeData.instructions || [],
         imageUrl: recipeData.imageUrl || '',

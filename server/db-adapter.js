@@ -67,6 +67,11 @@ class DatabaseAdapter {
         return ingredients.map((ing, index) => {
             const cleaned = { ...ing };
 
+            // 🔧 FIXED: Accept both 'id' and 'ingredientId' for backward compatibility
+            if (!cleaned.ingredientId && cleaned.id) {
+                cleaned.ingredientId = cleaned.id;  // Convert id → ingredientId
+            }
+
             // ⚠️ VALIDATION: Ensure ingredientId is present
             if (!cleaned.ingredientId) {
                 console.warn(`⚠️  WARNING: Ingredient at index ${index} missing 'ingredientId'. This will cause display issues!`, ing);
@@ -75,7 +80,7 @@ class DatabaseAdapter {
             }
 
             // Remove embedded data that should come from Ingredients table
-            const fieldsToRemove = ['name', 'category', 'categoryName', 'categoryIcon', 'defaultUnit'];
+            const fieldsToRemove = ['id', 'name', 'category', 'categoryName', 'categoryIcon', 'defaultUnit', 'phase'];
             fieldsToRemove.forEach(field => delete cleaned[field]);
 
             return cleaned;

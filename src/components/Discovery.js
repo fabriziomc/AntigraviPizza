@@ -3,6 +3,7 @@
 // ============================================
 
 import { importRecipeManually, importSampleRecipes } from '../modules/recipeSearch.js';
+import { getToken } from '../modules/auth.js';
 import { DOUGH_TYPES } from '../utils/constants.js';
 import { getAllPreparations, getAllIngredients } from '../modules/database.js';
 // refreshData is available globally via window.refreshData
@@ -655,7 +656,7 @@ async function handleTextImport() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${getToken()}`
             },
             body: JSON.stringify({ text })
         });
@@ -679,7 +680,9 @@ async function handleTextImport() {
             html += `<p style="color: var(--color-warning);">⚠️ ${errorCount} ricette con errori</p>`;
             html += `<details style="margin-top: 0.5rem;"><summary style="cursor: pointer; color: var(--color-gray-400);">Mostra errori</summary><ul style="margin-top: 0.5rem; padding-left: 1.5rem;">`;
             result.errors.forEach(err => {
-                html += `<li style="color: var(--color-error); font-size: 0.875rem;">${err}</li>`;
+                const recipeName = typeof err === 'string' ? 'Errore' : (err.recipe || 'Ricetta');
+                const errorMessage = typeof err === 'string' ? err : (err.error || 'Errore sconosciuto');
+                html += `<li style="color: var(--color-error); font-size: 0.875rem;"><strong>${recipeName}:</strong> ${errorMessage}</li>`;
             });
             html += `</ul></details>`;
         }
