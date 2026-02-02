@@ -950,7 +950,7 @@ function renderIngredientRow(ingredient, index, allIngredients) {
         <select class="edit-input ingredient-select" data-field="id" style="flex: 2; min-width: 150px;">
           <option value="">Ingrediente...</option>
           ${allIngredients.map(ing => `
-            <option value="${ing.id}" ${ingredient.id === ing.id ? 'selected' : ''}>
+            <option value="${ing.id}" ${(ingredient.id === ing.id || ingredient.ingredientId === ing.id) ? 'selected' : ''}>
               ${ing.name}
             </option>
           `).join('')}
@@ -987,7 +987,7 @@ function renderPreparationRow(preparation, index, allPreparations) {
         <select class="edit-input preparation-select" data-field="id" style="flex: 2; min-width: 150px;">
           <option value="">Preparazione...</option>
           ${allPreparations.map(prep => `
-            <option value="${prep.id}" ${preparation.id === prep.id ? 'selected' : ''}>
+            <option value="${prep.id}" ${(preparation.id === prep.id || preparation.preparationId === prep.id) ? 'selected' : ''}>
               ${prep.name}
             </option>
           `).join('')}
@@ -1095,13 +1095,13 @@ async function saveRecipeChanges(recipeId) {
 const editModeStyles = document.createElement('style');
 editModeStyles.textContent = `
   .edit-mode-container {
-    padding: 1rem;
+    padding: 0.5rem;
   }
   
   .edit-section {
     background: rgba(102, 126, 234, 0.05);
     border-radius: 0.5rem;
-    padding: 1rem;
+    padding: 0.75rem;
   }
   
   .edit-list {
@@ -1114,7 +1114,7 @@ editModeStyles.textContent = `
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    padding: 1rem;
+    padding: 0.75rem;
     background: var(--color-bg-secondary);
     border-radius: 0.5rem;
     border: 1px solid var(--color-gray-700);
@@ -1122,15 +1122,16 @@ editModeStyles.textContent = `
   
   .edit-row-main {
     display: flex;
+    flex-direction: column;
     gap: 0.5rem;
     width: 100%;
-    align-items: center;
   }
   
   .edit-row-group {
     display: flex;
     gap: 0.25rem;
     align-items: center;
+    width: 100%;
   }
   
   .edit-row-footer {
@@ -1149,24 +1150,6 @@ editModeStyles.textContent = `
     font-size: 0.875rem;
     color: var(--color-gray-400);
   }
-
-  /* Desktop optimization */
-  @media (min-width: 768px) {
-    .edit-row {
-      flex-direction: row;
-      flex-wrap: wrap;
-    }
-    .edit-row-main {
-      flex: 3;
-    }
-    .edit-row-footer {
-      flex: 1;
-      border-top: none;
-      padding-top: 0;
-      justify-content: flex-end;
-      gap: 1rem;
-    }
-  }
   
   .edit-input {
     padding: 0.5rem;
@@ -1175,6 +1158,83 @@ editModeStyles.textContent = `
     background: var(--color-bg-primary);
     color: var(--color-text-primary);
     font-size: 0.875rem;
+    min-height: 44px; /* Better touch target for mobile */
+  }
+  
+  /* Mobile-specific styles */
+  @media (max-width: 767px) {
+    .edit-mode-container {
+      padding: 0.5rem;
+    }
+    
+    .edit-section {
+      padding: 0.5rem;
+    }
+    
+    .edit-row {
+      padding: 0.5rem;
+    }
+    
+    .edit-row-main {
+      flex-direction: column;
+    }
+    
+    .ingredient-select,
+    .preparation-select {
+      width: 100% !important;
+      min-width: 100% !important;
+      flex: 1 !important;
+    }
+    
+    .edit-row-group {
+      width: 100%;
+    }
+    
+    .edit-row-group input,
+    .edit-row-group select {
+      flex: 1;
+    }
+    
+    .btn-small {
+      padding: 0.5rem 0.75rem;
+      min-height: 44px; /* Better touch target */
+    }
+    
+    .remove-row {
+      min-width: 44px;
+      min-height: 44px;
+    }
+  }
+
+  /* Desktop optimization */
+  @media (min-width: 768px) {
+    .edit-mode-container {
+      padding: 1rem;
+    }
+    
+    .edit-section {
+      padding: 1rem;
+    }
+    
+    .edit-row {
+      flex-direction: row;
+      flex-wrap: wrap;
+      padding: 1rem;
+    }
+    
+    .edit-row-main {
+      flex: 3;
+      flex-direction: row;
+      align-items: center;
+    }
+    
+    .edit-row-footer {
+      flex: 1;
+      border-top: none;
+      padding-top: 0;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
   }
   
   .edit-input option,
