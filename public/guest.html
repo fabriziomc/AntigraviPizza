@@ -548,18 +548,11 @@
                     const ingredientItems = [];
                     const preparationItems = [];
 
-                    // Add base ingredients only (not from preparations)
-                    const allRecipeIngredients = [
-                        ...(pizza.baseIngredients || []),
-                        ...(pizza.toppingsDuringBake || []),
-                        ...(pizza.toppingsPostBake || [])
-                    ];
-
-                    allRecipeIngredients.forEach(ing => {
-                        // Try to get name from ingredient object or resolve from ID
+                    // Process ingredients from each array separately to track their bake timing
+                    // Base ingredients - always pre-bake
+                    (pizza.baseIngredients || []).forEach(ing => {
                         let name = ing.name || ing.ingredientName;
 
-                        // If no name but has ingredientId, look it up
                         if (!name && ing.ingredientId) {
                             const foundIngredient = ingredientsMap.get(ing.ingredientId);
                             if (foundIngredient) {
@@ -567,16 +560,60 @@
                             }
                         }
 
-                        // If still no name and ing is just a string, use it
                         if (!name && typeof ing === 'string') {
                             name = ing;
                         }
 
                         if (name) {
-                            const isPostBake = ing.postBake === true || ing.postBake === 1 || ing.postBake === '1';
                             ingredientItems.push({
                                 name,
-                                isPostBake
+                                isPostBake: false // Base ingredients are always pre-bake
+                            });
+                        }
+                    });
+
+                    // Toppings during bake - always pre-bake
+                    (pizza.toppingsDuringBake || []).forEach(ing => {
+                        let name = ing.name || ing.ingredientName;
+
+                        if (!name && ing.ingredientId) {
+                            const foundIngredient = ingredientsMap.get(ing.ingredientId);
+                            if (foundIngredient) {
+                                name = foundIngredient.name;
+                            }
+                        }
+
+                        if (!name && typeof ing === 'string') {
+                            name = ing;
+                        }
+
+                        if (name) {
+                            ingredientItems.push({
+                                name,
+                                isPostBake: false // During bake = pre-bake
+                            });
+                        }
+                    });
+
+                    // Toppings post bake - always post-bake
+                    (pizza.toppingsPostBake || []).forEach(ing => {
+                        let name = ing.name || ing.ingredientName;
+
+                        if (!name && ing.ingredientId) {
+                            const foundIngredient = ingredientsMap.get(ing.ingredientId);
+                            if (foundIngredient) {
+                                name = foundIngredient.name;
+                            }
+                        }
+
+                        if (!name && typeof ing === 'string') {
+                            name = ing;
+                        }
+
+                        if (name) {
+                            ingredientItems.push({
+                                name,
+                                isPostBake: true // Post bake toppings are always post-bake
                             });
                         }
                     });
