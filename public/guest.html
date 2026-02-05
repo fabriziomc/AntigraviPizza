@@ -635,8 +635,8 @@
                     const allItems = [...ingredientItems, ...preparationItems];
 
                     // Separate pre-bake and post-bake items
-                    const preBakeItems = allItems.filter(item => !item.isPostBake);
-                    const postBakeItems = allItems.filter(item => item.isPostBake);
+                    let preBakeItems = allItems.filter(item => !item.isPostBake);
+                    let postBakeItems = allItems.filter(item => item.isPostBake);
 
                     // Remove duplicates by name (case-insensitive)
                     const deduplicateItems = (items) => {
@@ -651,8 +651,21 @@
                         });
                     };
 
-                    const uniquePreBakeItems = deduplicateItems(preBakeItems);
+                    // First deduplicate post-bake items
                     const uniquePostBakeItems = deduplicateItems(postBakeItems);
+
+                    // Create a set of post-bake ingredient names (lowercase)
+                    const postBakeNames = new Set(
+                        uniquePostBakeItems.map(item => item.name.toLowerCase())
+                    );
+
+                    // Remove from pre-bake any items that appear in post-bake
+                    preBakeItems = preBakeItems.filter(item =>
+                        !postBakeNames.has(item.name.toLowerCase())
+                    );
+
+                    // Then deduplicate pre-bake items
+                    const uniquePreBakeItems = deduplicateItems(preBakeItems);
 
                     // Render pre-bake items
                     const preBakeList = uniquePreBakeItems.length > 0
