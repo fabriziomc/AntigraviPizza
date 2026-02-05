@@ -2,7 +2,7 @@
 // PLANNER COMPONENT
 // ============================================
 
-import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, getAllRecipes, getAllGuests, addGuest, updateGuest, deleteGuest, getRecipeById, getPizzaNightById, getUserSettings } from '../modules/database.js';
+import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, updatePizzaNight, getAllRecipes, getAllGuests, addGuest, updateGuest, deleteGuest, getRecipeById, getPizzaNightById, getUserSettings } from '../modules/database.js';
 import { formatDate, formatDateForInput, getNextSaturdayEvening, confirm, formatQuantity, showToast } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
 import { getUser } from '../modules/auth.js';
