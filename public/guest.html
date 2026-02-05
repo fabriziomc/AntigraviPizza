@@ -529,6 +529,11 @@
                 const allPreps = allPrepsResponse.ok ? await allPrepsResponse.json() : [];
                 const prepsMap = new Map(allPreps.map(p => [p.id, p]));
 
+                // Fetch all ingredients for name resolution
+                const allIngredientsResponse = await fetch('/api/ingredients');
+                const allIngredients = allIngredientsResponse.ok ? await allIngredientsResponse.json() : [];
+                const ingredientsMap = new Map(allIngredients.map(i => [i.id, i]));
+
                 // Fetch all pizza details using guest endpoint
                 const pizzaPromises = pizzaNight.selectedPizzas.map(pizza => {
                     const id = typeof pizza === 'string' ? pizza : pizza.recipeId;
@@ -544,19 +549,36 @@
                     const preparationItems = [];
 
                     // Add base ingredients only (not from preparations)
-                    const allIngredients = [
+                    const allRecipeIngredients = [
                         ...(pizza.baseIngredients || []),
                         ...(pizza.toppingsDuringBake || []),
                         ...(pizza.toppingsPostBake || [])
                     ];
 
-                    allIngredients.forEach(ing => {
-                        const name = ing.name || ing.ingredientName || ing;
-                        const isPostBake = ing.postBake === true || ing.postBake === 1 || ing.postBake === '1';
-                        ingredientItems.push({
-                            name,
-                            isPostBake
-                        });
+                    allRecipeIngredients.forEach(ing => {
+                        // Try to get name from ingredient object or resolve from ID
+                        let name = ing.name || ing.ingredientName;
+
+                        // If no name but has ingredientId, look it up
+                        if (!name && ing.ingredientId) {
+                            const foundIngredient = ingredientsMap.get(ing.ingredientId);
+                            if (foundIngredient) {
+                                name = foundIngredient.name;
+                            }
+                        }
+
+                        // If still no name and ing is just a string, use it
+                        if (!name && typeof ing === 'string') {
+                            name = ing;
+                        }
+
+                        if (name) {
+                            const isPostBake = ing.postBake === true || ing.postBake === 1 || ing.postBake === '1';
+                            ingredientItems.push({
+                                name,
+                                isPostBake
+                            });
+                        }
                     });
 
                     // Add preparation names (not their ingredients)
