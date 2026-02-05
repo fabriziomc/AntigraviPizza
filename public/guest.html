@@ -539,10 +539,11 @@
 
                 // Render pizzas
                 pizzaList.innerHTML = pizzas.map(pizza => {
-                    // Create unified list of ingredients and preparations
-                    const unifiedItems = [];
+                    // Separate ingredients and preparations to avoid duplication
+                    const ingredientItems = [];
+                    const preparationItems = [];
 
-                    // Add ingredients
+                    // Add base ingredients only (not from preparations)
                     const allIngredients = [
                         ...(pizza.baseIngredients || []),
                         ...(pizza.toppingsDuringBake || []),
@@ -552,32 +553,33 @@
                     allIngredients.forEach(ing => {
                         const name = ing.name || ing.ingredientName || ing;
                         const isPostBake = ing.postBake === true || ing.postBake === 1 || ing.postBake === '1';
-                        unifiedItems.push({
+                        ingredientItems.push({
                             name,
-                            isPostBake,
-                            type: 'ingredient'
+                            isPostBake
                         });
                     });
 
-                    // Add preparations
+                    // Add preparation names (not their ingredients)
                     const recipePreps = pizza.preparations || [];
                     recipePreps.forEach(prep => {
                         const found = prepsMap.get(prep.id);
                         if (found) {
                             const isPostBake = prep.timing === 'after';
-                            unifiedItems.push({
+                            preparationItems.push({
                                 name: found.name,
-                                isPostBake,
-                                type: 'preparation'
+                                isPostBake
                             });
                         }
                     });
 
-                    // Separate pre-bake and post-bake items
-                    const preBakeItems = unifiedItems.filter(item => !item.isPostBake);
-                    const postBakeItems = unifiedItems.filter(item => item.isPostBake);
+                    // Combine ingredients and preparations
+                    const allItems = [...ingredientItems, ...preparationItems];
 
-                    // Render pre-bake items (no distinction between ingredients and preparations)
+                    // Separate pre-bake and post-bake items
+                    const preBakeItems = allItems.filter(item => !item.isPostBake);
+                    const postBakeItems = allItems.filter(item => item.isPostBake);
+
+                    // Render pre-bake items
                     const preBakeList = preBakeItems.length > 0
                         ? preBakeItems.map(item => item.name).join(', ')
                         : 'Ingredienti non disponibili';
