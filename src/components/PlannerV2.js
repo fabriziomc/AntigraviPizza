@@ -2241,7 +2241,16 @@ async function viewPizzaNightDetails(nightId) {
                         ` : ''}
                     </div>
                   </div>
-                  <span style="color: var(--color-accent-light); font-weight: 700;">×${pizza.quantity}</span>
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--color-accent-light); font-weight: 700;">×${pizza.quantity}</span>
+                    <button 
+                      onclick="window.deletePizzaFromNight('${nightId}', ${index})" 
+                      style="background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 0.25rem; color: #ef4444; transition: transform 0.2s;" 
+                      onmouseover="this.style.transform='scale(1.2)'" 
+                      onmouseout="this.style.transform='scale(1)'"
+                      title="Elimina pizza"
+                    >🗑️</button>
+                  </div>
                 </li>
               `;
     }).join('')}
@@ -2428,6 +2437,41 @@ window.movePizzaDown = async function (nightId, index) {
   } catch (error) {
     console.error('Failed to move pizza down:', error);
     showToast('Errore nel riordinamento', 'error');
+  }
+};
+
+// Function to delete a pizza from the night
+window.deletePizzaFromNight = async function (nightId, index) {
+  console.log(`🗑️ [PLANNER] deletePizzaFromNight called for index ${index}`);
+  try {
+    const { getPizzaNightById, updatePizzaNight } = await import('../modules/database.js');
+    const night = await getPizzaNightById(nightId);
+    if (!night || index < 0 || index >= night.selectedPizzas.length) return;
+
+    // Get the pizza name before removing it
+    const pizzaName = night.selectedPizzas[index].recipeName;
+
+    // Remove the pizza at the specified index
+    const pizzas = [...night.selectedPizzas];
+    pizzas.splice(index, 1);
+
+    console.log('🔄 [PLANNER] Removing pizza:', pizzaName);
+    console.log('🔄 [PLANNER] Remaining pizzas:', pizzas.map(p => p.recipeName));
+
+    // Update database
+    const updated = await updatePizzaNight(nightId, { ...night, selectedPizzas: pizzas });
+    console.log('✅ [PLANNER] Database update response:', updated);
+
+    // Show success message
+    showToast(`✅ Pizza "${pizzaName}" rimossa dalla serata`, 'success');
+
+    // Re-render modal and grid
+    console.log('♻️ [PLANNER] Refreshing details...');
+    await viewPizzaNightDetails(nightId);
+    await renderPizzaNights();
+  } catch (error) {
+    console.error('Failed to delete pizza:', error);
+    showToast('❌ Errore nell\'eliminazione della pizza', 'error');
   }
 };
 
