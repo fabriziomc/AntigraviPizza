@@ -2689,18 +2689,8 @@ async function saveAvailableIngredients(nightId) {
     // Update availableIngredients
     night.availableIngredients = availableIngredients;
 
-    // Send the complete updated night object
-    const response = await fetch(`/api/pizza-nights/${nightId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(night)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Server error:', errorData);
-      throw new Error('Failed to update available ingredients');
-    }
+    // Use the database module's updatePizzaNight function which includes authentication
+    await updatePizzaNight(nightId, night);
 
     closeModal();
     showToast(`✅ ${availableIngredients.length} ingredienti salvati come disponibili`, 'success');
@@ -2713,6 +2703,9 @@ async function saveAvailableIngredients(nightId) {
     showToast('❌ Errore nel salvare gli ingredienti', 'error');
   }
 }
+
+// Expose function globally
+window.saveAvailableIngredients = saveAvailableIngredients;
 
 // Quick select functions
 function quickSelectDough() {
