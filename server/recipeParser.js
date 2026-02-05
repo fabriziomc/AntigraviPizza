@@ -77,9 +77,9 @@ function parseRecipeBlock(block) {
             if (content) {
                 recipe.ingredientiCottura.push(...parseIngredientList(content));
             }
-        } else if (line.match(/^(Post[\s-]?cottura:|Top\s*\(Post[\s-]?cottura\):|Dopo\s+cottura:|Finitura:|All'uscita:)/i)) {
+        } else if (line.match(/^(Post[\s-]?cottura:|Top\s*\(Post[\s-]?cottura\):|Dopo\s+cottura:|Finitura:|All'uscita:|In\s+uscita:)/i)) {
             currentSection = 'post';
-            const content = line.replace(/^(Post[\s-]?cottura:|Top\s*\(Post[\s-]?cottura\):|Dopo\s+cottura:|Finitura:|All'uscita:)/i, '').trim();
+            const content = line.replace(/^(Post[\s-]?cottura:|Top\s*\(Post[\s-]?cottura\):|Dopo\s+cottura:|Finitura:|All'uscita:|In\s+uscita:)/i, '').trim();
             if (content) {
                 recipe.ingredientiPostCottura.push(...parseIngredientList(content));
             }

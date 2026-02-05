@@ -1058,7 +1058,10 @@ async function saveRecipeChanges(recipeId) {
     // Save to backend
     const response = await fetch(`/api/recipes/${recipeId}/components`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`
+      },
       body: JSON.stringify({ baseIngredients, preparations })
     });
 
