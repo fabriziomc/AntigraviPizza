@@ -510,12 +510,14 @@ async function showRecipeModal(recipeId) {
       // Combine all ingredients with timing info
       const allIngredients = [];
 
-      // Add ingredients from toppingsDuringBake (before cooking)
+      // Add ingredients from toppingsDuringBake (check individual postBake flag)
       if (recipe.toppingsDuringBake && recipe.toppingsDuringBake.length > 0) {
         recipe.toppingsDuringBake.forEach(ing => {
+          // Check if ingredient has postBake flag set
+          const isPostBake = ing.postBake === true || ing.postBake === 1 || ing.postBake === '1';
           allIngredients.push({
             type: 'ingredient',
-            timing: 'before',
+            timing: isPostBake ? 'after' : 'before',
             data: ing
           });
         });
