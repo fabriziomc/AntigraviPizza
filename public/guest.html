@@ -565,9 +565,11 @@
                         }
 
                         if (name) {
+                            // Check if ingredient has postBake flag set
+                            const isPostBake = ing.postBake === true || ing.postBake === 1 || ing.postBake === '1';
                             ingredientItems.push({
                                 name,
-                                isPostBake: false // Base ingredients are always pre-bake
+                                isPostBake
                             });
                         }
                     });
@@ -588,9 +590,11 @@
                         }
 
                         if (name) {
+                            // Check if ingredient has postBake flag set
+                            const isPostBake = ing.postBake === true || ing.postBake === 1 || ing.postBake === '1';
                             ingredientItems.push({
                                 name,
-                                isPostBake: false // During bake = pre-bake
+                                isPostBake
                             });
                         }
                     });
