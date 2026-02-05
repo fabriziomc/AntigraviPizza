@@ -601,14 +601,30 @@
                     const preBakeItems = allItems.filter(item => !item.isPostBake);
                     const postBakeItems = allItems.filter(item => item.isPostBake);
 
+                    // Remove duplicates by name (case-insensitive)
+                    const deduplicateItems = (items) => {
+                        const seen = new Set();
+                        return items.filter(item => {
+                            const lowerName = item.name.toLowerCase();
+                            if (seen.has(lowerName)) {
+                                return false;
+                            }
+                            seen.add(lowerName);
+                            return true;
+                        });
+                    };
+
+                    const uniquePreBakeItems = deduplicateItems(preBakeItems);
+                    const uniquePostBakeItems = deduplicateItems(postBakeItems);
+
                     // Render pre-bake items
-                    const preBakeList = preBakeItems.length > 0
-                        ? preBakeItems.map(item => item.name).join(', ')
+                    const preBakeList = uniquePreBakeItems.length > 0
+                        ? uniquePreBakeItems.map(item => item.name).join(', ')
                         : 'Ingredienti non disponibili';
 
                     // Render post-bake items only if they exist
-                    const postBakeSection = postBakeItems.length > 0
-                        ? `<br><strong style="color: #f97316;">In uscita:</strong> ${postBakeItems.map(item => item.name).join(', ')}`
+                    const postBakeSection = uniquePostBakeItems.length > 0
+                        ? `<br><strong style="color: #f97316;">In uscita:</strong> ${uniquePostBakeItems.map(item => item.name).join(', ')}`
                         : '';
 
                     const imageTag = (pizza.imageUrl || pizza.image)
