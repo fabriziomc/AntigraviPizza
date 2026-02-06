@@ -41,7 +41,8 @@ class DatabaseAdapter {
             ...record,
             selectedPizzas: typeof record.selectedPizzas === 'string' ? JSON.parse(record.selectedPizzas || '[]') : record.selectedPizzas,
             selectedGuests: typeof record.selectedGuests === 'string' ? JSON.parse(record.selectedGuests || '[]') : record.selectedGuests,
-            availableIngredients: typeof record.availableIngredients === 'string' ? JSON.parse(record.availableIngredients || '[]') : (record.availableIngredients || [])
+            availableIngredients: typeof record.availableIngredients === 'string' ? JSON.parse(record.availableIngredients || '[]') : (record.availableIngredients || []),
+            isVotingOpen: !!record.isVotingOpen
         };
     }
 
@@ -450,8 +451,8 @@ class DatabaseAdapter {
 
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
-                INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt, imageUrl, userId)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt, imageUrl, userId, isVotingOpen)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             stmt.run(
                 night.id,
@@ -466,12 +467,13 @@ class DatabaseAdapter {
                 night.status,
                 night.createdAt,
                 night.imageUrl || '',
-                userId
+                userId,
+                night.isVotingOpen ? 1 : 0
             );
         } else {
             await this.db.execute({
-                sql: `INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt, imageUrl, userId)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                sql: `INSERT INTO PizzaNights (id, name, date, guestCount, selectedDough, availableIngredients, selectedPizzas, selectedGuests, notes, status, createdAt, imageUrl, userId, isVotingOpen)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 args: [
                     night.id,
                     night.name,
@@ -485,7 +487,8 @@ class DatabaseAdapter {
                     night.status,
                     night.createdAt,
                     night.imageUrl || '',
-                    userId
+                    userId,
+                    night.isVotingOpen ? 1 : 0
                 ]
             });
         }
@@ -509,7 +512,7 @@ class DatabaseAdapter {
         if (this.isSQLite) {
             const stmt = this.db.prepare(`
                 UPDATE PizzaNights 
-                SET name=?, date=?, guestCount=?, selectedDough=?, availableIngredients=?, selectedPizzas=?, selectedGuests=?, notes=?, status=?, imageUrl=?
+                SET name=?, date=?, guestCount=?, selectedDough=?, availableIngredients=?, selectedPizzas=?, selectedGuests=?, notes=?, status=?, imageUrl=?, isVotingOpen=?
                 WHERE id=? AND userId=?
             `);
             stmt.run(
@@ -523,6 +526,7 @@ class DatabaseAdapter {
                 night.notes || '',
                 night.status,
                 night.imageUrl || '',
+                night.isVotingOpen ? 1 : 0,
                 id,
                 userId
             );
@@ -530,7 +534,7 @@ class DatabaseAdapter {
             await this.db.execute({
                 sql: `UPDATE PizzaNights 
                       SET name=?, date=?, guestCount=?, selectedDough=?, availableIngredients=?, 
-                          selectedPizzas=?, selectedGuests=?, notes=?, status=?, imageUrl=?
+                          selectedPizzas=?, selectedGuests=?, notes=?, status=?, imageUrl=?, isVotingOpen=?
                       WHERE id=? AND userId=?`,
                 args: [
                     night.name,
@@ -543,6 +547,7 @@ class DatabaseAdapter {
                     night.notes || '',
                     night.status,
                     night.imageUrl || '',
+                    night.isVotingOpen ? 1 : 0,
                     id,
                     userId
                 ]

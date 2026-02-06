@@ -2327,6 +2327,10 @@ async function viewPizzaNightDetails(nightId) {
           Avvia Serata
         </button>
       ` : ''}
+        <button class="btn ${night.isVotingOpen ? 'btn-danger' : 'btn-info'}" onclick="window.togglePizzaNightVotingAction('${night.id}')" style="background: ${night.isVotingOpen ? 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)' : 'linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)'};">
+          <span>${night.isVotingOpen ? '🔒' : '🔓'}</span>
+          ${night.isVotingOpen ? 'Chiudi Votazioni' : 'Apri Votazioni'}
+        </button>
         ${night.selectedPizzas.length > 0 ? `
         <button class="btn btn-secondary" onclick="window.closeModal(); setTimeout(() => window.manageAvailableIngredients('${night.id}'), 100);">
           <span>✓</span>
@@ -2856,6 +2860,27 @@ async function completePizzaNightAction(nightId) {
   } catch (error) {
     console.error('Failed to complete pizza night:', error);
     showToast('❌ Errore nel completare la serata', 'error');
+  }
+}
+
+async function togglePizzaNightVotingAction(nightId) {
+  try {
+    const db = await import('../modules/database.js');
+    const night = await db.getPizzaNightById(nightId);
+    if (!night) throw new Error('Serata non trovata');
+
+    const newVotingStatus = !night.isVotingOpen;
+    await db.updatePizzaNight(nightId, { isVotingOpen: newVotingStatus });
+
+    showToast(newVotingStatus ? '🔓 Votazioni aperte!' : '🔒 Votazioni chiuse!', 'success');
+
+    // Re-render details to show updated button state
+    await viewPizzaNightDetails(nightId);
+    // Refresh main list to sync state (optional but safe)
+    await refreshData();
+  } catch (error) {
+    console.error('Failed to toggle voting status:', error);
+    showToast('❌ Errore nel cambiare lo stato delle votazioni', 'error');
   }
 }
 
@@ -3606,6 +3631,7 @@ window.quickSelectNone = quickSelectNone;
 window.viewShoppingListForNight = viewShoppingListForNight;
 window.downloadShoppingListForNight = downloadShoppingListForNight;
 window.completePizzaNightAction = completePizzaNightAction;
+window.togglePizzaNightVotingAction = togglePizzaNightVotingAction;
 window.deletePizzaNightAction = deletePizzaNightAction;
 window.confirmDeletePizzaNight = confirmDeletePizzaNight;
 window.showManageGuestsModal = showManageGuestsModal;

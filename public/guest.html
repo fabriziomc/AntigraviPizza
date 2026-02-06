@@ -697,20 +697,22 @@
                                 <div class="ingredients-title">Ingredienti:</div>
                                 ${preBakeList}${postBakeSection}
                             </div>
+                            ${pizzaNight.isVotingOpen ? `
                             <div class="pizza-rating-container">
                                 <span class="rating-label">Ti è piaciuta? Dai un voto (1-10):</span>
                                 <div class="rating-select-wrapper" id="rating-wrap-${pizza.id}">
                                     ${existingRating
-                            ? `<span class="rating-success">Grazie per il tuo voto: ${existingRating}/10 ⭐</span>`
-                            : `
-                                        <select onchange="submitRating('${pizza.id}', this.value)" class="rating-select">
-                                            <option value="">Vota...</option>
-                                            ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<option value="${n}">${n}</option>`).join('')}
-                                        </select>
-                                        `
-                        }
+                                ? `<span class="rating-success">Grazie per il tuo voto: ${existingRating}/10 ⭐</span>`
+                                : `
+                                         <select onchange="submitRating('${pizza.id}', this.value)" class="rating-select">
+                                             <option value="">Vota...</option>
+                                             ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<option value="${n}">${n}</option>`).join('')}
+                                         </select>
+                                         `
+                            }
                                 </div>
                             </div>
+                            ` : ''}
                         </div>
                     `;
                 }).join('');
