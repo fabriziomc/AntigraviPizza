@@ -529,6 +529,7 @@ async function submitPreparationForm(prepId) {
       const selectedIngredient = cachedIngredients.find(ing => ing.name === ingNames[i].trim());
 
       ingredients.push({
+        ingredientId: selectedIngredient?.id, // Use ingredientId to match expected backend format
         name: ingNames[i].trim(),
         quantity: parseFloat(quantityInputs[i].value),
         unit: ingUnits[i].trim(),
