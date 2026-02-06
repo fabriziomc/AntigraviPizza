@@ -3262,40 +3262,66 @@ function renderLivePizza() {
 
   // Separate ingredients and preparations by phase
   // Combine all possible ingredient arrays for the recipe
-  const ingredients = [
+  const rawIngredients = [
     ...(pizza.baseIngredients || []),
     ...(pizza.toppingsDuringBake || []),
     ...(pizza.ingredients || [])
   ];
 
-  // Add post-bake toppings and mark them
+  // Map raw ingredients and check for postBake flag
+  const mappedIngredients = rawIngredients.map(ing => {
+    const isPostBake = ing.postBake === true || ing.postBake === 1 || ing.postBake === 'true' || ing.postBake === '1';
+    return { ...ing, isPostBake };
+  });
+
+  // Add specifically marked post-bake toppings from toppingsPostBake array
   const postBakeToppings = (pizza.toppingsPostBake || []).map(ing => ({
     ...ing,
-    postBake: true
+    isPostBake: true
   }));
 
-  const allIngredients = [...ingredients, ...postBakeToppings];
-  const preparations = pizza.preparations || [];
+  const allIngredientsList = [...mappedIngredients, ...postBakeToppings];
 
-  console.log('🔍 Live Mode Debug:');
-  console.log('  - Pizza:', pizza.name);
-  console.log('  - All ingredients:', allIngredients);
-  console.log('  - preparations:', preparations);
+  // Deduplicate ingredients by name, prioritizing post-bake timing
+  const seenIngredients = new Map();
+  const uniqueIngredients = [];
 
-  const beforeIngredients = allIngredients.filter(ing => !ing.postBake || ing.postBake === 0 || ing.postBake === '0');
-  const afterIngredients = allIngredients.filter(ing => !!ing.postBake && (ing.postBake === true || ing.postBake === 1 || ing.postBake === 'true' || ing.postBake === '1'));
+  allIngredientsList.forEach(ing => {
+    const name = (ing.name || ing).toString().toLowerCase();
+    if (!seenIngredients.has(name) || (!seenIngredients.get(name).isPostBake && ing.isPostBake)) {
+      if (seenIngredients.has(name)) {
+        const idx = uniqueIngredients.indexOf(seenIngredients.get(name));
+        if (idx > -1) uniqueIngredients.splice(idx, 1);
+      }
+      seenIngredients.set(name, ing);
+      uniqueIngredients.push(ing);
+    }
+  });
 
-  console.log('  - beforeIngredients count:', beforeIngredients.length);
-  console.log('  - afterIngredients count:', afterIngredients.length);
-  if (afterIngredients.length > 0) {
-    console.log('  - afterIngredients:', afterIngredients);
-  }
+  // Preparations
+  const rawPreparations = pizza.preparations || [];
+  const seenPreps = new Map();
+  const uniquePreparations = [];
 
-  // For preparations, some might have 'timing' property and others might be in separate lists if we added them in parser
-  // But currently parser puts them in instructions, not separate arrays. 
-  // However, we should check if they have timing 'after' or 'post-bake'
-  const beforePreparations = preparations.filter(prep => !prep.timing || (prep.timing !== 'after' && prep.timing !== 'post-bake'));
-  const afterPreparations = preparations.filter(prep => prep.timing === 'after' || prep.timing === 'post-bake');
+  rawPreparations.forEach(prep => {
+    const name = (prep.name || prep.preparationName || prep.id || 'Preparazione').toString().toLowerCase();
+    const isPostBake = prep.timing === 'after' || prep.timing === 'post-bake';
+
+    if (!seenPreps.has(name) || (!seenPreps.get(name).isPostBake && isPostBake)) {
+      if (seenPreps.has(name)) {
+        const idx = uniquePreparations.indexOf(seenPreps.get(name));
+        if (idx > -1) uniquePreparations.splice(idx, 1);
+      }
+      const prepObj = { ...prep, isPostBake };
+      seenPreps.set(name, prepObj);
+      uniquePreparations.push(prepObj);
+    }
+  });
+
+  const beforeIngredients = uniqueIngredients.filter(ing => !ing.isPostBake);
+  const afterIngredients = uniqueIngredients.filter(ing => ing.isPostBake);
+  const beforePreparations = uniquePreparations.filter(prep => !prep.isPostBake);
+  const afterPreparations = uniquePreparations.filter(prep => prep.isPostBake);
 
   // Render BEFORE cooking content
   renderCookingPhaseContent('beforeCookingContent', beforeIngredients, beforePreparations, 'before');

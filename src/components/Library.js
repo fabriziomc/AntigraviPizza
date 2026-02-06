@@ -510,6 +510,18 @@ async function showRecipeModal(recipeId) {
       // Combine all ingredients with timing info
       const allIngredients = [];
 
+      // Add base ingredients that are for topping (check individual postBake flag)
+      if (toppingIngredients && toppingIngredients.length > 0) {
+        toppingIngredients.forEach(ing => {
+          const isPostBake = ing.postBake === true || ing.postBake === 1 || ing.postBake === '1';
+          allIngredients.push({
+            type: 'ingredient',
+            timing: isPostBake ? 'after' : 'before',
+            data: ing
+          });
+        });
+      }
+
       // Add ingredients from toppingsDuringBake (check individual postBake flag)
       if (recipe.toppingsDuringBake && recipe.toppingsDuringBake.length > 0) {
         recipe.toppingsDuringBake.forEach(ing => {
@@ -523,7 +535,7 @@ async function showRecipeModal(recipeId) {
         });
       }
 
-      // Add ingredients from toppingsPostBake (after cooking)
+      // Add ingredients from toppingsPostBake (always after)
       if (recipe.toppingsPostBake && recipe.toppingsPostBake.length > 0) {
         recipe.toppingsPostBake.forEach(ing => {
           allIngredients.push({
@@ -564,8 +576,25 @@ async function showRecipeModal(recipeId) {
         return a.timing === 'before' ? -1 : 1;
       });
 
-      // Render all ingredients
-      return allIngredients.map(item => {
+      // Deduplicate by name, prioritizing 'after' if same name exists
+      const seen = new Map();
+      const uniqueIngredients = [];
+
+      allIngredients.forEach(item => {
+        const name = (item.type === 'ingredient' ? item.data.name : item.data.prepData.name).toLowerCase();
+        if (!seen.has(name) || (seen.get(name).timing === 'before' && item.timing === 'after')) {
+          if (seen.has(name)) {
+            // Remove the 'before' version if we found an 'after' version
+            const oldIdx = uniqueIngredients.indexOf(seen.get(name));
+            if (oldIdx > -1) uniqueIngredients.splice(oldIdx, 1);
+          }
+          seen.set(name, item);
+          uniqueIngredients.push(item);
+        }
+      });
+
+      // Render all unique ingredients
+      return uniqueIngredients.map(item => {
         if (item.type === 'ingredient') {
           const ing = item.data;
           const isPostBake = item.timing === 'after';
