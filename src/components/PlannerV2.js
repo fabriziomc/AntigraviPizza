@@ -2256,6 +2256,12 @@ async function viewPizzaNightDetails(nightId) {
     }).join('')}
             </ul>
           ` : '<p class="text-muted">Nessuna pizza selezionata</p>'}
+
+            <!-- Button to add more pizza -->
+            <button class="btn btn-ghost" onclick="window.showAddOnePizzaModal('${nightId}')" style="width: 100%; border: 1px dashed rgba(255,255,255,0.2); padding: 0.75rem; color: var(--color-primary-light); margin-top: 0.5rem;">
+              <span>➕</span>
+              Aggiungi Pizza
+            </button>
           </div>
 
           ${night.selectedPizzas.length > 0 ? `
@@ -3619,3 +3625,112 @@ window.completePizzaNightLive = completePizzaNightLive;
 window.reopenPizzaNightAction = reopenPizzaNightAction;
 window.saveIngredientCheck = saveIngredientCheck;
 window.savePrepCheck = savePrepCheck;
+
+// ============================================
+// ADD PIZZA TO EXISTING NIGHT
+// ============================================
+
+window.showAddOnePizzaModal = async function (nightId) {
+  // Use cached recipes or fetch if empty
+  if (!state.recipes || state.recipes.length === 0) {
+    state.recipes = await getAllRecipes();
+  }
+
+  // Local state for filtering
+  let searchTerm = '';
+
+  const renderList = (filtered) => {
+    const list = document.getElementById('addOnePizzaList');
+    if (!list) return;
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<p class="text-muted" style="text-align: center; padding: 2rem;">Nessuna pizza trovata</p>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(recipe => `
+      <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 0.75rem; margin-bottom: 0.75rem; border: 1px solid rgba(255,255,255,0.1);">
+        <div style="flex: 1;">
+          <div style="font-weight: 600; font-size: 1.1rem; color: white;">${recipe.name}</div>
+          <div style="font-size: 0.85rem; color: var(--color-gray-400); margin-top: 0.25rem;">
+            ${recipe.tags ? recipe.tags.map(t => `<span class="tag-sm">${t}</span>`).join(' ') : ''}
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <input type="number" id="qty_${recipe.id}" value="1" min="1" max="20" style="width: 60px; padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 0.5rem; color: white; text-align: center;">
+          <button class="btn btn-primary btn-sm" onclick="window.addPizzaToNightAction('${nightId}', '${recipe.id}', document.getElementById('qty_${recipe.id}').value)">
+            <span>➕</span> Aggiungi
+          </button>
+        </div>
+      </div>
+    `).join('');
+  };
+
+  const modalContent = `
+    <div class="modal-header">
+      <h2 class="modal-title">Aggiungi Pizza alla Serata</h2>
+      <button class="modal-close" onclick="window.viewPizzaNightDetails('${nightId}')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <input type="text" id="recipeSearch" class="form-input" placeholder="Cerca pizza per nome..." style="margin-bottom: 1.5rem; padding: 1rem; font-size: 1.1rem;">
+      </div>
+      <div id="addOnePizzaList" style="max-height: 500px; overflow-y: auto;">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="window.viewPizzaNightDetails('${nightId}')">Annulla</button>
+    </div>
+  `;
+
+  openModal(modalContent);
+
+  // Initial render
+  renderList(state.recipes);
+
+  // Setup search
+  setTimeout(() => {
+    const searchInput = document.getElementById('recipeSearch');
+    if (searchInput) {
+      searchInput.focus();
+      searchInput.oninput = (e) => {
+        searchTerm = e.target.value.toLowerCase();
+        const filtered = state.recipes.filter(r => r.name.toLowerCase().includes(searchTerm));
+        renderList(filtered);
+      };
+    }
+  }, 100);
+};
+
+window.addPizzaToNightAction = async function (nightId, recipeId, quantity) {
+  try {
+    const qty = parseInt(quantity) || 1;
+    const night = await getPizzaNightById(nightId);
+    if (!night) throw new Error('Serata non trovata');
+
+    const recipe = await getRecipeById(recipeId);
+    if (!recipe) throw new Error('Ricetta non trovata');
+
+    const newPizzaEntry = {
+      recipeId: recipe.id,
+      recipeName: recipe.name,
+      quantity: qty
+    };
+
+    const updatedSelectedPizzas = [...(night.selectedPizzas || []), newPizzaEntry];
+
+    await updatePizzaNight(nightId, {
+      ...night,
+      selectedPizzas: updatedSelectedPizzas
+    });
+
+    showToast(`✅ ${recipe.name} aggiunta correttamente!`, 'success');
+
+    // Refresh the details modal
+    await viewPizzaNightDetails(nightId);
+  } catch (error) {
+    console.error('Failed to add pizza to night:', error);
+    showToast('❌ Errore nell\'aggiungere la pizza', 'error');
+  }
+};
