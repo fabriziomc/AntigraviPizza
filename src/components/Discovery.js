@@ -5,7 +5,7 @@
 import { importRecipeManually, importSampleRecipes } from '../modules/recipeSearch.js';
 import { getToken } from '../modules/auth.js';
 import { DOUGH_TYPES } from '../utils/constants.js';
-import { getAllPreparations, getAllIngredients } from '../modules/database.js';
+import { getAllPreparations, getAllIngredients, getUserSettings } from '../modules/database.js';
 // refreshData is available globally via window.refreshData
 import { showToast } from '../utils/helpers.js';
 
@@ -109,6 +109,12 @@ function setupDiscoveryListeners() {
     const btnImportRecipeText = document.getElementById('btnImportRecipeText');
     if (btnImportRecipeText) {
         btnImportRecipeText.addEventListener('click', handleTextImport);
+    }
+
+    // Text Import - Generate with AI
+    const btnGenerateAIRecipe = document.getElementById('btnGenerateAIRecipe');
+    if (btnGenerateAIRecipe) {
+        btnGenerateAIRecipe.addEventListener('click', handleAIGeneration);
     }
 }
 
@@ -705,6 +711,64 @@ async function handleTextImport() {
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<span class="icon">🚀</span> Importa Ricette';
+    }
+}
+
+/**
+ * Handle AI recipe generation
+ */
+async function handleAIGeneration() {
+    const btn = document.getElementById('btnGenerateAIRecipe');
+    const textInput = document.getElementById('recipeTextInput');
+    const countInput = document.getElementById('aiRecipeCount');
+    const resultDiv = document.getElementById('importRecipeResult');
+
+    const count = parseInt(countInput.value) || 1;
+
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="icon">⏳</span> Generazione...';
+
+        showToast('✨ Chiedo aiuto allo chef AI...', 'info');
+
+        // Get API Key from settings
+        const settings = await getUserSettings();
+        const apiKey = settings?.geminiApiKey;
+
+        if (!apiKey) {
+            showToast('⚠️ Chiave Gemini non trovata nelle Impostazioni', 'warning');
+            btn.disabled = false;
+            btn.innerHTML = '<span class="icon">✨</span> Genera con AI';
+            return;
+        }
+
+        // Import AI utility
+        const { generateRecipesWithAI } = await import('../utils/aiUtils.js');
+
+        // Generate recipes
+        const generatedText = await generateRecipesWithAI(apiKey, count);
+
+        // Populate textarea
+        if (textInput.value.trim()) {
+            textInput.value += '\n\n' + generatedText;
+        } else {
+            textInput.value = generatedText;
+        }
+
+        showToast(`✅ ${count} ricette generate! Clicca "Importa" per salvarle.`, 'success');
+
+        // Ensure the result div is visible if we want to show anything there
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `<p style="color: var(--color-success);">✨ Chef AI ha sfornato ${count} nuove idee! Controlla il testo qui sopra.</p>`;
+
+    } catch (error) {
+        console.error('AI Generation error:', error);
+        showToast('❌ Errore: ' + error.message, 'error');
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `<p style="color: var(--color-error);">❌ Errore generazione: ${error.message}</p>`;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="icon">✨</span> Genera con AI';
     }
 }
 
