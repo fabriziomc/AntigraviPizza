@@ -52,7 +52,7 @@ function parseRecipeBlock(block) {
         ingredientiPostCottura: [],
         instructions: [],
         archetype: 'gourmet',
-        dough: 'nero',
+        dough: 'Napoletana Classica',
         tags: ['gourmet']
     };
 
@@ -88,6 +88,18 @@ function parseRecipeBlock(block) {
             const content = line.replace(/^(Perch[é|e]\s*funziona:|Descrizione:|Note:)/i, '').trim();
             if (content) {
                 recipe.description = content;
+            }
+        } else if (line.match(/^(Impasto:|Dough:)/i)) {
+            const content = line.replace(/^(Impasto:|Dough:)/i, '').trim();
+            if (content) {
+                recipe.dough = content;
+            }
+        } else if (line.match(/^(Stile:|Archetipo:|Archetype:)/i)) {
+            const content = line.replace(/^(Stile:|Archetipo:|Archetype:)/i, '').trim().toLowerCase();
+            if (content) {
+                // Mapping labels back to IDs if necessary, but the importer handles this too.
+                // For now, just store it.
+                recipe.archetype = content;
             }
         } else {
             // Continuation logic
@@ -180,17 +192,119 @@ function normalizeIngredientName(name) {
         .trim();
 }
 
-function generateInstructions(recipe) {
-    const instructions = ['Stendere l\'impasto nero al carbone vegetale'];
-    if (recipe.ingredientiCottura.length > 0) {
-        instructions.push(`Distribuire sulla base: ${recipe.ingredientiCottura.map(i => i.originalName).join(', ')}`);
+/**
+ * Generate instructions based on recipe components
+ * Supports both parser format and database record format
+ */
+export function generateInstructions(recipe) {
+    const dough = recipe.dough || 'Napoletana Classica';
+    const instructions = [`Stendere l'impasto tipo ${dough}`];
+
+    // Get ingredients/preparations during bake
+    const ingredientsDuring = [];
+    const ingredientsPost = [];
+    const seenIds = new Set();
+
+    // Helper to add without duplicates
+    const addSafe = (ing, section) => {
+        const id = ing.id || ing.ingredientId || ing.preparationId;
+        if (id && seenIds.has(id)) return;
+        if (id) seenIds.add(id);
+
+        if (section === 'post') {
+            ingredientsPost.push(ing);
+        } else {
+            ingredientsDuring.push(ing);
+        }
+    };
+
+    // Check baseIngredients (DB format) - PRIMARY SOURCE
+    if (recipe.baseIngredients && Array.isArray(recipe.baseIngredients)) {
+        recipe.baseIngredients.forEach(ing => {
+            addSafe(ing, ing.postBake ? 'post' : 'bake');
+        });
     }
+
+    // Check toppingsDuringBake/toppingsPostBake (Optimized DB format) - FALLBACK
+    if (recipe.toppingsDuringBake && Array.isArray(recipe.toppingsDuringBake)) {
+        recipe.toppingsDuringBake.forEach(ing => addSafe(ing, 'bake'));
+    }
+    if (recipe.toppingsPostBake && Array.isArray(recipe.toppingsPostBake)) {
+        recipe.toppingsPostBake.forEach(ing => addSafe(ing, 'post'));
+    }
+
+    // Check preparations (DB format)
+    if (recipe.preparations && Array.isArray(recipe.preparations)) {
+        recipe.preparations.forEach(prep => {
+            addSafe(prep, prep.timing === 'after' ? 'post' : 'bake');
+        });
+    }
+
+    // Check parser format (legacy/import)
+    if (recipe.ingredientiCottura && Array.isArray(recipe.ingredientiCottura)) {
+        recipe.ingredientiCottura.forEach(ing => addSafe(ing, 'bake'));
+    }
+    if (recipe.ingredientiPostCottura && Array.isArray(recipe.ingredientiPostCottura)) {
+        recipe.ingredientiPostCottura.forEach(ing => addSafe(ing, 'post'));
+    }
+
+    // Format strings
+    if (ingredientsDuring.length > 0) {
+        const names = ingredientsDuring
+            .map(i => i.originalName || i.name)
+            .filter(Boolean)
+            .filter((v, i, a) => a.indexOf(v) === i); // deduplicate
+        if (names.length > 0) {
+            instructions.push(`Distribuire sulla base: ${names.join(', ')}`);
+        }
+    }
+
     instructions.push('Infornare a 450°C per 90 secondi (o secondo il proprio forno)');
-    if (recipe.ingredientiPostCottura.length > 0) {
-        instructions.push(`Guarnire dopo la cottura con: ${recipe.ingredientiPostCottura.map(i => i.originalName).join(', ')}`);
+
+    if (ingredientsPost.length > 0) {
+        const names = ingredientsPost
+            .map(i => i.originalName || i.name)
+            .filter(Boolean)
+            .filter((v, i, a) => a.indexOf(v) === i); // deduplicate
+        if (names.length > 0) {
+            instructions.push(`Guarnire dopo la cottura con: ${names.join(', ')}`);
+        }
     }
+
     instructions.push('Servire immediatamente');
     return instructions;
+}
+
+/**
+ * Regenerate instructions for an existing recipe by resolving ID names
+ */
+export async function regenerateRecipeInstructions(recipe, dbAdapter, userId) {
+    if (!recipe) return [];
+
+    // Create a copy to avoid mutating original
+    const fullRecipe = { ...recipe };
+
+    // Resolve ingredient names if missing
+    if (fullRecipe.baseIngredients && Array.isArray(fullRecipe.baseIngredients)) {
+        const ingredients = await dbAdapter.getAllIngredients(userId);
+        fullRecipe.baseIngredients = fullRecipe.baseIngredients.map(ing => {
+            if (ing.name) return ing;
+            const dbIng = ingredients.find(i => i.id === (ing.id || ing.ingredientId));
+            return { ...ing, name: dbIng ? dbIng.name : 'Ingrediente sconosciuto' };
+        });
+    }
+
+    // Resolve preparation names if missing
+    if (fullRecipe.preparations && Array.isArray(fullRecipe.preparations)) {
+        const preps = await dbAdapter.getAllPreparations(userId);
+        fullRecipe.preparations = fullRecipe.preparations.map(prep => {
+            if (prep.name) return prep;
+            const dbPrep = preps.find(p => p.id === (prep.id || prep.preparationId));
+            return { ...prep, name: dbPrep ? dbPrep.name : 'Preparazione sconosciuta' };
+        });
+    }
+
+    return generateInstructions(fullRecipe);
 }
 
 export function suggestIngredientCategory(ingredientName) {

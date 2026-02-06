@@ -9,9 +9,11 @@ import { suggestIngredientCategory, validateRecipeData } from './recipeParser.js
  * Import a complete recipe into the database
  * @param {Object} parsedRecipe - Parsed recipe object from recipeParser
  * @param {DatabaseAdapter} dbAdapter - Database adapter instance
+ * @param {string} userId - User ID
+ * @param {string} archetype - Archetype ID (optional)
  * @returns {Promise<Object>} Import result with created entities
  */
-export async function importRecipe(parsedRecipe, dbAdapter, userId) {
+export async function importRecipe(parsedRecipe, dbAdapter, userId, archetype = null) {
     // Validate recipe data
     const validation = validateRecipeData(parsedRecipe);
     if (!validation.valid) {
@@ -29,16 +31,24 @@ export async function importRecipe(parsedRecipe, dbAdapter, userId) {
     };
 
     try {
-        // Collect all ingredients from all sections
-        const allIngredients = [
-            ...(parsedRecipe.ingredientiCottura || []),
-            ...(parsedRecipe.ingredientiPostCottura || [])
-        ];
-
         // Process each ingredient
         const processedIngredients = [];
-        for (const ingredient of allIngredients) {
+
+        // Process cottura ingredients
+        for (const ingredient of (parsedRecipe.ingredientiCottura || [])) {
             const processed = await findOrCreateIngredient(ingredient, dbAdapter, userId);
+            processed.section = 'cottura';
+            processedIngredients.push(processed);
+
+            if (processed.created) {
+                result.created.ingredients.push(processed.ingredient);
+            }
+        }
+
+        // Process post-cottura ingredients
+        for (const ingredient of (parsedRecipe.ingredientiPostCottura || [])) {
+            const processed = await findOrCreateIngredient(ingredient, dbAdapter, userId);
+            processed.section = 'post';
             processedIngredients.push(processed);
 
             if (processed.created) {
@@ -47,7 +57,7 @@ export async function importRecipe(parsedRecipe, dbAdapter, userId) {
         }
 
         // Build recipe object for database
-        const recipeData = buildRecipeData(parsedRecipe, processedIngredients);
+        const recipeData = buildRecipeData(parsedRecipe, processedIngredients, archetype);
 
         // Create the recipe
         const createdRecipe = await dbAdapter.createRecipe(recipeData, userId);
@@ -188,7 +198,7 @@ async function findIngredientByName(name, dbAdapter, userId) {
     return null;
 }
 
-function buildRecipeData(parsedRecipe, processedIngredients) {
+function buildRecipeData(parsedRecipe, processedIngredients, archetype = null) {
     // Map ALL ingredients (base + during bake + post bake) to separate arrays
     // baseIngredients for backward compatibility, and the new separated arrays
     const baseIngredients = [];
@@ -196,9 +206,7 @@ function buildRecipeData(parsedRecipe, processedIngredients) {
     const toppingsPostBake = [];
 
     processedIngredients.forEach(pi => {
-        const isPostBake = (parsedRecipe.ingredientiPostCottura || []).some(t =>
-            t.name.toLowerCase() === pi.ingredient.name.toLowerCase()
-        );
+        const isPostBake = pi.section === 'post';
 
         const ingredientRef = {
             ingredientId: pi.ingredient.id,
@@ -229,11 +237,11 @@ function buildRecipeData(parsedRecipe, processedIngredients) {
         preparations: [],
         instructions: parsedRecipe.instructions,
         imageUrl: '',
-        dough: parsedRecipe.dough || 'nero',
-        suggestedDough: parsedRecipe.dough || 'nero',
-        archetype: parsedRecipe.archetype || 'fusion',
-        recipeSource: 'manual',
-        archetypeUsed: parsedRecipe.archetype || 'fusion',
+        dough: parsedRecipe.dough || 'Napoletana Classica',
+        suggestedDough: parsedRecipe.dough || 'Napoletana Classica',
+        archetype: archetype || parsedRecipe.archetype || 'fusion',
+        recipeSource: archetype ? 'archetype' : 'manual',
+        archetypeUsed: archetype || parsedRecipe.archetype || 'fusion',
         createdAt: Date.now(),
         dateAdded: Date.now(),
         isFavorite: 0,
@@ -301,9 +309,11 @@ function guessTags(name) {
  * Import multiple recipes from parsed data
  * @param {Array} parsedRecipes - Array of parsed recipes
  * @param {DatabaseAdapter} dbAdapter - Database adapter
+ * @param {string} userId - User ID
+ * @param {string} archetype - Archetype ID (optional)
  * @returns {Promise<Object>} Batch import result
  */
-export async function importMultipleRecipes(parsedRecipes, dbAdapter, userId) {
+export async function importMultipleRecipes(parsedRecipes, dbAdapter, userId, archetype = null) {
     const results = {
         success: [],
         failed: [],
@@ -313,7 +323,7 @@ export async function importMultipleRecipes(parsedRecipes, dbAdapter, userId) {
 
     for (const parsedRecipe of parsedRecipes) {
         try {
-            const result = await importRecipe(parsedRecipe, dbAdapter, userId);
+            const result = await importRecipe(parsedRecipe, dbAdapter, userId, archetype);
             results.success.push(result);
             results.totalCreatedIngredients += result.created.ingredients.length;
             results.totalCreatedPreparations += result.created.preparations.length;

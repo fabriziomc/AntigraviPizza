@@ -7,27 +7,35 @@
  * Generate gourmet pizza recipes using Google Gemini API
  * @param {string} apiKey - Gemini API Key
  * @param {number} count - Number of recipes to generate (1-20)
+ * @param {string} archetype - Optional archetype name to guide generation
  * @returns {Promise<string>} Generated recipes in importable text format
  */
-export async function generateRecipesWithAI(apiKey, count = 1) {
+export async function generateRecipesWithAI(apiKey, count = 1, archetype = null) {
     if (!apiKey) {
         throw new Error('API Key Gemini mancante nelle impostazioni.');
     }
 
-    // Using Gemini 1.5 Flash - fast and reliable for text generation
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Using Gemini 2.5 Flash - latest model with available free tier quota
+    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+    const archetypePrompt = archetype ? `Le ricette devono essere nello stile "${archetype}". ` : '';
 
     const prompt = `Sei un esperto pizzaiolo gourmet italiano. 
 Genera esattamente ${count} ricette di pizza gourmet originale, creativa e deliziosa.
+${archetypePrompt}NON usare più di 5 ingredienti in totale per ogni pizza (sommando quelli in cottura e quelli post-cottura).
 Ogni ricetta DEVE seguire RIGOROSAMENTE questo formato testuale (senza markdown extra, solo testo pulito):
 
 [Numero]. [Nome Pizza]
+Stile: ${archetype || '[Stile preferito]'}
+Impasto: [tipo di impasto, es. Napoletana Classica, Contemporanea, Integrale, ecc. Default: Napoletana Classica]
 In cottura: [lista ingredienti separati da virgola]
 Post cottura: [lista ingredienti separati da virgola]
 Perché funziona: [una breve frase che spiega l'equilibrio dei sapori]
 
 Esempio:
 1. Sottobosco Incantato
+Stile: Terra e Bosco
+Impasto: Napoletana Classica
 In cottura: fior di latte, funghi porcini freschi, timo selvatico
 Post cottura: carpaccio di tartufo nero, nocciole del Piemonte tostate, fili di peperoncino
 Perché funziona: L'intensità terrosa del tartufo e dei porcini è bilanciata dalla croccantezza delle nocciole e dalla freschezza del timo.

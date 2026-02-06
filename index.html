@@ -251,18 +251,32 @@
             <div class="form-group">
               <label for="recipeTextInput" class="form-label">Incolla il testo delle ricette</label>
               <textarea id="recipeTextInput" class="form-input" rows="10" placeholder="1. Nome Pizza
+Stile: Mare
+Impasto: Napoletana Classica
 In cottura: ingredienti che vanno in forno
 Post-cottura: ingredienti aggiunti a crudo
 Perché funziona: descrizione
 
 2. Altra Pizza
-..." style="font-family: monospace; font-size: 0.9rem;"></textarea>
+Stile: Vegana
+..."></textarea>
               <small class="text-muted" style="display: block; margin-top: 0.5rem;">
-                Formato: ricette numerate con sezioni In cottura, Post-cottura, Perché funziona
+                Formato: ricette numerate con sezioni Stile, Impasto, In cottura, Post-cottura, Perché funziona
               </small>
             </div>
 
             <div class="action-group" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+              <div
+                style="display: flex; align-items: center; gap: 0.5rem; margin-right: 0.5rem; padding: 0.25rem 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; border: 1px solid var(--color-border);">
+                <label for="aiArchetypeSelect"
+                  style="font-size: 0.875rem; color: var(--color-text-secondary); white-space: nowrap;">🎨
+                  Stile:</label>
+                <select id="aiArchetypeSelect" class="form-select"
+                  style="padding: 0.25rem 0.5rem; width: auto; min-width: 120px;">
+                  <option value="">Casuale</option>
+                  <!-- Populated via JS -->
+                </select>
+              </div>
               <div
                 style="display: flex; align-items: center; gap: 0.5rem; margin-right: 0.5rem; padding: 0.25rem 0.75rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; border: 1px solid var(--color-border);">
                 <label for="aiRecipeCount"

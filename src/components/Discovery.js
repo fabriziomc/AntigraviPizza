@@ -4,7 +4,7 @@
 
 import { importRecipeManually, importSampleRecipes } from '../modules/recipeSearch.js';
 import { getToken } from '../modules/auth.js';
-import { DOUGH_TYPES } from '../utils/constants.js';
+import { DOUGH_TYPES, ARCHETYPES } from '../utils/constants.js';
 import { getAllPreparations, getAllIngredients, getUserSettings } from '../modules/database.js';
 // refreshData is available globally via window.refreshData
 import { showToast } from '../utils/helpers.js';
@@ -116,6 +116,9 @@ function setupDiscoveryListeners() {
     if (btnGenerateAIRecipe) {
         btnGenerateAIRecipe.addEventListener('click', handleAIGeneration);
     }
+
+    // Populate AI Archetype Selector
+    populateAIArchetypeSelector();
 }
 
 /**
@@ -575,6 +578,21 @@ window.removeAutoIngredient = function (ingId) {
     }
 };
 
+/**
+ * Populate AI Archetype Selector
+ */
+function populateAIArchetypeSelector() {
+    const selector = document.getElementById('aiArchetypeSelect');
+    if (!selector) return;
+
+    selector.innerHTML = '<option value="">Casuale</option>' +
+        Object.entries(ARCHETYPES).map(([id, data]) => {
+            // Skip 'combinazioni_db' for AI as it's a procedural archetype
+            if (id === 'combinazioni_db') return '';
+            return `<option value="${id}">${data.icon} ${data.label}</option>`;
+        }).join('');
+}
+
 async function handleManualImport(e) {
     e.preventDefault();
 
@@ -657,6 +675,9 @@ async function handleTextImport() {
         resultDiv.style.display = 'block';
         resultDiv.innerHTML = '<p style="color: var(--color-gray-400);">🔍 Parsing ricette...</p>';
 
+        const archetypeSelect = document.getElementById('aiArchetypeSelect');
+        const archetype = archetypeSelect?.value || null;
+
         // Call backend API to parse and import recipes
         const response = await fetch('/api/recipes/import-text', {
             method: 'POST',
@@ -664,7 +685,7 @@ async function handleTextImport() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${getToken()}`
             },
-            body: JSON.stringify({ text })
+            body: JSON.stringify({ text, archetype })
         });
 
         if (!response.ok) {
@@ -721,9 +742,18 @@ async function handleAIGeneration() {
     const btn = document.getElementById('btnGenerateAIRecipe');
     const textInput = document.getElementById('recipeTextInput');
     const countInput = document.getElementById('aiRecipeCount');
+    const archetypeSelect = document.getElementById('aiArchetypeSelect');
     const resultDiv = document.getElementById('importRecipeResult');
 
     const count = parseInt(countInput.value) || 1;
+    const archetypeId = archetypeSelect?.value;
+
+    // Get archetype label for the prompt
+    let archetypeLabel = null;
+    if (archetypeId) {
+        const { ARCHETYPES } = await import('../utils/constants.js');
+        archetypeLabel = ARCHETYPES[archetypeId]?.label;
+    }
 
     try {
         btn.disabled = true;
@@ -746,7 +776,7 @@ async function handleAIGeneration() {
         const { generateRecipesWithAI } = await import('../utils/aiUtils.js');
 
         // Generate recipes
-        const generatedText = await generateRecipesWithAI(apiKey, count);
+        const generatedText = await generateRecipesWithAI(apiKey, count, archetypeLabel);
 
         // Populate textarea
         if (textInput.value.trim()) {

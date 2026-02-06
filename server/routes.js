@@ -5,6 +5,7 @@ import { authenticateToken } from './auth/auth-middleware.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { regenerateRecipeInstructions } from './recipeParser.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -155,8 +156,22 @@ router.post('/recipes/:id/image', async (req, res) => {
 // PATCH recipe (partial update)
 router.patch('/recipes/:id', async (req, res) => {
     try {
-        console.log(`📝 [PATCH /recipes/${req.params.id}] Partial update:`, req.body);
-        const recipe = await dbAdapter.updateRecipe(req.params.id, req.body, req.user.id);
+        let updateData = { ...req.body };
+
+        // Synchronize section-specific arrays if baseIngredients is provided
+        if (req.body.baseIngredients && Array.isArray(req.body.baseIngredients)) {
+            updateData.toppingsDuringBake = req.body.baseIngredients.filter(i => !i.postBake);
+            updateData.toppingsPostBake = req.body.baseIngredients.filter(i => i.postBake);
+        }
+
+        // If dough or components changed, regenerate instructions to be safe
+        if (req.body.dough || req.body.baseIngredients || req.body.preparations) {
+            const currentRecipe = await dbAdapter.getRecipeById(req.params.id, req.user.id);
+            const mergedRecipe = { ...currentRecipe, ...updateData };
+            updateData.instructions = await regenerateRecipeInstructions(mergedRecipe, dbAdapter, req.user.id);
+        }
+
+        const recipe = await dbAdapter.updateRecipe(req.params.id, updateData, req.user.id);
         console.log(`✅ [PATCH /recipes/${req.params.id}] Updated successfully`);
         res.json(recipe);
     } catch (err) {
@@ -214,8 +229,18 @@ router.patch('/recipes/:id/components', async (req, res) => {
 
         // Update recipe with validated components
         const updateData = {};
-        if (baseIngredients) updateData.baseIngredients = baseIngredients;
+        if (baseIngredients) {
+            updateData.baseIngredients = baseIngredients;
+            // Synchronize section-specific arrays
+            updateData.toppingsDuringBake = baseIngredients.filter(i => !i.postBake);
+            updateData.toppingsPostBake = baseIngredients.filter(i => i.postBake);
+        }
         if (preparations) updateData.preparations = preparations;
+
+        // Regenerate instructions based on new components
+        const currentRecipe = await dbAdapter.getRecipeById(req.params.id, userId);
+        const mergedRecipe = { ...currentRecipe, ...updateData };
+        updateData.instructions = await regenerateRecipeInstructions(mergedRecipe, dbAdapter, userId);
 
         const recipe = await dbAdapter.updateRecipe(req.params.id, updateData, userId);
         console.log(`✅ [PATCH /recipes/${req.params.id}/components] Updated successfully`);
@@ -259,13 +284,11 @@ router.post(['/import-recipe', '/recipes/import-text'], async (req, res) => {
             return res.status(400).json({ error: 'recipeText is required and must be a string' });
         }
 
-        // Import parser and service
-        const { parseRecipeFile } = await import('./recipeParser.js');
-        const { importMultipleRecipes } = await import('./recipeImportService.js');
-
         // Parse recipes from text
         console.log('🔍 Parsing recipe text...');
         console.log(`📝 RAW TEXT RECEIVED:\n${recipeText.substring(0, 500)}${recipeText.length > 500 ? '...' : ''}`);
+        const { parseRecipeFile } = await import('./recipeParser.js');
+        const { importMultipleRecipes } = await import('./recipeImportService.js');
         const parsedRecipes = parseRecipeFile(recipeText);
         console.log(`✅ Parsed ${parsedRecipes.length} recipe(s):`, JSON.stringify(parsedRecipes, null, 2));
 
@@ -290,7 +313,8 @@ router.post(['/import-recipe', '/recipes/import-text'], async (req, res) => {
 
         // Import all parsed recipes
         console.log('💾 Importing recipes into database...');
-        const results = await importMultipleRecipes(parsedRecipes, dbAdapter, userId);
+        const archetype = req.body.archetype;
+        const results = await importMultipleRecipes(parsedRecipes, dbAdapter, userId, archetype);
 
         console.log(`✅ Import complete: ${results.success.length} succeeded, ${results.failed.length} failed`);
 
