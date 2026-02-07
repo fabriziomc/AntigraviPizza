@@ -1473,86 +1473,149 @@ function renderPlannerSuggestedChips() {
   `).join('');
 }
 
-window.showPizzaPreviewInPlanner = async function (recipeId) {
-  const [recipe, allPreps] = await Promise.all([
-    getRecipeById(recipeId),
-    getAllPreparations()
-  ]);
+window.showPizzaPreviewInPlanner = async function (recipeId, nightId) {
+  try {
+    const [recipe, night, allPreps, userSettings] = await Promise.all([
+      getRecipeById(recipeId),
+      nightId ? getPizzaNightById(nightId) : Promise.resolve(null),
+      getAllPreparations(),
+      getUserSettings()
+    ]);
 
-  if (!recipe) return;
+    if (!recipe) return;
 
-  const baseIngredients = recipe.baseIngredients || [];
-  const preparations = recipe.preparations || [];
+    // Load full preparation data
+    if (recipe.preparations && recipe.preparations.length > 0) {
+      recipe.preparations = recipe.preparations.map(prep => {
+        const fullPrep = allPreps.find(p => p.id === prep.id);
+        return fullPrep ? { ...fullPrep, ...prep } : prep;
+      });
+    }
 
-  const modalContent = `
-    <div class="modal-header">
-      <h2 class="modal-title">👁️ ${recipe.name}</h2>
-      <button class="modal-close" onclick="window.closePreviewModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div style="margin-bottom: 1rem;">
-        <div style="font-size: 0.875rem; color: var(--color-gray-400);">👨‍🍳 ${recipe.pizzaiolo}</div>
+    // Calculate cooking instructions
+    const maxOvenTemp = parseInt(userSettings?.maxOvenTemp || '250');
+    const doughType = night?.selectedDough || 'default';
+    const cookingInfo = getCookingInstructions(doughType, maxOvenTemp);
+
+    // Grouping logic (reused from Live Mode)
+    const rawIngredients = [
+      ...(recipe.baseIngredients || []),
+      ...(recipe.toppingsDuringBake || []),
+      ...(recipe.ingredients || [])
+    ];
+
+    const mappedIngredients = rawIngredients.map(ing => {
+      const isPostBake = ing.postBake === true || ing.postBake === 1 || ing.postBake === 'true' || ing.postBake === '1';
+      return { ...ing, isPostBake };
+    });
+
+    const postBakeToppings = (recipe.toppingsPostBake || []).map(ing => ({
+      ...ing,
+      isPostBake: true
+    }));
+
+    const allIngredientsList = [...mappedIngredients, ...postBakeToppings];
+
+    // Deduplicate
+    const seenIngredients = new Map();
+    const uniqueIngredients = [];
+    allIngredientsList.forEach(ing => {
+      const name = (ing.name || ing).toString().toLowerCase();
+      if (!seenIngredients.has(name) || (!seenIngredients.get(name).isPostBake && ing.isPostBake)) {
+        if (seenIngredients.has(name)) {
+          const idx = uniqueIngredients.indexOf(seenIngredients.get(name));
+          if (idx > -1) uniqueIngredients.splice(idx, 1);
+        }
+        seenIngredients.set(name, ing);
+        uniqueIngredients.push(ing);
+      }
+    });
+
+    const beforeIngredients = uniqueIngredients.filter(ing => !ing.isPostBake);
+    const afterIngredients = uniqueIngredients.filter(ing => ing.isPostBake);
+
+    const rawPreparations = recipe.preparations || [];
+    const beforePreparations = rawPreparations.filter(p => p.timing !== 'after' && p.timing !== 'post-bake');
+    const afterPreparations = rawPreparations.filter(p => p.timing === 'after' || p.timing === 'post-bake');
+
+    const renderItems = (items, preps) => {
+      if (items.length === 0 && preps.length === 0) return '<p class="text-muted" style="font-size: 0.875rem;">Nessuno</p>';
+
+      let html = '<div style="display: grid; gap: 0.5rem;">';
+      if (items.length > 0) {
+        html += items.map(ing => `
+          <div style="padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 0.5rem; font-size: 0.875rem; border: 1px solid rgba(255,255,255,0.05);">
+            <span style="font-weight: 600;">${ing.name || ing}</span>
+            ${ing.quantity ? `<span style="color: var(--color-gray-400); margin-left: 0.4rem;">(${ing.quantity}${ing.unit || ''})</span>` : ''}
+          </div>
+        `).join('');
+      }
+      if (preps.length > 0) {
+        html += preps.map(p => `
+          <div style="padding: 0.5rem; background: rgba(249, 115, 22, 0.1); border-radius: 0.5rem; font-size: 0.875rem; border: 1px solid rgba(249, 115, 22, 0.2); border-left: 3px solid var(--color-accent);">
+            <span style="font-weight: 600;">🧪 ${p.name || p.id}</span>
+            ${p.prepTime ? `<div style="font-size: 0.75rem; opacity: 0.7; margin-top: 0.2rem;">${p.prepTime}</div>` : ''}
+          </div>
+        `).join('');
+      }
+      html += '</div>';
+      return html;
+    };
+
+    const modalContent = `
+      <div class="modal-header">
+        <h2 class="modal-title">👁️ ${recipe.name}</h2>
+        <button class="modal-close" onclick="${nightId ? `window.viewPizzaNightDetails('${nightId}')` : 'window.closeModal()'}">×</button>
       </div>
-
-      ${recipe.description ? `<p style="margin-bottom: 1.5rem; color: var(--color-gray-300);">${recipe.description}</p>` : ''}
-
-      <div class="recipe-modal-grid">
-        <div>
-          <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--color-primary);">🥗 Ingredienti Base</h3>
-          ${baseIngredients.length > 0 ? `
-            <ul style="list-style: none; padding: 0; margin: 0;">
-              ${baseIngredients.map(ing => `
-                <li style="padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 0.25rem; margin-bottom: 0.25rem; font-size: 0.875rem;">
-                  <span style="font-weight: 600;">${ing.name}</span>
-                  ${ing.quantity && ing.unit ? `<span style="color: var(--color-gray-400); float: right;">${ing.quantity} ${ing.unit}</span>` : ''}
-                </li>
-              `).join('')}
-            </ul>
-          ` : '<p style="color: var(--color-gray-500); font-size: 0.875rem;">Nessun ingrediente</p>'}
+      <div class="modal-body enhanced-preview" style="padding-bottom: 2rem;">
+        <div style="margin-bottom: 1.5rem; border-radius: 0.75rem; overflow: hidden; background: rgba(0,0,0,0.3); min-height: 150px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
+          ${recipe.imageUrl ? `<img src="${recipe.imageUrl}" style="width: 100%; height: auto; max-height: 250px; object-fit: cover;">` : '<span style="font-size: 3rem; opacity: 0.2;">📸</span>'}
         </div>
 
-        <div>
-          <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--color-accent);">🥫 Preparazioni</h3>
-          ${preparations.length > 0 ? `
-            <ul style="list-style: none; padding: 0; margin: 0;">
-              ${preparations.map(prep => {
-    const prepData = allPreps.find(p => p.id === prep.id);
-    return prepData ? `
-                  <li style="padding: 0.5rem; background: rgba(249, 115, 22, 0.1); border-radius: 0.25rem; margin-bottom: 0.25rem; font-size: 0.875rem; border-left: 3px solid var(--color-accent);">
-                    <span style="font-weight: 600;">${prepData.name}</span>
-                    <div style="font-size: 0.75rem; color: var(--color-gray-400); margin-top: 0.25rem;">
-                      ${prepData.category} • ${prepData.prepTime}
-                    </div>
-                  </li>
-                ` : '';
-  }).join('')}
-            </ul>
-          ` : '<p style="color: var(--color-gray-500); font-size: 0.875rem;">Nessuna preparazione</p>'}
-        </div>
-      </div>
+        <div style="display: grid; gap: 1.5rem;">
+          <div class="preview-section">
+            <h3 style="color: var(--color-primary-light); font-size: 1.1rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span>🔥</span> Prima cottura
+            </h3>
+            <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.05);">
+              ${renderItems(beforeIngredients, beforePreparations)}
+            </div>
+          </div>
 
-      ${recipe.tags && recipe.tags.length > 0 ? `
-        <div style="margin-top: 1.5rem;">
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+          <div class="preview-section">
+            <h3 style="color: #f59e0b; font-size: 1.1rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span>♨️</span> Cottura
+            </h3>
+            <div style="background: rgba(245, 158, 11, 0.1); padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(245, 158, 11, 0.2);">
+               <p style="font-weight: 600; font-size: 1rem; color: white; margin: 0;">${cookingInfo.formatted}</p>
+               <p style="font-size: 0.8rem; margin-top: 0.4rem; opacity: 0.8;">(Calcolata per ${night?.selectedDough ? `impasto ${night.selectedDough}` : 'impasto base'})</p>
+            </div>
+          </div>
+
+          <div class="preview-section">
+            <h3 style="color: var(--color-accent-light); font-size: 1.1rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span>✨</span> Dopo cottura
+            </h3>
+            <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.05);">
+              ${renderItems(afterIngredients, afterPreparations)}
+            </div>
           </div>
         </div>
-      ` : ''}
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="window.closePreviewModal()">Chiudi</button>
-    </div>
-  `;
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="${nightId ? `window.viewPizzaNightDetails('${nightId}')` : 'window.closeModal()'}">
+          ${nightId ? 'Torna alla Serata' : 'Chiudi'}
+        </button>
+      </div>
+    `;
 
-  // Use secondary modal for preview
-  const previewBackdrop = document.getElementById('previewModalBackdrop');
-  const previewContent = document.getElementById('previewModalContent');
+    openModal(modalContent);
 
-  if (previewContent && previewBackdrop) {
-    previewContent.innerHTML = modalContent;
-    previewBackdrop.classList.add('active');
+  } catch (error) {
+    console.error('Error in enhanced preview:', error);
+    showToast('Errore nel caricamento dell\'anteprima', 'error');
   }
-}
+};
 
 // Helper function to close preview modal (secondary modal)
 window.closePreviewModal = function () {
@@ -2239,7 +2302,7 @@ async function viewPizzaNightDetails(nightId) {
                     <div>
                         <span style="font-weight: 500;">${pizza.recipeName}</span>
                         <button 
-                          onclick="window.showPizzaPreviewInPlanner('${pizza.recipeId}')" 
+                          onclick="window.showPizzaPreviewInPlanner('${pizza.recipeId}', '${nightId}')" 
                           style="background: none; border: none; cursor: pointer; font-size: 1rem; padding: 2px; margin-left: 5px; opacity: 0.7;"
                           title="Vedi ingredienti"
                         >👁️</button>
