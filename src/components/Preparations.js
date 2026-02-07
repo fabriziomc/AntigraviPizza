@@ -793,7 +793,7 @@ async function showPreparationModal(prepId, returnAction = null) {
     </div>
     
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="window.closeModal()">
+      <button class="btn btn-secondary" onclick="${returnAction ? `${returnAction}` : 'window.closeModal()'}">
         Chiudi
       </button>
       <button class="btn ${pizzaCount > 0 ? 'btn-accent' : 'btn-ghost'}" onclick="window.closeModal(); window.showPizzasUsingPreparationGlobal('${prep.id}', '${prep.name.replace(/'/g, "\\'")}')" style="position: relative;">
