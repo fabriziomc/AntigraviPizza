@@ -2,7 +2,7 @@
 // PREPARATIONS COMPONENT
 // ============================================
 
-import { getAllPreparations, createPreparation, updatePreparation, deletePreparation, getAllIngredients, getAllRecipes } from '../modules/database.js';
+import { getAllPreparations, createPreparation, updatePreparation, deletePreparation, getAllIngredients, getAllRecipes, getPreparationById } from '../modules/database.js';
 import { PREPARATION_CATEGORIES } from '../utils/constants.js';
 import { showToast } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
@@ -251,7 +251,17 @@ async function showPreparationForm(prepId = null) {
 
   if (isEdit) {
     prep = currentPreparations.find(p => p.id === prepId);
-    if (!prep) return;
+    if (!prep) {
+      try {
+        prep = await getPreparationById(prepId);
+      } catch (err) {
+        console.error('Error fetching preparation by ID:', err);
+      }
+    }
+    if (!prep) {
+      showToast('Preparazione non trovata', 'error');
+      return;
+    }
   }
 
   const modalContent = `
@@ -678,8 +688,20 @@ async function showPizzasUsingPreparation(prepId, prepName) {
  * Show preparation modal (read-only view)
  */
 async function showPreparationModal(prepId) {
-  const prep = currentPreparations.find(p => p.id === prepId);
-  if (!prep) return;
+  let prep = currentPreparations.find(p => p.id === prepId);
+
+  if (!prep) {
+    try {
+      prep = await getPreparationById(prepId);
+    } catch (err) {
+      console.error('Error fetching preparation by ID:', err);
+    }
+  }
+
+  if (!prep) {
+    showToast('Preparazione non trovata', 'error');
+    return;
+  }
 
   // Count pizzas using this preparation
   const pizzasUsing = await getPizzasUsingPreparation(prepId);
