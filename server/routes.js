@@ -1870,8 +1870,17 @@ router.post('/ai/service-order', async (req, res) => {
                 ...(p.toppingsDuringBake || []),
                 ...(p.toppingsPostBake || [])
             ].map(ing => ing.name).join(', ');
-            return `${i + 1}. ${p.name}: ${ingredients}`;
+
+            // Add preparations to the description
+            const preparations = (p.preparations || []).map(prep => prep.name).join(', ');
+
+            // Combine ingredients and preparations, filtering out empty strings
+            const allComponents = [ingredients, preparations].filter(Boolean).join(', ');
+
+            return `${i + 1}. ${p.name}: ${allComponents}`;
         }).join('\n');
+
+        console.log('📝 [AI PROMPT GENERATED] Pizza List Description:', pizzaListDescription);
 
         const prompt = `Sei un esperto sommelier di pizza e maestro pizzaiolo gourmet.
 Data la seguente lista di pizze selezionate per una serata, proponi un "Ordine di Servizio" (tasting menu) ottimale.
