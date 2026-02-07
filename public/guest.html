@@ -410,6 +410,32 @@
                 font-size: 1.25rem;
             }
         }
+
+        /* Service Order Styles */
+        .service-order-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #fffbeb;
+            border: 2px dashed #f59e0b;
+            border-radius: 12px;
+            color: #7c2d12;
+            font-style: italic;
+            line-height: 1.6;
+            text-align: left;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .service-order-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #d97706;
+        }
     </style>
 </head>
 
@@ -431,6 +457,9 @@
             <div id="pizzaList" class="pizza-list">
                 <div class="loading-spinner">🍕 Caricamento...</div>
             </div>
+
+            <!-- Service Order Container -->
+            <div id="serviceOrderContainer" class="service-order-container" style="display: none;"></div>
         </div>
     </div>
 
@@ -716,6 +745,20 @@
                         </div>
                     `;
                 }).join('');
+
+                // Render Service Order if available
+                const serviceOrderContainer = document.getElementById('serviceOrderContainer');
+                if (pizzaNight.serviceOrder) {
+                    serviceOrderContainer.style.display = 'block';
+                    // Convert newlines to <br> for proper formatting
+                    const formattedOrder = pizzaNight.serviceOrder.replace(/\n/g, '<br>');
+                    serviceOrderContainer.innerHTML = `
+                        <div class="service-order-title">👨‍🍳 L'Ordine di Servizio del Maestro</div>
+                        ${formattedOrder}
+                    `;
+                } else {
+                    serviceOrderContainer.style.display = 'none';
+                }
 
             } catch (error) {
                 console.error('Error loading menu:', error);
