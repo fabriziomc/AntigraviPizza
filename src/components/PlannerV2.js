@@ -2564,70 +2564,98 @@ window.deletePizzaFromNight = async function (nightId, index) {
 async function viewPizzaNightPreparations(nightId) {
   closeModal();
 
-  // Get pizza night data
-  const night = await getPizzaNightById(nightId);
-  if (!night) return;
-
   try {
-    const { getRecipeById, getAllPreparations } = await import('../modules/database.js');
+    const [night, allPrepsData] = await Promise.all([
+      getPizzaNightById(nightId),
+      getAllPreparations()
+    ]);
+
+    if (!night) return;
 
     // Resolve all recipes to collect preparations
     const recipes = await Promise.all(
       night.selectedPizzas.map(item => getRecipeById(item.recipeId))
     );
 
-    // Collect unique preparation IDs
-    const prepIds = new Set();
+    // Collect unique preparations with their resolved data
+    const resolvedPrepsMap = new Map();
+
     recipes.forEach(recipe => {
-      if (recipe.preparations) {
-        recipe.preparations.forEach(p => prepIds.add(p.id));
-      }
+      if (!recipe || !recipe.preparations) return;
+
+      recipe.preparations.forEach(prepRef => {
+        const prepId = typeof prepRef === 'string' ? prepRef : (prepRef.id || prepRef.preparationId);
+        if (!prepId) return;
+
+        if (!resolvedPrepsMap.has(prepId)) {
+          const fullPrep = allPrepsData.find(p => p.id === prepId);
+          if (fullPrep) {
+            resolvedPrepsMap.set(prepId, fullPrep);
+          } else {
+            // Fallback for missing database entry
+            resolvedPrepsMap.set(prepId, {
+              name: typeof prepRef === 'object' ? (prepRef.name || prepId) : prepId,
+              ingredients: [],
+              instructions: 'Dettagli non disponibili nel database.',
+              category: 'Vari'
+            });
+          }
+        }
+      });
     });
 
-    if (prepIds.size === 0) {
+    if (resolvedPrepsMap.size === 0) {
       showToast('Nessuna preparazione richiesta per questa serata');
       viewPizzaNightDetails(nightId);
       return;
     }
 
-    // Get all preparations details
-    const allPrepsData = await getAllPreparations();
-    const nightPreps = allPrepsData.filter(p => prepIds.has(p.id));
+    const nightPreps = Array.from(resolvedPrepsMap.values());
 
     // Build modal HTML
     let prepsHTML = nightPreps.map(prep => `
-      <div style="background: rgba(255,255,255,0.05); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--color-accent-light);">
-        <h3 style="color: var(--color-accent-light); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
-          <span>🧪</span> ${prep.name}
-        </h3>
+      <div style="background: rgba(255,255,255,0.05); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--color-accent-light); border-top: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+          <h3 style="color: var(--color-accent-light); margin: 0; display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem;">
+            <span>🧪</span> ${prep.name}
+          </h3>
+          ${prep.category ? `<span class="tag-sm" style="background: rgba(249, 115, 22, 0.2); color: var(--color-accent-light); border: 1px solid rgba(249, 115, 22, 0.3);">${prep.category}</span>` : ''}
+        </div>
         
-        <div style="margin-bottom: 1rem;">
-          <h4 style="font-size: 0.875rem; color: var(--color-gray-400); margin-bottom: 0.5rem; text-transform: uppercase;">Ingredienti</h4>
-          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-            ${prep.ingredients.map(ing => `
-              <span style="background: rgba(255,255,255,0.1); padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.8125rem;">
-                ${ing.name}: ${ing.quantity}${ing.unit}
-              </span>
-            `).join('')}
+        ${prep.ingredients && prep.ingredients.length > 0 ? `
+          <div style="margin-bottom: 1.25rem;">
+            <h4 style="font-size: 0.75rem; color: var(--color-gray-400); margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Ingredienti necessari</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+              ${prep.ingredients.map(ing => `
+                <span style="background: rgba(255,255,255,0.08); padding: 0.35rem 0.85rem; border-radius: 2rem; font-size: 0.875rem; border: 1px solid rgba(255,255,255,0.05); color: var(--color-gray-200);">
+                  <span style="font-weight: 600;">${ing.name}</span>${ing.quantity ? `: ${ing.quantity}${ing.unit || ''}` : ''}
+                </span>
+              `).join('')}
+            </div>
           </div>
-        </div>
+        ` : ''}
         
-        <div>
-          <h4 style="font-size: 0.875rem; color: var(--color-gray-400); margin-bottom: 0.5rem; text-transform: uppercase;">Procedimento</h4>
-          <p style="white-space: pre-wrap; line-height: 1.6;">${prep.instructions}</p>
-        </div>
+        ${prep.instructions ? `
+          <div style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.03);">
+            <h4 style="font-size: 0.75rem; color: var(--color-gray-400); margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Procedimento</h4>
+            <div style="white-space: pre-wrap; line-height: 1.6; color: var(--color-gray-200); font-size: 0.9375rem;">${prep.instructions}</div>
+          </div>
+        ` : ''}
       </div>
     `).join('');
 
     const modalContent = `
       <div class="modal-header">
-        <h2>🧪 Preparazioni - ${night.name}</h2>
+        <h2 class="modal-title">🧪 Preparazioni - ${night.name}</h2>
         <button class="modal-close" onclick="window.viewPizzaNightDetails('${nightId}')">×</button>
       </div>
-      <div class="modal-body">
-        <p style="color: var(--color-gray-300); margin-bottom: 1.5rem;">
-          Queste sono le preparazioni necessarie per le pizze selezionate (topping e salse speciali).
-        </p>
+      <div class="modal-body" style="padding-bottom: 2rem;">
+        <div style="padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 0.75rem; border: 1px solid rgba(99, 102, 241, 0.2); margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: flex-start;">
+          <span style="font-size: 1.25rem;">💡</span>
+          <p style="color: var(--color-gray-200); margin: 0; font-size: 0.875rem; line-height: 1.5;">
+            Queste sono tutte le preparazioni anticipate (topping cucinati, salse, creme) richieste per le pizze previste stasera.
+          </p>
+        </div>
         <div class="preparations-list">
           ${prepsHTML}
         </div>
