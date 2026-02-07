@@ -1887,7 +1887,9 @@ Per ogni pizza nella sequenza proposta:
 
 Formatta la risposta come una lista numerata chiara. Usa un linguaggio naturale, senza markdown eccessivo o grassetti inutili. Rispondi in Italiano.`;
 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        // Use Gemini 1.5 Flash which has a generous free tier
+        // (gemini-2.0-flash-exp causes quota issues for some users)
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
         const response = await fetch(apiUrl, {
             method: 'POST',
