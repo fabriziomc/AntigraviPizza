@@ -623,9 +623,17 @@ async function deletePreparationAction(prepId) {
 async function getPizzasUsingPreparation(prepId) {
   const allRecipes = await getAllRecipes();
 
+  // Normalize prepId for comparison
+  const targetId = String(prepId);
+
   const pizzasUsing = allRecipes.filter(recipe => {
     if (!recipe.preparations || recipe.preparations.length === 0) return false;
-    return recipe.preparations.some(p => p.id === prepId);
+
+    return recipe.preparations.some(p => {
+      // Handle different formats: string, {id}, {preparationId}, {preparationName}
+      const pId = typeof p === 'string' ? p : (p.id || p.preparationId || p.preparationName);
+      return String(pId) === targetId;
+    });
   });
 
   return pizzasUsing;
