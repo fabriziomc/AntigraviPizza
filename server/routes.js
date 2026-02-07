@@ -1880,8 +1880,6 @@ router.post('/ai/service-order', async (req, res) => {
             return `${i + 1}. ${p.name}: ${allComponents}`;
         }).join('\n');
 
-        console.log('📝 [AI PROMPT GENERATED] Pizza List Description:', pizzaListDescription);
-
         const prompt = `Sei un esperto sommelier di pizza e maestro pizzaiolo gourmet.
 Data la seguente lista di pizze selezionate per una serata, proponi un "Ordine di Servizio" (tasting menu) ottimale.
 L'obiettivo è creare una progressione sensoriale logica, partendo solitamente dai sapori più delicati e freschi per arrivare a quelli più complessi, intensi, sapidi o piccanti.
@@ -1919,9 +1917,6 @@ Formatta la risposta come una lista numerata chiara. Usa un linguaggio naturale,
         }
 
         const data = await response.json();
-        // Console log for debugging truncation
-        console.log('🤖 [GEMINI DEBUG] Full Response:', JSON.stringify(data, null, 2));
-
         const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (!generatedText) {
