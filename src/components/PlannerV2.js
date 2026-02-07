@@ -2620,7 +2620,7 @@ async function viewPizzaNightPreparations(nightId) {
             <span>🧪</span> ${prep.name}
           </h3>
           <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
-            <button class="btn btn-ghost btn-sm" onclick="window.viewPreparationRecipe('${prep.id}')" title="Vedi Ricetta Completa" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.1); white-space: nowrap;">
+            <button class="btn btn-ghost btn-sm" onclick="window.viewPreparationRecipe('${prep.id}', 'window.viewPizzaNightPreparations(\\'${nightId}\\')')" title="Vedi Ricetta Completa" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.1); white-space: nowrap;">
               <span>📖</span> Ricetta
             </button>
             ${prep.category ? `<span class="tag-sm" style="background: rgba(249, 115, 22, 0.2); color: var(--color-accent-light); border: 1px solid rgba(249, 115, 22, 0.3); white-space: nowrap; flex-shrink: 0;">${prep.category}</span>` : ''}

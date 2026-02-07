@@ -695,7 +695,7 @@ async function showPizzasUsingPreparation(prepId, prepName) {
 /**
  * Show preparation modal (read-only view)
  */
-async function showPreparationModal(prepId) {
+async function showPreparationModal(prepId, returnAction = null) {
   let prep = currentPreparations.find(p => p.id === prepId);
 
   if (!prep) {
@@ -718,7 +718,7 @@ async function showPreparationModal(prepId) {
   const modalContent = `
     <div class="modal-header">
       <h2 class="modal-title">${prep.name}</h2>
-      <button class="modal-close" onclick="window.closeModal()">×</button>
+      <button class="modal-close" onclick="${returnAction ? `${returnAction}` : 'window.closeModal()'}">×</button>
     </div>
     
     <div class="modal-body">
