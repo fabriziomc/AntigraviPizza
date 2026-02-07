@@ -1473,7 +1473,7 @@ function renderPlannerSuggestedChips() {
   `).join('');
 }
 
-async function showPizzaPreviewInPlanner(recipeId) {
+window.showPizzaPreviewInPlanner = async function (recipeId) {
   const recipe = await getRecipeById(recipeId);
   if (!recipe) return;
 
@@ -2234,6 +2234,11 @@ async function viewPizzaNightDetails(nightId) {
                     </button>
                     <div>
                         <span style="font-weight: 500;">${pizza.recipeName}</span>
+                        <button 
+                          onclick="window.showPizzaPreviewInPlanner('${pizza.recipeId}')" 
+                          style="background: none; border: none; cursor: pointer; font-size: 1rem; padding: 2px; margin-left: 5px; opacity: 0.7;"
+                          title="Vedi ingredienti"
+                        >👁️</button>
                         ${pizza.ratings && pizza.ratings.length > 0 ? `
                             <span title="${pizza.ratings.length} voti" style="font-size: 0.75rem; background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold;">
                                 ⭐ ${(pizza.ratings.reduce((a, b) => a + b, 0) / pizza.ratings.length).toFixed(1)}
