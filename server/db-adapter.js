@@ -1060,15 +1060,31 @@ class DatabaseAdapter {
 
     async getPreparationById(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Preparations WHERE id = ? AND (userId = ? OR userId IS NULL)');
-            const prep = this.parsePreparation(stmt.get(id, userId));
+            let sql = 'SELECT * FROM Preparations WHERE id = ?';
+            const params = [id];
+
+            if (userId) {
+                sql += ' AND (userId = ? OR userId IS NULL)';
+                params.push(userId);
+            }
+
+            const stmt = this.db.prepare(sql);
+            const prep = this.parsePreparation(stmt.get(...params));
             if (prep) {
                 prep.ingredients = await this.expandIngredients(prep.ingredients, userId);
             }
             return prep;
         } else {
             // Turso
-            const result = await this.db.execute({ sql: 'SELECT * FROM Preparations WHERE id = ? AND (userId = ? OR userId IS NULL)', args: [id, userId] });
+            let sql = 'SELECT * FROM Preparations WHERE id = ?';
+            const args = [id];
+
+            if (userId) {
+                sql += ' AND (userId = ? OR userId IS NULL)';
+                args.push(userId);
+            }
+
+            const result = await this.db.execute({ sql, args });
             const prep = this.parsePreparation(result.rows[0]);
             if (prep) {
                 prep.ingredients = await this.expandIngredients(prep.ingredients, userId);
@@ -1298,11 +1314,27 @@ class DatabaseAdapter {
 
     async getIngredientById(id, userId) {
         if (this.isSQLite) {
-            const stmt = this.db.prepare('SELECT * FROM Ingredients WHERE id = ? AND (userId = ? OR userId IS NULL)');
-            return this.parseIngredient(stmt.get(id, userId));
+            let sql = 'SELECT * FROM Ingredients WHERE id = ?';
+            const params = [id];
+
+            if (userId) {
+                sql += ' AND (userId = ? OR userId IS NULL)';
+                params.push(userId);
+            }
+
+            const stmt = this.db.prepare(sql);
+            return this.parseIngredient(stmt.get(...params));
         } else {
             // Turso
-            const result = await this.db.execute({ sql: 'SELECT * FROM Ingredients WHERE id = ? AND (userId = ? OR userId IS NULL)', args: [id, userId] });
+            let sql = 'SELECT * FROM Ingredients WHERE id = ?';
+            const args = [id];
+
+            if (userId) {
+                sql += ' AND (userId = ? OR userId IS NULL)';
+                args.push(userId);
+            }
+
+            const result = await this.db.execute({ sql, args });
             return this.parseIngredient(result.rows[0]);
         }
     }
