@@ -1895,7 +1895,12 @@ Formatta la risposta come una lista numerata chiara. Usa un linguaggio naturale,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+                generationConfig: {
+                    temperature: 0.8,
+                    topP: 0.95,
+                    topK: 40,
+                    maxOutputTokens: 8192
+                }
             })
         });
 
@@ -1905,6 +1910,9 @@ Formatta la risposta come una lista numerata chiara. Usa un linguaggio naturale,
         }
 
         const data = await response.json();
+        // Console log for debugging truncation
+        console.log('🤖 [GEMINI DEBUG] Full Response:', JSON.stringify(data, null, 2));
+
         const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (!generatedText) {
