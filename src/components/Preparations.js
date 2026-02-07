@@ -847,3 +847,4 @@ window.showPizzasUsingPreparationGlobal = showPizzasUsingPreparation;
 window.linkGzGlobal = linkGz;
 window.unlinkGzGlobal = unlinkGz;
 window.editLinkGzGlobal = editLinkGz;
+window.viewPreparationRecipe = showPreparationModal;

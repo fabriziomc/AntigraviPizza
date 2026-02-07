@@ -2619,7 +2619,12 @@ async function viewPizzaNightPreparations(nightId) {
           <h3 style="color: var(--color-accent-light); margin: 0; display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem;">
             <span>🧪</span> ${prep.name}
           </h3>
-          ${prep.category ? `<span class="tag-sm" style="background: rgba(249, 115, 22, 0.2); color: var(--color-accent-light); border: 1px solid rgba(249, 115, 22, 0.3);">${prep.category}</span>` : ''}
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button class="btn btn-ghost btn-sm" onclick="window.viewPreparationRecipe('${prep.id}')" title="Vedi Ricetta Completa" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.1);">
+              <span>📖</span> Ricetta
+            </button>
+            ${prep.category ? `<span class="tag-sm" style="background: rgba(249, 115, 22, 0.2); color: var(--color-accent-light); border: 1px solid rgba(249, 115, 22, 0.3);">${prep.category}</span>` : ''}
+          </div>
         </div>
         
         ${prep.ingredients && prep.ingredients.length > 0 ? `
