@@ -2,7 +2,7 @@
 // PLANNER COMPONENT
 // ============================================
 
-import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, updatePizzaNight, getAllRecipes, getAllGuests, addGuest, updateGuest, deleteGuest, getRecipeById, getPizzaNightById, getUserSettings } from '../modules/database.js';
+import { getAllPizzaNights, createPizzaNight, deletePizzaNight, completePizzaNight, updatePizzaNight, getAllRecipes, getAllGuests, addGuest, updateGuest, deleteGuest, getRecipeById, getPizzaNightById, getUserSettings, getAllPreparations } from '../modules/database.js';
 import { formatDate, formatDateForInput, getNextSaturdayEvening, confirm, formatQuantity, showToast } from '../utils/helpers.js';
 import { openModal, closeModal } from '../modules/ui.js';
 import { getUser } from '../modules/auth.js';
@@ -1474,7 +1474,11 @@ function renderPlannerSuggestedChips() {
 }
 
 window.showPizzaPreviewInPlanner = async function (recipeId) {
-  const recipe = await getRecipeById(recipeId);
+  const [recipe, allPreps] = await Promise.all([
+    getRecipeById(recipeId),
+    getAllPreparations()
+  ]);
+
   if (!recipe) return;
 
   const baseIngredients = recipe.baseIngredients || [];
@@ -1512,7 +1516,7 @@ window.showPizzaPreviewInPlanner = async function (recipeId) {
           ${preparations.length > 0 ? `
             <ul style="list-style: none; padding: 0; margin: 0;">
               ${preparations.map(prep => {
-    const prepData = PREPARATIONS.find(p => p.id === prep.id);
+    const prepData = allPreps.find(p => p.id === prep.id);
     return prepData ? `
                   <li style="padding: 0.5rem; background: rgba(249, 115, 22, 0.1); border-radius: 0.25rem; margin-bottom: 0.25rem; font-size: 0.875rem; border-left: 3px solid var(--color-accent);">
                     <span style="font-weight: 600;">${prepData.name}</span>
