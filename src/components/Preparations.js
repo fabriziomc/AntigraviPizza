@@ -754,10 +754,20 @@ async function showPreparationModal(prepId) {
             `).join('')}
           </ol>
         </div>
-        ` : prep.description ? `
+        ` : ''}
+
+        <!-- Recipe Link / Description fallback -->
+        ${(prep.recipeUrl || (prep.description && prep.description.startsWith('http'))) ? `
         <div class="preparation-section">
-          <h3 class="section-title">📝 Ricetta</h3>
-          <p>${prep.description.startsWith('http') ? `<a href="${prep.description}" target="_blank" rel="noopener">Vedi ricetta completa →</a>` : prep.description}</p>
+          <h3 class="section-title">📝 Ricetta Esterna</h3>
+          <p><a href="${prep.recipeUrl || prep.description}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #ffc107; border: 1px solid rgba(255,193,7,0.3); padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none;">
+            <span>🥡</span> Vedi ricetta completa →
+          </a></p>
+        </div>
+        ` : (prep.instructions && prep.instructions.length > 0) ? '' : prep.description ? `
+        <div class="preparation-section">
+          <h3 class="section-title">📝 Note</h3>
+          <p style="white-space: pre-wrap; color: var(--color-gray-200); line-height: 1.6;">${prep.description}</p>
         </div>
         ` : ''}
       </div>
