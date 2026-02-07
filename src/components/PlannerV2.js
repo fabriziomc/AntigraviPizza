@@ -325,8 +325,13 @@ async function showNewPizzaNightModal() {
         </div>
         
         <div class="form-group">
-          <label class="form-label">Note</label>
-          <textarea class="form-textarea" name="notes" placeholder="Note aggiuntive..."></textarea>
+          <label class="form-label">Note / Descrizione Libera</label>
+          <textarea class="form-textarea" name="notes" placeholder="Note aggiuntive o descrizione della serata..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Ordine di Servizio (AI o Manuale)</label>
+          <textarea class="form-textarea" name="serviceOrder" id="newNightServiceOrder" placeholder="L'ordine delle pizze e i motivi della scelta..."></textarea>
         </div>
       </form>
     </div>
@@ -2123,7 +2128,8 @@ async function submitNewPizzaNight() {
     selectedDough: formData.get('selectedDough'), // NUOVO: impasto scelto per la serata
     selectedPizzas,
     selectedGuests,
-    notes: formData.get('notes') || ''
+    notes: formData.get('notes') || '',
+    serviceOrder: formData.get('serviceOrder') || ''
   };
 
   console.log('💾 Saving pizza night with data:', nightData);
@@ -2373,6 +2379,31 @@ async function viewPizzaNightDetails(nightId) {
             <p>${night.notes}</p>
           </div>
         ` : ''}
+
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <h4 style="color: var(--color-accent-light); margin: 0;">📋 Ordine di Servizio</h4>
+              <button 
+                onclick="window.generateServiceOrder('${night.id}')" 
+                class="btn btn-sm btn-ghost" 
+                style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.1);"
+                id="btnAiServiceOrder"
+                title="Suggerimento AI"
+              >
+                <span>✨ AI</span>
+              </button>
+            </div>
+            <textarea 
+              id="serviceOrderTextarea"
+              class="form-textarea" 
+              style="min-height: 120px; font-size: 0.875rem; padding: 0.75rem; background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1);"
+              onchange="window.saveServiceOrder('${night.id}', this.value)"
+              placeholder="Scegli l'ordine di servizio o clicca su AI per un suggerimento..."
+            >${night.serviceOrder || ''}</textarea>
+            <div id="aiLoadingIndicator" style="display: none; font-size: 0.75rem; color: var(--color-primary-light); margin-top: 0.5rem;">
+                <span class="spinner-sm"></span> Elaborazione proposta di degustazione...
+            </div>
+          </div>
 
           <div>
             <h4 style="color: var(--color-accent-light); margin-bottom: 0.5rem;">📊 Stato</h4>
@@ -3832,6 +3863,82 @@ window.showAddOnePizzaModal = async function (nightId) {
       };
     }
   }, 100);
+};
+
+// ============================================
+// AI SERVICE ORDER LOGIC
+// ============================================
+
+window.generateServiceOrder = async function (nightId) {
+  const btn = document.getElementById('btnAiServiceOrder');
+  const indicator = document.getElementById('aiLoadingIndicator');
+  const textarea = document.getElementById('serviceOrderTextarea');
+
+  if (!btn || !indicator || !textarea) return;
+
+  // Show loading state
+  btn.disabled = true;
+  indicator.style.display = 'block';
+
+  try {
+    const db = await import('../modules/database.js');
+    const auth = await import('../modules/auth.js');
+
+    const night = await db.getPizzaNightById(nightId);
+    if (!night || !night.selectedPizzas || night.selectedPizzas.length === 0) {
+      showToast('⚠️ Seleziona almeno una pizza per generare l\'ordine di servizio.', 'warning');
+      return;
+    }
+
+    // Fetch recipes for details (ingredients)
+    const recipes = await db.getAllRecipes();
+    const pizzaDetails = night.selectedPizzas.map(p => {
+      const recipe = recipes.find(r => r.id === p.recipeId);
+      return recipe || { name: p.recipeName, baseIngredients: [] };
+    });
+
+    const token = auth.getToken();
+    const response = await fetch('/api/ai/service-order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ pizzas: pizzaDetails })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || 'Errore nella generazione');
+    }
+
+    const data = await response.json();
+
+    // Update UI
+    textarea.value = data.serviceOrder;
+
+    // Save to database
+    await db.updatePizzaNight(nightId, { serviceOrder: data.serviceOrder });
+
+    showToast('✨ Ordine di servizio suggerito dall\'AI!', 'success');
+  } catch (error) {
+    console.error('Failed to generate service order:', error);
+    showToast('❌ Errore AI: ' + error.message, 'error');
+  } finally {
+    btn.disabled = false;
+    indicator.style.display = 'none';
+  }
+};
+
+window.saveServiceOrder = async function (nightId, value) {
+  try {
+    const db = await import('../modules/database.js');
+    await db.updatePizzaNight(nightId, { serviceOrder: value });
+    console.log('✅ Service order updated manually');
+  } catch (error) {
+    console.error('Failed to save service order:', error);
+    showToast('❌ Errore nel salvataggio dell\'ordine', 'error');
+  }
 };
 
 window.addPizzaToNightAction = async function (nightId, recipeId, quantity) {

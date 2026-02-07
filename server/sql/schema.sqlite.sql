@@ -32,8 +32,12 @@ CREATE TABLE IF NOT EXISTS PizzaNights (
     selectedPizzas TEXT, -- JSON
     selectedGuests TEXT, -- JSON
     notes TEXT,
+    serviceOrder TEXT, -- NEW: AI generated service order
     status TEXT DEFAULT 'planned',
-    createdAt INTEGER
+    createdAt INTEGER,
+    imageUrl TEXT,
+    userId TEXT,
+    isVotingOpen INTEGER DEFAULT 0
 );
 
 -- Guests Table

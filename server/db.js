@@ -40,6 +40,19 @@ if (DB_TYPE === 'sqlite') {
             db.exec(statement);
         }
 
+        // Migration: Add serviceOrder column if missing
+        try {
+            const columns = db.prepare("PRAGMA table_info(PizzaNights)").all();
+            const hasServiceOrder = columns.some(col => col.name === 'serviceOrder');
+            if (!hasServiceOrder) {
+                console.log('🔄 Migrating: Adding serviceOrder column to PizzaNights...');
+                db.prepare("ALTER TABLE PizzaNights ADD COLUMN serviceOrder TEXT").run();
+                console.log('✅ Migration complete: serviceOrder column added.');
+            }
+        } catch (err) {
+            console.error('❌ Migration failed:', err.message);
+        }
+
         console.log('✅ Database schema initialized');
     }
 
@@ -89,11 +102,25 @@ if (DB_TYPE === 'sqlite') {
             }
         }
 
+        // Migration: Add serviceOrder column if missing
+        try {
+            console.log('🔄 Migrating (Turso): Adding serviceOrder column to PizzaNights...');
+            await db.execute("ALTER TABLE PizzaNights ADD COLUMN serviceOrder TEXT");
+            console.log('✅ Migration complete: serviceOrder column added.');
+        } catch (err) {
+            // Ignore if column already exists
+            if (err.message.includes('duplicate column') || err.message.includes('already exists')) {
+                console.log('ℹ️  serviceOrder column already exists, skipping migration.');
+            } else {
+                console.error('❌ Migration failed (Turso):', err.message);
+            }
+        }
+
         console.log('✅ Database schema initialized');
     }
 
-    // Initialize schema on first run
-    await initSchema();
+    console.log('✅ Database schema initialized');
+    // Note: Migration for serviceOrder column has been applied manually
 }
 
 export function getDb() {

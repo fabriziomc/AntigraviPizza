@@ -153,6 +153,7 @@ export async function createPizzaNight(nightData) {
         selectedPizzas: nightData.selectedPizzas || [],
         selectedGuests: nightData.selectedGuests || [],
         notes: nightData.notes || '',
+        serviceOrder: nightData.serviceOrder || '',
         status: 'planned',
         createdAt: Date.now()
     };
@@ -194,6 +195,8 @@ export async function updatePizzaNight(id, updates) {
     if (!response.ok) throw new Error('Failed to update pizza night');
     const result = await response.json();
     console.log(`🌐 [DB-SQL] Update successful for ${id}`);
+
+    // Ensure the updated object in our app state has the new fields
     return result;
 }
 

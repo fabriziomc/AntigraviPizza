@@ -1831,4 +1831,90 @@ router.post('/bring/add', async (req, res) => {
 
 
 
+// ==========================================
+// AI ASSISTANT
+// ==========================================
+
+// POST /ai/service-order - Generate a recommended tasting sequence
+router.post('/ai/service-order', async (req, res) => {
+    try {
+        const { pizzas } = req.body;
+        if (!pizzas || !Array.isArray(pizzas) || pizzas.length === 0) {
+            return res.status(400).json({ error: 'Lista pizze mancante o vuota' });
+        }
+
+        // Try to get API key from user settings first, then env var
+        let apiKey = process.env.GEMINI_API_KEY;
+
+        if (req.user && req.user.id) {
+            try {
+                // Use existing dbAdapter instance
+                const settings = await dbAdapter.getUserSettings(req.user.id);
+                if (settings && settings.geminiApiKey) {
+                    apiKey = settings.geminiApiKey;
+                    console.log(`🔑 Using User API Key for user ${req.user.id}`);
+                }
+            } catch (settingsErr) {
+                console.warn('⚠️ Failed to fetch user settings for API key:', settingsErr);
+            }
+        }
+
+        if (!apiKey) {
+            return res.status(500).json({ error: 'Chiave API Gemini non configurata (né nelle impostazioni utente né sul server)' });
+        }
+
+        // Prepare the prompt with pizza names and ingredients
+        let pizzaListDescription = pizzas.map((p, i) => {
+            const ingredients = [
+                ...(p.baseIngredients || []),
+                ...(p.toppingsDuringBake || []),
+                ...(p.toppingsPostBake || [])
+            ].map(ing => ing.name).join(', ');
+            return `${i + 1}. ${p.name}: ${ingredients}`;
+        }).join('\n');
+
+        const prompt = `Sei un esperto sommelier di pizza e maestro pizzaiolo gourmet.
+Data la seguente lista di pizze selezionate per una serata, proponi un "Ordine di Servizio" (tasting menu) ottimale.
+L'obiettivo è creare una progressione sensoriale logica, partendo solitamente dai sapori più delicati e freschi per arrivare a quelli più complessi, intensi, sapidi o piccanti.
+
+Pizze della serata:
+${pizzaListDescription}
+
+Per ogni pizza nella sequenza proposta:
+1. Spiega BREVEMENTE perché occupa quella posizione.
+2. Cita gli ingredienti chiave che giustificano la scelta (es. contrasto acido/grasso, intensità dei formaggi, presenza di ingredienti piccanti).
+3. Mantieni un tono professionale ma appassionato.
+
+Formatta la risposta come una lista numerata chiara. Usa un linguaggio naturale, senza markdown eccessivo o grassetti inutili. Rispondi in Italiano.`;
+
+        const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error?.message || 'Errore nella chiamata a Gemini');
+        }
+
+        const data = await response.json();
+        const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!generatedText) {
+            throw new Error('Nessuna risposta generata dall\'AI');
+        }
+
+        res.json({ serviceOrder: generatedText.trim() });
+    } catch (err) {
+        console.error('❌ [AI SERVICE ORDER] Error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 export default router;
