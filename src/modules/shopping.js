@@ -39,8 +39,9 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
         categoryMap[cat.id] = cat.name;
     });
 
-    // Helper to resolve ingredient
+    // Helper to resolve ingredient with multiple fallback strategies
     const resolveIngredient = (ing) => {
+        // Try to resolve by ingredientId first
         if (ing.ingredientId && ingredientMap[ing.ingredientId]) {
             const resolved = ingredientMap[ing.ingredientId];
             return {
@@ -50,7 +51,49 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
                 categoryId: resolved.categoryId
             };
         }
-        // Fallback to embedded data
+        
+        // Try to resolve by id (some preparations might use id instead of ingredientId)
+        if (ing.id && ingredientMap[ing.id]) {
+            const resolved = ingredientMap[ing.id];
+            return {
+                ...ing,
+                name: resolved.name,
+                category: categoryMap[resolved.categoryId] || 'Altro',
+                categoryId: resolved.categoryId
+            };
+        }
+        
+        // Try to resolve by name using ingredientNameMap
+        if (ing.name && ingredientNameMap[ing.name.toLowerCase()]) {
+            const resolved = ingredientNameMap[ing.name.toLowerCase()];
+            return {
+                ...ing,
+                name: resolved.name,
+                category: categoryMap[resolved.categoryId] || 'Altro',
+                categoryId: resolved.categoryId
+            };
+        }
+        
+        // If ingredient already has a name but no ID mapping, try to find category
+        if (ing.name) {
+            // Check if we can find category from existing aggregated ingredients
+            const existingIngredient = aggregated.find(i => i.name.toLowerCase() === ing.name.toLowerCase());
+            if (existingIngredient && existingIngredient.category) {
+                return {
+                    ...ing,
+                    category: existingIngredient.category
+                };
+            }
+            
+            // Default category
+            return {
+                ...ing,
+                category: ing.category || 'Altro'
+            };
+        }
+        
+        // Final fallback: return as-is
+        console.warn('Could not resolve ingredient:', ing);
         return ing;
     };
 
@@ -113,7 +156,9 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
             recipe.preparations.forEach(prep => {
                 // Find preparation data from database
                 const prepData = preparations.find(p => p.id === prep.id);
-                if (!prepData || !prepData.ingredients) return;
+                if (!prepData || !prepData.ingredients || !Array.isArray(prepData.ingredients) || prepData.ingredients.length === 0) {
+                    return;
+                }
 
                 prepData.ingredients.forEach(ingredient => {
                     // Resolve ingredient
