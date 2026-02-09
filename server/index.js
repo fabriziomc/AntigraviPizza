@@ -118,10 +118,23 @@ app.use((req, res, next) => {
 });
 
 
-app.listen(PORT, '0.0.0.0', () => {
+// Global error handlers
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('❌ Uncaught Exception:', err);
+});
+
+const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log('🔍 [INDEX.JS] app.listen callback fired!');
     console.log(`✅ Server is running on http://0.0.0.0:${PORT}`);
-    console.log('🚀 SERVER VERSION: v3 (Multi-User Auth)');
+    console.log(`🚀 SERVER VERSION: v3 (Multi-User Auth)`);
     console.log(`📊 Environment: ${process.env.NODE_ENV}`);
     console.log(`💾 Database: ${process.env.DB_TYPE}`);
-    console.log('🔐 Authentication: Enabled');
+    console.log(`🔐 Authentication: Enabled`);
 });
+
+// Keep process alive check
+setInterval(() => { }, 1000); // Dummy interval to keep process alive if somehow event loop empties

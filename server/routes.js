@@ -1,7 +1,7 @@
 import express from 'express';
 import DatabaseAdapter from './db-adapter.js';
 import generateImageRoute from './routes/generate-image.js';
-import { authenticateToken } from './auth/auth-middleware.js';
+import { authenticateToken, optionalAuth } from './auth/auth-middleware.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -42,11 +42,8 @@ router.use((req, res, next) => {
     }
 
     if (isPublicGet) {
-        // For public GET endpoints, try to authenticate but don't require it
-        authenticateToken(req, res, (err) => {
-            // Continue regardless of authentication result
-            next();
-        });
+        // For public GET endpoints, use optional authentication
+        optionalAuth(req, res, next);
     } else if (isGuestEndpoint) {
         // Guest endpoints don't require authentication at all
         console.log(`[AUTH MIDDLEWARE] Skipping auth for guest/bring endpoint: ${req.path}`);
@@ -885,10 +882,7 @@ router.delete('/combinations/:id', async (req, res) => {
 router.get('/preparations', async (req, res) => {
     try {
         console.time('🚀 getAllPreparations');
-        const userId = req.user?.id;
-        if (!userId) {
-            return res.json([]);
-        }
+        const userId = req.user?.id || null;
         const preparations = await dbAdapter.getAllPreparations(userId);
         res.json(preparations);
     } catch (err) {
@@ -977,10 +971,7 @@ router.delete('/preparations/:id', async (req, res) => {
 
 router.get('/ingredients', async (req, res) => {
     try {
-        const userId = req.user?.id;
-        if (!userId) {
-            return res.json([]);
-        }
+        const userId = req.user?.id || null;
         const ingredients = await dbAdapter.getAllIngredients(userId);
         res.json(ingredients);
     } catch (err) {
