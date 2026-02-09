@@ -654,11 +654,20 @@
                     // Add preparation names (not their ingredients)
                     const recipePreps = pizza.preparations || [];
                     recipePreps.forEach(prep => {
-                        const found = prepsMap.get(prep.id);
-                        if (found) {
+                        // Use prep.name directly (already expanded by server)
+                        // Fall back to prepsMap lookup if name is not available
+                        let prepName = prep.name;
+                        if (!prepName && prep.id) {
+                            const found = prepsMap.get(prep.id);
+                            if (found) {
+                                prepName = found.name;
+                            }
+                        }
+                        
+                        if (prepName) {
                             const isPostBake = prep.timing === 'after';
                             preparationItems.push({
-                                name: found.name,
+                                name: prepName,
                                 isPostBake
                             });
                         }

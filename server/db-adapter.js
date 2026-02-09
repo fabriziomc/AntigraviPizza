@@ -228,11 +228,15 @@ class DatabaseAdapter {
 
         if (!recipe) return null;
 
+        // For guest access (userId = null), use the recipe owner's userId to expand ingredients and preparations
+        // This ensures user-specific ingredients and preparations are properly fetched
+        const expansionUserId = userId || recipe.userId;
+
         // Expand ingredients and preparations
-        recipe.baseIngredients = await this.expandIngredients(recipe.baseIngredients || [], userId);
-        recipe.toppingsDuringBake = await this.expandIngredients(recipe.toppingsDuringBake || [], userId);
-        recipe.toppingsPostBake = await this.expandIngredients(recipe.toppingsPostBake || [], userId);
-        recipe.preparations = await this.expandPreparations(recipe.preparations || [], userId);
+        recipe.baseIngredients = await this.expandIngredients(recipe.baseIngredients || [], expansionUserId);
+        recipe.toppingsDuringBake = await this.expandIngredients(recipe.toppingsDuringBake || [], expansionUserId);
+        recipe.toppingsPostBake = await this.expandIngredients(recipe.toppingsPostBake || [], expansionUserId);
+        recipe.preparations = await this.expandPreparations(recipe.preparations || [], expansionUserId);
 
         return recipe;
     }
