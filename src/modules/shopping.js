@@ -134,9 +134,54 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
 
                     // Calculate how much of this ingredient we need
                     let scaledQuantity;
-                    if (ingredientData.perPortion && prep.quantity) {
-                        scaledQuantity = ingredientData.perPortion * (prep.quantity / ingredientData.perPortion) * pizzaQuantity;
+                    
+                    // Get yield with default value of 4 if not specified
+                    const yieldValue = prepData.yield || 4;
+                    
+                    // Check if we have the necessary data
+                    if (!ingredientData.quantity || !prep.quantity) {
+                        console.warn('Missing quantity data for preparation ingredient:', {
+                            ingredient: ingredientData.name,
+                            ingredientQuantity: ingredientData.quantity,
+                            prepQuantity: prep.quantity
+                        });
+                        return;
+                    }
+                    
+                    // Try to calculate using perPortion if available
+                    if (ingredientData.perPortion) {
+                        // ingredientData.perPortion is the amount per portion (e.g., 125g per portion)
+                        // yieldValue is number of portions (e.g., 4)
+                        // Total preparation weight = ingredientData.perPortion * yieldValue
+                        const totalPrepWeight = ingredientData.perPortion * yieldValue;
+                        if (totalPrepWeight > 0) {
+                            // Scaling factor = how much of the preparation is needed / total preparation weight
+                            const scalingFactor = prep.quantity / totalPrepWeight;
+                            scaledQuantity = ingredientData.quantity * scalingFactor * pizzaQuantity;
+                        } else {
+                            // Fallback: assume prep.quantity is the portion count
+                            scaledQuantity = ingredientData.quantity * (prep.quantity / yieldValue) * pizzaQuantity;
+                        }
                     } else {
+                        // No perPortion, we need to estimate
+                        // If we have yield, we can assume prep.quantity is in grams and represents
+                        // a fraction of the total preparation
+                        // Estimate total preparation weight as ingredientData.quantity * some factor
+                        // This is a rough estimate - better to have perPortion data
+                        const estimatedTotalPrepWeight = ingredientData.quantity * 2; // Rough estimate
+                        if (estimatedTotalPrepWeight > 0) {
+                            const scalingFactor = prep.quantity / estimatedTotalPrepWeight;
+                            scaledQuantity = ingredientData.quantity * scalingFactor * pizzaQuantity;
+                        } else {
+                            // Last resort: assume ingredientData.quantity is for one portion
+                            scaledQuantity = ingredientData.quantity * (prep.quantity / 100) * pizzaQuantity;
+                        }
+                    }
+                    
+                    // Ensure scaledQuantity is a valid number
+                    if (isNaN(scaledQuantity) || scaledQuantity <= 0) {
+                        console.warn('Invalid scaled quantity for ingredient:', ingredientData.name, scaledQuantity);
+                        // Fallback to a reasonable default
                         scaledQuantity = ingredientData.quantity * pizzaQuantity;
                     }
 
