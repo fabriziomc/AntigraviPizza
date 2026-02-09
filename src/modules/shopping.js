@@ -156,8 +156,11 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
         if (recipe.preparations && recipe.preparations.length > 0) {
             recipe.preparations.forEach(prep => {
                 // Find preparation data from database
-                const prepData = preparations.find(p => p.id === prep.id);
+                // Handle different formats: string, {id}, {preparationId}
+                const prepId = typeof prep === 'string' ? prep : (prep.preparationId || prep.id);
+                const prepData = preparations.find(p => p.id === prepId);
                 if (!prepData || !prepData.ingredients) {
+                    console.warn('Preparation not found or has no ingredients:', prepId, prep);
                     return;
                 }
 
@@ -200,11 +203,13 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
                     const yieldValue = prepData.yield || 4;
                     
                     // Check if we have the necessary data
-                    if (!ingredientData.quantity || !prep.quantity) {
-                        console.warn('Missing quantity data for preparation ingredient:', {
+                    // Use default quantity if not specified (assume 1 portion or 100g)
+                    const prepQuantity = prep.quantity || 100; // Default to 100g if not specified
+                    if (!ingredientData.quantity) {
+                        console.warn('Missing ingredient quantity data for preparation ingredient:', {
                             ingredient: ingredientData.name,
                             ingredientQuantity: ingredientData.quantity,
-                            prepQuantity: prep.quantity
+                            prepQuantity: prepQuantity
                         });
                         return;
                     }
@@ -217,25 +222,25 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
                         const totalPrepWeight = ingredientData.perPortion * yieldValue;
                         if (totalPrepWeight > 0) {
                             // Scaling factor = how much of the preparation is needed / total preparation weight
-                            const scalingFactor = prep.quantity / totalPrepWeight;
+                            const scalingFactor = prepQuantity / totalPrepWeight;
                             scaledQuantity = ingredientData.quantity * scalingFactor * pizzaQuantity;
                         } else {
-                            // Fallback: assume prep.quantity is the portion count
-                            scaledQuantity = ingredientData.quantity * (prep.quantity / yieldValue) * pizzaQuantity;
+                            // Fallback: assume prepQuantity is the portion count
+                            scaledQuantity = ingredientData.quantity * (prepQuantity / yieldValue) * pizzaQuantity;
                         }
                     } else {
                         // No perPortion, we need to estimate
-                        // If we have yield, we can assume prep.quantity is in grams and represents
+                        // If we have yield, we can assume prepQuantity is in grams and represents
                         // a fraction of the total preparation
                         // Estimate total preparation weight as ingredientData.quantity * some factor
                         // This is a rough estimate - better to have perPortion data
                         const estimatedTotalPrepWeight = ingredientData.quantity * 2; // Rough estimate
                         if (estimatedTotalPrepWeight > 0) {
-                            const scalingFactor = prep.quantity / estimatedTotalPrepWeight;
+                            const scalingFactor = prepQuantity / estimatedTotalPrepWeight;
                             scaledQuantity = ingredientData.quantity * scalingFactor * pizzaQuantity;
                         } else {
                             // Last resort: assume ingredientData.quantity is for one portion
-                            scaledQuantity = ingredientData.quantity * (prep.quantity / 100) * pizzaQuantity;
+                            scaledQuantity = ingredientData.quantity * (prepQuantity / 100) * pizzaQuantity;
                         }
                     }
                     
