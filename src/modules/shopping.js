@@ -157,11 +157,26 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
             recipe.preparations.forEach(prep => {
                 // Find preparation data from database
                 const prepData = preparations.find(p => p.id === prep.id);
-                if (!prepData || !prepData.ingredients || !Array.isArray(prepData.ingredients) || prepData.ingredients.length === 0) {
+                if (!prepData || !prepData.ingredients) {
                     return;
                 }
 
-                prepData.ingredients.forEach(ingredient => {
+                // Handle case where ingredients might be a JSON string
+                let ingredientsArray = prepData.ingredients;
+                if (typeof ingredientsArray === 'string') {
+                    try {
+                        ingredientsArray = JSON.parse(ingredientsArray);
+                    } catch (error) {
+                        console.warn('Failed to parse ingredients JSON for preparation:', prepData.name, error);
+                        return;
+                    }
+                }
+                
+                if (!Array.isArray(ingredientsArray) || ingredientsArray.length === 0) {
+                    return;
+                }
+
+                ingredientsArray.forEach(ingredient => {
                     // Resolve ingredient
                     const ingredientData = resolveIngredient(ingredient);
 
