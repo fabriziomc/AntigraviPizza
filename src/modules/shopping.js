@@ -41,11 +41,19 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
 
     // Helper to resolve ingredient with multiple fallback strategies
     const resolveIngredient = (ing) => {
+        // Preserve all original fields including perPortion, quantity, unit
+        const preservedFields = {
+            quantity: ing.quantity,
+            unit: ing.unit,
+            perPortion: ing.perPortion
+        };
+        
         // Try to resolve by ingredientId first
         if (ing.ingredientId && ingredientMap[ing.ingredientId]) {
             const resolved = ingredientMap[ing.ingredientId];
             return {
                 ...ing,
+                ...preservedFields,
                 name: resolved.name,
                 category: categoryMap[resolved.categoryId] || 'Altro',
                 categoryId: resolved.categoryId
@@ -57,6 +65,7 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
             const resolved = ingredientMap[ing.id];
             return {
                 ...ing,
+                ...preservedFields,
                 name: resolved.name,
                 category: categoryMap[resolved.categoryId] || 'Altro',
                 categoryId: resolved.categoryId
@@ -68,26 +77,18 @@ export async function generateShoppingList(selectedPizzas, selectedDough = null,
             const resolved = ingredientNameMap[ing.name.toLowerCase()];
             return {
                 ...ing,
+                ...preservedFields,
                 name: resolved.name,
                 category: categoryMap[resolved.categoryId] || 'Altro',
                 categoryId: resolved.categoryId
             };
         }
         
-        // If ingredient already has a name but no ID mapping, try to find category
+        // If ingredient already has a name but no ID mapping, use the category if provided
         if (ing.name) {
-            // Check if we can find category from existing aggregated ingredients
-            const existingIngredient = aggregated.find(i => i.name.toLowerCase() === ing.name.toLowerCase());
-            if (existingIngredient && existingIngredient.category) {
-                return {
-                    ...ing,
-                    category: existingIngredient.category
-                };
-            }
-            
-            // Default category
             return {
                 ...ing,
+                ...preservedFields,
                 category: ing.category || 'Altro'
             };
         }
