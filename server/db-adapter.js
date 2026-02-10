@@ -2054,7 +2054,10 @@ class DatabaseAdapter {
             const { seedAll } = await import('./seed-service.js');
             const seedResults = await seedAll();
 
-            // 2. Initialize archetype weights for this specific user
+            // 2. Copy base preparations for the new user (if they don't already have them)
+            await this.copyBasePreparationsForUser(userId);
+
+            // 3. Initialize archetype weights for this specific user
             const archetypeWeightsResult = await this.resetArchetypeWeights(userId);
 
             const combined = {
@@ -2066,6 +2069,120 @@ class DatabaseAdapter {
             return combined;
         } catch (error) {
             console.error(`❌ Failed to initialize defaults for user ${userId}:`, error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Copy base preparations (with userId IS NULL) for a new user
+     * This ensures every user has their own copy of base preparations
+     */
+    async copyBasePreparationsForUser(userId) {
+        try {
+            console.log(`📋 Copying base preparations for user ${userId}...`);
+            
+            // Get all base preparations (userId IS NULL)
+            let basePreparations;
+            if (this.isSQLite) {
+                const stmt = this.db.prepare('SELECT * FROM Preparations WHERE userId IS NULL');
+                basePreparations = stmt.all().map(p => this.parsePreparation(p));
+            } else {
+                const result = await this.db.execute({
+                    sql: 'SELECT * FROM Preparations WHERE userId IS NULL',
+                    args: []
+                });
+                basePreparations = result.rows.map(p => this.parsePreparation(p));
+            }
+
+            // Get existing preparations for this user to avoid duplicates
+            let userPreparations;
+            if (this.isSQLite) {
+                const stmt = this.db.prepare('SELECT name FROM Preparations WHERE userId = ?');
+                userPreparations = stmt.all(userId);
+            } else {
+                const result = await this.db.execute({
+                    sql: 'SELECT name FROM Preparations WHERE userId = ?',
+                    args: [userId]
+                });
+                userPreparations = result.rows;
+            }
+            
+            const userPreparationNames = new Set(userPreparations.map(p => p.name.toLowerCase()));
+            let copiedCount = 0;
+
+            for (const prep of basePreparations) {
+                // Check if user already has a preparation with the same name (case-insensitive)
+                if (!userPreparationNames.has(prep.name.toLowerCase())) {
+                    // Create a copy for the user with a new ID
+                    const newPrep = {
+                        ...prep,
+                        id: 'prep-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                        userId: userId,
+                        isCustom: 0  // Mark as base preparation (not custom)
+                    };
+
+                    // Ensure ingredients is a string (JSON)
+                    const ingredientsJson = typeof newPrep.ingredients === 'string' 
+                        ? newPrep.ingredients 
+                        : JSON.stringify(newPrep.ingredients || []);
+                    
+                    const instructionsJson = typeof newPrep.instructions === 'string'
+                        ? newPrep.instructions
+                        : JSON.stringify(newPrep.instructions || []);
+                    
+                    const tipsJson = typeof newPrep.tips === 'string'
+                        ? newPrep.tips
+                        : JSON.stringify(newPrep.tips || []);
+
+                    if (this.isSQLite) {
+                        const stmt = this.db.prepare(`
+                            INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom, userId)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        `);
+                        stmt.run(
+                            newPrep.id,
+                            newPrep.name,
+                            newPrep.category,
+                            newPrep.description || '',
+                            newPrep.yield || 4,
+                            newPrep.prepTime || '',
+                            newPrep.difficulty || 'Media',
+                            ingredientsJson,
+                            instructionsJson,
+                            tipsJson,
+                            newPrep.dateAdded || Date.now(),
+                            newPrep.isCustom ? 1 : 0,
+                            userId
+                        );
+                    } else {
+                        // Turso (libSQL) - use [yield] to avoid reserved word issues
+                        await this.db.execute({
+                            sql: 'INSERT INTO Preparations (id, name, category, description, [yield], prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                            args: [
+                                newPrep.id,
+                                newPrep.name,
+                                newPrep.category,
+                                newPrep.description || '',
+                                newPrep.yield || 4,
+                                newPrep.prepTime || '',
+                                newPrep.difficulty || 'Media',
+                                ingredientsJson,
+                                instructionsJson,
+                                tipsJson,
+                                newPrep.dateAdded || Date.now(),
+                                newPrep.isCustom ? 1 : 0,
+                                userId
+                            ]
+                        });
+                    }
+                    copiedCount++;
+                }
+            }
+
+            console.log(`✅ Copied ${copiedCount} base preparations for user ${userId}`);
+            return { success: true, copied: copiedCount };
+        } catch (error) {
+            console.error(`❌ Failed to copy base preparations for user ${userId}:`, error);
             return { success: false, error: error.message };
         }
     }

@@ -87,42 +87,47 @@ export async function seedAll() {
             const existingIngredientNames = new Set(existingIngredients.map(i => i.name.toLowerCase()));
 
             for (const ing of seedData.ingredients) {
-                if (!existingIngredientNames.has(ing.name.toLowerCase())) {
-                    const categoryId = categoryMap[ing.category];
-                    if (categoryId) {
-                        const ingredientData = {
-                            id: randomUUID(),
-                            name: ing.name,
-                            categoryId: categoryId,
-                            subcategory: ing.subcategory || null,
-                            minWeight: ing.minWeight || null,
-                            maxWeight: ing.maxWeight || null,
-                            defaultUnit: ing.defaultUnit || 'g',
-                            postBake: ing.postBake ? 1 : 0,
-                            phase: ing.phase || 'topping',
-                            season: ing.season ? JSON.stringify(ing.season) : null,
-                            allergens: ing.allergens ? JSON.stringify(ing.allergens) : '[]',
-                            tags: ing.tags ? JSON.stringify(ing.tags) : '[]',
-                            isCustom: ing.isCustom ? 1 : 0,
-                            dateAdded: Date.now()
-                        };
+                try {
+                    if (!existingIngredientNames.has(ing.name.toLowerCase())) {
+                        const categoryId = categoryMap[ing.category];
+                        if (categoryId) {
+                            const ingredientData = {
+                                id: randomUUID(),
+                                name: ing.name,
+                                categoryId: categoryId,
+                                subcategory: ing.subcategory || null,
+                                minWeight: ing.minWeight || null,
+                                maxWeight: ing.maxWeight || null,
+                                defaultUnit: ing.defaultUnit || 'g',
+                                postBake: ing.postBake ? 1 : 0,
+                                phase: ing.phase || 'topping',
+                                season: ing.season ? JSON.stringify(ing.season) : null,
+                                allergens: ing.allergens ? JSON.stringify(ing.allergens) : '[]',
+                                tags: ing.tags ? JSON.stringify(ing.tags) : '[]',
+                                isCustom: ing.isCustom ? 1 : 0,
+                                dateAdded: Date.now()
+                            };
 
-                        if (dbAdapter.isSQLite) {
-                            const stmt = dbAdapter.db.prepare('INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-                            stmt.run(ingredientData.id, ingredientData.name, ingredientData.categoryId, ingredientData.subcategory, ingredientData.minWeight, ingredientData.maxWeight, ingredientData.defaultUnit, ingredientData.postBake, ingredientData.phase, ingredientData.season, ingredientData.allergens, ingredientData.tags, ingredientData.isCustom, ingredientData.dateAdded, null);
-                        } else {
-                            // Turso
-                            await dbAdapter.db.execute({
-                                sql: 'INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                                args: [ingredientData.id, ingredientData.name, ingredientData.categoryId, ingredientData.subcategory, ingredientData.minWeight, ingredientData.maxWeight, ingredientData.defaultUnit, ingredientData.postBake, ingredientData.phase, ingredientData.season, ingredientData.allergens, ingredientData.tags, ingredientData.isCustom, ingredientData.dateAdded, null]
-                            });
+                            if (dbAdapter.isSQLite) {
+                                const stmt = dbAdapter.db.prepare('INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+                                stmt.run(ingredientData.id, ingredientData.name, ingredientData.categoryId, ingredientData.subcategory, ingredientData.minWeight, ingredientData.maxWeight, ingredientData.defaultUnit, ingredientData.postBake, ingredientData.phase, ingredientData.season, ingredientData.allergens, ingredientData.tags, ingredientData.isCustom, ingredientData.dateAdded, null);
+                            } else {
+                                // Turso
+                                await dbAdapter.db.execute({
+                                    sql: 'INSERT INTO Ingredients (id, name, categoryId, subcategory, minWeight, maxWeight, defaultUnit, postBake, phase, season, allergens, tags, isCustom, dateAdded, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                                    args: [ingredientData.id, ingredientData.name, ingredientData.categoryId, ingredientData.subcategory, ingredientData.minWeight, ingredientData.maxWeight, ingredientData.defaultUnit, ingredientData.postBake, ingredientData.phase, ingredientData.season, ingredientData.allergens, ingredientData.tags, ingredientData.isCustom, ingredientData.dateAdded, null]
+                                });
+                            }
+                            results.ingredients++;
                         }
-                        results.ingredients++;
                     }
+                } catch (error) {
+                    console.warn(`⚠️  Skipping ingredient "${ing.name}": ${error.message}`);
+                    results.errors.push(`Ingredient "${ing.name}": ${error.message}`);
                 }
             }
         }
-        console.log(`✅ Seeded ${results.ingredients} ingredients`);
+        console.log(`✅ Seeded ${results.ingredients} ingredients (${results.errors.length} errors)`);
 
         // 3. Seed Preparations from JSON
         console.log('🍽️ Seeding preparations...');
