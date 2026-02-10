@@ -1,11 +1,10 @@
-import { CONFIG } from '../config.js';
-import * as LocalDB from './database-local.js';
 import * as SqlDB from './database-sql.js';
 
-const useSql = CONFIG.USE_SQL_BACKEND;
-const activeDB = useSql ? SqlDB : LocalDB;
+// Forziamo l'uso del backend SQL (Turso) in tutta l'applicazione.
+// Il vecchio backend Local/IndexedDB non viene più utilizzato.
+const activeDB = SqlDB;
 
-console.log(`Database Mode: ${useSql ? 'SQL Server' : 'Local IndexedDB'}`);
+console.log('Database Mode: SQL Server (Turso)');
 
 export const initDB = activeDB.initDB;
 export const initSeedData = activeDB.initSeedData;

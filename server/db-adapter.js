@@ -2045,17 +2045,25 @@ class DatabaseAdapter {
 
     async initializeUserDefaults(userId) {
         // This method is called when a new user registers
-        // It seeds base categories, ingredients, and preparations for the new user
+        // It seeds base categories, ingredients, preparations and archetype weights for the new user
         try {
             console.log(`🌱 Initializing defaults for user ${userId}...`);
 
-            // Import and run the seed service to populate base data
-            // This ensures new users get base categories, ingredients, and preparations
+            // 1. Seed global base data (categories, ingredients, preparations)
+            //    Seed is idempotente: se i dati base esistono già, non vengono duplicati
             const { seedAll } = await import('./seed-service.js');
-            const results = await seedAll();
+            const seedResults = await seedAll();
 
-            console.log(`✅ Initialized defaults for user ${userId}:`, results);
-            return results;
+            // 2. Initialize archetype weights for this specific user
+            const archetypeWeightsResult = await this.resetArchetypeWeights(userId);
+
+            const combined = {
+                ...seedResults,
+                archetypeWeights: archetypeWeightsResult
+            };
+
+            console.log(`✅ Initialized defaults for user ${userId}:`, combined);
+            return combined;
         } catch (error) {
             console.error(`❌ Failed to initialize defaults for user ${userId}:`, error);
             return { success: false, error: error.message };

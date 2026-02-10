@@ -156,9 +156,9 @@ export async function seedAll() {
                         const stmt = dbAdapter.db.prepare('INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
                         stmt.run(preparationData.id, preparationData.name, preparationData.category, preparationData.description, preparationData.yield, preparationData.prepTime, preparationData.difficulty, preparationData.ingredients, preparationData.instructions, preparationData.tips, preparationData.dateAdded, preparationData.isCustom, null);
                     } else {
-                        // Turso
+                        // Turso (libSQL) - use [yield] to avoid reserved word issues
                         await dbAdapter.db.execute({
-                            sql: 'INSERT INTO Preparations (id, name, category, description, yield, prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                            sql: 'INSERT INTO Preparations (id, name, category, description, [yield], prepTime, difficulty, ingredients, instructions, tips, dateAdded, isCustom, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                             args: [preparationData.id, preparationData.name, preparationData.category, preparationData.description, preparationData.yield, preparationData.prepTime, preparationData.difficulty, preparationData.ingredients, preparationData.instructions, preparationData.tips, preparationData.dateAdded, preparationData.isCustom, null]
                         });
                     }
